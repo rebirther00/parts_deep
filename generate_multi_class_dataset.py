@@ -212,20 +212,63 @@ def generate_class_dataset(boom_config, class_index, start_frame):
                 print(f"  ⚠️  경고: 스테이지에 메시가 없습니다!")
                 print(f"  USD 파일 구조를 확인하세요.")
             
-            # 배경 설정 (배경 유무가 학습에 큰 영향을 줍니다)
-            # 참고: background_impact_analysis.md 문서 참조
-            # 주의: displayColor 설정이 에러를 발생시킬 수 있으므로, 일단 배경 없음으로 설정
-            # 배경이 필요하면 나중에 추가 가능
-            print(f"  배경 설정: 없음 (검은 배경) - displayColor 문제로 인해 일시적으로 비활성화")
+            # ==========================================
+            # Domain Randomization: 배경 설정
+            # ==========================================
+            # Sim-to-Real 성능 향상을 위해 다양한 배경 적용
+            print(f"  🎨 Domain Randomization: 배경 설정 중...")
             
-            # 조명 추가 (고정 intensity - 타입 미스매치 방지)
-            print(f"  조명 추가 중...")
-            light = rep.create.light(
+            # 바닥 평면 생성 (붐 아래에 위치)
+            floor_size = boom_size * 5  # 붐 크기의 5배
+            floor_plane = rep.create.plane(
+                scale=(floor_size, floor_size, 1),
+                position=(boom_center[0], boom_center[1], min_point[2] - 0.1),
+                rotation=(0, 0, 0),
+                semantics=[("class", "background")]
+            )
+            print(f"    ✓ 바닥 평면 생성 (크기: {floor_size:.1f})")
+            
+            # 뒷벽 평면 생성 (카메라 반대편)
+            back_wall = rep.create.plane(
+                scale=(floor_size, floor_size * 0.5, 1),
+                position=(boom_center[0] - floor_size * 0.4, boom_center[1], boom_center[2]),
+                rotation=(0, 90, 0),
+                semantics=[("class", "background")]
+            )
+            print(f"    ✓ 뒷벽 평면 생성")
+            
+            # ==========================================
+            # Domain Randomization: 조명 설정
+            # ==========================================
+            print(f"  💡 Domain Randomization: 조명 설정 중...")
+            
+            # 메인 돔 조명 (환경광)
+            dome_light = rep.create.light(
                 light_type="Dome",
-                intensity=1000.0,  # 고정값 사용 (랜덤화 시 타입 에러 발생)
+                intensity=800.0,  # 기본값, on_frame에서 랜덤화
                 rotation=(270, 0, 0)
             )
-            print(f"  ✓ 조명 추가 완료")
+            print(f"    ✓ 돔 조명 생성")
+            
+            # 추가 포인트 라이트 1 (주 조명)
+            point_light1 = rep.create.light(
+                light_type="Sphere",
+                intensity=50000.0,
+                position=(boom_center[0] + boom_size, boom_center[1] + boom_size, boom_center[2] + boom_size * 2),
+                scale=0.5
+            )
+            print(f"    ✓ 포인트 라이트 1 생성 (주 조명)")
+            
+            # 추가 포인트 라이트 2 (보조 조명 - 그림자 완화)
+            point_light2 = rep.create.light(
+                light_type="Sphere",
+                intensity=30000.0,
+                position=(boom_center[0] - boom_size, boom_center[1] - boom_size * 0.5, boom_center[2] + boom_size),
+                scale=0.3
+            )
+            print(f"    ✓ 포인트 라이트 2 생성 (보조 조명)")
+            
+            print(f"  ✓ Domain Randomization 설정 완료")
             
                 # 카메라 거리 계산
             print(f"  카메라 거리 계산 중...")
@@ -254,9 +297,12 @@ def generate_class_dataset(boom_config, class_index, start_frame):
             render_product = rep.create.render_product(camera, resolution=(1024, 1024))
             print(f"  ✓ Render product 생성 완료 (해상도: 1024x1024)")
             
-            # 카메라 랜덤화
-            print(f"  카메라 랜덤화 설정 중...")
+            # ==========================================
+            # Domain Randomization: 프레임별 랜덤화
+            # ==========================================
+            print(f"  🎲 프레임별 랜덤화 설정 중...")
             with rep.trigger.on_frame(max_execs=IMAGES_PER_CLASS):
+                # 카메라 위치 랜덤화
                 with rep.create.group([camera]):
                     rep.modify.pose(
                         position=rep.distribution.uniform(
@@ -269,7 +315,48 @@ def generate_class_dataset(boom_config, class_index, start_frame):
                         ),
                         look_at=boom_center
                     )
-            print(f"  ✓ 카메라 랜덤화 설정 완료 ({IMAGES_PER_CLASS}장)")
+                
+                # 바닥 색상 랜덤화 (공장 바닥 색상: 회색~갈색 계열)
+                with floor_plane:
+                    rep.randomizer.color(
+                        colors=rep.distribution.uniform(
+                            (0.2, 0.2, 0.2),  # 어두운 회색
+                            (0.6, 0.5, 0.4)   # 밝은 갈색/베이지
+                        )
+                    )
+                
+                # 뒷벽 색상 랜덤화 (공장 벽 색상: 흰색~회색 계열)
+                with back_wall:
+                    rep.randomizer.color(
+                        colors=rep.distribution.uniform(
+                            (0.4, 0.4, 0.4),  # 회색
+                            (0.9, 0.9, 0.85)  # 밝은 베이지
+                        )
+                    )
+                
+                # 포인트 라이트 1 위치 랜덤화
+                with point_light1:
+                    rep.modify.pose(
+                        position=rep.distribution.uniform(
+                            (boom_center[0] + boom_size * 0.5, boom_center[1] - boom_size, boom_center[2] + boom_size * 1.5),
+                            (boom_center[0] + boom_size * 1.5, boom_center[1] + boom_size, boom_center[2] + boom_size * 3)
+                        )
+                    )
+                
+                # 포인트 라이트 2 위치 랜덤화
+                with point_light2:
+                    rep.modify.pose(
+                        position=rep.distribution.uniform(
+                            (boom_center[0] - boom_size * 1.5, boom_center[1] - boom_size, boom_center[2] + boom_size * 0.5),
+                            (boom_center[0] - boom_size * 0.5, boom_center[1] + boom_size, boom_center[2] + boom_size * 2)
+                        )
+                    )
+            
+            print(f"  ✓ 프레임별 랜덤화 설정 완료:")
+            print(f"    - 카메라 위치 랜덤화")
+            print(f"    - 바닥/벽 색상 랜덤화 (공장 환경 시뮬레이션)")
+            print(f"    - 조명 위치 랜덤화 (다양한 그림자)")
+            print(f"    - 총 {IMAGES_PER_CLASS}장 생성 예정")
             
             # 바운딩 박스 annotator
             print(f"  바운딩 박스 annotator 설정 중...")
