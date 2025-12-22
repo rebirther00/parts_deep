@@ -33,6 +33,7 @@ CLASS_NAMES_PATH = "class_names.json"
 IMAGE_SIZE = 224
 BATCH_SIZE = 32
 OUTPUT_IMAGE_PATH = "evaluation_results_parts.png"
+OUTPUT_WRONG_IMAGE_PATH = "evaluation_wrong_predictions.png"  # 틀린 예측 결과 이미지
 
 # ================================================================================
 # 1. 데이터 및 모델 정보 로드
@@ -311,9 +312,93 @@ def create_result_grid(image_paths, labels, predictions, confidences, class_name
     return grid_image
 
 
+def create_wrong_predictions_grid(image_paths, labels, predictions, confidences, class_names,
+                                   num_cols=5, img_size=200):
+    """틀린 예측 결과만 그리드 형태로 시각화"""
+    
+    # 틀린 예측만 필터링
+    wrong_indices = [i for i in range(len(labels)) if labels[i] != predictions[i]]
+    
+    if len(wrong_indices) == 0:
+        print("\n✓ 모든 예측이 정확합니다! 틀린 예측 이미지가 없습니다.")
+        return None
+    
+    num_images = len(wrong_indices)
+    num_rows = (num_images + num_cols - 1) // num_cols
+    
+    text_height = 80
+    cell_width = img_size
+    cell_height = img_size + text_height
+    
+    grid_width = num_cols * cell_width
+    grid_height = num_rows * cell_height
+    grid_image = Image.new('RGB', (grid_width, grid_height), color='white')
+    
+    # 폰트 로드
+    try:
+        font_paths = [
+            '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf',
+            '/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf',
+        ]
+        font = None
+        for path in font_paths:
+            try:
+                font = ImageFont.truetype(path, 12)
+                break
+            except:
+                continue
+        if font is None:
+            font = ImageFont.load_default()
+    except:
+        font = ImageFont.load_default()
+    
+    for grid_idx, data_idx in enumerate(wrong_indices):
+        row = grid_idx // num_cols
+        col = grid_idx % num_cols
+        
+        x = col * cell_width
+        y = row * cell_height
+        
+        # 이미지 로드 및 리사이즈
+        img = get_original_image(image_paths[data_idx])
+        img = img.resize((img_size, img_size), Image.Resampling.LANCZOS)
+        grid_image.paste(img, (x, y))
+        
+        # 텍스트 정보
+        draw = ImageDraw.Draw(grid_image)
+        text_y = y + img_size + 5
+        
+        actual = class_names[labels[data_idx]]
+        predicted = class_names[predictions[data_idx]]
+        conf = confidences[data_idx]
+        
+        # 배경색 (틀린 예측이므로 빨간색 계열)
+        bg_color = (255, 220, 220)
+        draw.rectangle([x, y + img_size, x + cell_width, y + cell_height], fill=bg_color)
+        
+        # 텍스트 그리기
+        text_line1 = f"X Actual: {actual}"
+        text_line2 = f"Pred: {predicted}"
+        text_line3 = f"Conf: {conf:.1f}%"
+        
+        draw.text((x + 5, text_y), text_line1, fill=(200, 0, 0), font=font)
+        draw.text((x + 5, text_y + 20), text_line2, fill=(0, 0, 0), font=font)
+        draw.text((x + 5, text_y + 40), text_line3, fill=(100, 100, 100), font=font)
+    
+    # 결과 이미지 저장
+    grid_image.save(OUTPUT_WRONG_IMAGE_PATH, 'PNG', quality=95)
+    print(f"\n틀린 예측 이미지 저장: {OUTPUT_WRONG_IMAGE_PATH} ({num_images}개)")
+    
+    return grid_image
+
+
 # 이미지 생성
 print("\n결과 이미지 생성 중...")
 create_result_grid(all_image_paths, all_labels, all_predictions, all_confidences, class_names)
+
+# 틀린 예측 이미지 생성
+print("\n틀린 예측 이미지 생성 중...")
+create_wrong_predictions_grid(all_image_paths, all_labels, all_predictions, all_confidences, class_names)
 
 
 # ================================================================================
