@@ -1,5 +1,6 @@
 # ==========================================
-# 여러 종류의 붐을 구분하는 데이터셋 생성 스크립트
+# 굴착기 부품 데이터셋 생성 스크립트
+# (Domain Randomization 적용)
 # ==========================================
 from isaacsim import SimulationApp
 
@@ -19,36 +20,48 @@ import json
 from pathlib import Path
 
 # ==========================================
-# 설정: 여러 종류의 붐 정의
+# 설정: 굴착기 부품 정의 (자동 스캔)
 # ==========================================
-# 각 붐의 USD 파일 경로와 클래스명 정의
-BOOM_CONFIGS = {
-    "boom_25ton": {
-        "usd_path": "/home/rebirther/isaac-sim/assets/boom_link_25.usd",
-        "class_name": "boom_25ton",
-        "display_name": "붐 25톤급"
-    },
-    "arm_25ton": {
-        "usd_path": "/home/rebirther/isaac-sim/assets/arm_link_25.usd",  # 예시 경로
-        "class_name": "arm_25ton",
-        "display_name": "암 25톤급"
-    },
-    # "arm_15ton": {
-    #     "usd_path": "/home/rebirther/isaac-sim/assets/arm_15.usd",  # 예시 경로
-    #     "class_name": "arm_15ton",
-    #     "display_name": "암 15톤급"
-    # },
-    # "kevin_14ton": {
-    #     "usd_path": "/home/rebirther/isaac-sim/assets/kevin_14.usd",  # 예시 경로
-    #     "class_name": "kevin_14ton",
-    #     "display_name": "케빈 14톤급"
-    # }
-}
+# assets 폴더의 모든 USD 파일을 자동으로 스캔하여 데이터 생성
+ASSETS_DIR = "/home/rebirther/isaac-sim/assets"
+
+def scan_usd_files(assets_dir):
+    """
+    assets 폴더에서 모든 USD 파일을 스캔하여 설정 딕셔너리 생성
+    class_name과 display_name은 파일 이름으로 통일
+    """
+    import glob
+    configs = {}
+    
+    usd_files = glob.glob(os.path.join(assets_dir, "*.usd"))
+    usd_files.sort()  # 알파벳 순 정렬
+    
+    for usd_path in usd_files:
+        # 파일 이름에서 확장자 제거
+        file_name = os.path.basename(usd_path)
+        name_without_ext = os.path.splitext(file_name)[0]
+        
+        configs[name_without_ext] = {
+            "usd_path": usd_path,
+            "class_name": name_without_ext,
+            "display_name": name_without_ext
+        }
+    
+    return configs
+
+# USD 파일 자동 스캔
+EXCAVATOR_PARTS_CONFIG = scan_usd_files(ASSETS_DIR)
+
+# 스캔 결과 출력
+print(f"📂 Assets 폴더 스캔 완료: {ASSETS_DIR}")
+print(f"   발견된 USD 파일: {len(EXCAVATOR_PARTS_CONFIG)}개")
+for name, config in EXCAVATOR_PARTS_CONFIG.items():
+    print(f"   - {name}: {config['usd_path']}")
 
 # 데이터셋 설정
 BASE_OUTPUT_DIR = "/home/rebirther/isaac_data_output/datasets"
 IMAGES_PER_CLASS = 500  # 각 클래스당 생성할 이미지 수
-TOTAL_FRAMES = IMAGES_PER_CLASS * len(BOOM_CONFIGS)
+TOTAL_FRAMES = IMAGES_PER_CLASS * len(EXCAVATOR_PARTS_CONFIG)
 
 # 배경 설정 (중요: 배경 유무가 학습에 큰 영향을 줍니다)
 # "none": 배경 없음 (검은 배경)
@@ -65,9 +78,9 @@ BACKGROUND_RATIOS = {
 }
 
 print("="*60)
-print("다중 클래스 붐 데이터셋 생성 스크립트")
+print("굴착기 부품 데이터셋 생성 스크립트")
 print("="*60)
-print(f"생성할 클래스: {len(BOOM_CONFIGS)}개")
+print(f"생성할 클래스: {len(EXCAVATOR_PARTS_CONFIG)}개")
 print(f"클래스당 이미지: {IMAGES_PER_CLASS}장")
 print(f"총 이미지 수: {TOTAL_FRAMES}장")
 print(f"배경 모드: {BACKGROUND_MODE}")
@@ -83,29 +96,29 @@ print("="*60)
 # ==========================================
 # 각 클래스별 데이터 생성 함수
 # ==========================================
-# 중요: 한 번에 하나의 붐만 로드하여 데이터 생성
+# 중요: 한 번에 하나의 부품만 로드하여 데이터 생성
 # 여러 종류를 동시에 띄우는 것이 아니라 순차적으로 처리
-def generate_class_dataset(boom_config, class_index, start_frame):
+def generate_class_dataset(part_config, class_index, start_frame):
     """
     특정 클래스의 데이터셋 생성
     
-    중요: 한 번에 하나의 붐만 로드하여 데이터를 생성합니다.
+    중요: 한 번에 하나의 부품만 로드하여 데이터를 생성합니다.
     여러 종류를 동시에 띄우는 것이 아니라, 각 클래스를 순차적으로 처리합니다.
     
     Args:
-        boom_config: 붐 설정 딕셔너리
+        part_config: 부품 설정 딕셔너리
         class_index: 클래스 인덱스
         start_frame: 시작 프레임 번호
     """
-    usd_path = boom_config["usd_path"]
-    class_name = boom_config["class_name"]
-    display_name = boom_config["display_name"]
+    usd_path = part_config["usd_path"]
+    class_name = part_config["class_name"]
+    display_name = part_config["display_name"]
     
     # 클래스별 출력 디렉토리 생성
     class_output_dir = os.path.join(BASE_OUTPUT_DIR, class_name)
     os.makedirs(class_output_dir, exist_ok=True)
     
-    print(f"\n[{class_index+1}/{len(BOOM_CONFIGS)}] {display_name} 데이터 생성 시작...")
+    print(f"\n[{class_index+1}/{len(EXCAVATOR_PARTS_CONFIG)}] {display_name} 데이터 생성 시작...")
     print(f"  USD 파일: {usd_path}")
     print(f"  출력 디렉토리: {class_output_dir}")
     
@@ -126,14 +139,14 @@ def generate_class_dataset(boom_config, class_index, start_frame):
         print(f"  이 클래스는 건너뜁니다.")
         return
     
-    # USD 파일 로드 (한 번에 하나의 붐만 로드)
+    # USD 파일 로드 (한 번에 하나의 부품만 로드)
     # 중요: open_stage()는 이전 스테이지를 닫고 새로운 스테이지를 엽니다.
-    # 따라서 여러 붐이 동시에 존재하지 않습니다.
+    # 따라서 여러 부품이 동시에 존재하지 않습니다.
     print(f"  USD 파일 로딩 중... (이전 스테이지는 자동으로 닫힙니다)")
     omni.usd.get_context().open_stage(usd_path)
     time.sleep(1.0)
     
-    # 붐의 바운딩 박스 계산
+    # 부품의 바운딩 박스 계산
     stage = omni.usd.get_context().get_stage()
     if not stage:
         print(f"  ⚠️  경고: 스테이지를 가져올 수 없습니다.")
@@ -157,12 +170,12 @@ def generate_class_dataset(boom_config, class_index, start_frame):
     max_point = bbox_range.GetMax()
     center = (min_point + max_point) / 2.0
     
-    boom_center = (center[0], center[1], center[2])
-    boom_size = max(size[0], size[1], size[2])
+    part_center = (center[0], center[1], center[2])
+    part_size = max(size[0], size[1], size[2])
     size_value = (size[0], size[1], size[2])
     
-    print(f"  붐 중심: {boom_center}")
-    print(f"  붐 크기: {boom_size:.3f}")
+    print(f"  부품 중심: {part_center}")
+    print(f"  부품 크기: {part_size:.3f}")
     
     # Semantics 추가
     print(f"  Semantics 추가 중...")
@@ -191,7 +204,7 @@ def generate_class_dataset(boom_config, class_index, start_frame):
             print(f"    로드 전 스테이지 메시 개수: {mesh_count_before}")
             
             # USD 파일을 Replicator 레이어에 로드
-            boom_prim = rep.create.from_usd(
+            part_prim = rep.create.from_usd(
                 usd_path,
                 semantics=[("class", class_name)]
             )
@@ -201,12 +214,12 @@ def generate_class_dataset(boom_config, class_index, start_frame):
             mesh_count_after = len([p for p in stage_after.Traverse() if p.IsA(UsdGeom.Mesh)]) if stage_after else 0
             print(f"    로드 후 스테이지 메시 개수: {mesh_count_after}")
             
-            if boom_prim is None:
+            if part_prim is None:
                 print(f"  ⚠️  경고: rep.create.from_usd()가 None을 반환했습니다!")
                 print(f"  이는 USD 파일이 제대로 로드되지 않았음을 의미합니다.")
             else:
                 print(f"  ✓ USD 파일이 Replicator 레이어에 로드되었습니다.")
-                print(f"    반환 타입: {type(boom_prim)}")
+                print(f"    반환 타입: {type(part_prim)}")
             
             if mesh_count_after == 0:
                 print(f"  ⚠️  경고: 스테이지에 메시가 없습니다!")
@@ -218,11 +231,11 @@ def generate_class_dataset(boom_config, class_index, start_frame):
             # Sim-to-Real 성능 향상을 위해 다양한 배경 적용
             print(f"  🎨 Domain Randomization: 배경 설정 중...")
             
-            # 바닥 평면 생성 (붐 아래에 위치)
-            floor_size = boom_size * 5  # 붐 크기의 5배
+            # 바닥 평면 생성 (부품 아래에 위치)
+            floor_size = part_size * 5  # 부품 크기의 5배
             floor_plane = rep.create.plane(
                 scale=(floor_size, floor_size, 1),
-                position=(boom_center[0], boom_center[1], min_point[2] - 0.1),
+                position=(part_center[0], part_center[1], min_point[2] - 0.1),
                 rotation=(0, 0, 0),
                 semantics=[("class", "background")]
             )
@@ -231,7 +244,7 @@ def generate_class_dataset(boom_config, class_index, start_frame):
             # 뒷벽 평면 생성 (카메라 반대편)
             back_wall = rep.create.plane(
                 scale=(floor_size, floor_size * 0.5, 1),
-                position=(boom_center[0] - floor_size * 0.4, boom_center[1], boom_center[2]),
+                position=(part_center[0] - floor_size * 0.4, part_center[1], part_center[2]),
                 rotation=(0, 90, 0),
                 semantics=[("class", "background")]
             )
@@ -254,7 +267,7 @@ def generate_class_dataset(boom_config, class_index, start_frame):
             point_light1 = rep.create.light(
                 light_type="Sphere",
                 intensity=50000.0,
-                position=(boom_center[0] + boom_size, boom_center[1] + boom_size, boom_center[2] + boom_size * 2),
+                position=(part_center[0] + part_size, part_center[1] + part_size, part_center[2] + part_size * 2),
                 scale=0.5
             )
             print(f"    ✓ 포인트 라이트 1 생성 (주 조명)")
@@ -263,7 +276,7 @@ def generate_class_dataset(boom_config, class_index, start_frame):
             point_light2 = rep.create.light(
                 light_type="Sphere",
                 intensity=30000.0,
-                position=(boom_center[0] - boom_size, boom_center[1] - boom_size * 0.5, boom_center[2] + boom_size),
+                position=(part_center[0] - part_size, part_center[1] - part_size * 0.5, part_center[2] + part_size),
                 scale=0.3
             )
             print(f"    ✓ 포인트 라이트 2 생성 (보조 조명)")
@@ -272,23 +285,23 @@ def generate_class_dataset(boom_config, class_index, start_frame):
             
                 # 카메라 거리 계산
             print(f"  카메라 거리 계산 중...")
-            boom_diagonal = np.sqrt(size_value[0]**2 + size_value[1]**2 + size_value[2]**2)
+            part_diagonal = np.sqrt(size_value[0]**2 + size_value[1]**2 + size_value[2]**2)
             camera_fov_rad = np.radians(60)
-            min_camera_distance = (boom_diagonal / 2.0) / np.tan(camera_fov_rad / 2.0) / 0.8
+            min_camera_distance = (part_diagonal / 2.0) / np.tan(camera_fov_rad / 2.0) / 0.8
             camera_distance_min = min_camera_distance * 0.9
             camera_distance_max = min_camera_distance * 1.5
             
-            print(f"    붐 대각선: {boom_diagonal:.3f}")
+            print(f"    부품 대각선: {part_diagonal:.3f}")
             print(f"    카메라 거리 범위: {camera_distance_min:.3f} ~ {camera_distance_max:.3f}")
             
             # 카메라 생성
             print(f"  카메라 생성 중...")
             initial_camera_distance = (camera_distance_min + camera_distance_max) / 2.0
             camera = rep.create.camera(
-                position=(boom_center[0] + initial_camera_distance * 0.7, 
-                          boom_center[1] + initial_camera_distance * 0.5, 
-                          boom_center[2] + initial_camera_distance * 0.5),
-                look_at=boom_center
+                position=(part_center[0] + initial_camera_distance * 0.7, 
+                          part_center[1] + initial_camera_distance * 0.5, 
+                          part_center[2] + initial_camera_distance * 0.5),
+                look_at=part_center
             )
             print(f"  ✓ 카메라 생성 완료 (거리: {initial_camera_distance:.3f})")
             
@@ -306,14 +319,14 @@ def generate_class_dataset(boom_config, class_index, start_frame):
                 with rep.create.group([camera]):
                     rep.modify.pose(
                         position=rep.distribution.uniform(
-                            (boom_center[0] - camera_distance_max * 0.7, 
-                             boom_center[1] - camera_distance_max * 0.5, 
-                             boom_center[2] + camera_distance_min * 0.3),
-                            (boom_center[0] + camera_distance_max * 0.7, 
-                             boom_center[1] + camera_distance_max * 0.5, 
-                             boom_center[2] + camera_distance_max * 0.9)
+                            (part_center[0] - camera_distance_max * 0.7, 
+                             part_center[1] - camera_distance_max * 0.5, 
+                             part_center[2] + camera_distance_min * 0.3),
+                            (part_center[0] + camera_distance_max * 0.7, 
+                             part_center[1] + camera_distance_max * 0.5, 
+                             part_center[2] + camera_distance_max * 0.9)
                         ),
-                        look_at=boom_center
+                        look_at=part_center
                     )
                 
                 # 바닥 색상 랜덤화 (공장 바닥 색상: 회색~갈색 계열)
@@ -338,8 +351,8 @@ def generate_class_dataset(boom_config, class_index, start_frame):
                 with point_light1:
                     rep.modify.pose(
                         position=rep.distribution.uniform(
-                            (boom_center[0] + boom_size * 0.5, boom_center[1] - boom_size, boom_center[2] + boom_size * 1.5),
-                            (boom_center[0] + boom_size * 1.5, boom_center[1] + boom_size, boom_center[2] + boom_size * 3)
+                            (part_center[0] + part_size * 0.5, part_center[1] - part_size, part_center[2] + part_size * 1.5),
+                            (part_center[0] + part_size * 1.5, part_center[1] + part_size, part_center[2] + part_size * 3)
                         )
                     )
                 
@@ -347,8 +360,8 @@ def generate_class_dataset(boom_config, class_index, start_frame):
                 with point_light2:
                     rep.modify.pose(
                         position=rep.distribution.uniform(
-                            (boom_center[0] - boom_size * 1.5, boom_center[1] - boom_size, boom_center[2] + boom_size * 0.5),
-                            (boom_center[0] - boom_size * 0.5, boom_center[1] + boom_size, boom_center[2] + boom_size * 2)
+                            (part_center[0] - part_size * 1.5, part_center[1] - part_size, part_center[2] + part_size * 0.5),
+                            (part_center[0] - part_size * 0.5, part_center[1] + part_size, part_center[2] + part_size * 2)
                         )
                     )
             
@@ -423,7 +436,7 @@ def generate_class_dataset(boom_config, class_index, start_frame):
             elif len(generated_files) == 0:
                 print(f"  ⚠️  이미지 파일이 생성되지 않았습니다!")
                 print(f"  가능한 원인:")
-                print(f"    1. 카메라가 붐을 보지 못함")
+                print(f"    1. 카메라가 부품을 보지 못함")
                 print(f"    2. Writer가 제대로 작동하지 않음")
                 print(f"    3. 렌더링이 실패함")
                 print(f"    4. rep.create.from_usd()가 객체를 제대로 로드하지 못함")
@@ -463,8 +476,8 @@ def generate_class_dataset(boom_config, class_index, start_frame):
         "display_name": display_name,
         "usd_path": usd_path,
         "num_images": IMAGES_PER_CLASS,
-        "boom_center": list(boom_center),
-        "boom_size": float(boom_size),
+        "part_center": list(part_center),
+        "part_size": float(part_size),
         "background_mode": BACKGROUND_MODE,
         "background_ratios": BACKGROUND_RATIOS if BACKGROUND_MODE == "random" else None
     }
@@ -479,23 +492,23 @@ def generate_class_dataset(boom_config, class_index, start_frame):
 # 전체 데이터셋 생성
 # ==========================================
 # 중요: 각 클래스를 순차적으로 처리합니다.
-# 한 번에 하나의 붐만 로드하여 데이터를 생성하고,
+# 한 번에 하나의 부품만 로드하여 데이터를 생성하고,
 # 완료 후 다음 클래스로 이동합니다.
 print("\n전체 데이터셋 생성 시작...")
-print("방식: 한 번에 하나의 붐만 로드하여 순차적으로 처리\n")
+print("방식: 한 번에 하나의 부품만 로드하여 순차적으로 처리\n")
 
-for idx, (key, config) in enumerate(BOOM_CONFIGS.items()):
+for idx, (key, config) in enumerate(EXCAVATOR_PARTS_CONFIG.items()):
     start_frame = idx * IMAGES_PER_CLASS
     print(f"\n{'='*60}")
-    print(f"클래스 {idx+1}/{len(BOOM_CONFIGS)} 처리 중...")
+    print(f"클래스 {idx+1}/{len(EXCAVATOR_PARTS_CONFIG)} 처리 중...")
     print(f"{'='*60}")
     
-    # 한 번에 하나의 붐만 로드하여 데이터 생성
+    # 한 번에 하나의 부품만 로드하여 데이터 생성
     generate_class_dataset(config, idx, start_frame)
     
     # 다음 클래스를 위해 스테이지 정리 (연속 처리 시 중요)
     # 이전 클래스의 USD 파일을 언로드하고 다음 클래스 준비
-    if idx < len(BOOM_CONFIGS) - 1:
+    if idx < len(EXCAVATOR_PARTS_CONFIG) - 1:
         print("\n다음 클래스를 위해 스테이지 정리 중...")
         try:
             # Orchestrator 정지 (run_until_complete 완료 후에는 이미 정지 상태)
@@ -525,11 +538,11 @@ print("\n" + "="*60)
 print("전체 데이터셋 메타데이터 생성 중...")
 
 dataset_metadata = {
-    "dataset_name": "Boom Classification Dataset",
-    "num_classes": len(BOOM_CONFIGS),
+    "dataset_name": "Excavator Parts Classification Dataset",
+    "num_classes": len(EXCAVATOR_PARTS_CONFIG),
     "images_per_class": IMAGES_PER_CLASS,
     "total_images": TOTAL_FRAMES,
-    "classes": {key: config["display_name"] for key, config in BOOM_CONFIGS.items()},
+    "classes": {key: config["display_name"] for key, config in EXCAVATOR_PARTS_CONFIG.items()},
     "background_mode": BACKGROUND_MODE,
     "background_ratios": BACKGROUND_RATIOS if BACKGROUND_MODE == "random" else None,
     "created_at": time.strftime("%Y-%m-%d %H:%M:%S"),
@@ -551,7 +564,7 @@ print("="*60)
 
 # 생성된 파일 통계
 import glob
-for key, config in BOOM_CONFIGS.items():
+for key, config in EXCAVATOR_PARTS_CONFIG.items():
     class_dir = os.path.join(BASE_OUTPUT_DIR, config["class_name"])
     if os.path.exists(class_dir):
         # glob을 사용하여 파일 개수 확인
