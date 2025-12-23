@@ -204,7 +204,7 @@ def generate_class_dataset(part_config, class_index, start_frame):
     
     bbox_range = combined_range
     
-    if bbox_range.GetSize().GetLength() <= 0.001:
+    if bbox_range.GetSize().GetLength() <= 0.0000001:
         print(f"  ⚠️  경고: 바운딩 박스를 계산할 수 없습니다.")
         return
     
@@ -213,19 +213,20 @@ def generate_class_dataset(part_config, class_index, start_frame):
     max_point = bbox_range.GetMax()
     center = (min_point + max_point) / 2.0
     
-    part_center = (center[0], center[1], center[2])
     part_size = max(size[0], size[1], size[2])
+    part_center = (center[0], center[1], center[2])
     size_value = (size[0], size[1], size[2])
     
-    # 스케일 경고 (부품 크기가 100 이상이면 mm 단위로 판단)
-    if part_size > 100:
-        print(f"  ⚠️  경고: 부품 크기가 {part_size:.1f}로 큼 (mm 단위로 추정)")
-        print(f"     USD 파일의 스케일을 확인하세요. (권장: metersPerUnit=0.001)")
-        print(f"     데이터 생성은 계속 진행됩니다.")
+    print(f"  바운딩 박스:")
+    print(f"    Min: ({min_point[0]:.6f}, {min_point[1]:.6f}, {min_point[2]:.6f})")
+    print(f"    Max: ({max_point[0]:.6f}, {max_point[1]:.6f}, {max_point[2]:.6f})")
+    print(f"  부품 중심: ({part_center[0]:.6f}, {part_center[1]:.6f}, {part_center[2]:.6f})")
+    print(f"  부품 크기: {part_size:.6f}")
+    print(f"  부품 바닥 Z: {min_point[2]:.6f}")
     
-    print(f"  부품 중심: {part_center}")
-    print(f"  부품 크기: {part_size:.3f}")
-    print(f"  부품 바닥 Z: {min_point[2]:.3f}")
+    # 객체 스케일을 변경하지 않음!
+    # 대신 카메라 거리, 바닥 평면 등을 객체 크기에 비례하여 설정
+    # 이렇게 하면 크기가 다른 객체도 이미지에서 동일하게 보임
     
     # 기존 메시에 Semantics 추가 (Replicator가 인식할 수 있도록)
     print(f"  Semantics 추가 중...")
@@ -264,16 +265,16 @@ def generate_class_dataset(part_config, class_index, start_frame):
             # Sim-to-Real 성능 향상을 위해 다양한 배경 적용
             print(f"  🎨 Domain Randomization: 배경 설정 중...")
             
-            # 바닥 평면 생성 (부품의 min_z와 동일한 높이에 배치)
+            # 바닥 평면 생성 (부품 바닥과 동일한 높이)
             floor_size = part_size * 5  # 부품 크기의 5배
-            floor_z = min_point[2]  # 부품 바닥과 정확히 동일한 높이
+            floor_z = min_point[2]  # 부품 바닥과 동일한 높이
             floor_plane = rep.create.plane(
                 scale=(floor_size, floor_size, 1),
                 position=(part_center[0], part_center[1], floor_z),
                 rotation=(0, 0, 0),
                 semantics=[("class", "background")]
             )
-            print(f"    ✓ 바닥 평면 생성 (크기: {floor_size:.1f}, Z={floor_z:.3f}, 부품 바닥과 동일)")
+            print(f"    ✓ 바닥 평면 생성 (크기: {floor_size:.1f}, Z={floor_z:.3f})")
             
             # 뒷벽 평면 생성 (카메라 반대편)
             back_wall = rep.create.plane(
