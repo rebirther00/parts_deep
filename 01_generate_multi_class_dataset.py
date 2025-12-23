@@ -2,6 +2,19 @@
 # 굴착기 부품 데이터셋 생성 스크립트
 # (Domain Randomization 적용)
 # ==========================================
+
+# 로깅 설정 (SimulationApp 초기화 전에 설정해야 함)
+import os
+import sys
+SCRIPT_DIR = "/home/rebirther/isaac_data_output"
+if SCRIPT_DIR not in sys.path:
+    sys.path.insert(0, SCRIPT_DIR)
+from utils.logger import setup_logging, reinit_logging, finish_logging
+
+# 로그 파일 생성
+LOG_PATH = setup_logging("01_generate")
+
+# Isaac Sim 초기화
 from isaacsim import SimulationApp
 
 # 시뮬레이터 초기화
@@ -13,20 +26,13 @@ simulation_app = SimulationApp({"headless": False})
 import omni.replicator.core as rep
 import omni.usd
 from pxr import Usd, UsdGeom, Semantics
-import os
-import sys
 import time
 import numpy as np
 import json
 from pathlib import Path
 
-# 로깅 설정 (utils 모듈 경로 추가)
-SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, SCRIPT_DIR)
-from utils.logger import setup_logging, finish_logging
-
-# 로그 파일 생성
-LOG_PATH = setup_logging("01_generate")
+# 로깅 재초기화 (SimulationApp이 stdout을 변경한 후 다시 설정)
+reinit_logging(LOG_PATH)
 
 # ==========================================
 # 설정: 굴착기 부품 정의 (자동 스캔)
@@ -71,6 +77,17 @@ for name, config in EXCAVATOR_PARTS_CONFIG.items():
 BASE_OUTPUT_DIR = "/home/rebirther/isaac_data_output/datasets"
 IMAGES_PER_CLASS = 500  # 각 클래스당 생성할 이미지 수
 TOTAL_FRAMES = IMAGES_PER_CLASS * len(EXCAVATOR_PARTS_CONFIG)
+CLEAR_EXISTING_DATA = True  # True: 기존 데이터셋 폴더 삭제 후 새로 생성
+
+# 기존 데이터셋 폴더 삭제 (CLEAR_EXISTING_DATA가 True일 때)
+if CLEAR_EXISTING_DATA and os.path.exists(BASE_OUTPUT_DIR):
+    import shutil
+    print(f"\n⚠️  기존 데이터셋 폴더 삭제 중: {BASE_OUTPUT_DIR}")
+    try:
+        shutil.rmtree(BASE_OUTPUT_DIR)
+        print(f"✓ 기존 데이터셋 폴더 삭제 완료")
+    except Exception as e:
+        print(f"⚠️  폴더 삭제 실패: {e}")
 
 # 배경 설정 (중요: 배경 유무가 학습에 큰 영향을 줍니다)
 # "none": 배경 없음 (검은 배경)
@@ -166,9 +183,26 @@ def generate_class_dataset(part_config, class_index, start_frame):
         includedPurposes=[UsdGeom.Tokens.default_]
     )
     
-    root_prim = stage.GetPseudoRoot()
-    bbox = bbox_cache.ComputeWorldBound(root_prim)
-    bbox_range = bbox.GetRange()
+    # 메시 프리미티브만 대상으로 바운딩 박스 계산 (헬퍼 오브젝트 제외)
+    mesh_prims = [p for p in stage.Traverse() if p.IsA(UsdGeom.Mesh)]
+    if not mesh_prims:
+        print(f"  ⚠️  경고: 메시를 찾을 수 없습니다.")
+        return
+    
+    print(f"  메시 개수: {len(mesh_prims)}개")
+    
+    # 각 메시의 바운딩 박스를 합침
+    from pxr import Gf
+    combined_range = None
+    for mesh_prim in mesh_prims:
+        mesh_bbox = bbox_cache.ComputeWorldBound(mesh_prim)
+        mesh_range = mesh_bbox.GetRange()
+        if combined_range is None:
+            combined_range = Gf.Range3d(mesh_range.GetMin(), mesh_range.GetMax())
+        else:
+            combined_range.UnionWith(mesh_range)
+    
+    bbox_range = combined_range
     
     if bbox_range.GetSize().GetLength() <= 0.001:
         print(f"  ⚠️  경고: 바운딩 박스를 계산할 수 없습니다.")
@@ -185,54 +219,38 @@ def generate_class_dataset(part_config, class_index, start_frame):
     
     print(f"  부품 중심: {part_center}")
     print(f"  부품 크기: {part_size:.3f}")
+    print(f"  부품 바닥 Z: {min_point[2]:.3f}")
     
-    # Semantics 추가
+    # 기존 메시에 Semantics 추가 (Replicator가 인식할 수 있도록)
     print(f"  Semantics 추가 중...")
     for prim in stage.Traverse():
         if prim.IsA(UsdGeom.Imageable):
             sem = Semantics.SemanticsAPI.Apply(prim, "Semantics")
             sem.CreateSemanticTypeAttr("class")
             sem.CreateSemanticDataAttr().Set(class_name)
+    print(f"  ✓ Semantics 추가 완료")
     
-    # Replicator 설정
+    # Replicator 설정 (기존 스테이지 유지, new_stage() 호출하지 않음)
     print(f"  Replicator 레이어 생성 중...")
     try:
         with rep.new_layer():
-            # 중요: rep.new_layer() 안에서는 USD 파일을 rep.create.from_usd()로 다시 로드해야 함
-            # 스테이지에 이미 로드된 객체는 Replicator 레이어에 자동으로 포함되지 않음
-            # 
-            # 문제: rep.create.from_usd()가 일부 USD 파일에서 제대로 작동하지 않을 수 있음
-            # 해결: 반환값을 확인하고, 실패하면 에러를 출력
+            # 기존 스테이지에서 메시 프리미티브 참조
+            # rep.create.from_usd()를 사용하지 않고 rep.get.prims()로 기존 객체 참조
+            print(f"  기존 스테이지에서 메시 참조 중...")
             
-            print(f"  Replicator 레이어에 USD 파일 로드 중...")
-            print(f"    USD 경로: {usd_path}")
+            # 스테이지의 모든 메시 가져오기
+            mesh_prims = [p for p in stage.Traverse() if p.IsA(UsdGeom.Mesh)]
+            print(f"    스테이지 메시 개수: {len(mesh_prims)}")
             
-            # 스테이지 확인 (로드 전)
-            stage_before = omni.usd.get_context().get_stage()
-            mesh_count_before = len([p for p in stage_before.Traverse() if p.IsA(UsdGeom.Mesh)]) if stage_before else 0
-            print(f"    로드 전 스테이지 메시 개수: {mesh_count_before}")
-            
-            # USD 파일을 Replicator 레이어에 로드
-            part_prim = rep.create.from_usd(
-                usd_path,
-                semantics=[("class", class_name)]
-            )
-            
-            # 로드 후 확인
-            stage_after = omni.usd.get_context().get_stage()
-            mesh_count_after = len([p for p in stage_after.Traverse() if p.IsA(UsdGeom.Mesh)]) if stage_after else 0
-            print(f"    로드 후 스테이지 메시 개수: {mesh_count_after}")
-            
-            if part_prim is None:
-                print(f"  ⚠️  경고: rep.create.from_usd()가 None을 반환했습니다!")
-                print(f"  이는 USD 파일이 제대로 로드되지 않았음을 의미합니다.")
-            else:
-                print(f"  ✓ USD 파일이 Replicator 레이어에 로드되었습니다.")
-                print(f"    반환 타입: {type(part_prim)}")
-            
-            if mesh_count_after == 0:
+            if len(mesh_prims) == 0:
                 print(f"  ⚠️  경고: 스테이지에 메시가 없습니다!")
                 print(f"  USD 파일 구조를 확인하세요.")
+                return
+            
+            # rep.get.prims()로 기존 메시 참조
+            part_prim = rep.get.prims(semantics=[("class", class_name)])
+            print(f"  ✓ 기존 메시를 Replicator에서 참조합니다.")
+            print(f"    반환 타입: {type(part_prim)}")
             
             # ==========================================
             # Domain Randomization: 배경 설정
@@ -240,15 +258,16 @@ def generate_class_dataset(part_config, class_index, start_frame):
             # Sim-to-Real 성능 향상을 위해 다양한 배경 적용
             print(f"  🎨 Domain Randomization: 배경 설정 중...")
             
-            # 바닥 평면 생성 (부품 아래에 위치)
+            # 바닥 평면 생성 (부품의 min_z와 동일한 높이에 배치)
             floor_size = part_size * 5  # 부품 크기의 5배
+            floor_z = min_point[2]  # 부품 바닥과 정확히 동일한 높이
             floor_plane = rep.create.plane(
                 scale=(floor_size, floor_size, 1),
-                position=(part_center[0], part_center[1], min_point[2] - 0.1),
+                position=(part_center[0], part_center[1], floor_z),
                 rotation=(0, 0, 0),
                 semantics=[("class", "background")]
             )
-            print(f"    ✓ 바닥 평면 생성 (크기: {floor_size:.1f})")
+            print(f"    ✓ 바닥 평면 생성 (크기: {floor_size:.1f}, Z={floor_z:.3f}, 부품 바닥과 동일)")
             
             # 뒷벽 평면 생성 (카메라 반대편)
             back_wall = rep.create.plane(
