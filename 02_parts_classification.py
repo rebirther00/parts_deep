@@ -14,6 +14,7 @@ from sklearn.model_selection import train_test_split
 import random
 import psutil
 import os
+import sys
 import argparse
 import time
 import json
@@ -26,6 +27,15 @@ parser = argparse.ArgumentParser(description='굴착기 부품 분류 모델 학
 parser.add_argument('-cpu', '--cpu', action='store_true', 
                     help='CPU로 강제 실행 (기본값: GPU 사용 가능 시 GPU 사용)')
 args = parser.parse_args()
+
+# ================================================================================
+# 로깅 설정
+# ================================================================================
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, SCRIPT_DIR)
+from utils.logger import setup_logging, finish_logging
+
+LOG_PATH = setup_logging("02_classification")
 
 # ================================================================================
 # 설정 변수
@@ -561,3 +571,5 @@ print(f"  ───────────────────────�
 print(f"  총 실행 시간: {total_time:.2f}초 ({total_time/60:.2f}분)")
 print("=" * 80)
 
+# 로깅 종료
+finish_logging()

@@ -11,6 +11,7 @@ from PIL import Image, ImageDraw, ImageFont
 import numpy as np
 import random
 import os
+import sys
 import json
 import argparse
 
@@ -23,6 +24,15 @@ parser.add_argument('-cpu', '--cpu', action='store_true',
 parser.add_argument('--num_samples', type=int, default=None,
                     help='평가할 샘플 수 (기본값: 전체 테스트셋)')
 args = parser.parse_args()
+
+# ================================================================================
+# 로깅 설정
+# ================================================================================
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, SCRIPT_DIR)
+from utils.logger import setup_logging, finish_logging
+
+LOG_PATH = setup_logging("03_evaluation")
 
 # ================================================================================
 # 설정 변수
@@ -506,3 +516,5 @@ with open("evaluation_results_parts.json", 'w', encoding='utf-8') as f:
     json.dump(results, f, ensure_ascii=False, indent=2)
 print(f"\n결과 저장: evaluation_results_parts.json")
 
+# 로깅 종료
+finish_logging()
