@@ -25,10 +25,11 @@ simulation_app = SimulationApp({"headless": False})
 # ==========================================
 import omni.replicator.core as rep
 import omni.usd
-from pxr import Usd, UsdGeom, Semantics
+from pxr import Usd, UsdGeom, Semantics, Gf
 import time
 import numpy as np
 import json
+import math
 from pathlib import Path
 
 # 로깅 재초기화 (SimulationApp이 stdout을 변경한 후 다시 설정)
@@ -63,6 +64,106 @@ def scan_usd_files(assets_dir):
         }
     
     return configs
+
+
+def _get_up_axis_and_index(stage):
+    """
+    스테이지 UpAxis를 읽고, 높이축 인덱스(0=X,1=Y,2=Z)를 반환
+    """
+    up_axis = UsdGeom.GetStageUpAxis(stage)
+    axis_index = 2  # Z-up 기본
+    if up_axis == UsdGeom.Tokens.y:
+        axis_index = 1
+    elif up_axis == UsdGeom.Tokens.x:
+        axis_index = 0
+    return up_axis, axis_index
+
+
+def _mesh_local_min_max(mesh: UsdGeom.Mesh, time_code: Usd.TimeCode):
+    """
+    Mesh의 로컬(min,max)을 반환.
+    - extent가 있으면 extent 사용(가벼움)
+    - 없으면 points로 계산(무거움, 하지만 정확)
+    """
+    extent = mesh.GetExtentAttr().Get(time_code)
+    if extent and len(extent) == 2:
+        mn = extent[0]
+        mx = extent[1]
+        return (
+            Gf.Vec3d(mn[0], mn[1], mn[2]),
+            Gf.Vec3d(mx[0], mx[1], mx[2]),
+        )
+
+    pts = mesh.GetPointsAttr().Get(time_code)
+    if not pts:
+        return None, None
+
+    mn = Gf.Vec3d(float("inf"), float("inf"), float("inf"))
+    mx = Gf.Vec3d(float("-inf"), float("-inf"), float("-inf"))
+    for p in pts:
+        mn = Gf.Vec3d(min(mn[0], p[0]), min(mn[1], p[1]), min(mn[2], p[2]))
+        mx = Gf.Vec3d(max(mx[0], p[0]), max(mx[1], p[1]), max(mx[2], p[2]))
+    return mn, mx
+
+
+def compute_world_aabb_from_meshes(stage, time_code: Usd.TimeCode):
+    """
+    (Orient 포함) Mesh vertex/extent를 LocalToWorld로 변환하여 월드 AABB 계산.
+    - BBoxCache가 xformOp:orient 등을 누락하는 케이스 대응용
+    """
+    xform_cache = UsdGeom.XformCache(time_code)
+    mesh_prims = [p for p in stage.Traverse() if p.IsA(UsdGeom.Mesh)]
+    if not mesh_prims:
+        return None
+
+    world_min = Gf.Vec3d(float("inf"), float("inf"), float("inf"))
+    world_max = Gf.Vec3d(float("-inf"), float("-inf"), float("-inf"))
+    used_meshes = 0
+    used_points_fallback = 0
+
+    for prim in mesh_prims:
+        mesh = UsdGeom.Mesh(prim)
+        local_min, local_max = _mesh_local_min_max(mesh, time_code)
+        if local_min is None or local_max is None:
+            continue
+
+        # extent가 없어서 points fallback을 쓴 경우 카운트(진단용)
+        if mesh.GetExtentAttr().Get(time_code) is None:
+            used_points_fallback += 1
+
+        M = xform_cache.GetLocalToWorldTransform(prim)  # orient 포함
+        used_meshes += 1
+
+        # 로컬 bbox 8개 코너를 월드로 변환하여 AABB 갱신
+        for x in (local_min[0], local_max[0]):
+            for y in (local_min[1], local_max[1]):
+                for z in (local_min[2], local_max[2]):
+                    wp = M.Transform(Gf.Vec3d(x, y, z))
+                    world_min = Gf.Vec3d(
+                        min(world_min[0], wp[0]),
+                        min(world_min[1], wp[1]),
+                        min(world_min[2], wp[2]),
+                    )
+                    world_max = Gf.Vec3d(
+                        max(world_max[0], wp[0]),
+                        max(world_max[1], wp[1]),
+                        max(world_max[2], wp[2]),
+                    )
+
+    if used_meshes == 0:
+        return None
+
+    size = world_max - world_min
+    center = (world_min + world_max) / 2.0
+    return {
+        "world_min": world_min,
+        "world_max": world_max,
+        "size": size,
+        "center": center,
+        "mesh_count": len(mesh_prims),
+        "used_meshes": used_meshes,
+        "used_points_fallback": used_points_fallback,
+    }
 
 # USD 파일 자동 스캔
 EXCAVATOR_PARTS_CONFIG = scan_usd_files(ASSETS_DIR)
@@ -177,52 +278,64 @@ def generate_class_dataset(part_config, class_index, start_frame):
     if not stage:
         print(f"  ⚠️  경고: 스테이지를 가져올 수 없습니다.")
         return
-    
-    bbox_cache = UsdGeom.BBoxCache(
-        Usd.TimeCode.Default(), 
-        includedPurposes=[UsdGeom.Tokens.default_]
-    )
-    
-    # 메시 프리미티브만 대상으로 바운딩 박스 계산 (헬퍼 오브젝트 제외)
-    mesh_prims = [p for p in stage.Traverse() if p.IsA(UsdGeom.Mesh)]
-    if not mesh_prims:
-        print(f"  ⚠️  경고: 메시를 찾을 수 없습니다.")
+
+    # =========================================================
+    # (중요) Orient 포함: vertex(LocalToWorld) 기반 월드 AABB 계산
+    # - BBoxCache가 xformOp:orient을 반영하지 않는 케이스 대응
+    # - 옵션1: 오브젝트는 이동하지 않고 바닥 평면만 '진짜 바닥 높이'에 둠
+    # =========================================================
+    time_code = Usd.TimeCode.Default()
+    up_axis, axis_index = _get_up_axis_and_index(stage)
+
+    # 비교용: 기존 BBoxCache 결과도 출력(진단용)
+    bbox_cache = UsdGeom.BBoxCache(time_code, includedPurposes=[UsdGeom.Tokens.default_])
+    try:
+        mesh_prims_for_debug = [p for p in stage.Traverse() if p.IsA(UsdGeom.Mesh)]
+        if mesh_prims_for_debug:
+            debug_range = None
+            for mp in mesh_prims_for_debug:
+                r = bbox_cache.ComputeWorldBound(mp).GetRange()
+                if debug_range is None:
+                    debug_range = Gf.Range3d(r.GetMin(), r.GetMax())
+                else:
+                    debug_range.UnionWith(r)
+            if debug_range:
+                dbg_min = debug_range.GetMin()
+                dbg_max = debug_range.GetMax()
+                dbg_size = debug_range.GetSize()
+                print(f"  [비교용] BBoxCache 기반 AABB:")
+                print(f"    UpAxis: {up_axis}")
+                print(f"    Min: ({dbg_min[0]:.6f}, {dbg_min[1]:.6f}, {dbg_min[2]:.6f})")
+                print(f"    Max: ({dbg_max[0]:.6f}, {dbg_max[1]:.6f}, {dbg_max[2]:.6f})")
+                print(f"    Size: ({dbg_size[0]:.6f}, {dbg_size[1]:.6f}, {dbg_size[2]:.6f})")
+                print(f"    바닥(UpAxis min): {dbg_min[axis_index]:.6f}")
+    except Exception as e:
+        print(f"  ⚠️  [비교용] BBoxCache 출력 실패(무시): {e}")
+
+    aabb = compute_world_aabb_from_meshes(stage, time_code)
+    if not aabb:
+        print(f"  ⚠️  경고: 메시 기반 월드 AABB를 계산할 수 없습니다.")
         return
-    
-    print(f"  메시 개수: {len(mesh_prims)}개")
-    
-    # 각 메시의 바운딩 박스를 합침
-    from pxr import Gf
-    combined_range = None
-    for mesh_prim in mesh_prims:
-        mesh_bbox = bbox_cache.ComputeWorldBound(mesh_prim)
-        mesh_range = mesh_bbox.GetRange()
-        if combined_range is None:
-            combined_range = Gf.Range3d(mesh_range.GetMin(), mesh_range.GetMax())
-        else:
-            combined_range.UnionWith(mesh_range)
-    
-    bbox_range = combined_range
-    
-    if bbox_range.GetSize().GetLength() <= 0.0000001:
-        print(f"  ⚠️  경고: 바운딩 박스를 계산할 수 없습니다.")
-        return
-    
-    size = bbox_range.GetSize()
-    min_point = bbox_range.GetMin()
-    max_point = bbox_range.GetMax()
-    center = (min_point + max_point) / 2.0
-    
+
+    world_min = aabb["world_min"]
+    world_max = aabb["world_max"]
+    size = aabb["size"]
+    center = aabb["center"]
+
     part_size = max(size[0], size[1], size[2])
     part_center = (center[0], center[1], center[2])
     size_value = (size[0], size[1], size[2])
-    
-    print(f"  바운딩 박스:")
-    print(f"    Min: ({min_point[0]:.6f}, {min_point[1]:.6f}, {min_point[2]:.6f})")
-    print(f"    Max: ({max_point[0]:.6f}, {max_point[1]:.6f}, {max_point[2]:.6f})")
+    floor_height = float(world_min[axis_index])
+
+    print(f"  [옵션1] Vertex(LocalToWorld) 기반 월드 AABB:")
+    print(f"    UpAxis: {up_axis}")
+    print(f"    Mesh 개수: {aabb['mesh_count']}개 (사용: {aabb['used_meshes']}개, points 폴백: {aabb['used_points_fallback']}개)")
+    print(f"    Min: ({world_min[0]:.6f}, {world_min[1]:.6f}, {world_min[2]:.6f})")
+    print(f"    Max: ({world_max[0]:.6f}, {world_max[1]:.6f}, {world_max[2]:.6f})")
+    print(f"    Size: ({size[0]:.6f}, {size[1]:.6f}, {size[2]:.6f})")
     print(f"  부품 중심: ({part_center[0]:.6f}, {part_center[1]:.6f}, {part_center[2]:.6f})")
     print(f"  부품 크기: {part_size:.6f}")
-    print(f"  부품 바닥 Z: {min_point[2]:.6f}")
+    print(f"  부품 바닥(UpAxis min): {floor_height:.6f}")
     
     # 객체 스케일을 변경하지 않음!
     # 대신 카메라 거리, 바닥 평면 등을 객체 크기에 비례하여 설정
@@ -267,14 +380,24 @@ def generate_class_dataset(part_config, class_index, start_frame):
             
             # 바닥 평면 생성 (부품 바닥과 동일한 높이)
             floor_size = part_size * 5  # 부품 크기의 5배
-            floor_z = min_point[2]  # 부품 바닥과 동일한 높이
+            # 옵션1: 오브젝트는 그대로, 바닥 평면만 '진짜 바닥 높이'에 배치
+            if axis_index == 2:
+                floor_pos = (part_center[0], part_center[1], floor_height)
+                floor_rot = (0, 0, 0)
+            elif axis_index == 1:
+                floor_pos = (part_center[0], floor_height, part_center[2])
+                floor_rot = (90, 0, 0)
+            else:
+                floor_pos = (floor_height, part_center[1], part_center[2])
+                floor_rot = (0, 90, 0)
+
             floor_plane = rep.create.plane(
                 scale=(floor_size, floor_size, 1),
-                position=(part_center[0], part_center[1], floor_z),
-                rotation=(0, 0, 0),
+                position=floor_pos,
+                rotation=floor_rot,
                 semantics=[("class", "background")]
             )
-            print(f"    ✓ 바닥 평면 생성 (크기: {floor_size:.1f}, Z={floor_z:.3f})")
+            print(f"    ✓ 바닥 평면 생성(옵션1) (크기: {floor_size:.1f}, UpAxis={up_axis}, 바닥높이={floor_height:.3f})")
             
             # 뒷벽 평면 생성 (카메라 반대편)
             back_wall = rep.create.plane(
