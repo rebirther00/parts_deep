@@ -217,6 +217,12 @@ def generate_class_dataset(part_config, class_index, start_frame):
     part_size = max(size[0], size[1], size[2])
     size_value = (size[0], size[1], size[2])
     
+    # 스케일 경고 (부품 크기가 100 이상이면 mm 단위로 판단)
+    if part_size > 100:
+        print(f"  ⚠️  경고: 부품 크기가 {part_size:.1f}로 큼 (mm 단위로 추정)")
+        print(f"     USD 파일의 스케일을 확인하세요. (권장: metersPerUnit=0.001)")
+        print(f"     데이터 생성은 계속 진행됩니다.")
+    
     print(f"  부품 중심: {part_center}")
     print(f"  부품 크기: {part_size:.3f}")
     print(f"  부품 바닥 Z: {min_point[2]:.3f}")
