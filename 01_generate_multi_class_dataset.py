@@ -108,8 +108,11 @@ def _mesh_local_min_max(mesh: UsdGeom.Mesh, time_code: Usd.TimeCode):
 
 def compute_world_aabb_from_meshes(stage, time_code: Usd.TimeCode):
     """
-    (Orient 포함) Mesh vertex/extent를 LocalToWorld로 변환하여 월드 AABB 계산.
+    (Orient 포함) Mesh vertex를 LocalToWorld로 변환하여 월드 AABB 계산.
     - BBoxCache가 xformOp:orient 등을 누락하는 케이스 대응용
+    - 회전된 객체에서 '로컬 AABB 8코너 변환' 방식은 보수적으로 min이 더 낮게 잡힐 수 있어
+      바닥 평면이 과하게 내려가며 "떠 보이는" 현상이 생길 수 있음.
+    - 따라서 기본은 vertex 전체를 월드로 변환하여 min/max를 직접 계산한다.
     """
     xform_cache = UsdGeom.XformCache(time_code)
     mesh_prims = [p for p in stage.Traverse() if p.IsA(UsdGeom.Mesh)]
@@ -119,22 +122,45 @@ def compute_world_aabb_from_meshes(stage, time_code: Usd.TimeCode):
     world_min = Gf.Vec3d(float("inf"), float("inf"), float("inf"))
     world_max = Gf.Vec3d(float("-inf"), float("-inf"), float("-inf"))
     used_meshes = 0
-    used_points_fallback = 0
+    used_points = 0
+    used_extent_fallback = 0
+
+    # 성능 안전장치: 너무 큰 메시(점이 매우 많음)에서 stride로 샘플링 가능
+    # - 기본 1: 모든 점 사용(가장 정확)
+    # - 필요 시 2,4,...로 올리면 빨라지지만 정확도는 떨어질 수 있음
+    POINT_STRIDE = 1
+    total_points = 0
 
     for prim in mesh_prims:
         mesh = UsdGeom.Mesh(prim)
-        local_min, local_max = _mesh_local_min_max(mesh, time_code)
-        if local_min is None or local_max is None:
-            continue
-
-        # extent가 없어서 points fallback을 쓴 경우 카운트(진단용)
-        if mesh.GetExtentAttr().Get(time_code) is None:
-            used_points_fallback += 1
-
         M = xform_cache.GetLocalToWorldTransform(prim)  # orient 포함
         used_meshes += 1
 
-        # 로컬 bbox 8개 코너를 월드로 변환하여 AABB 갱신
+        # 1) points가 있으면 points 기반(정확)
+        pts = mesh.GetPointsAttr().Get(time_code)
+        if pts:
+            used_points += 1
+            total_points += len(pts)
+            for i in range(0, len(pts), POINT_STRIDE):
+                p = pts[i]
+                wp = M.Transform(Gf.Vec3d(p[0], p[1], p[2]))
+                world_min = Gf.Vec3d(
+                    min(world_min[0], wp[0]),
+                    min(world_min[1], wp[1]),
+                    min(world_min[2], wp[2]),
+                )
+                world_max = Gf.Vec3d(
+                    max(world_max[0], wp[0]),
+                    max(world_max[1], wp[1]),
+                    max(world_max[2], wp[2]),
+                )
+            continue
+
+        # 2) points가 없으면 extent로 fallback(희귀)
+        used_extent_fallback += 1
+        local_min, local_max = _mesh_local_min_max(mesh, time_code)
+        if local_min is None or local_max is None:
+            continue
         for x in (local_min[0], local_max[0]):
             for y in (local_min[1], local_max[1]):
                 for z in (local_min[2], local_max[2]):
@@ -162,7 +188,10 @@ def compute_world_aabb_from_meshes(stage, time_code: Usd.TimeCode):
         "center": center,
         "mesh_count": len(mesh_prims),
         "used_meshes": used_meshes,
-        "used_points_fallback": used_points_fallback,
+        "used_points": used_points,
+        "used_extent_fallback": used_extent_fallback,
+        "point_stride": POINT_STRIDE,
+        "total_points": total_points,
     }
 
 # USD 파일 자동 스캔
@@ -329,7 +358,12 @@ def generate_class_dataset(part_config, class_index, start_frame):
 
     print(f"  [옵션1] Vertex(LocalToWorld) 기반 월드 AABB:")
     print(f"    UpAxis: {up_axis}")
-    print(f"    Mesh 개수: {aabb['mesh_count']}개 (사용: {aabb['used_meshes']}개, points 폴백: {aabb['used_points_fallback']}개)")
+    print(
+        f"    Mesh 개수: {aabb['mesh_count']}개 (사용: {aabb['used_meshes']}개, "
+        f"points 사용: {aabb.get('used_points', 0)}개, extent 폴백: {aabb.get('used_extent_fallback', 0)}개)"
+    )
+    if "total_points" in aabb:
+        print(f"    총 vertex 수(합계): {aabb['total_points']:,} (stride={aabb.get('point_stride', 1)})")
     print(f"    Min: ({world_min[0]:.6f}, {world_min[1]:.6f}, {world_min[2]:.6f})")
     print(f"    Max: ({world_max[0]:.6f}, {world_max[1]:.6f}, {world_max[2]:.6f})")
     print(f"    Size: ({size[0]:.6f}, {size[1]:.6f}, {size[2]:.6f})")
