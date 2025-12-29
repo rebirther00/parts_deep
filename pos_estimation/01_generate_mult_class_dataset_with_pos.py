@@ -250,8 +250,17 @@ def generate_class_dataset(part_config, class_index, total_classes):
         print(f"  ⚠️  스테이지 로드 실패")
         return
     
-    meters_per_unit = UsdGeom.GetStageMetersPerUnit(stage)
-    print(f"  metersPerUnit: {meters_per_unit}")
+    meters_per_unit_raw = UsdGeom.GetStageMetersPerUnit(stage)
+    
+    # metersPerUnit이 비정상적으로 작으면 (< 0.1) 1.0으로 간주
+    # 이유: 일부 USD가 센티미터 단위로 모델링되어 metersPerUnit=0.01이지만,
+    #       실제로는 다른 부품과 같은 크기 (약 4m)여야 함
+    if meters_per_unit_raw < 0.1:
+        meters_per_unit = 1.0
+        print(f"  metersPerUnit: {meters_per_unit_raw} → 1.0으로 보정 (스케일 통일)")
+    else:
+        meters_per_unit = meters_per_unit_raw
+        print(f"  metersPerUnit: {meters_per_unit}")
     
     # AABB 계산
     aabb = compute_world_aabb(stage)
@@ -481,6 +490,8 @@ def generate_class_dataset(part_config, class_index, total_classes):
                     },
                     "stage_info": {
                         "meters_per_unit": meters_per_unit,
+                        "meters_per_unit_raw": meters_per_unit_raw,
+                        "scale_corrected": meters_per_unit_raw < 0.1,
                         "part_size_m": part_size * meters_per_unit
                     }
                 }
@@ -513,7 +524,9 @@ def generate_class_dataset(part_config, class_index, total_classes):
         "num_images": generated_frames,
         "part_size_m": float(part_size * meters_per_unit),
         "part_center_world_m": list(object_world_pos_m),
-        "meters_per_unit": meters_per_unit
+        "meters_per_unit": meters_per_unit,
+        "meters_per_unit_raw": meters_per_unit_raw,
+        "scale_corrected": meters_per_unit_raw < 0.1
     }
     with open(os.path.join(class_output_dir, "metadata.json"), 'w', encoding='utf-8') as f:
         json.dump(metadata, f, indent=2, ensure_ascii=False)
