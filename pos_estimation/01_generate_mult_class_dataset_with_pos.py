@@ -151,14 +151,62 @@ def get_camera_world_transform(stage, camera_prim_path):
     return (position[0], position[1], position[2]), euler_xyz_deg, rot_matrix
 
 
-def compute_relative_pose(camera_pos, object_center, meters_per_unit):
-    """카메라 기준 오브젝트 상대 위치 계산 (미터 단위)"""
-    # 오브젝트 위치 - 카메라 위치 = 카메라 기준 오브젝트 위치
-    rel_x = (object_center[0] - camera_pos[0]) * meters_per_unit
-    rel_y = (object_center[1] - camera_pos[1]) * meters_per_unit
-    rel_z = (object_center[2] - camera_pos[2]) * meters_per_unit
+def compute_relative_pose(camera_pos, object_center, meters_per_unit, camera_rot_matrix=None):
+    """카메라 좌표계에서 오브젝트 상대 위치 계산 (미터 단위)
     
-    return (rel_x, rel_y, rel_z)
+    OpenCV/Depth 좌표계로 변환:
+    - X: 오른쪽 (+)
+    - Y: 아래쪽 (+)  
+    - Z: 앞쪽 (+, forward)
+    
+    USD/OpenGL 카메라 좌표계:
+    - X: 오른쪽 (+)
+    - Y: 위쪽 (+)
+    - Z: 뒤쪽 (+, backward)
+    
+    Args:
+        camera_pos: 카메라 월드 위치 (x, y, z)
+        object_center: 오브젝트 월드 위치 (x, y, z)
+        meters_per_unit: 스케일 계수
+        camera_rot_matrix: 카메라 회전 행렬 (Gf.Matrix3d) - 없으면 월드 좌표 차이만 반환
+    
+    Returns:
+        카메라 좌표계에서의 오브젝트 위치 (x, y, z) in meters (OpenCV 좌표계)
+    """
+    # 1. 월드 좌표계에서의 차이 (미터 단위)
+    world_diff = np.array([
+        (object_center[0] - camera_pos[0]) * meters_per_unit,
+        (object_center[1] - camera_pos[1]) * meters_per_unit,
+        (object_center[2] - camera_pos[2]) * meters_per_unit
+    ])
+    
+    if camera_rot_matrix is None:
+        # 회전 행렬이 없으면 월드 좌표 차이만 반환 (이전 동작)
+        return tuple(world_diff)
+    
+    # 2. 카메라 회전 행렬을 numpy 배열로 변환
+    # Gf.Matrix3d는 row-major
+    R_cam = np.array([
+        [camera_rot_matrix[0][0], camera_rot_matrix[0][1], camera_rot_matrix[0][2]],
+        [camera_rot_matrix[1][0], camera_rot_matrix[1][1], camera_rot_matrix[1][2]],
+        [camera_rot_matrix[2][0], camera_rot_matrix[2][1], camera_rot_matrix[2][2]]
+    ])
+    
+    # 3. 카메라 회전의 역행렬 적용 → 카메라 좌표계로 변환
+    # R_cam은 카메라의 월드 회전이므로, R_cam^T (전치 = 역행렬)로 월드→카메라 변환
+    R_cam_inv = R_cam.T
+    camTobj_usd = R_cam_inv @ world_diff
+    
+    # 4. USD/OpenGL 좌표계 → OpenCV/Depth 좌표계 변환
+    # USD: Y-up, -Z forward → OpenCV: Y-down, +Z forward
+    # 변환: X' = X, Y' = -Y, Z' = -Z
+    camTobj_opencv = np.array([
+        camTobj_usd[0],   # X 유지
+        -camTobj_usd[1],  # Y 반전
+        -camTobj_usd[2]   # Z 반전
+    ])
+    
+    return tuple(camTobj_opencv)
 
 
 def find_camera_prim_path(stage):
@@ -447,8 +495,9 @@ def generate_class_dataset(part_config, class_index, total_classes):
                     camera_pos[2] * meters_per_unit
                 )
                 
-                # 카메라 기준 오브젝트 상대 위치 (미터)
-                rel_pos_m = compute_relative_pose(camera_pos, object_world_pos, meters_per_unit)
+                # 카메라 좌표계에서 오브젝트 상대 위치 (미터)
+                # camera_rot_matrix를 전달하여 올바른 카메라 좌표계로 변환
+                rel_pos_m = compute_relative_pose(camera_pos, object_world_pos, meters_per_unit, camera_rot_matrix)
                 
                 # 카메라 기준 오브젝트 상대 회전 (오브젝트 고정이므로 카메라 회전의 역)
                 # 카메라가 오브젝트를 바라볼 때, 카메라 좌표계에서 오브젝트의 방향
