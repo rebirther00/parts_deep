@@ -315,6 +315,18 @@ def _select_object_bbox_from_files(bbox_npy_path: str, label_json_path: str):
     Writer가 저장한 bbox npy/json을 기반으로 "background가 아닌" bbox 중 가장 큰 bbox를 선택.
     반환: (bbox_xyxy, occlusion_ratio)
     """
+    def _get_field(bb, key: str, default=None):
+        """bbox row(dict 또는 numpy structured row)에서 필드 값을 안전하게 꺼냅니다."""
+        try:
+            # numpy.void / structured array row
+            return bb[key]
+        except Exception:
+            try:
+                # dict-like
+                return bb.get(key, default)
+            except Exception:
+                return default
+
     try:
         bboxes = np.load(bbox_npy_path, allow_pickle=True)
         with open(label_json_path, "r", encoding="utf-8") as f:
@@ -326,17 +338,21 @@ def _select_object_bbox_from_files(bbox_npy_path: str, label_json_path: str):
     best_area = -1
     best_occ = None
     for bb in bboxes:
-        sid = str(int(bb["semanticId"]))
+        sid_raw = _get_field(bb, "semanticId", None)
+        if sid_raw is None:
+            continue
+        sid = str(int(sid_raw))
         cls = labels_map.get(sid, {}).get("class", "unknown")
         if cls == "background":
             continue
-        x_min = int(bb["x_min"]); y_min = int(bb["y_min"])
-        x_max = int(bb["x_max"]); y_max = int(bb["y_max"])
+        x_min = int(_get_field(bb, "x_min", 0)); y_min = int(_get_field(bb, "y_min", 0))
+        x_max = int(_get_field(bb, "x_max", 0)); y_max = int(_get_field(bb, "y_max", 0))
         area = max(0, x_max - x_min) * max(0, y_max - y_min)
         if area > best_area:
             best_area = area
             best = (x_min, y_min, x_max, y_max)
-            best_occ = float(bb.get("occlusionRatio", 0.0))
+            occ_raw = _get_field(bb, "occlusionRatio", 0.0)
+            best_occ = float(occ_raw) if occ_raw is not None else 0.0
     return best, best_occ
 
 def _is_frame_valid(bbox_xyxy, occlusion_ratio: float, width: int, height: int):
@@ -373,6 +389,15 @@ def _is_frame_valid(bbox_xyxy, occlusion_ratio: float, width: int, height: int):
 
     return True, "ok"
 
+def _wait_for_files(paths, timeout_s: float, poll_s: float = 0.05):
+    """Replicator writer 출력이 비동기라서, 필요한 파일들이 생성될 때까지 기다립니다."""
+    deadline = time.time() + float(timeout_s)
+    while time.time() < deadline:
+        if all(os.path.exists(p) for p in paths):
+            return True
+        time.sleep(poll_s)
+    return False
+
 def _move_or_delete_attempt_files(tmp_dir: str, attempt_idx: int, out_dir: str, out_idx: int, accept: bool):
     """
     attempt_idx로 생성된 writer 파일을 accept 여부에 따라 처리.
@@ -384,6 +409,8 @@ def _move_or_delete_attempt_files(tmp_dir: str, attempt_idx: int, out_dir: str, 
         ("rgb_{:04d}.png", "rgb_{:04d}.png"),
         ("bounding_box_2d_tight_{:04d}.npy", "bounding_box_2d_tight_{:04d}.npy"),
         ("bounding_box_2d_tight_labels_{:04d}.json", "bounding_box_2d_tight_labels_{:04d}.json"),
+        # BasicWriter가 함께 생성하는 prim_paths 파일도 같이 정리(남아있으면 폴더가 더러워짐)
+        ("bounding_box_2d_tight_prim_paths_{:04d}.json", "bounding_box_2d_tight_prim_paths_{:04d}.json"),
     ]
     for src_fmt, dst_fmt in patterns:
         src = os.path.join(tmp_dir, src_fmt.format(attempt_idx))
@@ -661,109 +688,114 @@ def generate_class_dataset(part_config, class_index: int):
 
         accepted = 0
         attempt_idx = 0
-        while accepted < IMAGES_PER_CLASS and attempt_idx < max_attempts:
-            # 1) 부품 pose 샘플링(world 기준)
-            dx = float(np.random.uniform(-xy_range, xy_range))
-            dy = float(np.random.uniform(-xy_range, xy_range))
-            # 높이축 외에는 거의 0, 높이축은 바닥에 맞춰둔 후 작은 노이즈만(옵션)
-            dz = 0.0
+        try:
+            while accepted < IMAGES_PER_CLASS and attempt_idx < max_attempts:
+                # 1) 부품 pose 샘플링(world 기준)
+                dx = float(np.random.uniform(-xy_range, xy_range))
+                dy = float(np.random.uniform(-xy_range, xy_range))
+                # 높이축 외에는 거의 0, 높이축은 바닥에 맞춰둔 후 작은 노이즈만(옵션)
+                dz = 0.0
 
-            roll = float(np.random.uniform(ROLL_DEG_RANGE[0], ROLL_DEG_RANGE[1]))
-            pitch = float(np.random.uniform(PITCH_DEG_RANGE[0], PITCH_DEG_RANGE[1]))
-            yaw = float(np.random.uniform(YAW_DEG_RANGE[0], YAW_DEG_RANGE[1]))
+                roll = float(np.random.uniform(ROLL_DEG_RANGE[0], ROLL_DEG_RANGE[1]))
+                pitch = float(np.random.uniform(PITCH_DEG_RANGE[0], PITCH_DEG_RANGE[1]))
+                yaw = float(np.random.uniform(YAW_DEG_RANGE[0], YAW_DEG_RANGE[1]))
 
-            # base 위치: 바닥 위에 놓이도록(초기 바닥 기준)
-            # 여기서는 "기준 중심(part_center)"를 테이블 기준점으로 쓰고, XY만 이동
-            t_world_obj = np.array([part_center[0] + dx, part_center[1] + dy, part_center[2]], dtype=float)
-            # 높이축 정렬: z-up이면 z를 조정. y-up/x-up도 동일 로직으로 처리
-            t_world_obj[axis_index] = part_center[axis_index] + dz
+                # base 위치: 바닥 위에 놓이도록(초기 바닥 기준)
+                # 여기서는 "기준 중심(part_center)"를 테이블 기준점으로 쓰고, XY만 이동
+                t_world_obj = np.array([part_center[0] + dx, part_center[1] + dy, part_center[2]], dtype=float)
+                # 높이축 정렬: z-up이면 z를 조정. y-up/x-up도 동일 로직으로 처리
+                t_world_obj[axis_index] = part_center[axis_index] + dz
 
-            # 2) USD에 적용(rotateXYZ)
-            _set_xform_translate_rotate_xyz(root_prim, t_world_obj, (roll, pitch, yaw))
+                # 2) USD에 적용(rotateXYZ)
+                _set_xform_translate_rotate_xyz(root_prim, t_world_obj, (roll, pitch, yaw))
 
-            # 3) 렌더/어노테이션 1프레임 진행
-            if hasattr(rep.orchestrator, "step"):
-                rep.orchestrator.step()
-            else:
-                rep.orchestrator.run(num_frames=1)
+                # 3) 렌더/어노테이션 1프레임 진행
+                if hasattr(rep.orchestrator, "step"):
+                    rep.orchestrator.step()
+                else:
+                    rep.orchestrator.run(num_frames=1)
 
-            # writer 파일 생성 확인 및 유효성 평가(80% 이상 보임)
-            fid = f"{attempt_idx:04d}"
-            bbox_npy = os.path.join(tmp_output_dir, f"bounding_box_2d_tight_{fid}.npy")
-            bbox_lbl = os.path.join(tmp_output_dir, f"bounding_box_2d_tight_labels_{fid}.json")
-            # 파일이 늦게 생성될 수 있으므로 짧게 대기(최대 0.5초)
-            for _ in range(10):
-                if os.path.exists(bbox_npy) and os.path.exists(bbox_lbl):
-                    break
-                time.sleep(0.05)
+                # writer 출력은 비동기일 수 있으므로, 필요한 파일들이 실제로 생길 때까지 기다린다.
+                fid = f"{attempt_idx:04d}"
+                rgb_png = os.path.join(tmp_output_dir, f"rgb_{fid}.png")
+                bbox_npy = os.path.join(tmp_output_dir, f"bounding_box_2d_tight_{fid}.npy")
+                bbox_lbl = os.path.join(tmp_output_dir, f"bounding_box_2d_tight_labels_{fid}.json")
 
-            bbox_xyxy, occ = _select_object_bbox_from_files(bbox_npy, bbox_lbl)
-            ok, reason = _is_frame_valid(bbox_xyxy, occ, RESOLUTION[0], RESOLUTION[1])
+                ready = _wait_for_files([rgb_png, bbox_npy, bbox_lbl], timeout_s=3.0, poll_s=0.05)
+                if not ready:
+                    # 파일이 늦게 생성되는 경우가 있어, 일단 거부 처리하되 가능한 범위에서 정리한다.
+                    _move_or_delete_attempt_files(tmp_output_dir, attempt_idx, class_output_dir, accepted, accept=False)
+                    reject_count += 1
+                    attempt_idx += 1
+                    continue
 
-            if not ok:
-                # 무효 프레임: tmp 파일 삭제
-                _move_or_delete_attempt_files(tmp_output_dir, attempt_idx, class_output_dir, accepted, accept=False)
-                reject_count += 1
-                # 거부가 너무 많으면 XY 이동 범위를 줄여 "화면 밖으로 나가는" 빈도를 줄인다.
-                if reject_count % XY_RANGE_SHRINK_EVERY_REJECTS == 0:
-                    xy_range *= XY_RANGE_SHRINK_FACTOR
-                    print(f"  ⚠️  reject {reject_count}회 발생 → XY 이동 범위 축소: {xy_range:.4f} (reason={reason})")
+                bbox_xyxy, occ = _select_object_bbox_from_files(bbox_npy, bbox_lbl)
+                ok, reason = _is_frame_valid(bbox_xyxy, occ, RESOLUTION[0], RESOLUTION[1])
+
+                if not ok:
+                    # 무효 프레임: tmp 파일 삭제
+                    _move_or_delete_attempt_files(tmp_output_dir, attempt_idx, class_output_dir, accepted, accept=False)
+                    reject_count += 1
+                    # 거부가 너무 많으면 XY 이동 범위를 줄여 "화면 밖으로 나가는" 빈도를 줄인다.
+                    if reject_count % XY_RANGE_SHRINK_EVERY_REJECTS == 0:
+                        xy_range *= XY_RANGE_SHRINK_FACTOR
+                        print(f"  ⚠️  reject {reject_count}회 발생 → XY 이동 범위 축소: {xy_range:.4f} (reason={reason})")
+                    attempt_idx += 1
+                    continue
+
+                # 4) 포즈 라벨 계산(카메라(optical) 기준) - accept된 프레임만 저장
+                # object 회전행렬(world 기준): rotateXYZ(roll,pitch,yaw) 순서 가정
+                rx, ry, rz = math.radians(roll), math.radians(pitch), math.radians(yaw)
+                Rx = np.array([[1, 0, 0], [0, math.cos(rx), -math.sin(rx)], [0, math.sin(rx), math.cos(rx)]], dtype=float)
+                Ry = np.array([[math.cos(ry), 0, math.sin(ry)], [0, 1, 0], [-math.sin(ry), 0, math.cos(ry)]], dtype=float)
+                Rz = np.array([[math.cos(rz), -math.sin(rz), 0], [math.sin(rz), math.cos(rz), 0], [0, 0, 1]], dtype=float)
+                R_world_obj = (Rz @ Ry @ Rx)
+
+                t_cam_obj = R_cam_world @ (t_world_obj - t_world_cam)
+                R_cam_obj = R_cam_world @ R_world_obj
+                q_cam_obj = _rotmat_to_quat_xyzw(R_cam_obj)
+
+                pose = {
+                    "class_name": class_name,
+                    "frame_idx": accepted,
+                    "unit": "m",
+                    "camera": {
+                        "width": RESOLUTION[0],
+                        "height": RESOLUTION[1],
+                        "K_assumed": K,
+                        "convention": "cam_optical: x-right, y-down, z-forward",
+                    },
+                    "pose_cam_optical_obj": {
+                        "t_xyz_m": [float(t_cam_obj[0]), float(t_cam_obj[1]), float(t_cam_obj[2])],
+                        "q_xyzw": [float(q_cam_obj[0]), float(q_cam_obj[1]), float(q_cam_obj[2]), float(q_cam_obj[3])],
+                    },
+                    "raw_pose_world": {
+                        "t_xyz_m": [float(t_world_obj[0]), float(t_world_obj[1]), float(t_world_obj[2])],
+                        "r_xyz_deg": [roll, pitch, yaw],
+                        "camera_pos_world_m": [float(cam_pos[0]), float(cam_pos[1]), float(cam_pos[2])],
+                        "camera_lookat_world_m": [float(cam_lookat[0]), float(cam_lookat[1]), float(cam_lookat[2])],
+                    },
+                    "stage": {
+                        "up_axis": str(up_axis),
+                        "meters_per_unit": meters_per_unit,
+                    },
+                }
+
+                # accept된 writer 파일을 최종 디렉토리로 이동/재번호 부여
+                _move_or_delete_attempt_files(tmp_output_dir, attempt_idx, class_output_dir, accepted, accept=True)
+
+                pose_path = os.path.join(class_output_dir, f"pose_{accepted:04d}.json")
+                with open(pose_path, "w", encoding="utf-8") as f:
+                    json.dump(pose, f, indent=2, ensure_ascii=False)
+
+                accepted += 1
                 attempt_idx += 1
-                continue
 
-            # 4) 포즈 라벨 계산(카메라(optical) 기준) - accept된 프레임만 저장
-            # object 회전행렬(world 기준): rotateXYZ(roll,pitch,yaw) 순서 가정
-            rx, ry, rz = math.radians(roll), math.radians(pitch), math.radians(yaw)
-            Rx = np.array([[1, 0, 0], [0, math.cos(rx), -math.sin(rx)], [0, math.sin(rx), math.cos(rx)]], dtype=float)
-            Ry = np.array([[math.cos(ry), 0, math.sin(ry)], [0, 1, 0], [-math.sin(ry), 0, math.cos(ry)]], dtype=float)
-            Rz = np.array([[math.cos(rz), -math.sin(rz), 0], [math.sin(rz), math.cos(rz), 0], [0, 0, 1]], dtype=float)
-            R_world_obj = (Rz @ Ry @ Rx)
-
-            t_cam_obj = R_cam_world @ (t_world_obj - t_world_cam)
-            R_cam_obj = R_cam_world @ R_world_obj
-            q_cam_obj = _rotmat_to_quat_xyzw(R_cam_obj)
-
-            pose = {
-                "class_name": class_name,
-                "frame_idx": accepted,
-                "unit": "m",
-                "camera": {
-                    "width": RESOLUTION[0],
-                    "height": RESOLUTION[1],
-                    "K_assumed": K,
-                    "convention": "cam_optical: x-right, y-down, z-forward",
-                },
-                "pose_cam_optical_obj": {
-                    "t_xyz_m": [float(t_cam_obj[0]), float(t_cam_obj[1]), float(t_cam_obj[2])],
-                    "q_xyzw": [float(q_cam_obj[0]), float(q_cam_obj[1]), float(q_cam_obj[2]), float(q_cam_obj[3])],
-                },
-                "raw_pose_world": {
-                    "t_xyz_m": [float(t_world_obj[0]), float(t_world_obj[1]), float(t_world_obj[2])],
-                    "r_xyz_deg": [roll, pitch, yaw],
-                    "camera_pos_world_m": [float(cam_pos[0]), float(cam_pos[1]), float(cam_pos[2])],
-                    "camera_lookat_world_m": [float(cam_lookat[0]), float(cam_lookat[1]), float(cam_lookat[2])],
-                },
-                "stage": {
-                    "up_axis": str(up_axis),
-                    "meters_per_unit": meters_per_unit,
-                },
-            }
-
-            # accept된 writer 파일을 최종 디렉토리로 이동/재번호 부여
-            _move_or_delete_attempt_files(tmp_output_dir, attempt_idx, class_output_dir, accepted, accept=True)
-
-            pose_path = os.path.join(class_output_dir, f"pose_{accepted:04d}.json")
-            with open(pose_path, "w", encoding="utf-8") as f:
-                json.dump(pose, f, indent=2, ensure_ascii=False)
-
-            accepted += 1
-            attempt_idx += 1
-
-            if accepted % 50 == 0:
-                print(f"  진행: {accepted}/{IMAGES_PER_CLASS} (attempt={attempt_idx}, reject={reject_count}, xy_range={xy_range:.4f})")
-
-        # tmp 디렉토리 정리
-        shutil.rmtree(tmp_output_dir, ignore_errors=True)
+                if accepted % 50 == 0:
+                    print(f"  진행: {accepted}/{IMAGES_PER_CLASS} (attempt={attempt_idx}, reject={reject_count}, xy_range={xy_range:.4f})")
+        finally:
+            # tmp 디렉토리 정리(중간 중단/예외가 발생해도 남지 않게)
+            shutil.rmtree(tmp_output_dir, ignore_errors=True)
 
         if accepted < IMAGES_PER_CLASS:
             print(f"  ⚠️  유효 프레임 부족: {accepted}/{IMAGES_PER_CLASS} (attempt={attempt_idx}, reject={reject_count})")
