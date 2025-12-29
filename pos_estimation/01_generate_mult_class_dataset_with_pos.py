@@ -196,6 +196,45 @@ def compute_world_aabb_from_meshes(stage, time_code: Usd.TimeCode):
         "total_points": total_points,
     }
 
+def compute_root_local_aabb_from_mesh_extents(stage, root_prim: Usd.Prim, time_code: Usd.TimeCode):
+    """
+    모든 Mesh의 extent(또는 points) 기반 AABB를 root_prim 로컬 좌표계로 합산하여 반환합니다.
+    - 1회만 계산해두고, 프레임마다 root 회전/이동만 적용하여 "바닥 관통 방지용" 최저점 계산에 사용합니다.
+    - points 전체를 쓰면 무겁기 때문에, 가능하면 extent(2개 Vec3)로 corners만 변환합니다.
+    반환: {"local_min": np.ndarray(3), "local_max": np.ndarray(3)}
+    """
+    xform_cache = UsdGeom.XformCache(time_code)
+    root_M_world = xform_cache.GetLocalToWorldTransform(root_prim)
+    root_M_world_inv = root_M_world.GetInverse()
+
+    mesh_prims = [p for p in stage.Traverse() if p.IsA(UsdGeom.Mesh)]
+    if not mesh_prims:
+        return None
+
+    local_min = np.array([float("inf"), float("inf"), float("inf")], dtype=float)
+    local_max = np.array([float("-inf"), float("-inf"), float("-inf")], dtype=float)
+
+    for prim in mesh_prims:
+        mesh = UsdGeom.Mesh(prim)
+        M_world = xform_cache.GetLocalToWorldTransform(prim)
+
+        mn, mx = _mesh_local_min_max(mesh, time_code)
+        if mn is None or mx is None:
+            continue
+
+        # mesh local AABB corners -> world -> root local
+        for x in (mn[0], mx[0]):
+            for y in (mn[1], mx[1]):
+                for z in (mn[2], mx[2]):
+                    wp = M_world.Transform(Gf.Vec3d(x, y, z))
+                    rp = root_M_world_inv.Transform(wp)  # point in root local
+                    local_min = np.minimum(local_min, np.array([rp[0], rp[1], rp[2]], dtype=float))
+                    local_max = np.maximum(local_max, np.array([rp[0], rp[1], rp[2]], dtype=float))
+
+    if np.any(~np.isfinite(local_min)) or np.any(~np.isfinite(local_max)):
+        return None
+    return {"local_min": local_min, "local_max": local_max}
+
 
 def _find_root_xform_prim(stage: Usd.Stage):
     """
@@ -608,6 +647,11 @@ def generate_class_dataset(part_config, class_index: int):
     print(f"  Root prim: {root_path}")
     print(f"  UpAxis: {up_axis}, metersPerUnit: {meters_per_unit}")
 
+    # roll/pitch 시 바닥 관통 방지용: root local AABB(정적) 사전 계산
+    root_local_aabb = compute_root_local_aabb_from_mesh_extents(stage, root_prim, time_code)
+    if not root_local_aabb:
+        print("  ⚠️  root local AABB 계산 실패(바닥 관통 방지 보정이 약해질 수 있음)")
+
     # Semantics 추가
     for prim in stage.Traverse():
         if prim.IsA(UsdGeom.Imageable):
@@ -757,6 +801,11 @@ def generate_class_dataset(part_config, class_index: int):
         reject_count = 0
         # translate는 "절대값 set"이 아니라, 현재 위치(base)에서 dx/dy 오프셋으로 적용한다.
         base_t_world = _get_translate_op_value_or_zero(root_prim)
+        # 바닥 관통 방지용 파라미터(단위: stage unit)
+        # - clearance는 아주 작게(약간만 띄우기). metersPerUnit을 사용해 대략 2mm 정도로 맞춘다.
+        clearance_m = 0.002
+        clearance_u = float(clearance_m / meters_per_unit) if meters_per_unit > 0 else 0.0
+        clearance_u = max(clearance_u, float(part_size) * 0.002)  # 너무 작아지지 않게 하한
 
         if not (hasattr(rep.orchestrator, "step") or hasattr(rep.orchestrator, "run")):
             raise RuntimeError("rep.orchestrator.step/run API를 찾을 수 없습니다. Isaac Sim 버전을 확인하세요.")
@@ -779,6 +828,28 @@ def generate_class_dataset(part_config, class_index: int):
                 # 높이축(up)은 base 값을 유지하고, planar 축만 움직인다.
                 t_world_obj = _apply_planar_offset(base_t_world, dx, dy, axis_index)
                 t_world_obj[axis_index] = base_t_world[axis_index] + dz
+
+                # roll/pitch로 인해 바닥 아래로 파묻히지 않도록, 회전 후 최저점이 floor_height 이상이 되게 up축을 보정한다.
+                # - root_local_aabb의 8개 코너를 회전시켜 최저 up값을 근사(빠름)
+                rx, ry, rz = math.radians(roll), math.radians(pitch), math.radians(yaw)
+                Rx = np.array([[1, 0, 0], [0, math.cos(rx), -math.sin(rx)], [0, math.sin(rx), math.cos(rx)]], dtype=float)
+                Ry = np.array([[math.cos(ry), 0, math.sin(ry)], [0, 1, 0], [-math.sin(ry), 0, math.cos(ry)]], dtype=float)
+                Rz = np.array([[math.cos(rz), -math.sin(rz), 0], [math.sin(rz), math.cos(rz), 0], [0, 0, 1]], dtype=float)
+                R_world_obj = (Rz @ Ry @ Rx)
+
+                if root_local_aabb:
+                    mn = root_local_aabb["local_min"]
+                    mx = root_local_aabb["local_max"]
+                    min_up = float("inf")
+                    for x in (mn[0], mx[0]):
+                        for y in (mn[1], mx[1]):
+                            for z in (mn[2], mx[2]):
+                                p = np.array([x, y, z], dtype=float)
+                                wp = t_world_obj + (R_world_obj @ p)
+                                min_up = min(min_up, float(wp[axis_index]))
+                    target_up = float(floor_height) + clearance_u
+                    if min_up < target_up:
+                        t_world_obj[axis_index] += (target_up - min_up)
 
                 # 2) USD에 적용(rotateXYZ)
                 _set_xform_translate_rotate_xyz(root_prim, t_world_obj, (roll, pitch, yaw))
@@ -818,13 +889,6 @@ def generate_class_dataset(part_config, class_index: int):
                     continue
 
                 # 4) 포즈 라벨 계산(카메라(optical) 기준) - accept된 프레임만 저장
-                # object 회전행렬(world 기준): rotateXYZ(roll,pitch,yaw) 순서 가정
-                rx, ry, rz = math.radians(roll), math.radians(pitch), math.radians(yaw)
-                Rx = np.array([[1, 0, 0], [0, math.cos(rx), -math.sin(rx)], [0, math.sin(rx), math.cos(rx)]], dtype=float)
-                Ry = np.array([[math.cos(ry), 0, math.sin(ry)], [0, 1, 0], [-math.sin(ry), 0, math.cos(ry)]], dtype=float)
-                Rz = np.array([[math.cos(rz), -math.sin(rz), 0], [math.sin(rz), math.cos(rz), 0], [0, 0, 1]], dtype=float)
-                R_world_obj = (Rz @ Ry @ Rx)
-
                 t_cam_obj = R_cam_world @ (t_world_obj - t_world_cam)
                 R_cam_obj = R_cam_world @ R_world_obj
                 q_cam_obj = _rotmat_to_quat_xyzw(R_cam_obj)
