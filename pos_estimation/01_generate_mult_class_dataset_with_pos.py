@@ -22,6 +22,7 @@ import time
 import math
 from pathlib import Path
 import numpy as np
+import shutil
 
 SCRIPT_DIR = "/home/rebirther/isaac_data_output"
 if SCRIPT_DIR not in sys.path:
@@ -75,6 +76,18 @@ YAW_DEG_RANGE = (0.0, 360.0)
 
 # XY 이동 범위(보수적으로: 부품 크기에 비례)
 XY_RANGE_RATIO = 0.15  # part_size의 15% 범위에서만 이동
+
+# 유효 프레임 조건(부품이 최소 80% 이상 보이게)
+# - occlusionRatio <= 0.2 를 기준으로 "80% 이상 보임"으로 간주
+# - bbox가 이미지 경계에 닿으면 잘림(truncation)으로 보고 실패 처리
+MIN_VISIBLE_RATIO = 0.80
+BBOX_MARGIN_PX = 5
+MIN_BBOX_AREA_RATIO = 0.02  # 이미지 대비 bbox 면적이 너무 작으면 실패 처리(2%)
+
+# 리젝션 샘플링 안전장치
+MAX_ATTEMPTS_MULTIPLIER = 10  # IMAGES_PER_CLASS의 N배까지 시도
+XY_RANGE_SHRINK_EVERY_REJECTS = 200
+XY_RANGE_SHRINK_FACTOR = 0.7
 
 
 # =========================
@@ -295,6 +308,95 @@ def _camera_basis_from_lookat(cam_pos, target_pos, world_up_vec):
     R_world_cam = np.column_stack([right, down, forward])
     return R_world_cam
 
+def _select_object_bbox_from_files(bbox_npy_path: str, label_json_path: str):
+    """
+    Writer가 저장한 bbox npy/json을 기반으로 "background가 아닌" bbox 중 가장 큰 bbox를 선택.
+    반환: (bbox_xyxy, occlusion_ratio)
+    """
+    try:
+        bboxes = np.load(bbox_npy_path, allow_pickle=True)
+        with open(label_json_path, "r", encoding="utf-8") as f:
+            labels_map = json.load(f)
+    except Exception:
+        return None, None
+
+    best = None
+    best_area = -1
+    best_occ = None
+    for bb in bboxes:
+        sid = str(int(bb["semanticId"]))
+        cls = labels_map.get(sid, {}).get("class", "unknown")
+        if cls == "background":
+            continue
+        x_min = int(bb["x_min"]); y_min = int(bb["y_min"])
+        x_max = int(bb["x_max"]); y_max = int(bb["y_max"])
+        area = max(0, x_max - x_min) * max(0, y_max - y_min)
+        if area > best_area:
+            best_area = area
+            best = (x_min, y_min, x_max, y_max)
+            best_occ = float(bb.get("occlusionRatio", 0.0))
+    return best, best_occ
+
+def _is_frame_valid(bbox_xyxy, occlusion_ratio: float, width: int, height: int):
+    """
+    유효 프레임 판단:
+    - visible ratio >= MIN_VISIBLE_RATIO (occlusionRatio 기반 근사)
+    - bbox가 이미지 경계에 닿지 않음(잘림 방지)
+    - bbox 면적이 너무 작지 않음
+    """
+    if bbox_xyxy is None:
+        return False, "no_object_bbox"
+
+    x_min, y_min, x_max, y_max = bbox_xyxy
+    if x_max <= x_min or y_max <= y_min:
+        return False, "invalid_bbox"
+
+    visible_ratio = 1.0 - float(occlusion_ratio if occlusion_ratio is not None else 1.0)
+    if visible_ratio < MIN_VISIBLE_RATIO:
+        return False, f"visible_ratio<{MIN_VISIBLE_RATIO:.2f}"
+
+    # 경계 닿음(truncation) 체크
+    if (
+        x_min < BBOX_MARGIN_PX
+        or y_min < BBOX_MARGIN_PX
+        or x_max > (width - 1 - BBOX_MARGIN_PX)
+        or y_max > (height - 1 - BBOX_MARGIN_PX)
+    ):
+        return False, "truncated_bbox"
+
+    bbox_area = float((x_max - x_min) * (y_max - y_min))
+    img_area = float(width * height)
+    if bbox_area / img_area < MIN_BBOX_AREA_RATIO:
+        return False, "bbox_too_small"
+
+    return True, "ok"
+
+def _move_or_delete_attempt_files(tmp_dir: str, attempt_idx: int, out_dir: str, out_idx: int, accept: bool):
+    """
+    attempt_idx로 생성된 writer 파일을 accept 여부에 따라 처리.
+    - accept=True: tmp의 파일들을 out_dir로 out_idx 번호로 rename/move
+    - accept=False: tmp의 attempt_idx 파일들을 삭제
+    """
+    # writer가 생성하는 파일 패턴(현재 사용)
+    patterns = [
+        ("rgb_{:04d}.png", "rgb_{:04d}.png"),
+        ("bounding_box_2d_tight_{:04d}.npy", "bounding_box_2d_tight_{:04d}.npy"),
+        ("bounding_box_2d_tight_labels_{:04d}.json", "bounding_box_2d_tight_labels_{:04d}.json"),
+    ]
+    for src_fmt, dst_fmt in patterns:
+        src = os.path.join(tmp_dir, src_fmt.format(attempt_idx))
+        if not os.path.exists(src):
+            continue
+        if accept:
+            dst = os.path.join(out_dir, dst_fmt.format(out_idx))
+            os.makedirs(os.path.dirname(dst), exist_ok=True)
+            shutil.move(src, dst)
+        else:
+            try:
+                os.remove(src)
+            except Exception:
+                pass
+
 
 # =========================
 # 메인
@@ -497,12 +599,21 @@ def generate_class_dataset(part_config, class_index: int):
         bbox_annotator = rep.AnnotatorRegistry.get_annotator("bounding_box_2d_tight")
         bbox_annotator.attach([render_product])
 
+        # 리젝션 샘플링을 위해 writer는 임시 디렉토리에 기록하고,
+        # "유효 프레임만" 최종 디렉토리(class_output_dir)로 이동/재번호 부여한다.
+        tmp_output_dir = os.path.join(class_output_dir, "_tmp_writer")
+        if os.path.exists(tmp_output_dir):
+            shutil.rmtree(tmp_output_dir, ignore_errors=True)
+        os.makedirs(tmp_output_dir, exist_ok=True)
+
         writer = rep.WriterRegistry.get("BasicWriter")
-        writer.initialize(output_dir=class_output_dir, rgb=True, bounding_box_2d_tight=True)
+        writer.initialize(output_dir=tmp_output_dir, rgb=True, bounding_box_2d_tight=True)
         writer.attach([render_product])
 
         # 프레임별 랜덤화(배경/조명만): 카메라는 고정, 부품은 외부 루프로 이동
-        with rep.trigger.on_frame(max_execs=IMAGES_PER_CLASS):
+        # 리젝션으로 시도 횟수가 늘어날 수 있으므로 max_execs를 크게 잡는다.
+        max_attempts = int(IMAGES_PER_CLASS * MAX_ATTEMPTS_MULTIPLIER)
+        with rep.trigger.on_frame(max_execs=max_attempts):
             with floor_plane:
                 rep.randomizer.color(
                     colors=rep.distribution.uniform((0.2, 0.2, 0.2), (0.6, 0.5, 0.4))
@@ -536,14 +647,19 @@ def generate_class_dataset(part_config, class_index: int):
         R_cam_world = R_world_cam.T
         t_world_cam = np.asarray(cam_pos, dtype=float)
 
-        # 프레임 루프: 부품 pose를 USD로 직접 설정한 뒤 orchestrator를 1스텝씩 진행
+        # 프레임 루프(리젝션 샘플링):
+        # - attempt는 writer 파일 인덱스로 증가
+        # - accept된 프레임만 최종 인덱스(0..IMAGES_PER_CLASS-1)로 이동
         # (카메라는 고정, 조명/배경은 trigger에서 변함)
         xy_range = part_size * XY_RANGE_RATIO
+        reject_count = 0
 
         if not (hasattr(rep.orchestrator, "step") or hasattr(rep.orchestrator, "run")):
             raise RuntimeError("rep.orchestrator.step/run API를 찾을 수 없습니다. Isaac Sim 버전을 확인하세요.")
 
-        for frame_idx in range(IMAGES_PER_CLASS):
+        accepted = 0
+        attempt_idx = 0
+        while accepted < IMAGES_PER_CLASS and attempt_idx < max_attempts:
             # 1) 부품 pose 샘플링(world 기준)
             dx = float(np.random.uniform(-xy_range, xy_range))
             dy = float(np.random.uniform(-xy_range, xy_range))
@@ -569,7 +685,31 @@ def generate_class_dataset(part_config, class_index: int):
             else:
                 rep.orchestrator.run(num_frames=1)
 
-            # 4) 포즈 라벨 계산(카메라(optical) 기준)
+            # writer 파일 생성 확인 및 유효성 평가(80% 이상 보임)
+            fid = f"{attempt_idx:04d}"
+            bbox_npy = os.path.join(tmp_output_dir, f"bounding_box_2d_tight_{fid}.npy")
+            bbox_lbl = os.path.join(tmp_output_dir, f"bounding_box_2d_tight_labels_{fid}.json")
+            # 파일이 늦게 생성될 수 있으므로 짧게 대기(최대 0.5초)
+            for _ in range(10):
+                if os.path.exists(bbox_npy) and os.path.exists(bbox_lbl):
+                    break
+                time.sleep(0.05)
+
+            bbox_xyxy, occ = _select_object_bbox_from_files(bbox_npy, bbox_lbl)
+            ok, reason = _is_frame_valid(bbox_xyxy, occ, RESOLUTION[0], RESOLUTION[1])
+
+            if not ok:
+                # 무효 프레임: tmp 파일 삭제
+                _move_or_delete_attempt_files(tmp_output_dir, attempt_idx, class_output_dir, accepted, accept=False)
+                reject_count += 1
+                # 거부가 너무 많으면 XY 이동 범위를 줄여 "화면 밖으로 나가는" 빈도를 줄인다.
+                if reject_count % XY_RANGE_SHRINK_EVERY_REJECTS == 0:
+                    xy_range *= XY_RANGE_SHRINK_FACTOR
+                    print(f"  ⚠️  reject {reject_count}회 발생 → XY 이동 범위 축소: {xy_range:.4f} (reason={reason})")
+                attempt_idx += 1
+                continue
+
+            # 4) 포즈 라벨 계산(카메라(optical) 기준) - accept된 프레임만 저장
             # object 회전행렬(world 기준): rotateXYZ(roll,pitch,yaw) 순서 가정
             rx, ry, rz = math.radians(roll), math.radians(pitch), math.radians(yaw)
             Rx = np.array([[1, 0, 0], [0, math.cos(rx), -math.sin(rx)], [0, math.sin(rx), math.cos(rx)]], dtype=float)
@@ -583,7 +723,7 @@ def generate_class_dataset(part_config, class_index: int):
 
             pose = {
                 "class_name": class_name,
-                "frame_idx": frame_idx,
+                "frame_idx": accepted,
                 "unit": "m",
                 "camera": {
                     "width": RESOLUTION[0],
@@ -607,11 +747,26 @@ def generate_class_dataset(part_config, class_index: int):
                 },
             }
 
-            pose_path = os.path.join(class_output_dir, f"pose_{frame_idx:04d}.json")
+            # accept된 writer 파일을 최종 디렉토리로 이동/재번호 부여
+            _move_or_delete_attempt_files(tmp_output_dir, attempt_idx, class_output_dir, accepted, accept=True)
+
+            pose_path = os.path.join(class_output_dir, f"pose_{accepted:04d}.json")
             with open(pose_path, "w", encoding="utf-8") as f:
                 json.dump(pose, f, indent=2, ensure_ascii=False)
 
-        print(f"  ✓ {display_name}: {IMAGES_PER_CLASS} 프레임 생성 완료")
+            accepted += 1
+            attempt_idx += 1
+
+            if accepted % 50 == 0:
+                print(f"  진행: {accepted}/{IMAGES_PER_CLASS} (attempt={attempt_idx}, reject={reject_count}, xy_range={xy_range:.4f})")
+
+        # tmp 디렉토리 정리
+        shutil.rmtree(tmp_output_dir, ignore_errors=True)
+
+        if accepted < IMAGES_PER_CLASS:
+            print(f"  ⚠️  유효 프레임 부족: {accepted}/{IMAGES_PER_CLASS} (attempt={attempt_idx}, reject={reject_count})")
+        else:
+            print(f"  ✓ {display_name}: {IMAGES_PER_CLASS} 프레임 생성 완료 (reject={reject_count}, attempt={attempt_idx})")
 
 
 print("\n전체 dataset_pos 생성 시작...")
