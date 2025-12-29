@@ -71,25 +71,32 @@ BACKGROUND_RATIOS = {
 CAM_ELEVATION_DEG = 35.0  # 아래로 내려다보는 각도 느낌(명세용)
 CAM_AZIMUTH_DEG = 0.0     # 좌우 회전(명세용, 필요 시 변경)
 
-# 부품 포즈 분포(평평하게 놓임)
-ROLL_DEG_RANGE = (-8.0, 8.0)
-PITCH_DEG_RANGE = (-8.0, 8.0)
+# 부품 포즈 분포
+# - 사용자 요청: roll/pitch/yaw를 더 자유롭게(필요 시 더 줄여도 됨)
+ROLL_DEG_RANGE = (-45.0, 45.0)
+PITCH_DEG_RANGE = (-45.0, 45.0)
 YAW_DEG_RANGE = (0.0, 360.0)
 
-# XY 이동 범위(보수적으로: 부품 크기에 비례)
-XY_RANGE_RATIO = 0.15  # part_size의 15% 범위에서만 이동
+# 이동 범위(미터 기준): 부품 스케일(metersPerUnit)이 달라도 동일한 "물리 이동량"이 되게 함
+# - 사용자 요청: x/y/z 이동 다 하고, 0.6m 정도는 적정해 보임
+XY_RANGE_M = 0.6         # +/- 0.6 m
+Z_RANGE_M = (0.0, 0.6)   # [min, max] m (많이 높여도 된다고 하셔서 상한을 넉넉히)
 
 # 유효 프레임 조건(부품이 최소 80% 이상 보이게)
 # - occlusionRatio <= 0.2 를 기준으로 "80% 이상 보임"으로 간주
 # - bbox가 이미지 경계에 닿으면 잘림(truncation)으로 보고 실패 처리
 MIN_VISIBLE_RATIO = 0.80
 BBOX_MARGIN_PX = 5
-MIN_BBOX_AREA_RATIO = 0.02  # 이미지 대비 bbox 면적이 너무 작으면 실패 처리(2%)
+# z를 크게 올릴 경우 bbox가 작아질 수 있으므로, 너무 공격적인 면적 필터는 reject 폭증을 유발할 수 있음.
+# (80% 가시성 + 경계 비접촉 조건이 이미 있으므로) 면적 기준은 완화.
+MIN_BBOX_AREA_RATIO = 0.005  # 0.5%
 
 # 리젝션 샘플링 안전장치
 MAX_ATTEMPTS_MULTIPLIER = 10  # IMAGES_PER_CLASS의 N배까지 시도
-XY_RANGE_SHRINK_EVERY_REJECTS = 200
-XY_RANGE_SHRINK_FACTOR = 0.7
+# 이전에는 reject가 많으면 XY 이동 범위를 줄였는데, 그러면 이동이 눈에 안 보이는 데이터가 생김.
+# 사용자 요청에 따라 "이동 범위를 유지"하고, 대신 바닥 관통 방지/카메라 프레이밍/리젝션 조건으로 품질을 맞춘다.
+XY_RANGE_SHRINK_EVERY_REJECTS = None
+XY_RANGE_SHRINK_FACTOR = None
 
 
 # =========================
@@ -724,7 +731,7 @@ def generate_class_dataset(part_config, class_index: int):
         part_diagonal = float(math.sqrt(float(size[0]) ** 2 + float(size[1]) ** 2 + float(size[2]) ** 2))
         camera_fov_rad = math.radians(FOV_DEG)
         # XY 이동(오프셋)까지 고려해 프레이밍 여유를 준다. (truncated_bbox 감소 목적)
-        xy_range_init = float(part_size * XY_RANGE_RATIO)
+        xy_range_init = float(XY_RANGE_M / meters_per_unit) if meters_per_unit > 0 else 0.0
         effective_radius = (part_diagonal / 2.0) + (xy_range_init * 1.2)
         min_camera_distance = (effective_radius) / math.tan(camera_fov_rad / 2.0) / 0.82
         camera_distance = min_camera_distance * 1.15
@@ -797,7 +804,8 @@ def generate_class_dataset(part_config, class_index: int):
         # - attempt는 writer 파일 인덱스로 증가
         # - accept된 프레임만 최종 인덱스(0..IMAGES_PER_CLASS-1)로 이동
         # (카메라는 고정, 조명/배경은 trigger에서 변함)
-        xy_range = part_size * XY_RANGE_RATIO
+        # 이동 범위(미터 -> stage unit 변환)
+        xy_range = float(XY_RANGE_M / meters_per_unit) if meters_per_unit > 0 else 0.0
         reject_count = 0
         # translate는 "절대값 set"이 아니라, 현재 위치(base)에서 dx/dy 오프셋으로 적용한다.
         base_t_world = _get_translate_op_value_or_zero(root_prim)
@@ -817,8 +825,10 @@ def generate_class_dataset(part_config, class_index: int):
                 # 1) 부품 pose 샘플링(world 기준)
                 dx = float(np.random.uniform(-xy_range, xy_range))
                 dy = float(np.random.uniform(-xy_range, xy_range))
-                # 높이축 외에는 거의 0, 높이축은 바닥에 맞춰둔 후 작은 노이즈만(옵션)
-                dz = 0.0
+                # z(up축) 이동: 미터 기준으로 샘플링 후 stage unit으로 변환
+                z_min_u = float(Z_RANGE_M[0] / meters_per_unit) if meters_per_unit > 0 else 0.0
+                z_max_u = float(Z_RANGE_M[1] / meters_per_unit) if meters_per_unit > 0 else 0.0
+                dz = float(np.random.uniform(z_min_u, z_max_u))
 
                 roll = float(np.random.uniform(ROLL_DEG_RANGE[0], ROLL_DEG_RANGE[1]))
                 pitch = float(np.random.uniform(PITCH_DEG_RANGE[0], PITCH_DEG_RANGE[1]))
@@ -881,10 +891,12 @@ def generate_class_dataset(part_config, class_index: int):
                     # 무효 프레임: tmp 파일 삭제
                     _move_or_delete_attempt_files(tmp_output_dir, attempt_idx, class_output_dir, accepted, accept=False)
                     reject_count += 1
-                    # 거부가 너무 많으면 XY 이동 범위를 줄여 "화면 밖으로 나가는" 빈도를 줄인다.
-                    if reject_count % XY_RANGE_SHRINK_EVERY_REJECTS == 0:
-                        xy_range *= XY_RANGE_SHRINK_FACTOR
-                        print(f"  ⚠️  reject {reject_count}회 발생 → XY 이동 범위 축소: {xy_range:.4f} (reason={reason})")
+                    # 과거에는 reject가 많으면 XY 이동 범위를 줄였지만,
+                    # 사용자 요청에 따라 이동 범위는 유지한다(이동이 눈에 보이도록).
+                    if XY_RANGE_SHRINK_EVERY_REJECTS and XY_RANGE_SHRINK_FACTOR:
+                        if reject_count % int(XY_RANGE_SHRINK_EVERY_REJECTS) == 0:
+                            xy_range *= float(XY_RANGE_SHRINK_FACTOR)
+                            print(f"  ⚠️  reject {reject_count}회 발생 → XY 이동 범위 축소: {xy_range:.4f} (reason={reason})")
                     attempt_idx += 1
                     continue
 
@@ -904,14 +916,32 @@ def generate_class_dataset(part_config, class_index: int):
                         "convention": "cam_optical: x-right, y-down, z-forward",
                     },
                     "pose_cam_optical_obj": {
-                        "t_xyz_m": [float(t_cam_obj[0]), float(t_cam_obj[1]), float(t_cam_obj[2])],
+                        # stage unit -> meters
+                        "t_xyz_m": [
+                            float(t_cam_obj[0] * meters_per_unit),
+                            float(t_cam_obj[1] * meters_per_unit),
+                            float(t_cam_obj[2] * meters_per_unit),
+                        ],
                         "q_xyzw": [float(q_cam_obj[0]), float(q_cam_obj[1]), float(q_cam_obj[2]), float(q_cam_obj[3])],
                     },
                     "raw_pose_world": {
-                        "t_xyz_m": [float(t_world_obj[0]), float(t_world_obj[1]), float(t_world_obj[2])],
+                        # stage unit -> meters
+                        "t_xyz_m": [
+                            float(t_world_obj[0] * meters_per_unit),
+                            float(t_world_obj[1] * meters_per_unit),
+                            float(t_world_obj[2] * meters_per_unit),
+                        ],
                         "r_xyz_deg": [roll, pitch, yaw],
-                        "camera_pos_world_m": [float(cam_pos[0]), float(cam_pos[1]), float(cam_pos[2])],
-                        "camera_lookat_world_m": [float(cam_lookat[0]), float(cam_lookat[1]), float(cam_lookat[2])],
+                        "camera_pos_world_m": [
+                            float(cam_pos[0] * meters_per_unit),
+                            float(cam_pos[1] * meters_per_unit),
+                            float(cam_pos[2] * meters_per_unit),
+                        ],
+                        "camera_lookat_world_m": [
+                            float(cam_lookat[0] * meters_per_unit),
+                            float(cam_lookat[1] * meters_per_unit),
+                            float(cam_lookat[2] * meters_per_unit),
+                        ],
                     },
                     "stage": {
                         "up_axis": str(up_axis),
