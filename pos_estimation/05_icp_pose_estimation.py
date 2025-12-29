@@ -99,8 +99,17 @@ def classify_image(model, image_path, class_names, device='cpu'):
     return class_name, class_idx
 
 
-def depth_to_pointcloud(depth_npy_path, intrinsics):
-    """Depth 맵을 Point Cloud로 변환"""
+def depth_to_pointcloud(depth_npy_path, intrinsics, meters_per_unit=1.0):
+    """Depth 맵을 Point Cloud로 변환
+    
+    Args:
+        depth_npy_path: Depth 맵 파일 경로
+        intrinsics: 카메라 내재 파라미터
+        meters_per_unit: 스케일 보정 계수 (0.01이면 Depth를 100배 스케일업)
+    
+    Returns:
+        Point Cloud (미터 단위로 통일)
+    """
     if not os.path.exists(depth_npy_path):
         return None
     
@@ -119,8 +128,16 @@ def depth_to_pointcloud(depth_npy_path, intrinsics):
     v = np.arange(height)
     u, v = np.meshgrid(u, v)
     
-    # 유효한 depth만 사용 (0 또는 inf 제외)
-    valid_mask = (depth > 0.1) & (depth < 100.0) & np.isfinite(depth)
+    # 스케일에 따른 유효 범위 동적 조정
+    # metersPerUnit=0.01인 경우, Depth가 0.04~0.09m 범위 (실제 4~9m)
+    min_depth = 0.01 * meters_per_unit  # 최소 1cm (스케일 적용)
+    max_depth = 100.0 * meters_per_unit  # 최대 100m (스케일 적용)
+    
+    valid_mask = (depth > min_depth) & (depth < max_depth) & np.isfinite(depth)
+    
+    if valid_mask.sum() == 0:
+        print(f"  ⚠️  유효한 Depth 없음 (범위: {min_depth:.4f}~{max_depth:.4f}m)")
+        return None
     
     # 3D 좌표 계산 (카메라 좌표계)
     z = depth[valid_mask]
@@ -129,6 +146,11 @@ def depth_to_pointcloud(depth_npy_path, intrinsics):
     
     points = np.stack([x, y, z], axis=1)
     
+    # 스케일 보정: meters_per_unit < 1.0이면 스케일업하여 미터 단위로 통일
+    if meters_per_unit < 1.0 and meters_per_unit > 0:
+        scale_factor = 1.0 / meters_per_unit  # 0.01 → 100배 스케일업
+        points = points * scale_factor
+    
     # Open3D Point Cloud 생성
     pcd = o3d.geometry.PointCloud()
     pcd.points = o3d.utility.Vector3dVector(points)
@@ -136,11 +158,42 @@ def depth_to_pointcloud(depth_npy_path, intrinsics):
     return pcd
 
 
-def load_cad_pointcloud(cad_usd_path, num_points=10000):
+def get_meters_per_unit(class_dir):
+    """metadata.json 또는 pose_0000.json에서 meters_per_unit_raw 읽기"""
+    # metadata.json 확인
+    metadata_path = os.path.join(class_dir, "metadata.json")
+    if os.path.exists(metadata_path):
+        with open(metadata_path, 'r') as f:
+            metadata = json.load(f)
+        if 'meters_per_unit_raw' in metadata:
+            return metadata['meters_per_unit_raw']
+        if 'meters_per_unit' in metadata:
+            return metadata['meters_per_unit']
+    
+    # pose_0000.json 확인
+    pose_path = os.path.join(class_dir, "pose_0000.json")
+    if os.path.exists(pose_path):
+        with open(pose_path, 'r') as f:
+            pose = json.load(f)
+        if 'stage_info' in pose:
+            if 'meters_per_unit_raw' in pose['stage_info']:
+                return pose['stage_info']['meters_per_unit_raw']
+            if 'meters_per_unit' in pose['stage_info']:
+                return pose['stage_info']['meters_per_unit']
+    
+    return 1.0  # 기본값
+
+
+def load_cad_pointcloud(cad_usd_path, num_points=10000, cad_scale=1.0):
     """CAD 파일(USD)에서 Point Cloud 생성
     
-    참고: Open3D는 USD를 직접 읽지 못하므로,
-    사전에 CAD를 .ply 또는 .pcd로 변환해두어야 함
+    Args:
+        cad_usd_path: CAD 파일 경로 (USD, PLY, OBJ)
+        num_points: 샘플링할 포인트 수
+        cad_scale: CAD 스케일 보정 (0.001이면 mm→m 변환)
+    
+    Returns:
+        Point Cloud (미터 단위로 통일)
     """
     # USD 대신 .ply 파일 찾기
     ply_path = cad_usd_path.replace('.usd', '.ply')
@@ -157,7 +210,39 @@ def load_cad_pointcloud(cad_usd_path, num_points=10000):
     
     # 메시에서 포인트 샘플링
     pcd = mesh.sample_points_uniformly(number_of_points=num_points)
+    
+    # CAD 스케일 보정 (mm→m 등)
+    if cad_scale != 1.0:
+        points = np.asarray(pcd.points) * cad_scale
+        pcd.points = o3d.utility.Vector3dVector(points)
+    
     return pcd
+
+
+def detect_cad_scale(obj_path):
+    """CAD 파일의 스케일 자동 감지 (미터 단위로 변환하기 위한 계수)
+    
+    대략적인 부품 크기가 1~10m라고 가정.
+    CAD 좌표가 1000 이상이면 mm 단위로 간주.
+    """
+    if not os.path.exists(obj_path):
+        return 1.0
+    
+    mesh = o3d.io.read_triangle_mesh(obj_path)
+    vertices = np.asarray(mesh.vertices)
+    
+    if len(vertices) == 0:
+        return 1.0
+    
+    # 좌표 범위 확인
+    max_coord = np.abs(vertices).max()
+    
+    if max_coord > 1000:  # mm 단위로 추정
+        return 0.001  # mm → m
+    elif max_coord > 100:  # cm 단위로 추정
+        return 0.01  # cm → m
+    else:
+        return 1.0  # 이미 m 단위
 
 
 def create_dummy_cad_pointcloud(class_name, part_size_m=4.0):
@@ -291,11 +376,17 @@ def evaluate_icp_on_dataset(dataset_dir, classification_model_path):
             print(f"\n  {class_name}: Depth 파일 없음")
             continue
         
-        print(f"\n  {class_name}: {len(depth_files)}개 샘플")
+        # 스케일 정보 읽기
+        meters_per_unit = get_meters_per_unit(class_dir)
+        print(f"\n  {class_name}: {len(depth_files)}개 샘플 (metersPerUnit={meters_per_unit})")
         
-        # CAD Point Cloud 로드 (또는 생성)
+        # CAD Point Cloud 로드 (스케일 자동 감지)
         cad_path = os.path.join(CAD_DIR, f"{class_name}.usd")
-        cad_pcd = load_cad_pointcloud(cad_path)
+        obj_path = cad_path.replace('.usd', '.obj')
+        cad_scale = detect_cad_scale(obj_path)
+        print(f"    CAD 스케일: {cad_scale} ({'mm→m' if cad_scale == 0.001 else 'cm→m' if cad_scale == 0.01 else 'm'})")
+        
+        cad_pcd = load_cad_pointcloud(cad_path, cad_scale=cad_scale)
         
         if cad_pcd is None:
             print(f"    → CAD 파일 없음, 테스트용 더미 생성")
@@ -323,8 +414,8 @@ def evaluate_icp_on_dataset(dataset_dir, classification_model_path):
             gt_position = gt_pose['camTobj']['t_xyz_m']
             gt_rotation = gt_pose['camTobj']['r_xyz_deg']
             
-            # Depth → Point Cloud
-            scene_pcd = depth_to_pointcloud(depth_path, CAMERA_INTRINSICS)
+            # Depth → Point Cloud (스케일 보정 적용)
+            scene_pcd = depth_to_pointcloud(depth_path, CAMERA_INTRINSICS, meters_per_unit)
             if scene_pcd is None or len(scene_pcd.points) < 100:
                 continue
             
@@ -374,7 +465,7 @@ def evaluate_icp_on_dataset(dataset_dir, classification_model_path):
         print(f"평균 회전 오차: {total_rotation_error / total_samples:.2f}°")
 
 
-def demo_single_image(rgb_path, depth_path, class_name):
+def demo_single_image(rgb_path, depth_path, class_name, class_dir=None):
     """단일 이미지에서 ICP 데모"""
     if not OPEN3D_AVAILABLE:
         print("Open3D가 필요합니다. pip install open3d")
@@ -387,16 +478,32 @@ def demo_single_image(rgb_path, depth_path, class_name):
     print(f"Depth: {depth_path}")
     print(f"Class: {class_name}")
     
-    # Depth → Point Cloud
-    scene_pcd = depth_to_pointcloud(depth_path, CAMERA_INTRINSICS)
+    # 스케일 정보 읽기
+    if class_dir is None:
+        class_dir = os.path.dirname(depth_path)
+    meters_per_unit = get_meters_per_unit(class_dir)
+    print(f"metersPerUnit: {meters_per_unit}")
+    
+    # Depth → Point Cloud (스케일 보정 적용)
+    scene_pcd = depth_to_pointcloud(depth_path, CAMERA_INTRINSICS, meters_per_unit)
     if scene_pcd is None:
         print("Depth 로드 실패")
         return
     
     print(f"\n장면 Point Cloud: {len(scene_pcd.points)}개 포인트")
     
-    # CAD Point Cloud (테스트용 더미)
-    cad_pcd = create_dummy_cad_pointcloud(class_name)
+    # CAD Point Cloud 로드 (스케일 자동 감지)
+    cad_path = os.path.join(CAD_DIR, f"{class_name}.usd")
+    obj_path = cad_path.replace('.usd', '.obj')
+    cad_scale = detect_cad_scale(obj_path)
+    print(f"CAD 스케일: {cad_scale} ({'mm→m' if cad_scale == 0.001 else 'cm→m' if cad_scale == 0.01 else 'm'})")
+    
+    cad_pcd = load_cad_pointcloud(cad_path, cad_scale=cad_scale)
+    
+    if cad_pcd is None:
+        print(f"⚠️  CAD 파일 로드 실패, 테스트용 더미 생성")
+        cad_pcd = create_dummy_cad_pointcloud(class_name)
+    
     print(f"CAD Point Cloud: {len(cad_pcd.points)}개 포인트")
     
     # ICP 실행
