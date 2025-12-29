@@ -26,6 +26,10 @@ import glob
 parser = argparse.ArgumentParser(description='굴착기 부품 분류 모델 학습')
 parser.add_argument('-cpu', '--cpu', action='store_true', 
                     help='CPU로 강제 실행 (기본값: GPU 사용 가능 시 GPU 사용)')
+parser.add_argument('--dataset_dir', type=str, default="/home/rebirther/isaac_data_output/datasets",
+                    help='데이터셋 경로 (기본: datasets, 예: dataset_pos)')
+parser.add_argument('--bbox_crop', action='store_true',
+                    help='bounding_box_2d_tight로 부품 bbox crop 후 학습 (dataset_pos 학습 시 권장)')
 args = parser.parse_args()
 
 # ================================================================================
@@ -40,7 +44,7 @@ LOG_PATH = setup_logging("02_classification")
 # ================================================================================
 # 설정 변수
 # ================================================================================
-DATASET_DIR = "/home/rebirther/isaac_data_output/datasets"  # 데이터셋 경로
+DATASET_DIR = args.dataset_dir  # 데이터셋 경로
 MODEL_SAVE_PATH = "best_parts_model.pth"  # 모델 저장 경로
 TRAIN_INDICES_PATH = "training_indices_parts.json"  # 학습 인덱스 저장 경로
 
@@ -130,7 +134,7 @@ step2_start_time = time.time()
 class ExcavatorPartsDataset(Dataset):
     """굴착기 부품 이미지 Dataset 클래스"""
     
-    def __init__(self, image_paths, labels, transform=None):
+    def __init__(self, image_paths, labels, transform=None, bbox_crop=False):
         """
         Args:
             image_paths: 이미지 파일 경로 리스트
@@ -140,18 +144,57 @@ class ExcavatorPartsDataset(Dataset):
         self.image_paths = image_paths
         self.labels = labels
         self.transform = transform
+        self.bbox_crop = bbox_crop
     
     def __len__(self):
         return len(self.image_paths)
     
     def __getitem__(self, idx):
-        # 이미지 로드
-        image = Image.open(self.image_paths[idx])
+        img_path = self.image_paths[idx]
+        image = Image.open(img_path)
         
         # RGB로 변환 (RGBA인 경우 대비)
         if image.mode != 'RGB':
             image = image.convert('RGB')
         
+        # bbox crop (옵션): dataset_pos / datasets 모두 bounding_box_2d_tight를 가지고 있음
+        if self.bbox_crop:
+            frame_num = os.path.basename(img_path).replace('rgb_', '').replace('.png', '')
+            class_dir = os.path.dirname(img_path)
+            bbox_file = os.path.join(class_dir, f'bounding_box_2d_tight_{frame_num}.npy')
+            label_file = os.path.join(class_dir, f'bounding_box_2d_tight_labels_{frame_num}.json')
+            try:
+                if os.path.exists(bbox_file) and os.path.exists(label_file):
+                    bboxes = np.load(bbox_file, allow_pickle=True)
+                    with open(label_file, 'r') as f:
+                        labels_map = json.load(f)
+                    # background가 아닌 bbox 중 가장 큰 bbox 선택
+                    best = None
+                    best_area = -1
+                    for bb in bboxes:
+                        sid = str(int(bb['semanticId']))
+                        cls = labels_map.get(sid, {}).get('class', 'unknown')
+                        if cls == 'background':
+                            continue
+                        x_min = int(bb['x_min']); y_min = int(bb['y_min'])
+                        x_max = int(bb['x_max']); y_max = int(bb['y_max'])
+                        area = max(0, x_max - x_min) * max(0, y_max - y_min)
+                        if area > best_area:
+                            best_area = area
+                            best = (x_min, y_min, x_max, y_max)
+                    if best is not None:
+                        w, h = image.size
+                        x_min, y_min, x_max, y_max = best
+                        x_min = max(0, min(w - 1, x_min))
+                        y_min = max(0, min(h - 1, y_min))
+                        x_max = max(0, min(w - 1, x_max))
+                        y_max = max(0, min(h - 1, y_max))
+                        # PIL crop right/bottom exclusive
+                        image = image.crop((x_min, y_min, x_max + 1, y_max + 1))
+            except Exception:
+                # crop 실패해도 학습은 계속 진행
+                pass
+
         # 레이블
         label = torch.tensor(self.labels[idx], dtype=torch.long)
         
@@ -267,8 +310,8 @@ else:
     print(f"\n배치 사이즈 고정: {batch_size}")
 
 # Dataset 및 DataLoader 생성
-train_dataset = ExcavatorPartsDataset(train_paths, train_labels, transform=train_transform)
-test_dataset = ExcavatorPartsDataset(test_paths, test_labels, transform=val_transform)
+train_dataset = ExcavatorPartsDataset(train_paths, train_labels, transform=train_transform, bbox_crop=args.bbox_crop)
+test_dataset = ExcavatorPartsDataset(test_paths, test_labels, transform=val_transform, bbox_crop=args.bbox_crop)
 
 num_workers = 0  # 메모리 효율성을 위해 0으로 설정
 pin_memory = torch.cuda.is_available() and not args.cpu
