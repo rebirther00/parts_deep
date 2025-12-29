@@ -1,1083 +1,677 @@
-"""
-굴착기 부품 데이터셋 생성 스크립트 (분류 + 6DoF 포즈)
+# ==========================================
+# 굴착기 부품 데이터셋 생성 스크립트 (Pose Estimation용)
+# 완전 재작성: 단순하고 확실한 Xform 조작
+# ==========================================
+#
+# 핵심 원칙:
+# 1. 카메라 고정, 오브젝트 조정
+# 2. Z를 먼저 충분히 들어올린 후 회전 (바닥 파묻힘 방지)
+# 3. Wrapper Xform을 만들어 단순한 transform만 적용
+# 4. 80% 이상 가시성 검증 (rejection sampling)
+# ==========================================
 
-- 출력: /home/rebirther/isaac_data_output/pos_estimation/dataset_pos
-- 방식(A안): 카메라 고정(상단 사선), 부품 이동(작업대 위, 평평하게)
-- 저장:
-  - rgb_{frame:04d}.png
-  - bounding_box_2d_tight_{frame:04d}.npy
-  - bounding_box_2d_tight_labels_{frame:04d}.json
-  - pose_{frame:04d}.json  (카메라(optical) 기준 ^cam T_obj, 단위 m)
-
-주의:
-- Isaac Sim/Replicator 실행 환경에서 동작합니다.
-- intrinsics(실카메라)가 없으므로, FOV/해상도를 고정하고 K를 계산하여 메타에 기록합니다.
-"""
-
-# 로깅 설정 (SimulationApp 초기화 전에 설정해야 함)
 import os
 import sys
+import shutil
 import json
 import time
 import math
-from pathlib import Path
+import random
+import glob
 import numpy as np
-import shutil
+from pathlib import Path
 
-SCRIPT_DIR = "/home/rebirther/isaac_data_output"
+# 프로젝트 경로 설정
 PROJECT_DIR = os.path.dirname(os.path.abspath(__file__))
 REPO_DIR = os.path.dirname(PROJECT_DIR)
 if REPO_DIR not in sys.path:
     sys.path.insert(0, REPO_DIR)
 
-from utils.logger import setup_logging, reinit_logging, finish_logging
-
-LOG_PATH = setup_logging("01_generate_pos")
-
+# Isaac Sim 초기화
 from isaacsim import SimulationApp
-
-# 시뮬레이터 초기화
 simulation_app = SimulationApp({"headless": False})
 
-# App 실행 후 임포트
+# Isaac Sim 모듈 (App 실행 후 임포트)
 import omni.replicator.core as rep
 import omni.usd
-from pxr import Usd, UsdGeom, Semantics, Gf
+from pxr import Usd, UsdGeom, Semantics, Gf, Sdf
 
-reinit_logging(LOG_PATH)
-
-
-# =========================
+# ==========================================
 # 설정
-# =========================
+# ==========================================
 ASSETS_DIR = "/home/rebirther/isaac-sim/assets"
-BASE_OUTPUT_DIR = os.path.join(PROJECT_DIR, "dataset_pos")
+OUTPUT_DIR = os.path.join(PROJECT_DIR, "dataset_pos")
 IMAGES_PER_CLASS = 500
-CLEAR_EXISTING_DATA = True
-
-# 카메라 설정 (가상 카메라: intrinsics 실측값 없음)
 RESOLUTION = (1024, 1024)
-FOV_DEG = 60.0  # 거리 계산/메타 기록용
+CLEAR_EXISTING = True
 
-# 배경 설정 (기존 스크립트와 동일한 랜덤 비율)
-BACKGROUND_MODE = "random"
-BACKGROUND_RATIOS = {
-    "none": 0.2,
-    "solid": 0.3,
-    "factory": 0.5,
-}
+# 카메라 설정 (oblique view - 35도 각도로 내려다봄)
+CAMERA_ELEVATION_DEG = 35.0  # 수평에서 아래로 내려다보는 각도
+CAMERA_DISTANCE_FACTOR = 2.5  # 부품 크기 대비 카메라 거리 배율
 
-# A안: 상단 사선(작업대를 내려다보는) 카메라 고정
-CAM_ELEVATION_DEG = 35.0  # 아래로 내려다보는 각도 느낌(명세용)
-CAM_AZIMUTH_DEG = 0.0     # 좌우 회전(명세용, 필요 시 변경)
+# 오브젝트 이동 범위 (미터 단위로 생각, 나중에 스테이지 단위로 변환)
+XY_RANGE_M = 0.15  # XY 이동 범위 (카메라 시야 내에서 약간 이동)
+Z_LIFT_FACTOR = 0.7  # 부품 크기 대비 Z 들어올림 비율 (회전해도 안 묻히게)
+Z_RANGE_FACTOR = 0.3  # 추가 Z 변동 범위 (부품 크기 대비)
 
-# 부품 포즈 분포
-# - 사용자 요청: roll/pitch/yaw를 더 자유롭게(필요 시 더 줄여도 됨)
-ROLL_DEG_RANGE = (-45.0, 45.0)
-PITCH_DEG_RANGE = (-45.0, 45.0)
-YAW_DEG_RANGE = (0.0, 360.0)
+# 회전 범위
+ROLL_RANGE_DEG = (-45.0, 45.0)
+PITCH_RANGE_DEG = (-45.0, 45.0)
+YAW_RANGE_DEG = (0.0, 360.0)
 
-# 이동 범위(미터 기준): 부품 스케일(metersPerUnit)이 달라도 동일한 "물리 이동량"이 되게 함
-# - 사용자 요청: x/y/z 이동 다 하고, 0.6m 정도는 적정해 보임
-XY_RANGE_M = 0.6         # +/- 0.6 m
-Z_RANGE_M = (0.0, 0.6)   # [min, max] m (많이 높여도 된다고 하셔서 상한을 넉넉히)
-
-# 유효 프레임 조건(부품이 최소 80% 이상 보이게)
-# - occlusionRatio <= 0.2 를 기준으로 "80% 이상 보임"으로 간주
-# - bbox가 이미지 경계에 닿으면 잘림(truncation)으로 보고 실패 처리
-MIN_VISIBLE_RATIO = 0.80
-BBOX_MARGIN_PX = 5
-# z를 크게 올릴 경우 bbox가 작아질 수 있으므로, 너무 공격적인 면적 필터는 reject 폭증을 유발할 수 있음.
-# (80% 가시성 + 경계 비접촉 조건이 이미 있으므로) 면적 기준은 완화.
-MIN_BBOX_AREA_RATIO = 0.005  # 0.5%
-
-# 리젝션 샘플링 안전장치
-MAX_ATTEMPTS_MULTIPLIER = 10  # IMAGES_PER_CLASS의 N배까지 시도
-# 이전에는 reject가 많으면 XY 이동 범위를 줄였는데, 그러면 이동이 눈에 안 보이는 데이터가 생김.
-# 사용자 요청에 따라 "이동 범위를 유지"하고, 대신 바닥 관통 방지/카메라 프레이밍/리젝션 조건으로 품질을 맞춘다.
-XY_RANGE_SHRINK_EVERY_REJECTS = None
-XY_RANGE_SHRINK_FACTOR = None
-
-# ===== 스케일 자동 보정 (B안) =====
-# - arm_link_30_notmat처럼 metersPerUnit이 0.01이면 "4 stage unit = 4cm"로 해석되어 너무 작게 보임.
-# - USD 파일을 수정(A안)하기 어렵다면, 생성 스크립트에서 root prim에 uniform scale을 적용해
-#   "미터 기준 크기"로 맞춰서 bbox/no_object_bbox 문제를 완화한다.
-ENABLE_AUTO_SCALE_FIX = True
-# metersPerUnit이 이 값보다 작으면(예: 0.01) 자동 스케일 보정을 적용
-AUTO_SCALE_MPU_THRESHOLD = 0.1
-# 보정 방식: scale_factor = 1.0 / metersPerUnit  (0.01 -> 100)
-AUTO_SCALE_MAX_FACTOR = 1000.0  # 안전장치
+# 가시성 검증 설정
+MIN_VISIBILITY = 0.80  # 80% 이상 가시성
+MIN_BBOX_AREA_RATIO = 0.02  # 이미지 면적 대비 최소 bbox 면적 (2%)
+EDGE_MARGIN = 10  # 이미지 가장자리 여백 (픽셀)
+MAX_ATTEMPTS_PER_FRAME = 50  # 한 프레임 채우기 위한 최대 시도 횟수
 
 
-# =========================
-# 유틸
-# =========================
-def scan_usd_files(assets_dir: str):
-    """assets 폴더의 모든 USD 파일을 스캔하여 설정 딕셔너리 생성"""
-    import glob
+def scan_usd_files(assets_dir):
+    """assets 폴더에서 모든 USD 파일 스캔"""
     configs = {}
-    usd_files = glob.glob(os.path.join(assets_dir, "*.usd"))
-    usd_files.sort()
+    usd_files = sorted(glob.glob(os.path.join(assets_dir, "*.usd")))
     for usd_path in usd_files:
-        file_name = os.path.basename(usd_path)
-        name_without_ext = os.path.splitext(file_name)[0]
-        configs[name_without_ext] = {
+        name = os.path.splitext(os.path.basename(usd_path))[0]
+        configs[name] = {
             "usd_path": usd_path,
-            "class_name": name_without_ext,
-            "display_name": name_without_ext,
+            "class_name": name,
+            "display_name": name
         }
     return configs
 
 
-def _get_up_axis_and_index(stage):
-    """스테이지 UpAxis를 읽고, 높이축 인덱스(0=X,1=Y,2=Z)를 반환"""
-    up_axis = UsdGeom.GetStageUpAxis(stage)
-    axis_index = 2
-    if up_axis == UsdGeom.Tokens.y:
-        axis_index = 1
-    elif up_axis == UsdGeom.Tokens.x:
-        axis_index = 0
-    return up_axis, axis_index
-
-
-def _mesh_local_min_max(mesh: UsdGeom.Mesh, time_code: Usd.TimeCode):
-    extent = mesh.GetExtentAttr().Get(time_code)
-    if extent and len(extent) == 2:
-        mn = extent[0]
-        mx = extent[1]
-        return (Gf.Vec3d(mn[0], mn[1], mn[2]), Gf.Vec3d(mx[0], mx[1], mx[2]))
-    pts = mesh.GetPointsAttr().Get(time_code)
-    if not pts:
-        return None, None
-    mn = Gf.Vec3d(float("inf"), float("inf"), float("inf"))
-    mx = Gf.Vec3d(float("-inf"), float("-inf"), float("-inf"))
-    for p in pts:
-        mn = Gf.Vec3d(min(mn[0], p[0]), min(mn[1], p[1]), min(mn[2], p[2]))
-        mx = Gf.Vec3d(max(mx[0], p[0]), max(mx[1], p[1]), max(mx[2], p[2]))
-    return mn, mx
-
-
-def compute_world_aabb_from_meshes(stage, time_code: Usd.TimeCode):
+def compute_world_aabb(stage):
     """
-    Mesh vertex를 LocalToWorld로 변환하여 월드 AABB 계산(orient 반영).
+    스테이지의 모든 Mesh에 대해 월드 좌표계 AABB 계산.
+    모든 vertex를 월드 좌표로 변환하여 정확한 min/max 계산.
     """
+    time_code = Usd.TimeCode.Default()
     xform_cache = UsdGeom.XformCache(time_code)
+    
     mesh_prims = [p for p in stage.Traverse() if p.IsA(UsdGeom.Mesh)]
     if not mesh_prims:
         return None
-
+    
     world_min = Gf.Vec3d(float("inf"), float("inf"), float("inf"))
     world_max = Gf.Vec3d(float("-inf"), float("-inf"), float("-inf"))
-    used_meshes = 0
-    used_points = 0
-    used_extent_fallback = 0
-    total_points = 0
-
+    
     for prim in mesh_prims:
         mesh = UsdGeom.Mesh(prim)
         M = xform_cache.GetLocalToWorldTransform(prim)
-        used_meshes += 1
-
+        
         pts = mesh.GetPointsAttr().Get(time_code)
         if pts:
-            used_points += 1
-            total_points += len(pts)
             for p in pts:
                 wp = M.Transform(Gf.Vec3d(p[0], p[1], p[2]))
                 world_min = Gf.Vec3d(min(world_min[0], wp[0]), min(world_min[1], wp[1]), min(world_min[2], wp[2]))
                 world_max = Gf.Vec3d(max(world_max[0], wp[0]), max(world_max[1], wp[1]), max(world_max[2], wp[2]))
-            continue
-
-        used_extent_fallback += 1
-        local_min, local_max = _mesh_local_min_max(mesh, time_code)
-        if local_min is None or local_max is None:
-            continue
-        for x in (local_min[0], local_max[0]):
-            for y in (local_min[1], local_max[1]):
-                for z in (local_min[2], local_max[2]):
-                    wp = M.Transform(Gf.Vec3d(x, y, z))
-                    world_min = Gf.Vec3d(min(world_min[0], wp[0]), min(world_min[1], wp[1]), min(world_min[2], wp[2]))
-                    world_max = Gf.Vec3d(max(world_max[0], wp[0]), max(world_max[1], wp[1]), max(world_max[2], wp[2]))
-
+    
+    if world_min[0] == float("inf"):
+        return None
+    
     size = world_max - world_min
     center = (world_min + world_max) / 2.0
     return {
-        "world_min": world_min,
-        "world_max": world_max,
+        "min": world_min,
+        "max": world_max,
         "size": size,
         "center": center,
-        "mesh_count": len(mesh_prims),
-        "used_meshes": used_meshes,
-        "used_points": used_points,
-        "used_extent_fallback": used_extent_fallback,
-        "total_points": total_points,
+        "floor": world_min[2]  # Z-up 가정
     }
 
-def compute_root_local_aabb_from_mesh_extents(stage, root_prim: Usd.Prim, time_code: Usd.TimeCode):
+
+def create_wrapper_xform(stage, wrapper_path="/World/ObjectWrapper"):
     """
-    모든 Mesh의 extent(또는 points) 기반 AABB를 root_prim 로컬 좌표계로 합산하여 반환합니다.
-    - 1회만 계산해두고, 프레임마다 root 회전/이동만 적용하여 "바닥 관통 방지용" 최저점 계산에 사용합니다.
-    - points 전체를 쓰면 무겁기 때문에, 가능하면 extent(2개 Vec3)로 corners만 변환합니다.
-    반환: {"local_min": np.ndarray(3), "local_max": np.ndarray(3)}
+    새로운 Wrapper Xform 생성.
+    이 Xform에 translate, rotateXYZ 연산만 적용하여 단순하게 조작.
     """
-    xform_cache = UsdGeom.XformCache(time_code)
-    root_M_world = xform_cache.GetLocalToWorldTransform(root_prim)
-    root_M_world_inv = root_M_world.GetInverse()
-
-    mesh_prims = [p for p in stage.Traverse() if p.IsA(UsdGeom.Mesh)]
-    if not mesh_prims:
-        return None
-
-    local_min = np.array([float("inf"), float("inf"), float("inf")], dtype=float)
-    local_max = np.array([float("-inf"), float("-inf"), float("-inf")], dtype=float)
-
-    for prim in mesh_prims:
-        mesh = UsdGeom.Mesh(prim)
-        M_world = xform_cache.GetLocalToWorldTransform(prim)
-
-        mn, mx = _mesh_local_min_max(mesh, time_code)
-        if mn is None or mx is None:
-            continue
-
-        # mesh local AABB corners -> world -> root local
-        for x in (mn[0], mx[0]):
-            for y in (mn[1], mx[1]):
-                for z in (mn[2], mx[2]):
-                    wp = M_world.Transform(Gf.Vec3d(x, y, z))
-                    rp = root_M_world_inv.Transform(wp)  # point in root local
-                    local_min = np.minimum(local_min, np.array([rp[0], rp[1], rp[2]], dtype=float))
-                    local_max = np.maximum(local_max, np.array([rp[0], rp[1], rp[2]], dtype=float))
-
-    if np.any(~np.isfinite(local_min)) or np.any(~np.isfinite(local_max)):
-        return None
-    return {"local_min": local_min, "local_max": local_max}
+    # 기존에 있으면 삭제
+    existing = stage.GetPrimAtPath(wrapper_path)
+    if existing:
+        stage.RemovePrim(wrapper_path)
+    
+    # 새 Xform 생성
+    wrapper = UsdGeom.Xform.Define(stage, wrapper_path)
+    
+    # 명시적으로 xformOpOrder 설정: translate 먼저, 그 다음 rotateXYZ
+    # 이렇게 하면 "Z를 올린 후 회전"이 됨
+    xformable = UsdGeom.Xformable(wrapper.GetPrim())
+    xformable.ClearXformOpOrder()
+    
+    # translate 연산 추가
+    xformable.AddTranslateOp(opSuffix="pos")
+    # rotateXYZ 연산 추가 (ZYX 순서로 적용됨 - 일반적인 Euler)
+    xformable.AddRotateXYZOp(opSuffix="rot")
+    
+    return wrapper.GetPrim()
 
 
-def _find_root_xform_prim(stage: Usd.Stage):
+def reparent_all_to_wrapper(stage, wrapper_path="/World/ObjectWrapper"):
     """
-    부품을 '하나의 강체'처럼 이동시키기 위한 루트 Xform prim을 찾습니다.
-    우선순위:
-    1) DefaultPrim이 Xformable이면 그것 사용(단, /World는 제외)
-    2) /World 아래에서 "메쉬(UsdGeom.Mesh)를 포함하는" 가장 가까운 Xformable prim 사용
-    3) /World/* 형태의 첫 번째 Xformable prim 사용(최후 수단)
-
-    ⚠️ 주의:
-    - /World를 루트로 잡아 움직이면 스테이지 전체가 이동되어 카메라 시야 밖으로 튀거나,
-      semantics가 비정상 동작하는 현상이 발생할 수 있어 반드시 피합니다.
+    /World 아래의 모든 프림들을 Wrapper 아래로 이동.
+    단, Wrapper 자신과 카메라, 조명은 제외.
     """
-    default_prim = stage.GetDefaultPrim()
-    if default_prim and default_prim.IsA(UsdGeom.Xformable) and default_prim.GetPath().pathString != "/World":
-        return default_prim
-
-    # 2) /World 아래에서 메쉬를 포함하는 Xform prim 찾기
-    def _has_mesh_descendant(p: Usd.Prim) -> bool:
-        try:
-            for ch in Usd.PrimRange(p):
-                if ch.IsA(UsdGeom.Mesh):
-                    return True
-        except Exception:
-            return False
+    wrapper_prim = stage.GetPrimAtPath(wrapper_path)
+    if not wrapper_prim:
+        print(f"  ⚠️  Wrapper prim not found: {wrapper_path}")
         return False
-
-    best = None
-    best_depth = 10**9
-    for prim in stage.Traverse():
-        path = prim.GetPath().pathString
-        if path == "/World":
-            continue
-        if not prim.IsA(UsdGeom.Xformable):
-            continue
-        # /World 이하만 고려
-        if not path.startswith("/World/"):
-            continue
-        # 너무 깊은 곳의 Xform을 고르면 부분만 움직일 수 있어, 가능한 한 상위(얕은) 루트를 선호
-        depth = path.count("/")
-        if depth >= best_depth:
-            continue
-        if _has_mesh_descendant(prim):
-            best = prim
-            best_depth = depth
-
-    if best:
-        return best
-
-    # 3) 최후 수단: /World/* 형태의 첫 Xformable prim
-    root_candidate = None
-    for prim in stage.Traverse():
-        path = prim.GetPath().pathString
-        if path.count("/") == 2 and prim.IsA(UsdGeom.Xformable) and path != "/World":
-            root_candidate = prim
-            break
-    return root_candidate
-
-
-def _set_xform_translate_rotate_xyz(prim: Usd.Prim, t_xyz, r_xyz_deg):
-    """
-    prim에 translate + rotateXYZ를 설정합니다(간단/명시적).
-    - translate: meters
-    - rotateXYZ: degrees
-    """
-    xform = UsdGeom.Xformable(prim)
-    ops = xform.GetOrderedXformOps()
-    # 기존 op가 있으면 재사용, 없으면 생성
-    t_op = None
-    r_op = None
-    for op in ops:
-        if op.GetOpType() == UsdGeom.XformOp.TypeTranslate:
-            t_op = op
-        if op.GetOpType() == UsdGeom.XformOp.TypeRotateXYZ:
-            r_op = op
-    if t_op is None:
-        t_op = xform.AddTranslateOp()
-    if r_op is None:
-        r_op = xform.AddRotateXYZOp()
-    t_op.Set(Gf.Vec3d(float(t_xyz[0]), float(t_xyz[1]), float(t_xyz[2])))
-    r_op.Set(Gf.Vec3f(float(r_xyz_deg[0]), float(r_xyz_deg[1]), float(r_xyz_deg[2])))
-
-def _set_xform_scale_xyz(prim: Usd.Prim, s_xyz):
-    """prim에 scale(op)를 설정합니다."""
-    xform = UsdGeom.Xformable(prim)
-    ops = xform.GetOrderedXformOps()
-    s_op = None
-    for op in ops:
-        if op.GetOpType() == UsdGeom.XformOp.TypeScale:
-            s_op = op
-            break
-    if s_op is None:
-        s_op = xform.AddScaleOp()
-    s_op.Set(Gf.Vec3f(float(s_xyz[0]), float(s_xyz[1]), float(s_xyz[2])))
-
-def _get_translate_op_value_or_zero(prim: Usd.Prim):
-    """prim의 translate op 값(없으면 0,0,0)을 반환"""
-    xform = UsdGeom.Xformable(prim)
-    for op in xform.GetOrderedXformOps():
-        if op.GetOpType() == UsdGeom.XformOp.TypeTranslate:
-            v = op.Get()
-            try:
-                return np.array([float(v[0]), float(v[1]), float(v[2])], dtype=float)
-            except Exception:
-                break
-    return np.array([0.0, 0.0, 0.0], dtype=float)
-
-def _apply_planar_offset(base_t_xyz, dx: float, dy: float, axis_index: int):
-    """
-    UpAxis(axis_index)에 수직인 평면에 (dx,dy) 오프셋을 적용합니다.
-    - z-up(axis_index=2): (x,y)에 dx,dy
-    - y-up(axis_index=1): (x,z)에 dx,dy
-    - x-up(axis_index=0): (y,z)에 dx,dy
-    """
-    t = np.array(base_t_xyz, dtype=float).copy()
-    if axis_index == 2:
-        t[0] += dx
-        t[1] += dy
-    elif axis_index == 1:
-        t[0] += dx
-        t[2] += dy
+    
+    world_prim = stage.GetPrimAtPath("/World")
+    if not world_prim:
+        # /World가 없으면 루트 프림들을 대상으로
+        root_prims = [p for p in stage.GetPseudoRoot().GetChildren()]
     else:
-        t[1] += dx
-        t[2] += dy
-    return t
-
-
-def _compute_K_from_fov_deg(width: int, height: int, fov_deg: float):
-    """정사각형 해상도/수평FOV 가정으로 K 근사 계산"""
-    fov_rad = math.radians(float(fov_deg))
-    fx = (width / 2.0) / math.tan(fov_rad / 2.0)
-    fy = fx
-    cx = (width - 1) / 2.0
-    cy = (height - 1) / 2.0
-    return [[fx, 0.0, cx], [0.0, fy, cy], [0.0, 0.0, 1.0]]
-
-
-def _rotmat_to_quat_xyzw(R: np.ndarray):
-    """3x3 회전행렬 -> quaternion(x,y,z,w)"""
-    # 안정적인 변환(표준 알고리즘)
-    m00, m01, m02 = R[0, 0], R[0, 1], R[0, 2]
-    m10, m11, m12 = R[1, 0], R[1, 1], R[1, 2]
-    m20, m21, m22 = R[2, 0], R[2, 1], R[2, 2]
-    tr = m00 + m11 + m22
-    if tr > 0:
-        S = math.sqrt(tr + 1.0) * 2.0
-        qw = 0.25 * S
-        qx = (m21 - m12) / S
-        qy = (m02 - m20) / S
-        qz = (m10 - m01) / S
-    elif (m00 > m11) and (m00 > m22):
-        S = math.sqrt(1.0 + m00 - m11 - m22) * 2.0
-        qw = (m21 - m12) / S
-        qx = 0.25 * S
-        qy = (m01 + m10) / S
-        qz = (m02 + m20) / S
-    elif m11 > m22:
-        S = math.sqrt(1.0 + m11 - m00 - m22) * 2.0
-        qw = (m02 - m20) / S
-        qx = (m01 + m10) / S
-        qy = 0.25 * S
-        qz = (m12 + m21) / S
-    else:
-        S = math.sqrt(1.0 + m22 - m00 - m11) * 2.0
-        qw = (m10 - m01) / S
-        qx = (m02 + m20) / S
-        qy = (m12 + m21) / S
-        qz = 0.25 * S
-    # 정규화
-    n = math.sqrt(qx * qx + qy * qy + qz * qz + qw * qw)
-    return [qx / n, qy / n, qz / n, qw / n]
-
-
-def _camera_basis_from_lookat(cam_pos, target_pos, world_up_vec):
-    """
-    cam_optical 기준 축을 world에서 계산:
-    - z: forward (카메라 -> 타겟)
-    - x: right
-    - y: down  (world_up에 기반해 up을 만들고 부호 반전)
-    반환:
-    - R_world_cam (3x3): cam축들이 world에서 어떻게 놓이는지(열벡터 = [x y z])
-    """
-    cam_pos = np.asarray(cam_pos, dtype=float)
-    target_pos = np.asarray(target_pos, dtype=float)
-    up_guess = np.asarray(world_up_vec, dtype=float)
-
-    forward = target_pos - cam_pos
-    forward = forward / (np.linalg.norm(forward) + 1e-12)
-    right = np.cross(forward, up_guess)
-    right = right / (np.linalg.norm(right) + 1e-12)
-    up = np.cross(right, forward)
-    up = up / (np.linalg.norm(up) + 1e-12)
-    down = -up
-
-    R_world_cam = np.column_stack([right, down, forward])
-    return R_world_cam
-
-def _select_object_bbox_from_files(bbox_npy_path: str, label_json_path: str):
-    """
-    Writer가 저장한 bbox npy/json을 기반으로 "background가 아닌" bbox 중 가장 큰 bbox를 선택.
-    반환: (bbox_xyxy, occlusion_ratio)
-    """
-    def _get_field(bb, key: str, default=None):
-        """bbox row(dict 또는 numpy structured row)에서 필드 값을 안전하게 꺼냅니다."""
+        root_prims = list(world_prim.GetChildren())
+    
+    moved_count = 0
+    for prim in root_prims:
+        prim_path = str(prim.GetPath())
+        
+        # Wrapper 자신은 건너뜀
+        if prim_path == wrapper_path:
+            continue
+        
+        # 카메라, 조명은 건너뜀
+        if prim.IsA(UsdGeom.Camera) or "light" in prim_path.lower() or "Light" in prim_path:
+            continue
+        
+        # 이미 Wrapper 아래에 있으면 건너뜀
+        if prim_path.startswith(wrapper_path + "/"):
+            continue
+        
+        # Wrapper 아래로 이동
         try:
-            # numpy.void / structured array row
-            return bb[key]
-        except Exception:
+            new_path = wrapper_path + "/" + prim.GetName()
+            # Sdf layer에서 직접 이동
+            edit = Sdf.BatchNamespaceEdit()
+            edit.Add(prim_path, new_path)
+            if stage.GetRootLayer().Apply(edit):
+                moved_count += 1
+            else:
+                print(f"    ⚠️  이동 실패: {prim_path}")
+        except Exception as e:
+            print(f"    ⚠️  이동 예외: {prim_path} - {e}")
+    
+    print(f"  ✓ {moved_count}개 프림을 Wrapper로 이동 완료")
+    return moved_count > 0
+
+
+def set_wrapper_pose(stage, wrapper_path, translate, rotate_xyz_deg):
+    """
+    Wrapper Xform의 위치와 회전 설정.
+    translate: (x, y, z) - 월드 좌표
+    rotate_xyz_deg: (roll, pitch, yaw) - 도 단위
+    """
+    wrapper = stage.GetPrimAtPath(wrapper_path)
+    if not wrapper:
+        return False
+    
+    xformable = UsdGeom.Xformable(wrapper)
+    
+    # translate 설정
+    for op in xformable.GetOrderedXformOps():
+        if op.GetOpName() == "xformOp:translate:pos":
+            op.Set(Gf.Vec3d(translate[0], translate[1], translate[2]))
+        elif op.GetOpName() == "xformOp:rotateXYZ:rot":
+            op.Set(Gf.Vec3f(rotate_xyz_deg[0], rotate_xyz_deg[1], rotate_xyz_deg[2]))
+    
+    return True
+
+
+def create_fixed_camera(stage, position, look_at, cam_path="/World/FixedCamera"):
+    """고정 카메라 생성"""
+    # 기존에 있으면 삭제
+    existing = stage.GetPrimAtPath(cam_path)
+    if existing:
+        stage.RemovePrim(cam_path)
+    
+    camera = UsdGeom.Camera.Define(stage, cam_path)
+    
+    # 카메라 위치 설정
+    xformable = UsdGeom.Xformable(camera.GetPrim())
+    xformable.ClearXformOpOrder()
+    
+    # look_at 방향 계산
+    eye = Gf.Vec3d(position[0], position[1], position[2])
+    target = Gf.Vec3d(look_at[0], look_at[1], look_at[2])
+    up = Gf.Vec3d(0, 0, 1)  # Z-up
+    
+    # 카메라 방향 벡터
+    forward = (target - eye).GetNormalized()
+    right = Gf.Cross(forward, up).GetNormalized()
+    actual_up = Gf.Cross(right, forward).GetNormalized()
+    
+    # 변환 행렬 생성
+    matrix = Gf.Matrix4d()
+    matrix.SetRow(0, Gf.Vec4d(right[0], right[1], right[2], 0))
+    matrix.SetRow(1, Gf.Vec4d(actual_up[0], actual_up[1], actual_up[2], 0))
+    matrix.SetRow(2, Gf.Vec4d(-forward[0], -forward[1], -forward[2], 0))
+    matrix.SetRow(3, Gf.Vec4d(eye[0], eye[1], eye[2], 1))
+    
+    xformable.AddTransformOp().Set(matrix)
+    
+    return camera.GetPrim()
+
+
+def validate_bbox(bbox_data, labels_data, resolution, class_name):
+    """
+    BBox 데이터 검증.
+    Returns: (valid, reason, bbox_info)
+    - valid: True if 80% visible and good position
+    - reason: 거부 이유 (valid=False일 때)
+    - bbox_info: (x_min, y_min, x_max, y_max, occlusion)
+    """
+    if bbox_data is None or len(bbox_data) == 0:
+        return False, "no_bbox_data", None
+    
+    # 클래스에 해당하는 bbox 찾기
+    id_to_labels = {v: k for k, v in labels_data.get("idToLabels", {}).items()}
+    
+    best_bbox = None
+    best_area = 0
+    
+    for box in bbox_data:
+        # numpy.void (structured array) 처리
+        if hasattr(box, 'dtype') and box.dtype.names:
+            semantic_id = int(box['semanticId'])
+            x_min = float(box['x_min'])
+            y_min = float(box['y_min'])
+            x_max = float(box['x_max'])
+            y_max = float(box['y_max'])
+            occlusion = float(box['occlusionRatio']) if 'occlusionRatio' in box.dtype.names else 0.0
+        else:
+            # 일반 dict 또는 tuple
             try:
-                # dict-like
-                return bb.get(key, default)
-            except Exception:
-                return default
-
-    try:
-        bboxes = np.load(bbox_npy_path, allow_pickle=True)
-        with open(label_json_path, "r", encoding="utf-8") as f:
-            labels_map = json.load(f)
-    except Exception:
-        return None, None
-
-    best = None
-    best_area = -1
-    best_occ = None
-    for bb in bboxes:
-        sid_raw = _get_field(bb, "semanticId", None)
-        if sid_raw is None:
+                semantic_id = int(box.get('semanticId', box[0]))
+                x_min = float(box.get('x_min', box[1]))
+                y_min = float(box.get('y_min', box[2]))
+                x_max = float(box.get('x_max', box[3]))
+                y_max = float(box.get('y_max', box[4]))
+                occlusion = float(box.get('occlusionRatio', 0.0))
+            except:
+                continue
+        
+        # 클래스 이름 확인
+        sem_id_str = str(semantic_id)
+        if sem_id_str not in id_to_labels:
             continue
-        sid = str(int(sid_raw))
-        cls = labels_map.get(sid, {}).get("class", "unknown")
-        if cls == "background":
+        
+        label_info = id_to_labels[sem_id_str]
+        if class_name not in str(label_info):
             continue
-        x_min = int(_get_field(bb, "x_min", 0)); y_min = int(_get_field(bb, "y_min", 0))
-        x_max = int(_get_field(bb, "x_max", 0)); y_max = int(_get_field(bb, "y_max", 0))
-        area = max(0, x_max - x_min) * max(0, y_max - y_min)
+        
+        area = (x_max - x_min) * (y_max - y_min)
         if area > best_area:
             best_area = area
-            best = (x_min, y_min, x_max, y_max)
-            occ_raw = _get_field(bb, "occlusionRatio", 0.0)
-            best_occ = float(occ_raw) if occ_raw is not None else 0.0
-    return best, best_occ
-
-def _is_frame_valid(bbox_xyxy, occlusion_ratio: float, width: int, height: int):
-    """
-    유효 프레임 판단:
-    - visible ratio >= MIN_VISIBLE_RATIO (occlusionRatio 기반 근사)
-    - bbox가 이미지 경계에 닿지 않음(잘림 방지)
-    - bbox 면적이 너무 작지 않음
-    """
-    if bbox_xyxy is None:
-        return False, "no_object_bbox"
-
-    x_min, y_min, x_max, y_max = bbox_xyxy
-    if x_max <= x_min or y_max <= y_min:
-        return False, "invalid_bbox"
-
-    visible_ratio = 1.0 - float(occlusion_ratio if occlusion_ratio is not None else 1.0)
-    if visible_ratio < MIN_VISIBLE_RATIO:
-        return False, f"visible_ratio<{MIN_VISIBLE_RATIO:.2f}"
-
-    # 경계 닿음(truncation) 체크
-    if (
-        x_min < BBOX_MARGIN_PX
-        or y_min < BBOX_MARGIN_PX
-        or x_max > (width - 1 - BBOX_MARGIN_PX)
-        or y_max > (height - 1 - BBOX_MARGIN_PX)
-    ):
-        return False, "truncated_bbox"
-
-    bbox_area = float((x_max - x_min) * (y_max - y_min))
-    img_area = float(width * height)
-    if bbox_area / img_area < MIN_BBOX_AREA_RATIO:
-        return False, "bbox_too_small"
-
-    return True, "ok"
-
-def _wait_for_files(paths, timeout_s: float, poll_s: float = 0.05):
-    """Replicator writer 출력이 비동기라서, 필요한 파일들이 생성될 때까지 기다립니다."""
-    deadline = time.time() + float(timeout_s)
-    while time.time() < deadline:
-        if all(os.path.exists(p) for p in paths):
-            return True
-        time.sleep(poll_s)
-    return False
-
-def _move_or_delete_attempt_files(tmp_dir: str, attempt_idx: int, out_dir: str, out_idx: int, accept: bool):
-    """
-    attempt_idx로 생성된 writer 파일을 accept 여부에 따라 처리.
-    - accept=True: tmp의 파일들을 out_dir로 out_idx 번호로 rename/move
-    - accept=False: tmp의 attempt_idx 파일들을 삭제
-    """
-    # writer가 생성하는 파일 패턴(현재 사용)
-    patterns = [
-        ("rgb_{:04d}.png", "rgb_{:04d}.png"),
-        ("bounding_box_2d_tight_{:04d}.npy", "bounding_box_2d_tight_{:04d}.npy"),
-        ("bounding_box_2d_tight_labels_{:04d}.json", "bounding_box_2d_tight_labels_{:04d}.json"),
-        # BasicWriter가 함께 생성하는 prim_paths 파일도 같이 정리(남아있으면 폴더가 더러워짐)
-        ("bounding_box_2d_tight_prim_paths_{:04d}.json", "bounding_box_2d_tight_prim_paths_{:04d}.json"),
-    ]
-    for src_fmt, dst_fmt in patterns:
-        src = os.path.join(tmp_dir, src_fmt.format(attempt_idx))
-        if not os.path.exists(src):
-            continue
-        if accept:
-            dst = os.path.join(out_dir, dst_fmt.format(out_idx))
-            os.makedirs(os.path.dirname(dst), exist_ok=True)
-            shutil.move(src, dst)
-        else:
-            try:
-                os.remove(src)
-            except Exception:
-                pass
+            best_bbox = (x_min, y_min, x_max, y_max, occlusion)
+    
+    if best_bbox is None:
+        return False, "no_class_bbox", None
+    
+    x_min, y_min, x_max, y_max, occlusion = best_bbox
+    
+    # 1. 가시성 검사 (80% 이상)
+    visibility = 1.0 - occlusion
+    if visibility < MIN_VISIBILITY:
+        return False, f"low_visibility_{visibility:.2f}", best_bbox
+    
+    # 2. 이미지 경계 검사
+    if x_min < EDGE_MARGIN or y_min < EDGE_MARGIN:
+        return False, "near_edge_min", best_bbox
+    if x_max > resolution[0] - EDGE_MARGIN or y_max > resolution[1] - EDGE_MARGIN:
+        return False, "near_edge_max", best_bbox
+    
+    # 3. bbox 면적 검사
+    image_area = resolution[0] * resolution[1]
+    bbox_area = (x_max - x_min) * (y_max - y_min)
+    if bbox_area < image_area * MIN_BBOX_AREA_RATIO:
+        return False, f"small_bbox_{bbox_area/image_area:.3f}", best_bbox
+    
+    return True, "ok", best_bbox
 
 
-# =========================
-# 메인
-# =========================
-EXCAVATOR_PARTS_CONFIG = scan_usd_files(ASSETS_DIR)
-
-print("=" * 60)
-print("굴착기 부품 데이터셋 생성 (분류 + 6DoF 포즈)")
-print("=" * 60)
-print(f"출력 경로: {BASE_OUTPUT_DIR}")
-print(f"클래스 수: {len(EXCAVATOR_PARTS_CONFIG)}")
-print(f"클래스당 이미지: {IMAGES_PER_CLASS}")
-print(f"해상도: {RESOLUTION[0]}x{RESOLUTION[1]}, FOV: {FOV_DEG}deg")
-print(f"방식: 카메라 고정(A안, 상단 사선) / 부품 이동(평평)")
-print("=" * 60)
-
-if CLEAR_EXISTING_DATA and os.path.exists(BASE_OUTPUT_DIR):
-    import shutil
-    print(f"\n⚠️  기존 dataset_pos 폴더 삭제 중: {BASE_OUTPUT_DIR}")
-    shutil.rmtree(BASE_OUTPUT_DIR, ignore_errors=True)
-    print("✓ 삭제 완료")
-
-os.makedirs(BASE_OUTPUT_DIR, exist_ok=True)
-
-# 전역 메타데이터(dataset_info.json)
-K = _compute_K_from_fov_deg(RESOLUTION[0], RESOLUTION[1], FOV_DEG)
-dataset_metadata = {
-    "dataset_name": "Excavator Parts Classification + 6DoF Pose Dataset",
-    "output_dir": BASE_OUTPUT_DIR,
-    "num_classes": len(EXCAVATOR_PARTS_CONFIG),
-    "images_per_class": IMAGES_PER_CLASS,
-    "total_images": IMAGES_PER_CLASS * len(EXCAVATOR_PARTS_CONFIG),
-    "classes": {key: cfg["display_name"] for key, cfg in EXCAVATOR_PARTS_CONFIG.items()},
-    "background_mode": BACKGROUND_MODE,
-    "background_ratios": BACKGROUND_RATIOS if BACKGROUND_MODE == "random" else None,
-    "camera": {
-        "resolution": [RESOLUTION[0], RESOLUTION[1]],
-        "fov_deg_assumed": FOV_DEG,
-        "K_assumed": K,
-        "convention": "cam_optical: x-right, y-down, z-forward",
-        "note": "실카메라 intrinsics가 없으므로 FOV 기반으로 K를 근사 계산"
-    },
-    "pose_label": {
-        "frame": "cam_optical",
-        "object_frame": "CAD origin (USD object local frame)",
-        "unit_translation": "m",
-        "rotation": "quaternion_xyzw",
-        "note": "카메라 고정/부품 이동(A안). roll/pitch 제한, yaw 자유."
-    },
-    "created_at": time.strftime("%Y-%m-%d %H:%M:%S"),
-}
-
-with open(os.path.join(BASE_OUTPUT_DIR, "dataset_info.json"), "w", encoding="utf-8") as f:
-    json.dump(dataset_metadata, f, indent=2, ensure_ascii=False)
-
-
-def generate_class_dataset(part_config, class_index: int):
+def generate_class_dataset(part_config, class_index, total_classes):
+    """한 클래스의 데이터셋 생성"""
     usd_path = part_config["usd_path"]
     class_name = part_config["class_name"]
     display_name = part_config["display_name"]
-
-    class_output_dir = os.path.join(BASE_OUTPUT_DIR, class_name)
+    
+    class_output_dir = os.path.join(OUTPUT_DIR, class_name)
     os.makedirs(class_output_dir, exist_ok=True)
-
-    print(f"\n[{class_index+1}/{len(EXCAVATOR_PARTS_CONFIG)}] {display_name} 생성 시작")
+    
+    print(f"\n{'='*60}")
+    print(f"[{class_index+1}/{total_classes}] {display_name}")
+    print(f"{'='*60}")
     print(f"  USD: {usd_path}")
-    print(f"  OUT: {class_output_dir}")
-
+    print(f"  출력: {class_output_dir}")
+    
     if not os.path.exists(usd_path):
-        print(f"  ⚠️  USD 파일 없음: {usd_path} (스킵)")
+        print(f"  ⚠️  USD 파일 없음, 건너뜀")
         return
-
+    
+    # USD 로드
+    print(f"  USD 로딩 중...")
     omni.usd.get_context().open_stage(usd_path)
     time.sleep(1.0)
-
+    
     stage = omni.usd.get_context().get_stage()
     if not stage:
-        print("  ⚠️  스테이지 로드 실패")
+        print(f"  ⚠️  스테이지 로드 실패")
         return
-
-    time_code = Usd.TimeCode.Default()
-    up_axis, axis_index = _get_up_axis_and_index(stage)
-    meters_per_unit = float(UsdGeom.GetStageMetersPerUnit(stage))
-    world_up = np.array([0.0, 0.0, 1.0])
-    if axis_index == 1:
-        world_up = np.array([0.0, 1.0, 0.0])
-    elif axis_index == 0:
-        world_up = np.array([1.0, 0.0, 0.0])
-
-    aabb = compute_world_aabb_from_meshes(stage, time_code)
+    
+    # 스테이지 단위 확인
+    meters_per_unit = UsdGeom.GetStageMetersPerUnit(stage)
+    print(f"  metersPerUnit: {meters_per_unit}")
+    
+    # AABB 계산
+    aabb = compute_world_aabb(stage)
     if not aabb:
-        print("  ⚠️  AABB 계산 실패(메시 없음?)")
+        print(f"  ⚠️  AABB 계산 실패")
         return
-
-    world_min = aabb["world_min"]
-    world_max = aabb["world_max"]
-    size = aabb["size"]
-    center = aabb["center"]
-    part_center = (float(center[0]), float(center[1]), float(center[2]))
-    part_size = float(max(size[0], size[1], size[2]))
-    floor_height = float(world_min[axis_index])
-    # 스케일(단위) 진단용: stage unit 기준 값들을 "미터"로 환산
-    part_size_m = float(part_size * meters_per_unit)
-    floor_height_m = float(floor_height * meters_per_unit)
-
-    # 루트 프림 찾기(부품 이동용)
-    root_prim = _find_root_xform_prim(stage)
-    if not root_prim:
-        print("  ⚠️  루트 Xform prim을 찾지 못했습니다(스킵)")
-        return
-
-    root_path = root_prim.GetPath().pathString
-    print(f"  Root prim: {root_path}")
-    print(f"  UpAxis: {up_axis}, metersPerUnit: {meters_per_unit}")
-    print(f"  [스케일 진단] part_size: {part_size:.6f} (stage unit) = {part_size_m:.6f} m")
-    print(f"  [스케일 진단] floor_height: {floor_height:.6f} (stage unit) = {floor_height_m:.6f} m")
-    if part_size_m < 0.10:
-        print("  ⚠️  [경고] 부품이 '미터 기준으로 매우 작게' 해석되고 있습니다. (USD 단위/스케일 문제 가능성 큼)")
-    if part_size_m > 20.0:
-        print("  ⚠️  [경고] 부품이 '미터 기준으로 매우 크게' 해석되고 있습니다. (USD 단위/스케일 문제 가능성 큼)")
-
-    # ===== B안: USD 단위/스케일 자동 보정 =====
-    # - metersPerUnit이 0.01인 USD는 cm 단위로 작성된 경우가 많아, 시뮬레이션에서 100배 작게 보일 수 있음
-    # - root prim에 uniform scale을 적용해 "미터 기준" 크기로 맞춘다.
-    applied_scale = np.array([1.0, 1.0, 1.0], dtype=float)
-    if ENABLE_AUTO_SCALE_FIX and meters_per_unit > 0 and meters_per_unit < AUTO_SCALE_MPU_THRESHOLD:
-        scale_factor = float(min(AUTO_SCALE_MAX_FACTOR, 1.0 / meters_per_unit))
-        if scale_factor > 1.0 + 1e-6:
-            applied_scale = np.array([scale_factor, scale_factor, scale_factor], dtype=float)
-            print(f"  ✅ [스케일 보정] metersPerUnit={meters_per_unit:.6f} → root scale x{scale_factor:.3f} 적용")
-            _set_xform_scale_xyz(root_prim, applied_scale)
-            # 스케일 적용 후 시뮬레이션 업데이트 및 AABB 재계산(카메라/바닥/진단 값 일관성 확보)
-            for _ in range(5):
-                simulation_app.update()
-                time.sleep(0.02)
-            aabb2 = compute_world_aabb_from_meshes(stage, time_code)
-            if aabb2:
-                world_min = aabb2["world_min"]
-                world_max = aabb2["world_max"]
-                size = aabb2["size"]
-                center = aabb2["center"]
-                part_center = (float(center[0]), float(center[1]), float(center[2]))
-                part_size = float(max(size[0], size[1], size[2]))
-                floor_height = float(world_min[axis_index])
-                part_size_m = float(part_size * meters_per_unit)
-                floor_height_m = float(floor_height * meters_per_unit)
-                print(f"  [스케일 보정 후] part_size: {part_size:.6f} (unit) = {part_size_m:.6f} m")
-                print(f"  [스케일 보정 후] floor_height: {floor_height:.6f} (unit) = {floor_height_m:.6f} m")
-            else:
-                print("  ⚠️  [스케일 보정] AABB 재계산 실패(계속 진행)")
-
-    # roll/pitch 시 바닥 관통 방지용: root local AABB(정적) 사전 계산
-    root_local_aabb = compute_root_local_aabb_from_mesh_extents(stage, root_prim, time_code)
-    if not root_local_aabb:
-        print("  ⚠️  root local AABB 계산 실패(바닥 관통 방지 보정이 약해질 수 있음)")
-
+    
+    part_size = max(aabb["size"][0], aabb["size"][1], aabb["size"][2])
+    part_center = aabb["center"]
+    floor_height = aabb["floor"]
+    
+    # 미터 단위로 환산
+    part_size_m = part_size * meters_per_unit
+    
+    print(f"  부품 크기: {part_size:.4f} (단위) = {part_size_m:.4f} m")
+    print(f"  부품 중심: ({part_center[0]:.4f}, {part_center[1]:.4f}, {part_center[2]:.4f})")
+    print(f"  바닥 높이: {floor_height:.4f}")
+    
+    # XY 범위를 스테이지 단위로 변환
+    xy_range = XY_RANGE_M / meters_per_unit
+    z_lift = part_size * Z_LIFT_FACTOR  # 부품 크기의 70%를 들어올림
+    z_range = part_size * Z_RANGE_FACTOR  # 추가 Z 변동
+    
+    print(f"  XY 이동 범위: ±{xy_range:.4f} 단위 (±{XY_RANGE_M:.4f} m)")
+    print(f"  Z 기본 들어올림: {z_lift:.4f} 단위")
+    print(f"  Z 추가 변동: ±{z_range:.4f} 단위")
+    print(f"  Roll/Pitch 범위: {ROLL_RANGE_DEG}")
+    print(f"  Yaw 범위: {YAW_RANGE_DEG}")
+    
+    # Wrapper Xform 생성
+    print(f"  Wrapper Xform 생성 중...")
+    wrapper_path = "/World/ObjectWrapper"
+    wrapper_prim = create_wrapper_xform(stage, wrapper_path)
+    
+    # 모든 오브젝트를 Wrapper 아래로 이동
+    print(f"  오브젝트를 Wrapper로 이동 중...")
+    if not reparent_all_to_wrapper(stage, wrapper_path):
+        print(f"  ⚠️  Reparent 실패, 직접 조작 시도...")
+    
     # Semantics 추가
+    print(f"  Semantics 추가 중...")
     for prim in stage.Traverse():
         if prim.IsA(UsdGeom.Imageable):
             sem = Semantics.SemanticsAPI.Apply(prim, "Semantics")
             sem.CreateSemanticTypeAttr("class")
             sem.CreateSemanticDataAttr().Set(class_name)
-
-    # 클래스 메타 저장
+    
+    # 카메라 위치 계산 (oblique view)
+    camera_distance = part_size * CAMERA_DISTANCE_FACTOR
+    elev_rad = math.radians(CAMERA_ELEVATION_DEG)
+    
+    # 오브젝트의 초기 위치 (Wrapper가 이동하기 전 기준점)
+    base_z = floor_height + z_lift  # 바닥에서 들어올린 높이
+    
+    # 카메라는 오브젝트 중심 + Z 들어올림 위치를 바라봄
+    look_at = (part_center[0], part_center[1], base_z)
+    
+    # 카메라 위치 (X 방향에서 비스듬히 내려다봄)
+    cam_x = part_center[0] + camera_distance * math.cos(elev_rad)
+    cam_y = part_center[1]
+    cam_z = base_z + camera_distance * math.sin(elev_rad)
+    camera_pos = (cam_x, cam_y, cam_z)
+    
+    print(f"  카메라 위치: ({cam_x:.4f}, {cam_y:.4f}, {cam_z:.4f})")
+    print(f"  카메라 타겟: ({look_at[0]:.4f}, {look_at[1]:.4f}, {look_at[2]:.4f})")
+    
+    # 카메라 생성
+    camera_prim = create_fixed_camera(stage, camera_pos, look_at)
+    
+    # 조명 생성
+    print(f"  조명 생성 중...")
+    dome_light = rep.create.light(light_type="Dome", intensity=1000.0, rotation=(270, 0, 0))
+    
+    # Render product
+    camera = rep.get.prim_at_path(str(camera_prim.GetPath()))
+    render_product = rep.create.render_product(camera, resolution=RESOLUTION)
+    
+    # 임시 Writer 디렉토리
+    tmp_dir = os.path.join(class_output_dir, "_tmp")
+    if os.path.exists(tmp_dir):
+        shutil.rmtree(tmp_dir)
+    os.makedirs(tmp_dir)
+    
+    # Writer 설정
+    writer = rep.WriterRegistry.get("BasicWriter")
+    writer.initialize(output_dir=tmp_dir, rgb=True, bounding_box_2d_tight=True)
+    writer.attach([render_product])
+    
+    # 시뮬레이션 준비
+    print(f"  시뮬레이션 준비 중...")
+    for _ in range(10):
+        simulation_app.update()
+        time.sleep(0.05)
+    
+    # Rejection sampling 루프
+    print(f"\n  🔄 Rejection Sampling 시작 (목표: {IMAGES_PER_CLASS}장)")
+    
+    accepted = 0
+    total_attempts = 0
+    reject_reasons = {}
+    frame_idx = 0
+    
+    while accepted < IMAGES_PER_CLASS:
+        total_attempts += 1
+        
+        if total_attempts > IMAGES_PER_CLASS * MAX_ATTEMPTS_PER_FRAME:
+            print(f"  ⚠️  최대 시도 횟수 초과, {accepted}장만 생성됨")
+            break
+        
+        # 랜덤 pose 생성
+        dx = random.uniform(-xy_range, xy_range)
+        dy = random.uniform(-xy_range, xy_range)
+        dz = random.uniform(0, z_range)
+        roll = random.uniform(*ROLL_RANGE_DEG)
+        pitch = random.uniform(*PITCH_RANGE_DEG)
+        yaw = random.uniform(*YAW_RANGE_DEG)
+        
+        # Wrapper 위치 설정
+        # 핵심: Z를 먼저 충분히 올린 후 회전
+        new_x = part_center[0] + dx
+        new_y = part_center[1] + dy
+        new_z = base_z + dz  # 이미 z_lift만큼 올라간 상태
+        
+        set_wrapper_pose(stage, wrapper_path, (new_x, new_y, new_z), (roll, pitch, yaw))
+        
+        # 렌더링
+        if hasattr(rep.orchestrator, 'step'):
+            rep.orchestrator.step()
+        else:
+            rep.orchestrator.run(num_frames=1)
+        
+        simulation_app.update()
+        time.sleep(0.05)
+        
+        # BBox 파일 읽기
+        bbox_npy = os.path.join(tmp_dir, f"bounding_box_2d_tight_{frame_idx:04d}.npy")
+        bbox_json = os.path.join(tmp_dir, f"bounding_box_2d_tight_labels_{frame_idx:04d}.json")
+        rgb_png = os.path.join(tmp_dir, f"rgb_{frame_idx:04d}.png")
+        
+        # 파일 대기 (최대 2초)
+        wait_start = time.time()
+        while time.time() - wait_start < 2.0:
+            if os.path.exists(bbox_npy) and os.path.exists(bbox_json):
+                break
+            time.sleep(0.05)
+        
+        frame_idx += 1
+        
+        if not os.path.exists(bbox_npy) or not os.path.exists(bbox_json):
+            reason = "file_not_found"
+            reject_reasons[reason] = reject_reasons.get(reason, 0) + 1
+            continue
+        
+        # BBox 검증
+        try:
+            bbox_data = np.load(bbox_npy)
+            with open(bbox_json, 'r') as f:
+                labels_data = json.load(f)
+            
+            valid, reason, bbox_info = validate_bbox(bbox_data, labels_data, RESOLUTION, class_name)
+            
+            if not valid:
+                reject_reasons[reason] = reject_reasons.get(reason, 0) + 1
+                continue
+            
+            # RGB 파일 대기
+            wait_start = time.time()
+            while time.time() - wait_start < 2.0:
+                if os.path.exists(rgb_png) and os.path.getsize(rgb_png) > 1000:
+                    break
+                time.sleep(0.05)
+            
+            if not os.path.exists(rgb_png) or os.path.getsize(rgb_png) < 1000:
+                reason = "rgb_not_ready"
+                reject_reasons[reason] = reject_reasons.get(reason, 0) + 1
+                continue
+            
+            # 유효한 프레임! 저장
+            final_rgb = os.path.join(class_output_dir, f"rgb_{accepted:04d}.png")
+            final_pose = os.path.join(class_output_dir, f"pose_{accepted:04d}.json")
+            
+            shutil.copy(rgb_png, final_rgb)
+            
+            # Pose 정보 저장
+            x_min, y_min, x_max, y_max, occlusion = bbox_info
+            pose_data = {
+                "class_name": class_name,
+                "frame_index": accepted,
+                "raw_pose_world": {
+                    "t_xyz_m": [
+                        (new_x - part_center[0]) * meters_per_unit,
+                        (new_y - part_center[1]) * meters_per_unit,
+                        (new_z - floor_height) * meters_per_unit
+                    ],
+                    "r_xyz_deg": [roll, pitch, yaw]
+                },
+                "bbox_2d": {
+                    "x_min": x_min,
+                    "y_min": y_min,
+                    "x_max": x_max,
+                    "y_max": y_max,
+                    "visibility": 1.0 - occlusion
+                },
+                "camera": {
+                    "position_m": [c * meters_per_unit for c in camera_pos],
+                    "look_at_m": [c * meters_per_unit for c in look_at],
+                    "resolution": list(RESOLUTION)
+                },
+                "stage_info": {
+                    "meters_per_unit": meters_per_unit,
+                    "part_size_m": part_size_m
+                }
+            }
+            
+            with open(final_pose, 'w', encoding='utf-8') as f:
+                json.dump(pose_data, f, indent=2, ensure_ascii=False)
+            
+            accepted += 1
+            
+            if accepted % 50 == 0 or accepted == IMAGES_PER_CLASS:
+                top_rejects = sorted(reject_reasons.items(), key=lambda x: -x[1])[:3]
+                print(f"    진행: {accepted}/{IMAGES_PER_CLASS} (시도: {total_attempts}, 거부 상위: {top_rejects})")
+            
+        except Exception as e:
+            reason = f"exception_{type(e).__name__}"
+            reject_reasons[reason] = reject_reasons.get(reason, 0) + 1
+            continue
+    
+    # 정리
+    print(f"\n  ✓ {display_name} 완료: {accepted}장 생성")
+    print(f"    총 시도: {total_attempts}, 채택률: {accepted/max(1,total_attempts)*100:.1f}%")
+    print(f"    거부 사유: {reject_reasons}")
+    
+    # 임시 폴더 삭제
+    shutil.rmtree(tmp_dir, ignore_errors=True)
+    
+    # 메타데이터 저장
     metadata = {
         "class_name": class_name,
-        "display_name": display_name,
-        "usd_path": usd_path,
-        "num_images": IMAGES_PER_CLASS,
-        "root_prim_path": root_path,
-        "part_center_world": list(part_center),
-        "part_size_world": part_size,
-        "floor_height_world": floor_height,
-        "up_axis": str(up_axis),
-        "axis_index": int(axis_index),
-        "meters_per_unit": meters_per_unit,
-        "applied_root_scale_xyz": [float(applied_scale[0]), float(applied_scale[1]), float(applied_scale[2])],
-        "background_mode": BACKGROUND_MODE,
-        "background_ratios": BACKGROUND_RATIOS if BACKGROUND_MODE == "random" else None,
+        "num_images": accepted,
+        "part_size_m": part_size_m,
+        "settings": {
+            "xy_range_m": XY_RANGE_M,
+            "z_lift_factor": Z_LIFT_FACTOR,
+            "roll_pitch_range": ROLL_RANGE_DEG,
+            "yaw_range": YAW_RANGE_DEG,
+            "camera_elevation_deg": CAMERA_ELEVATION_DEG
+        }
     }
-    with open(os.path.join(class_output_dir, "metadata.json"), "w", encoding="utf-8") as f:
+    with open(os.path.join(class_output_dir, "metadata.json"), 'w', encoding='utf-8') as f:
         json.dump(metadata, f, indent=2, ensure_ascii=False)
 
-    # Replicator 레이어
-    with rep.new_layer():
-        # 바닥/뒷벽 (기존 방식 유지)
-        floor_size = part_size * 5.0
-        if axis_index == 2:
-            floor_pos = (part_center[0], part_center[1], floor_height)
-            floor_rot = (0, 0, 0)
-        elif axis_index == 1:
-            floor_pos = (part_center[0], floor_height, part_center[2])
-            floor_rot = (90, 0, 0)
-        else:
-            floor_pos = (floor_height, part_center[1], part_center[2])
-            floor_rot = (0, 90, 0)
 
-        floor_plane = rep.create.plane(
-            scale=(floor_size, floor_size, 1),
-            position=floor_pos,
-            rotation=floor_rot,
-            semantics=[("class", "background")],
-        )
-        back_wall = rep.create.plane(
-            scale=(floor_size, floor_size * 0.5, 1),
-            position=(part_center[0] - floor_size * 0.4, part_center[1], part_center[2]),
-            rotation=(0, 90, 0),
-            semantics=[("class", "background")],
-        )
-
-        # 조명(기존 유지 + 프레임별 위치 랜덤화는 trigger에서)
-        dome_light = rep.create.light(light_type="Dome", intensity=800.0, rotation=(270, 0, 0))
-        point_light1 = rep.create.light(
-            light_type="Sphere",
-            intensity=50000.0,
-            position=(part_center[0] + part_size, part_center[1] + part_size, part_center[2] + part_size * 2),
-            scale=0.5,
-        )
-        point_light2 = rep.create.light(
-            light_type="Sphere",
-            intensity=30000.0,
-            position=(part_center[0] - part_size, part_center[1] - part_size * 0.5, part_center[2] + part_size),
-            scale=0.3,
-        )
-
-        # 카메라 고정(A안 느낌): "부품 전체가 보이도록" 거리 자동 산정 + 사선 위치 고정
-        part_diagonal = float(math.sqrt(float(size[0]) ** 2 + float(size[1]) ** 2 + float(size[2]) ** 2))
-        camera_fov_rad = math.radians(FOV_DEG)
-        # XY 이동(오프셋)까지 고려해 프레이밍 여유를 준다. (truncated_bbox 감소 목적)
-        xy_range_init = float(XY_RANGE_M / meters_per_unit) if meters_per_unit > 0 else 0.0
-        effective_radius = (part_diagonal / 2.0) + (xy_range_init * 1.2)
-        min_camera_distance = (effective_radius) / math.tan(camera_fov_rad / 2.0) / 0.82
-        camera_distance = min_camera_distance * 1.15
-
-        # 카메라 위치(사선): up축 기준으로 위쪽(+up) + 약간 옆(+right)
-        # 간단히 기존 벡터(0.7,0.5,0.5)를 유지하되, 카메라를 고정한다.
-        cam_pos = (
-            part_center[0] + camera_distance * 0.7,
-            part_center[1] + camera_distance * 0.5,
-            part_center[2] + camera_distance * 0.5,
-        )
-        cam_lookat = part_center
-        # 카메라/이동 범위 진단 로그 (stage unit + meter)
-        xy_range_init_u = float(XY_RANGE_M / meters_per_unit) if meters_per_unit > 0 else 0.0
-        z_min_u = float(Z_RANGE_M[0] / meters_per_unit) if meters_per_unit > 0 else 0.0
-        z_max_u = float(Z_RANGE_M[1] / meters_per_unit) if meters_per_unit > 0 else 0.0
-        print(f"  [진단] camera_distance: {camera_distance:.4f} (unit) = {camera_distance * meters_per_unit:.4f} m")
-        print(f"  [진단] XY_RANGE_M: ±{XY_RANGE_M:.3f} m (unit ±{xy_range_init_u:.3f})")
-        print(f"  [진단] Z_RANGE_M: {Z_RANGE_M[0]:.3f}~{Z_RANGE_M[1]:.3f} m (unit {z_min_u:.3f}~{z_max_u:.3f})")
-        print(f"  [진단] RPY(deg): roll{ROLL_DEG_RANGE}, pitch{PITCH_DEG_RANGE}, yaw{YAW_DEG_RANGE}")
-
-        camera = rep.create.camera(position=cam_pos, look_at=cam_lookat)
-        render_product = rep.create.render_product(camera, resolution=RESOLUTION)
-
-        # bbox annotator + writer
-        bbox_annotator = rep.AnnotatorRegistry.get_annotator("bounding_box_2d_tight")
-        bbox_annotator.attach([render_product])
-
-        # 리젝션 샘플링을 위해 writer는 임시 디렉토리에 기록하고,
-        # "유효 프레임만" 최종 디렉토리(class_output_dir)로 이동/재번호 부여한다.
-        tmp_output_dir = os.path.join(class_output_dir, "_tmp_writer")
-        if os.path.exists(tmp_output_dir):
-            shutil.rmtree(tmp_output_dir, ignore_errors=True)
-        os.makedirs(tmp_output_dir, exist_ok=True)
-
-        writer = rep.WriterRegistry.get("BasicWriter")
-        writer.initialize(output_dir=tmp_output_dir, rgb=True, bounding_box_2d_tight=True)
-        writer.attach([render_product])
-
-        # 프레임별 랜덤화(배경/조명만): 카메라는 고정, 부품은 외부 루프로 이동
-        # 리젝션으로 시도 횟수가 늘어날 수 있으므로 max_execs를 크게 잡는다.
-        max_attempts = int(IMAGES_PER_CLASS * MAX_ATTEMPTS_MULTIPLIER)
-        with rep.trigger.on_frame(max_execs=max_attempts):
-            with floor_plane:
-                rep.randomizer.color(
-                    colors=rep.distribution.uniform((0.2, 0.2, 0.2), (0.6, 0.5, 0.4))
-                )
-            with back_wall:
-                rep.randomizer.color(
-                    colors=rep.distribution.uniform((0.4, 0.4, 0.4), (0.9, 0.9, 0.85))
-                )
-            with point_light1:
-                rep.modify.pose(
-                    position=rep.distribution.uniform(
-                        (part_center[0] + part_size * 0.5, part_center[1] - part_size, part_center[2] + part_size * 1.5),
-                        (part_center[0] + part_size * 1.5, part_center[1] + part_size, part_center[2] + part_size * 3),
-                    )
-                )
-            with point_light2:
-                rep.modify.pose(
-                    position=rep.distribution.uniform(
-                        (part_center[0] - part_size * 1.5, part_center[1] - part_size, part_center[2] + part_size * 0.5),
-                        (part_center[0] - part_size * 0.5, part_center[1] + part_size, part_center[2] + part_size * 2),
-                    )
-                )
-
-        # 시뮬레이션 준비
-        for _ in range(10):
-            simulation_app.update()
-            time.sleep(0.05)
-
-        # cam_optical 기준(우리 정의) 카메라 외부파라미터(고정)
-        R_world_cam = _camera_basis_from_lookat(cam_pos, cam_lookat, world_up)
-        R_cam_world = R_world_cam.T
-        t_world_cam = np.asarray(cam_pos, dtype=float)
-
-        # 프레임 루프(리젝션 샘플링):
-        # - attempt는 writer 파일 인덱스로 증가
-        # - accept된 프레임만 최종 인덱스(0..IMAGES_PER_CLASS-1)로 이동
-        # (카메라는 고정, 조명/배경은 trigger에서 변함)
-        # 이동 범위(미터 -> stage unit 변환)
-        xy_range = float(XY_RANGE_M / meters_per_unit) if meters_per_unit > 0 else 0.0
-        reject_count = 0
-        # translate는 "절대값 set"이 아니라, 현재 위치(base)에서 dx/dy 오프셋으로 적용한다.
-        base_t_world = _get_translate_op_value_or_zero(root_prim)
-        # reject 사유 통계(진단용)
-        reject_reasons = {}
-        # 바닥 관통 방지용 파라미터(단위: stage unit)
-        # - clearance는 아주 작게(약간만 띄우기). metersPerUnit을 사용해 대략 2mm 정도로 맞춘다.
-        clearance_m = 0.002
-        clearance_u = float(clearance_m / meters_per_unit) if meters_per_unit > 0 else 0.0
-        clearance_u = max(clearance_u, float(part_size) * 0.002)  # 너무 작아지지 않게 하한
-
-        if not (hasattr(rep.orchestrator, "step") or hasattr(rep.orchestrator, "run")):
-            raise RuntimeError("rep.orchestrator.step/run API를 찾을 수 없습니다. Isaac Sim 버전을 확인하세요.")
-
-        accepted = 0
-        attempt_idx = 0
-        try:
-            while accepted < IMAGES_PER_CLASS and attempt_idx < max_attempts:
-                # 1) 부품 pose 샘플링(world 기준)
-                dx = float(np.random.uniform(-xy_range, xy_range))
-                dy = float(np.random.uniform(-xy_range, xy_range))
-                # z(up축) 이동: 미터 기준으로 샘플링 후 stage unit으로 변환
-                z_min_u = float(Z_RANGE_M[0] / meters_per_unit) if meters_per_unit > 0 else 0.0
-                z_max_u = float(Z_RANGE_M[1] / meters_per_unit) if meters_per_unit > 0 else 0.0
-                dz = float(np.random.uniform(z_min_u, z_max_u))
-
-                roll = float(np.random.uniform(ROLL_DEG_RANGE[0], ROLL_DEG_RANGE[1]))
-                pitch = float(np.random.uniform(PITCH_DEG_RANGE[0], PITCH_DEG_RANGE[1]))
-                yaw = float(np.random.uniform(YAW_DEG_RANGE[0], YAW_DEG_RANGE[1]))
-
-                # base 위치 + (dx,dy) 오프셋 (UpAxis 고려)
-                # 높이축(up)은 base 값을 유지하고, planar 축만 움직인다.
-                t_world_obj = _apply_planar_offset(base_t_world, dx, dy, axis_index)
-                t_world_obj[axis_index] = base_t_world[axis_index] + dz
-
-                # roll/pitch로 인해 바닥 아래로 파묻히지 않도록, 회전 후 최저점이 floor_height 이상이 되게 up축을 보정한다.
-                # - root_local_aabb의 8개 코너를 회전시켜 최저 up값을 근사(빠름)
-                rx, ry, rz = math.radians(roll), math.radians(pitch), math.radians(yaw)
-                Rx = np.array([[1, 0, 0], [0, math.cos(rx), -math.sin(rx)], [0, math.sin(rx), math.cos(rx)]], dtype=float)
-                Ry = np.array([[math.cos(ry), 0, math.sin(ry)], [0, 1, 0], [-math.sin(ry), 0, math.cos(ry)]], dtype=float)
-                Rz = np.array([[math.cos(rz), -math.sin(rz), 0], [math.sin(rz), math.cos(rz), 0], [0, 0, 1]], dtype=float)
-                R_world_obj = (Rz @ Ry @ Rx)
-
-                if root_local_aabb:
-                    mn = root_local_aabb["local_min"]
-                    mx = root_local_aabb["local_max"]
-                    min_up = float("inf")
-                    for x in (mn[0], mx[0]):
-                        for y in (mn[1], mx[1]):
-                            for z in (mn[2], mx[2]):
-                                p = np.array([x, y, z], dtype=float)
-                                # scale 보정이 적용된 경우, root local 좌표도 동일하게 scale되어 월드로 변환됨
-                                p_scaled = p * applied_scale
-                                wp = t_world_obj + (R_world_obj @ p_scaled)
-                                min_up = min(min_up, float(wp[axis_index]))
-                    target_up = float(floor_height) + clearance_u
-                    if min_up < target_up:
-                        t_world_obj[axis_index] += (target_up - min_up)
-
-                # 2) USD에 적용(rotateXYZ)
-                _set_xform_translate_rotate_xyz(root_prim, t_world_obj, (roll, pitch, yaw))
-
-                # 3) 렌더/어노테이션 1프레임 진행
-                if hasattr(rep.orchestrator, "step"):
-                    rep.orchestrator.step()
-                else:
-                    rep.orchestrator.run(num_frames=1)
-
-                # writer 출력은 비동기일 수 있으므로, 필요한 파일들이 실제로 생길 때까지 기다린다.
-                fid = f"{attempt_idx:04d}"
-                rgb_png = os.path.join(tmp_output_dir, f"rgb_{fid}.png")
-                bbox_npy = os.path.join(tmp_output_dir, f"bounding_box_2d_tight_{fid}.npy")
-                bbox_lbl = os.path.join(tmp_output_dir, f"bounding_box_2d_tight_labels_{fid}.json")
-
-                # writer 출력이 비동기일 수 있어, bbox/labels와 rgb를 분리해서 대기한다.
-                # - bbox/labels: 유효성 판단에 필요
-                # - rgb: accept될 때만 최종 저장에 필요
-                ready_bbox = _wait_for_files([bbox_npy, bbox_lbl], timeout_s=3.0, poll_s=0.05)
-                if not ready_bbox:
-                    _move_or_delete_attempt_files(tmp_output_dir, attempt_idx, class_output_dir, accepted, accept=False)
-                    reject_count += 1
-                    reject_reasons["writer_timeout_bbox"] = reject_reasons.get("writer_timeout_bbox", 0) + 1
-                    attempt_idx += 1
-                    continue
-
-                bbox_xyxy, occ = _select_object_bbox_from_files(bbox_npy, bbox_lbl)
-                ok, reason = _is_frame_valid(bbox_xyxy, occ, RESOLUTION[0], RESOLUTION[1])
-
-                if not ok:
-                    # 무효 프레임: tmp 파일 삭제
-                    _move_or_delete_attempt_files(tmp_output_dir, attempt_idx, class_output_dir, accepted, accept=False)
-                    reject_count += 1
-                    reject_reasons[reason] = reject_reasons.get(reason, 0) + 1
-                    # 과거에는 reject가 많으면 XY 이동 범위를 줄였지만,
-                    # 사용자 요청에 따라 이동 범위는 유지한다(이동이 눈에 보이도록).
-                    if XY_RANGE_SHRINK_EVERY_REJECTS and XY_RANGE_SHRINK_FACTOR:
-                        if reject_count % int(XY_RANGE_SHRINK_EVERY_REJECTS) == 0:
-                            xy_range *= float(XY_RANGE_SHRINK_FACTOR)
-                            print(f"  ⚠️  reject {reject_count}회 발생 → XY 이동 범위 축소: {xy_range:.4f} (reason={reason})")
-                    attempt_idx += 1
-                    continue
-
-                # accept 후보: rgb가 아직 안 내려왔으면 조금 더 기다린다.
-                ready_rgb = _wait_for_files([rgb_png], timeout_s=5.0, poll_s=0.05)
-                if not ready_rgb:
-                    _move_or_delete_attempt_files(tmp_output_dir, attempt_idx, class_output_dir, accepted, accept=False)
-                    reject_count += 1
-                    reject_reasons["writer_timeout_rgb"] = reject_reasons.get("writer_timeout_rgb", 0) + 1
-                    attempt_idx += 1
-                    continue
-
-                # 4) 포즈 라벨 계산(카메라(optical) 기준) - accept된 프레임만 저장
-                t_cam_obj = R_cam_world @ (t_world_obj - t_world_cam)
-                R_cam_obj = R_cam_world @ R_world_obj
-                q_cam_obj = _rotmat_to_quat_xyzw(R_cam_obj)
-
-                pose = {
-                    "class_name": class_name,
-                    "frame_idx": accepted,
-                    "unit": "m",
-                    "camera": {
-                        "width": RESOLUTION[0],
-                        "height": RESOLUTION[1],
-                        "K_assumed": K,
-                        "convention": "cam_optical: x-right, y-down, z-forward",
-                    },
-                    "pose_cam_optical_obj": {
-                        # stage unit -> meters
-                        "t_xyz_m": [
-                            float(t_cam_obj[0] * meters_per_unit),
-                            float(t_cam_obj[1] * meters_per_unit),
-                            float(t_cam_obj[2] * meters_per_unit),
-                        ],
-                        "q_xyzw": [float(q_cam_obj[0]), float(q_cam_obj[1]), float(q_cam_obj[2]), float(q_cam_obj[3])],
-                    },
-                    "raw_pose_world": {
-                        # stage unit -> meters
-                        "t_xyz_m": [
-                            float(t_world_obj[0] * meters_per_unit),
-                            float(t_world_obj[1] * meters_per_unit),
-                            float(t_world_obj[2] * meters_per_unit),
-                        ],
-                        "r_xyz_deg": [roll, pitch, yaw],
-                        "camera_pos_world_m": [
-                            float(cam_pos[0] * meters_per_unit),
-                            float(cam_pos[1] * meters_per_unit),
-                            float(cam_pos[2] * meters_per_unit),
-                        ],
-                        "camera_lookat_world_m": [
-                            float(cam_lookat[0] * meters_per_unit),
-                            float(cam_lookat[1] * meters_per_unit),
-                            float(cam_lookat[2] * meters_per_unit),
-                        ],
-                    },
-                    "stage": {
-                        "up_axis": str(up_axis),
-                        "meters_per_unit": meters_per_unit,
-                    },
-                }
-
-                # accept된 writer 파일을 최종 디렉토리로 이동/재번호 부여
-                _move_or_delete_attempt_files(tmp_output_dir, attempt_idx, class_output_dir, accepted, accept=True)
-
-                pose_path = os.path.join(class_output_dir, f"pose_{accepted:04d}.json")
-                with open(pose_path, "w", encoding="utf-8") as f:
-                    json.dump(pose, f, indent=2, ensure_ascii=False)
-
-                accepted += 1
-                attempt_idx += 1
-
-                if accepted % 50 == 0:
-                    # 상위 3개 reject 사유만 요약 출력(로그 과다 방지)
-                    top = sorted(reject_reasons.items(), key=lambda x: -x[1])[:3]
-                    top_str = ", ".join([f"{k}:{v}" for k, v in top]) if top else "-"
-                    print(f"  진행: {accepted}/{IMAGES_PER_CLASS} (attempt={attempt_idx}, reject={reject_count}, top_reject=[{top_str}])")
-        finally:
-            # tmp 디렉토리 정리(중간 중단/예외가 발생해도 남지 않게)
-            shutil.rmtree(tmp_output_dir, ignore_errors=True)
-
-        if accepted < IMAGES_PER_CLASS:
-            top = sorted(reject_reasons.items(), key=lambda x: -x[1])[:10]
-            top_str = ", ".join([f"{k}:{v}" for k, v in top]) if top else "-"
-            print(f"  ⚠️  유효 프레임 부족: {accepted}/{IMAGES_PER_CLASS} (attempt={attempt_idx}, reject={reject_count}, top_reject=[{top_str}])")
-        else:
-            top = sorted(reject_reasons.items(), key=lambda x: -x[1])[:10]
-            top_str = ", ".join([f"{k}:{v}" for k, v in top]) if top else "-"
-            print(f"  ✓ {display_name}: {IMAGES_PER_CLASS} 프레임 생성 완료 (reject={reject_count}, attempt={attempt_idx}, top_reject=[{top_str}])")
-
-
-print("\n전체 dataset_pos 생성 시작...")
-for idx, (_, cfg) in enumerate(EXCAVATOR_PARTS_CONFIG.items()):
-    generate_class_dataset(cfg, idx)
-
-print("\n" + "=" * 60)
-print("dataset_pos 생성 완료!")
-print("=" * 60)
-
-finish_logging()
-
-print("\n시뮬레이션을 계속 실행합니다. 종료하려면 Ctrl+C")
-while simulation_app.is_running():
-    simulation_app.update()
-
-simulation_app.close()
+# ==========================================
+# 메인 실행
+# ==========================================
+if __name__ == "__main__":
+    print("="*60)
+    print("굴착기 부품 Pose Estimation 데이터셋 생성")
+    print("="*60)
+    
+    # USD 파일 스캔
+    parts_config = scan_usd_files(ASSETS_DIR)
+    print(f"발견된 USD: {len(parts_config)}개")
+    for name in parts_config:
+        print(f"  - {name}")
+    
+    # 출력 디렉토리 정리
+    if CLEAR_EXISTING and os.path.exists(OUTPUT_DIR):
+        print(f"\n기존 데이터 삭제 중: {OUTPUT_DIR}")
+        shutil.rmtree(OUTPUT_DIR)
+    os.makedirs(OUTPUT_DIR, exist_ok=True)
+    
+    # 각 클래스 처리
+    for idx, (name, config) in enumerate(parts_config.items()):
+        generate_class_dataset(config, idx, len(parts_config))
+        
+        # 다음 클래스 전 정리
+        if idx < len(parts_config) - 1:
+            print("\n스테이지 정리 중...")
+            rep.orchestrator.stop()
+            for _ in range(20):
+                simulation_app.update()
+                time.sleep(0.05)
+            time.sleep(1.0)
+    
+    # 전체 메타데이터
+    dataset_info = {
+        "name": "Excavator Parts Pose Estimation Dataset",
+        "num_classes": len(parts_config),
+        "images_per_class": IMAGES_PER_CLASS,
+        "classes": list(parts_config.keys()),
+        "created_at": time.strftime("%Y-%m-%d %H:%M:%S")
+    }
+    with open(os.path.join(OUTPUT_DIR, "dataset_info.json"), 'w', encoding='utf-8') as f:
+        json.dump(dataset_info, f, indent=2, ensure_ascii=False)
+    
+    print("\n" + "="*60)
+    print("데이터셋 생성 완료!")
+    print("="*60)
+    
+    # 결과 출력
+    for name in parts_config:
+        class_dir = os.path.join(OUTPUT_DIR, name)
+        if os.path.exists(class_dir):
+            count = len(glob.glob(os.path.join(class_dir, "rgb_*.png")))
+            print(f"  {name}: {count}장")
+    
+    print("\n종료하려면 Ctrl+C를 누르세요.")
+    while simulation_app.is_running():
+        simulation_app.update()
+    
+    simulation_app.close()
