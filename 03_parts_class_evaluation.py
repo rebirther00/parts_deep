@@ -387,7 +387,7 @@ def create_result_grid(image_paths, labels, predictions, confidences, class_name
     num_images = min(len(image_paths), max_images)
     num_rows = (num_images + num_cols - 1) // num_cols
     
-    text_height = 80
+    text_height = 100
     cell_width = img_size
     cell_height = img_size + text_height
     
@@ -445,10 +445,24 @@ def create_result_grid(image_paths, labels, predictions, confidences, class_name
         text_line1 = f"{symbol} Actual: {actual}"
         text_line2 = f"Pred: {predicted}"
         text_line3 = f"Conf: {conf:.1f}%"
+        # 어떤 원본 파일을 평가했는지 표시(상대 경로 우선)
+        try:
+            if args.dataset_dir:
+                rel = os.path.relpath(image_paths[idx], args.dataset_dir)
+            else:
+                # dataset_dir 미지정 시에도 class/rgb_####.png 형태로 짧게 표시
+                rel = os.path.join(os.path.basename(os.path.dirname(image_paths[idx])), os.path.basename(image_paths[idx]))
+        except Exception:
+            rel = os.path.basename(image_paths[idx])
+        # 너무 길면 잘라서 표시
+        if len(rel) > 34:
+            rel = "..." + rel[-31:]
+        text_line4 = f"src: {rel}"
         
         draw.text((x + 5, text_y), text_line1, fill=text_color, font=font)
         draw.text((x + 5, text_y + 20), text_line2, fill=(0, 0, 0), font=font)
         draw.text((x + 5, text_y + 40), text_line3, fill=(100, 100, 100), font=font)
+        draw.text((x + 5, text_y + 60), text_line4, fill=(60, 60, 60), font=font)
     
     # 결과 이미지 저장
     grid_image.save(OUTPUT_IMAGE_PATH, 'PNG', quality=95)
@@ -471,7 +485,7 @@ def create_wrong_predictions_grid(image_paths, labels, predictions, confidences,
     num_images = len(wrong_indices)
     num_rows = (num_images + num_cols - 1) // num_cols
     
-    text_height = 80
+    text_height = 100
     cell_width = img_size
     cell_height = img_size + text_height
     
@@ -516,6 +530,16 @@ def create_wrong_predictions_grid(image_paths, labels, predictions, confidences,
         actual = class_names[labels[data_idx]]
         predicted = class_names[predictions[data_idx]]
         conf = confidences[data_idx]
+        # 원본 파일 표시(상대 경로 우선)
+        try:
+            if args.dataset_dir:
+                rel = os.path.relpath(image_paths[data_idx], args.dataset_dir)
+            else:
+                rel = os.path.join(os.path.basename(os.path.dirname(image_paths[data_idx])), os.path.basename(image_paths[data_idx]))
+        except Exception:
+            rel = os.path.basename(image_paths[data_idx])
+        if len(rel) > 34:
+            rel = "..." + rel[-31:]
         
         # 배경색 (틀린 예측이므로 빨간색 계열)
         bg_color = (255, 220, 220)
@@ -525,10 +549,12 @@ def create_wrong_predictions_grid(image_paths, labels, predictions, confidences,
         text_line1 = f"X Actual: {actual}"
         text_line2 = f"Pred: {predicted}"
         text_line3 = f"Conf: {conf:.1f}%"
+        text_line4 = f"src: {rel}"
         
         draw.text((x + 5, text_y), text_line1, fill=(200, 0, 0), font=font)
         draw.text((x + 5, text_y + 20), text_line2, fill=(0, 0, 0), font=font)
         draw.text((x + 5, text_y + 40), text_line3, fill=(100, 100, 100), font=font)
+        draw.text((x + 5, text_y + 60), text_line4, fill=(60, 60, 60), font=font)
     
     # 결과 이미지 저장
     grid_image.save(OUTPUT_WRONG_IMAGE_PATH, 'PNG', quality=95)
