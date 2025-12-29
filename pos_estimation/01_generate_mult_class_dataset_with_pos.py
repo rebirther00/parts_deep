@@ -49,12 +49,12 @@ CLEAR_EXISTING = True
 CAMERA_ELEVATION_DEG = 35.0
 
 # 오브젝트 이동/회전 범위
-XY_OFFSET_RATIO = 0.15  # 부품 크기 대비 XY 오프셋 비율
-Z_LIFT_RATIO = 0.6  # 부품 크기 대비 Z 들어올림 비율
-Z_RANGE_RATIO = 0.2  # 추가 Z 변동 비율
+XY_OFFSET_RATIO = 0.10  # 부품 크기 대비 XY 오프셋 비율 (축소)
+Z_LIFT_RATIO = 1.0  # 부품 크기 대비 Z 들어올림 비율 (증가: 바닥 파묻힘 방지)
+Z_RANGE_RATIO = 0.1  # 추가 Z 변동 비율 (축소)
 
-ROLL_RANGE = (-45.0, 45.0)
-PITCH_RANGE = (-45.0, 45.0)
+ROLL_RANGE = (-20.0, 20.0)  # 축소 (테스트용)
+PITCH_RANGE = (-20.0, 20.0)  # 축소 (테스트용)
 YAW_RANGE = (0.0, 360.0)
 
 # 가시성 검증
@@ -114,12 +114,15 @@ def compute_world_aabb(stage):
     }
 
 
-def validate_bbox_data(bbox_data, labels_data, resolution, class_name):
+def validate_bbox_data(bbox_data, labels_data, resolution, class_name, debug=False):
     """BBox 데이터 검증"""
     if bbox_data is None or len(bbox_data) == 0:
         return False, "no_bbox", None
     
     id_to_labels = labels_data.get("idToLabels", {})
+    
+    if debug:
+        print(f"      [DEBUG] bbox count: {len(bbox_data)}, idToLabels: {id_to_labels}")
     
     best_bbox = None
     best_area = 0
@@ -136,11 +139,19 @@ def validate_bbox_data(bbox_data, labels_data, resolution, class_name):
         except:
             continue
         
-        # 클래스 확인
+        # 클래스 확인 - 더 유연한 매칭
         if semantic_id not in id_to_labels:
+            if debug:
+                print(f"      [DEBUG] semantic_id {semantic_id} not in idToLabels")
             continue
+        
         label_info = id_to_labels[semantic_id]
-        if class_name not in str(label_info):
+        # label_info가 dict인 경우 'class' 키 확인, 아니면 문자열 비교
+        label_class = label_info.get("class", str(label_info)) if isinstance(label_info, dict) else str(label_info)
+        
+        if class_name not in label_class:
+            if debug:
+                print(f"      [DEBUG] class_name '{class_name}' not in label_class '{label_class}'")
             continue
         
         area = (x_max - x_min) * (y_max - y_min)
@@ -388,12 +399,19 @@ def generate_class_dataset(part_config, class_index, total_classes):
             accepted = 0
             frame_idx = 0
             reject_counts = {}
+            last_log_frame = 0
             
             while accepted < IMAGES_PER_CLASS:
                 # 최대 시도 횟수 체크
                 if frame_idx >= IMAGES_PER_CLASS * (MAX_REJECTS_PER_ACCEPT + 1):
                     print(f"  ⚠️  최대 시도 초과, {accepted}장만 생성")
                     break
+                
+                # 10프레임마다 진행 로그 (디버깅용)
+                if frame_idx > 0 and frame_idx % 10 == 0 and frame_idx != last_log_frame:
+                    last_log_frame = frame_idx
+                    top3 = sorted(reject_counts.items(), key=lambda x: -x[1])[:3]
+                    print(f"    [진행] 시도: {frame_idx}, 채택: {accepted}, 거부사유: {top3}")
                 
                 # 1프레임 실행
                 rep.orchestrator.step()
@@ -423,7 +441,9 @@ def generate_class_dataset(part_config, class_index, total_classes):
                     with open(bbox_json, 'r') as f:
                         labels_data = json.load(f)
                     
-                    valid, reason, bbox_info = validate_bbox_data(bbox_data, labels_data, RESOLUTION, class_name)
+                    # 첫 5프레임만 디버깅 로그 출력
+                    debug_mode = (frame_idx <= 5)
+                    valid, reason, bbox_info = validate_bbox_data(bbox_data, labels_data, RESOLUTION, class_name, debug=debug_mode)
                     
                     if not valid:
                         reject_counts[reason] = reject_counts.get(reason, 0) + 1
