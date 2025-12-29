@@ -1,12 +1,17 @@
 # ==========================================
-# 굴착기 부품 데이터셋 생성 스크립트 (Pose Estimation용)
-# B안: step() 루프로 각 프레임마다 카메라 위치 추적
+# 굴착기 부품 데이터셋 생성 스크립트 (6DoF Pose Estimation용)
+# RGB + Depth + Pose 라벨 생성
 # ==========================================
 #
 # 핵심:
-# 1. class_estimation과 동일한 방식으로 이미지 생성
+# 1. RGB 이미지 + Depth 맵 동시 생성
 # 2. 각 프레임마다 카메라 prim에서 월드 좌표 읽기
 # 3. 카메라→오브젝트 상대 pose 계산하여 pose_####.json 저장
+#
+# 생성 파일:
+# - rgb_####.png: RGB 이미지 (1024x1024)
+# - distance_to_camera_####.npy: Depth 맵 (float32, 미터 단위)
+# - pose_####.json: 6DoF 라벨 (위치 + 자세)
 # ==========================================
 
 import os
@@ -36,10 +41,11 @@ from pxr import Usd, UsdGeom, Semantics, Gf
 # 설정
 # ==========================================
 ASSETS_DIR = "/home/rebirther/isaac-sim/assets"
-BASE_OUTPUT_DIR = os.path.join(PROJECT_DIR, "dataset_pos")
+BASE_OUTPUT_DIR = os.path.join(PROJECT_DIR, "dataset_pos_depth")  # Depth 포함 데이터셋
 IMAGES_PER_CLASS = 500
 RESOLUTION = (1024, 1024)
 CLEAR_EXISTING = True
+ENABLE_DEPTH = True  # Depth 맵 생성 활성화
 
 
 def scan_usd_files(assets_dir):
@@ -396,11 +402,16 @@ def generate_class_dataset(part_config, class_index, total_classes):
             
             print(f"  ✓ 프레임별 랜덤화 설정")
             
-            # Writer 설정
+            # Writer 설정 (RGB + Depth + BBox)
             writer = rep.WriterRegistry.get("BasicWriter")
-            writer.initialize(output_dir=class_output_dir, rgb=True, bounding_box_2d_tight=True)
+            writer.initialize(
+                output_dir=class_output_dir,
+                rgb=True,
+                distance_to_camera=ENABLE_DEPTH,  # Depth 맵 (카메라로부터 거리)
+                bounding_box_2d_tight=True
+            )
             writer.attach([render_product])
-            print(f"  ✓ Writer 설정")
+            print(f"  ✓ Writer 설정 (depth={ENABLE_DEPTH})")
             
             # 시뮬레이션 준비
             print(f"\n  🎬 데이터 생성 시작 ({IMAGES_PER_CLASS}장, step 루프)...")
@@ -486,7 +497,8 @@ def generate_class_dataset(part_config, class_index, total_classes):
                     "bbox_2d": bbox_info,
                     "image_info": {
                         "resolution": list(RESOLUTION),
-                        "rgb_file": f"rgb_{idx_str}.png"
+                        "rgb_file": f"rgb_{idx_str}.png",
+                        "depth_file": f"distance_to_camera_{idx_str}.npy" if ENABLE_DEPTH else None
                     },
                     "stage_info": {
                         "meters_per_unit": meters_per_unit,
@@ -567,10 +579,12 @@ if __name__ == "__main__":
     
     # 전체 메타데이터
     dataset_info = {
-        "name": "Excavator Parts Pose Dataset",
+        "name": "Excavator Parts 6DoF Pose Dataset (RGB + Depth)",
         "num_classes": len(parts_config),
         "images_per_class": IMAGES_PER_CLASS,
         "classes": list(parts_config.keys()),
+        "depth_enabled": ENABLE_DEPTH,
+        "resolution": list(RESOLUTION),
         "created_at": time.strftime("%Y-%m-%d %H:%M:%S")
     }
     with open(os.path.join(BASE_OUTPUT_DIR, "dataset_info.json"), 'w', encoding='utf-8') as f:
@@ -584,8 +598,9 @@ if __name__ == "__main__":
         class_dir = os.path.join(BASE_OUTPUT_DIR, name)
         if os.path.exists(class_dir):
             rgb_count = len(glob.glob(os.path.join(class_dir, "rgb_*.png")))
+            depth_count = len(glob.glob(os.path.join(class_dir, "distance_to_camera_*.npy")))
             pose_count = len(glob.glob(os.path.join(class_dir, "pose_*.json")))
-            print(f"  {name}: RGB {rgb_count}장, Pose {pose_count}개")
+            print(f"  {name}: RGB {rgb_count}장, Depth {depth_count}장, Pose {pose_count}개")
     
     print("\n종료하려면 Ctrl+C를 누르세요.")
     while simulation_app.is_running():
