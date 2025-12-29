@@ -643,6 +643,9 @@ def generate_class_dataset(part_config, class_index: int):
     part_center = (float(center[0]), float(center[1]), float(center[2]))
     part_size = float(max(size[0], size[1], size[2]))
     floor_height = float(world_min[axis_index])
+    # 스케일(단위) 진단용: stage unit 기준 값들을 "미터"로 환산
+    part_size_m = float(part_size * meters_per_unit)
+    floor_height_m = float(floor_height * meters_per_unit)
 
     # 루트 프림 찾기(부품 이동용)
     root_prim = _find_root_xform_prim(stage)
@@ -653,6 +656,12 @@ def generate_class_dataset(part_config, class_index: int):
     root_path = root_prim.GetPath().pathString
     print(f"  Root prim: {root_path}")
     print(f"  UpAxis: {up_axis}, metersPerUnit: {meters_per_unit}")
+    print(f"  [스케일 진단] part_size: {part_size:.6f} (stage unit) = {part_size_m:.6f} m")
+    print(f"  [스케일 진단] floor_height: {floor_height:.6f} (stage unit) = {floor_height_m:.6f} m")
+    if part_size_m < 0.10:
+        print("  ⚠️  [경고] 부품이 '미터 기준으로 매우 작게' 해석되고 있습니다. (USD 단위/스케일 문제 가능성 큼)")
+    if part_size_m > 20.0:
+        print("  ⚠️  [경고] 부품이 '미터 기준으로 매우 크게' 해석되고 있습니다. (USD 단위/스케일 문제 가능성 큼)")
 
     # roll/pitch 시 바닥 관통 방지용: root local AABB(정적) 사전 계산
     root_local_aabb = compute_root_local_aabb_from_mesh_extents(stage, root_prim, time_code)
@@ -744,6 +753,14 @@ def generate_class_dataset(part_config, class_index: int):
             part_center[2] + camera_distance * 0.5,
         )
         cam_lookat = part_center
+        # 카메라/이동 범위 진단 로그 (stage unit + meter)
+        xy_range_init_u = float(XY_RANGE_M / meters_per_unit) if meters_per_unit > 0 else 0.0
+        z_min_u = float(Z_RANGE_M[0] / meters_per_unit) if meters_per_unit > 0 else 0.0
+        z_max_u = float(Z_RANGE_M[1] / meters_per_unit) if meters_per_unit > 0 else 0.0
+        print(f"  [진단] camera_distance: {camera_distance:.4f} (unit) = {camera_distance * meters_per_unit:.4f} m")
+        print(f"  [진단] XY_RANGE_M: ±{XY_RANGE_M:.3f} m (unit ±{xy_range_init_u:.3f})")
+        print(f"  [진단] Z_RANGE_M: {Z_RANGE_M[0]:.3f}~{Z_RANGE_M[1]:.3f} m (unit {z_min_u:.3f}~{z_max_u:.3f})")
+        print(f"  [진단] RPY(deg): roll{ROLL_DEG_RANGE}, pitch{PITCH_DEG_RANGE}, yaw{YAW_DEG_RANGE}")
 
         camera = rep.create.camera(position=cam_pos, look_at=cam_lookat)
         render_product = rep.create.render_product(camera, resolution=RESOLUTION)
@@ -809,6 +826,8 @@ def generate_class_dataset(part_config, class_index: int):
         reject_count = 0
         # translate는 "절대값 set"이 아니라, 현재 위치(base)에서 dx/dy 오프셋으로 적용한다.
         base_t_world = _get_translate_op_value_or_zero(root_prim)
+        # reject 사유 통계(진단용)
+        reject_reasons = {}
         # 바닥 관통 방지용 파라미터(단위: stage unit)
         # - clearance는 아주 작게(약간만 띄우기). metersPerUnit을 사용해 대략 2mm 정도로 맞춘다.
         clearance_m = 0.002
@@ -891,6 +910,7 @@ def generate_class_dataset(part_config, class_index: int):
                     # 무효 프레임: tmp 파일 삭제
                     _move_or_delete_attempt_files(tmp_output_dir, attempt_idx, class_output_dir, accepted, accept=False)
                     reject_count += 1
+                    reject_reasons[reason] = reject_reasons.get(reason, 0) + 1
                     # 과거에는 reject가 많으면 XY 이동 범위를 줄였지만,
                     # 사용자 요청에 따라 이동 범위는 유지한다(이동이 눈에 보이도록).
                     if XY_RANGE_SHRINK_EVERY_REJECTS and XY_RANGE_SHRINK_FACTOR:
@@ -960,15 +980,22 @@ def generate_class_dataset(part_config, class_index: int):
                 attempt_idx += 1
 
                 if accepted % 50 == 0:
-                    print(f"  진행: {accepted}/{IMAGES_PER_CLASS} (attempt={attempt_idx}, reject={reject_count}, xy_range={xy_range:.4f})")
+                    # 상위 3개 reject 사유만 요약 출력(로그 과다 방지)
+                    top = sorted(reject_reasons.items(), key=lambda x: -x[1])[:3]
+                    top_str = ", ".join([f"{k}:{v}" for k, v in top]) if top else "-"
+                    print(f"  진행: {accepted}/{IMAGES_PER_CLASS} (attempt={attempt_idx}, reject={reject_count}, top_reject=[{top_str}])")
         finally:
             # tmp 디렉토리 정리(중간 중단/예외가 발생해도 남지 않게)
             shutil.rmtree(tmp_output_dir, ignore_errors=True)
 
         if accepted < IMAGES_PER_CLASS:
-            print(f"  ⚠️  유효 프레임 부족: {accepted}/{IMAGES_PER_CLASS} (attempt={attempt_idx}, reject={reject_count})")
+            top = sorted(reject_reasons.items(), key=lambda x: -x[1])[:10]
+            top_str = ", ".join([f"{k}:{v}" for k, v in top]) if top else "-"
+            print(f"  ⚠️  유효 프레임 부족: {accepted}/{IMAGES_PER_CLASS} (attempt={attempt_idx}, reject={reject_count}, top_reject=[{top_str}])")
         else:
-            print(f"  ✓ {display_name}: {IMAGES_PER_CLASS} 프레임 생성 완료 (reject={reject_count}, attempt={attempt_idx})")
+            top = sorted(reject_reasons.items(), key=lambda x: -x[1])[:10]
+            top_str = ", ".join([f"{k}:{v}" for k, v in top]) if top else "-"
+            print(f"  ✓ {display_name}: {IMAGES_PER_CLASS} 프레임 생성 완료 (reject={reject_count}, attempt={attempt_idx}, top_reject=[{top_str}])")
 
 
 print("\n전체 dataset_pos 생성 시작...")
