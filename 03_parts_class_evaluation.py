@@ -14,6 +14,7 @@ import os
 import sys
 import json
 import argparse
+import glob
 
 # ================================================================================
 # 명령줄 인자 파싱
@@ -23,6 +24,14 @@ parser.add_argument('-cpu', '--cpu', action='store_true',
                     help='CPU로 강제 실행')
 parser.add_argument('--num_samples', type=int, default=None,
                     help='평가할 샘플 수 (기본값: 전체 테스트셋)')
+parser.add_argument('--dataset_dir', type=str, default=None,
+                    help='평가에 사용할 데이터셋 경로 (예: dataset_pos). 미지정 시 training_indices_parts.json의 test_paths 사용')
+parser.add_argument('--bbox_crop', action='store_true',
+                    help='bounding_box_2d_tight로 부품 bbox crop 후 평가 (학습을 --bbox_crop로 했다면 평가도 동일 옵션 권장)')
+parser.add_argument('--test_size', type=float, default=0.2,
+                    help='dataset_dir를 스캔해 split을 새로 만들 때 사용할 test 비율(기본 0.2)')
+parser.add_argument('--seed', type=int, default=42,
+                    help='dataset_dir를 스캔해 split을 새로 만들 때 사용할 랜덤 시드(기본 42)')
 args = parser.parse_args()
 
 # ================================================================================
@@ -52,22 +61,76 @@ print("=" * 80)
 print("굴착기 부품 분류 모델 평가")
 print("=" * 80)
 
-# 학습 데이터 정보 로드
+def scan_dataset_for_eval(dataset_dir, class_names):
+    """dataset_dir에서 rgb_*.png를 스캔하여 평가 경로 리스트 생성 (class_names에 있는 클래스만 포함)"""
+    test_paths = []
+    for class_name in class_names:
+        class_dir = os.path.join(dataset_dir, class_name)
+        if not os.path.isdir(class_dir):
+            continue
+        pngs = sorted(glob.glob(os.path.join(class_dir, "rgb_*.png")))
+        test_paths.extend(pngs)
+    return test_paths
+
+def split_paths_train_test(image_paths, class_names, test_size=0.2, seed=42):
+    """
+    이미지 경로 목록을 클래스 비율 유지(stratify)로 train/test split.
+    라벨은 '부모 폴더명'으로 결정.
+    """
+    labels = []
+    for p in image_paths:
+        cls = os.path.basename(os.path.dirname(p))
+        labels.append(class_names.index(cls))
+
+    indices = list(range(len(image_paths)))
+    train_idx, test_idx = train_test_split(
+        indices,
+        test_size=test_size,
+        random_state=seed,
+        stratify=labels
+    )
+    train_paths = [image_paths[i] for i in train_idx]
+    test_paths = [image_paths[i] for i in test_idx]
+    return train_paths, test_paths
+
+
+# 학습 데이터 정보 로드(클래스 순서/매핑은 학습 결과를 그대로 사용)
 if not os.path.exists(TRAIN_INDICES_PATH):
-    raise FileNotFoundError(f"학습 데이터 정보 파일을 찾을 수 없습니다: {TRAIN_INDICES_PATH}\n"
-                           f"먼저 02_parts_classification.py를 실행하세요.")
+    raise FileNotFoundError(
+        f"학습 데이터 정보 파일을 찾을 수 없습니다: {TRAIN_INDICES_PATH}\n"
+        f"먼저 02_parts_classification.py를 실행하세요."
+    )
 
 with open(TRAIN_INDICES_PATH, 'r', encoding='utf-8') as f:
     train_data_info = json.load(f)
 
-test_paths = train_data_info['test_paths']
 class_names = train_data_info['class_names']
 num_classes = len(class_names)
+
+if args.dataset_dir:
+    # 1) 기본: 학습 시 저장된 test_paths를 재사용(8:2 split 유지)
+    saved_test_paths = train_data_info.get("test_paths", [])
+    test_paths = [p for p in saved_test_paths if p.startswith(args.dataset_dir)]
+
+    # 2) 만약 학습 인덱스가 다른 데이터셋을 가리키면(dataset_dir prefix 매칭 실패),
+    #    dataset_dir를 스캔해서 새로 8:2 split을 만든 뒤 test만 사용
+    if len(test_paths) == 0:
+        all_paths = scan_dataset_for_eval(args.dataset_dir, class_names)
+        if len(all_paths) == 0:
+            raise FileNotFoundError(f"dataset_dir에서 rgb_*.png를 찾지 못했습니다: {args.dataset_dir}")
+        _, test_paths = split_paths_train_test(all_paths, class_names, test_size=args.test_size, seed=args.seed)
+else:
+    test_paths = train_data_info['test_paths']
 
 print(f"\n모델 파일: {MODEL_PATH}")
 print(f"테스트 데이터: {len(test_paths)}장")
 print(f"클래스 수: {num_classes}개")
 print(f"클래스 이름: {class_names}")
+if args.dataset_dir:
+    print(f"평가 데이터셋 경로: {args.dataset_dir}")
+    print(f"split 방식: {'training_indices_parts.json의 test_paths 재사용' if len(train_data_info.get('test_paths', [])) > 0 else 'dataset_dir 스캔 후 새 split'}")
+    print(f"test_size(새 split 시): {args.test_size}, seed(새 split 시): {args.seed}")
+print(f"bbox_crop 평가: {args.bbox_crop}")
 
 # 평가할 샘플 수 결정
 if args.num_samples and args.num_samples < len(test_paths):
@@ -82,10 +145,11 @@ if args.num_samples and args.num_samples < len(test_paths):
 class ExcavatorPartsDataset(Dataset):
     """굴착기 부품 이미지 Dataset 클래스"""
     
-    def __init__(self, image_paths, class_names, transform=None):
+    def __init__(self, image_paths, class_names, transform=None, bbox_crop=False):
         self.image_paths = image_paths
         self.class_names = class_names
         self.transform = transform
+        self.bbox_crop = bbox_crop
         
         # 경로에서 클래스 인덱스 추출
         self.labels = []
@@ -102,11 +166,48 @@ class ExcavatorPartsDataset(Dataset):
     
     def __getitem__(self, idx):
         # 이미지 로드
-        image = Image.open(self.image_paths[idx])
+        img_path = self.image_paths[idx]
+        image = Image.open(img_path)
         
         if image.mode != 'RGB':
             image = image.convert('RGB')
         
+        # bbox crop (옵션)
+        if self.bbox_crop:
+            frame_num = os.path.basename(img_path).replace('rgb_', '').replace('.png', '')
+            class_dir = os.path.dirname(img_path)
+            bbox_file = os.path.join(class_dir, f'bounding_box_2d_tight_{frame_num}.npy')
+            label_file = os.path.join(class_dir, f'bounding_box_2d_tight_labels_{frame_num}.json')
+            try:
+                if os.path.exists(bbox_file) and os.path.exists(label_file):
+                    bboxes = np.load(bbox_file, allow_pickle=True)
+                    with open(label_file, 'r') as f:
+                        labels_map = json.load(f)
+                    # background가 아닌 bbox 중 가장 큰 bbox 선택
+                    best = None
+                    best_area = -1
+                    for bb in bboxes:
+                        sid = str(int(bb['semanticId']))
+                        cls = labels_map.get(sid, {}).get('class', 'unknown')
+                        if cls == 'background':
+                            continue
+                        x_min = int(bb['x_min']); y_min = int(bb['y_min'])
+                        x_max = int(bb['x_max']); y_max = int(bb['y_max'])
+                        area = max(0, x_max - x_min) * max(0, y_max - y_min)
+                        if area > best_area:
+                            best_area = area
+                            best = (x_min, y_min, x_max, y_max)
+                    if best is not None:
+                        w, h = image.size
+                        x_min, y_min, x_max, y_max = best
+                        x_min = max(0, min(w - 1, x_min))
+                        y_min = max(0, min(h - 1, y_min))
+                        x_max = max(0, min(w - 1, x_max))
+                        y_max = max(0, min(h - 1, y_max))
+                        image = image.crop((x_min, y_min, x_max + 1, y_max + 1))
+            except Exception:
+                pass
+
         label = torch.tensor(self.labels[idx], dtype=torch.long)
         
         if self.transform:
@@ -124,7 +225,7 @@ eval_transform = transforms.Compose([
 ])
 
 # Dataset 및 DataLoader 생성
-test_dataset = ExcavatorPartsDataset(test_paths, class_names, transform=eval_transform)
+test_dataset = ExcavatorPartsDataset(test_paths, class_names, transform=eval_transform, bbox_crop=args.bbox_crop)
 test_loader = DataLoader(test_dataset, batch_size=BATCH_SIZE, shuffle=False)
 
 print(f"\n테스트 배치 개수: {len(test_loader)}")
@@ -193,6 +294,40 @@ def get_original_image(path):
     image = Image.open(path)
     if image.mode != 'RGB':
         image = image.convert('RGB')
+    # 시각화도 평가 입력과 맞추기 위해 bbox_crop 옵션이면 crop된 이미지를 보여줌
+    if args.bbox_crop:
+        frame_num = os.path.basename(path).replace('rgb_', '').replace('.png', '')
+        class_dir = os.path.dirname(path)
+        bbox_file = os.path.join(class_dir, f'bounding_box_2d_tight_{frame_num}.npy')
+        label_file = os.path.join(class_dir, f'bounding_box_2d_tight_labels_{frame_num}.json')
+        try:
+            if os.path.exists(bbox_file) and os.path.exists(label_file):
+                bboxes = np.load(bbox_file, allow_pickle=True)
+                with open(label_file, 'r') as f:
+                    labels_map = json.load(f)
+                best = None
+                best_area = -1
+                for bb in bboxes:
+                    sid = str(int(bb['semanticId']))
+                    cls = labels_map.get(sid, {}).get('class', 'unknown')
+                    if cls == 'background':
+                        continue
+                    x_min = int(bb['x_min']); y_min = int(bb['y_min'])
+                    x_max = int(bb['x_max']); y_max = int(bb['y_max'])
+                    area = max(0, x_max - x_min) * max(0, y_max - y_min)
+                    if area > best_area:
+                        best_area = area
+                        best = (x_min, y_min, x_max, y_max)
+                if best is not None:
+                    w, h = image.size
+                    x_min, y_min, x_max, y_max = best
+                    x_min = max(0, min(w - 1, x_min))
+                    y_min = max(0, min(h - 1, y_min))
+                    x_max = max(0, min(w - 1, x_max))
+                    y_max = max(0, min(h - 1, y_max))
+                    image = image.crop((x_min, y_min, x_max + 1, y_max + 1))
+        except Exception:
+            pass
     return image
 
 print("\n예측 결과:")
