@@ -201,16 +201,55 @@ def _find_root_xform_prim(stage: Usd.Stage):
     """
     부품을 '하나의 강체'처럼 이동시키기 위한 루트 Xform prim을 찾습니다.
     우선순위:
-    1) DefaultPrim이 Xformable이면 그것 사용
-    2) /World/* 형태의 첫 번째 Xformable prim 사용
+    1) DefaultPrim이 Xformable이면 그것 사용(단, /World는 제외)
+    2) /World 아래에서 "메쉬(UsdGeom.Mesh)를 포함하는" 가장 가까운 Xformable prim 사용
+    3) /World/* 형태의 첫 번째 Xformable prim 사용(최후 수단)
+
+    ⚠️ 주의:
+    - /World를 루트로 잡아 움직이면 스테이지 전체가 이동되어 카메라 시야 밖으로 튀거나,
+      semantics가 비정상 동작하는 현상이 발생할 수 있어 반드시 피합니다.
     """
     default_prim = stage.GetDefaultPrim()
-    if default_prim and default_prim.IsA(UsdGeom.Xformable):
+    if default_prim and default_prim.IsA(UsdGeom.Xformable) and default_prim.GetPath().pathString != "/World":
         return default_prim
 
+    # 2) /World 아래에서 메쉬를 포함하는 Xform prim 찾기
+    def _has_mesh_descendant(p: Usd.Prim) -> bool:
+        try:
+            for ch in Usd.PrimRange(p):
+                if ch.IsA(UsdGeom.Mesh):
+                    return True
+        except Exception:
+            return False
+        return False
+
+    best = None
+    best_depth = 10**9
+    for prim in stage.Traverse():
+        path = prim.GetPath().pathString
+        if path == "/World":
+            continue
+        if not prim.IsA(UsdGeom.Xformable):
+            continue
+        # /World 이하만 고려
+        if not path.startswith("/World/"):
+            continue
+        # 너무 깊은 곳의 Xform을 고르면 부분만 움직일 수 있어, 가능한 한 상위(얕은) 루트를 선호
+        depth = path.count("/")
+        if depth >= best_depth:
+            continue
+        if _has_mesh_descendant(prim):
+            best = prim
+            best_depth = depth
+
+    if best:
+        return best
+
+    # 3) 최후 수단: /World/* 형태의 첫 Xformable prim
     root_candidate = None
     for prim in stage.Traverse():
-        if prim.GetPath().pathString.count("/") == 2 and prim.IsA(UsdGeom.Xformable) and prim.GetPath() != "/World":
+        path = prim.GetPath().pathString
+        if path.count("/") == 2 and prim.IsA(UsdGeom.Xformable) and path != "/World":
             root_candidate = prim
             break
     return root_candidate
@@ -238,6 +277,37 @@ def _set_xform_translate_rotate_xyz(prim: Usd.Prim, t_xyz, r_xyz_deg):
         r_op = xform.AddRotateXYZOp()
     t_op.Set(Gf.Vec3d(float(t_xyz[0]), float(t_xyz[1]), float(t_xyz[2])))
     r_op.Set(Gf.Vec3f(float(r_xyz_deg[0]), float(r_xyz_deg[1]), float(r_xyz_deg[2])))
+
+def _get_translate_op_value_or_zero(prim: Usd.Prim):
+    """prim의 translate op 값(없으면 0,0,0)을 반환"""
+    xform = UsdGeom.Xformable(prim)
+    for op in xform.GetOrderedXformOps():
+        if op.GetOpType() == UsdGeom.XformOp.TypeTranslate:
+            v = op.Get()
+            try:
+                return np.array([float(v[0]), float(v[1]), float(v[2])], dtype=float)
+            except Exception:
+                break
+    return np.array([0.0, 0.0, 0.0], dtype=float)
+
+def _apply_planar_offset(base_t_xyz, dx: float, dy: float, axis_index: int):
+    """
+    UpAxis(axis_index)에 수직인 평면에 (dx,dy) 오프셋을 적용합니다.
+    - z-up(axis_index=2): (x,y)에 dx,dy
+    - y-up(axis_index=1): (x,z)에 dx,dy
+    - x-up(axis_index=0): (y,z)에 dx,dy
+    """
+    t = np.array(base_t_xyz, dtype=float).copy()
+    if axis_index == 2:
+        t[0] += dx
+        t[1] += dy
+    elif axis_index == 1:
+        t[0] += dx
+        t[2] += dy
+    else:
+        t[1] += dx
+        t[2] += dy
+    return t
 
 
 def _compute_K_from_fov_deg(width: int, height: int, fov_deg: float):
@@ -609,7 +679,10 @@ def generate_class_dataset(part_config, class_index: int):
         # 카메라 고정(A안 느낌): "부품 전체가 보이도록" 거리 자동 산정 + 사선 위치 고정
         part_diagonal = float(math.sqrt(float(size[0]) ** 2 + float(size[1]) ** 2 + float(size[2]) ** 2))
         camera_fov_rad = math.radians(FOV_DEG)
-        min_camera_distance = (part_diagonal / 2.0) / math.tan(camera_fov_rad / 2.0) / 0.8
+        # XY 이동(오프셋)까지 고려해 프레이밍 여유를 준다. (truncated_bbox 감소 목적)
+        xy_range_init = float(part_size * XY_RANGE_RATIO)
+        effective_radius = (part_diagonal / 2.0) + (xy_range_init * 1.2)
+        min_camera_distance = (effective_radius) / math.tan(camera_fov_rad / 2.0) / 0.82
         camera_distance = min_camera_distance * 1.15
 
         # 카메라 위치(사선): up축 기준으로 위쪽(+up) + 약간 옆(+right)
@@ -682,6 +755,8 @@ def generate_class_dataset(part_config, class_index: int):
         # (카메라는 고정, 조명/배경은 trigger에서 변함)
         xy_range = part_size * XY_RANGE_RATIO
         reject_count = 0
+        # translate는 "절대값 set"이 아니라, 현재 위치(base)에서 dx/dy 오프셋으로 적용한다.
+        base_t_world = _get_translate_op_value_or_zero(root_prim)
 
         if not (hasattr(rep.orchestrator, "step") or hasattr(rep.orchestrator, "run")):
             raise RuntimeError("rep.orchestrator.step/run API를 찾을 수 없습니다. Isaac Sim 버전을 확인하세요.")
@@ -700,11 +775,10 @@ def generate_class_dataset(part_config, class_index: int):
                 pitch = float(np.random.uniform(PITCH_DEG_RANGE[0], PITCH_DEG_RANGE[1]))
                 yaw = float(np.random.uniform(YAW_DEG_RANGE[0], YAW_DEG_RANGE[1]))
 
-                # base 위치: 바닥 위에 놓이도록(초기 바닥 기준)
-                # 여기서는 "기준 중심(part_center)"를 테이블 기준점으로 쓰고, XY만 이동
-                t_world_obj = np.array([part_center[0] + dx, part_center[1] + dy, part_center[2]], dtype=float)
-                # 높이축 정렬: z-up이면 z를 조정. y-up/x-up도 동일 로직으로 처리
-                t_world_obj[axis_index] = part_center[axis_index] + dz
+                # base 위치 + (dx,dy) 오프셋 (UpAxis 고려)
+                # 높이축(up)은 base 값을 유지하고, planar 축만 움직인다.
+                t_world_obj = _apply_planar_offset(base_t_world, dx, dy, axis_index)
+                t_world_obj[axis_index] = base_t_world[axis_index] + dz
 
                 # 2) USD에 적용(rotateXYZ)
                 _set_xform_translate_rotate_xyz(root_prim, t_world_obj, (roll, pitch, yaw))
