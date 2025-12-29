@@ -98,6 +98,16 @@ MAX_ATTEMPTS_MULTIPLIER = 10  # IMAGES_PER_CLASS의 N배까지 시도
 XY_RANGE_SHRINK_EVERY_REJECTS = None
 XY_RANGE_SHRINK_FACTOR = None
 
+# ===== 스케일 자동 보정 (B안) =====
+# - arm_link_30_notmat처럼 metersPerUnit이 0.01이면 "4 stage unit = 4cm"로 해석되어 너무 작게 보임.
+# - USD 파일을 수정(A안)하기 어렵다면, 생성 스크립트에서 root prim에 uniform scale을 적용해
+#   "미터 기준 크기"로 맞춰서 bbox/no_object_bbox 문제를 완화한다.
+ENABLE_AUTO_SCALE_FIX = True
+# metersPerUnit이 이 값보다 작으면(예: 0.01) 자동 스케일 보정을 적용
+AUTO_SCALE_MPU_THRESHOLD = 0.1
+# 보정 방식: scale_factor = 1.0 / metersPerUnit  (0.01 -> 100)
+AUTO_SCALE_MAX_FACTOR = 1000.0  # 안전장치
+
 
 # =========================
 # 유틸
@@ -323,6 +333,19 @@ def _set_xform_translate_rotate_xyz(prim: Usd.Prim, t_xyz, r_xyz_deg):
         r_op = xform.AddRotateXYZOp()
     t_op.Set(Gf.Vec3d(float(t_xyz[0]), float(t_xyz[1]), float(t_xyz[2])))
     r_op.Set(Gf.Vec3f(float(r_xyz_deg[0]), float(r_xyz_deg[1]), float(r_xyz_deg[2])))
+
+def _set_xform_scale_xyz(prim: Usd.Prim, s_xyz):
+    """prim에 scale(op)를 설정합니다."""
+    xform = UsdGeom.Xformable(prim)
+    ops = xform.GetOrderedXformOps()
+    s_op = None
+    for op in ops:
+        if op.GetOpType() == UsdGeom.XformOp.TypeScale:
+            s_op = op
+            break
+    if s_op is None:
+        s_op = xform.AddScaleOp()
+    s_op.Set(Gf.Vec3f(float(s_xyz[0]), float(s_xyz[1]), float(s_xyz[2])))
 
 def _get_translate_op_value_or_zero(prim: Usd.Prim):
     """prim의 translate op 값(없으면 0,0,0)을 반환"""
@@ -663,6 +686,36 @@ def generate_class_dataset(part_config, class_index: int):
     if part_size_m > 20.0:
         print("  ⚠️  [경고] 부품이 '미터 기준으로 매우 크게' 해석되고 있습니다. (USD 단위/스케일 문제 가능성 큼)")
 
+    # ===== B안: USD 단위/스케일 자동 보정 =====
+    # - metersPerUnit이 0.01인 USD는 cm 단위로 작성된 경우가 많아, 시뮬레이션에서 100배 작게 보일 수 있음
+    # - root prim에 uniform scale을 적용해 "미터 기준" 크기로 맞춘다.
+    applied_scale = np.array([1.0, 1.0, 1.0], dtype=float)
+    if ENABLE_AUTO_SCALE_FIX and meters_per_unit > 0 and meters_per_unit < AUTO_SCALE_MPU_THRESHOLD:
+        scale_factor = float(min(AUTO_SCALE_MAX_FACTOR, 1.0 / meters_per_unit))
+        if scale_factor > 1.0 + 1e-6:
+            applied_scale = np.array([scale_factor, scale_factor, scale_factor], dtype=float)
+            print(f"  ✅ [스케일 보정] metersPerUnit={meters_per_unit:.6f} → root scale x{scale_factor:.3f} 적용")
+            _set_xform_scale_xyz(root_prim, applied_scale)
+            # 스케일 적용 후 시뮬레이션 업데이트 및 AABB 재계산(카메라/바닥/진단 값 일관성 확보)
+            for _ in range(5):
+                simulation_app.update()
+                time.sleep(0.02)
+            aabb2 = compute_world_aabb_from_meshes(stage, time_code)
+            if aabb2:
+                world_min = aabb2["world_min"]
+                world_max = aabb2["world_max"]
+                size = aabb2["size"]
+                center = aabb2["center"]
+                part_center = (float(center[0]), float(center[1]), float(center[2]))
+                part_size = float(max(size[0], size[1], size[2]))
+                floor_height = float(world_min[axis_index])
+                part_size_m = float(part_size * meters_per_unit)
+                floor_height_m = float(floor_height * meters_per_unit)
+                print(f"  [스케일 보정 후] part_size: {part_size:.6f} (unit) = {part_size_m:.6f} m")
+                print(f"  [스케일 보정 후] floor_height: {floor_height:.6f} (unit) = {floor_height_m:.6f} m")
+            else:
+                print("  ⚠️  [스케일 보정] AABB 재계산 실패(계속 진행)")
+
     # roll/pitch 시 바닥 관통 방지용: root local AABB(정적) 사전 계산
     root_local_aabb = compute_root_local_aabb_from_mesh_extents(stage, root_prim, time_code)
     if not root_local_aabb:
@@ -688,6 +741,7 @@ def generate_class_dataset(part_config, class_index: int):
         "up_axis": str(up_axis),
         "axis_index": int(axis_index),
         "meters_per_unit": meters_per_unit,
+        "applied_root_scale_xyz": [float(applied_scale[0]), float(applied_scale[1]), float(applied_scale[2])],
         "background_mode": BACKGROUND_MODE,
         "background_ratios": BACKGROUND_RATIOS if BACKGROUND_MODE == "random" else None,
     }
@@ -874,7 +928,9 @@ def generate_class_dataset(part_config, class_index: int):
                         for y in (mn[1], mx[1]):
                             for z in (mn[2], mx[2]):
                                 p = np.array([x, y, z], dtype=float)
-                                wp = t_world_obj + (R_world_obj @ p)
+                                # scale 보정이 적용된 경우, root local 좌표도 동일하게 scale되어 월드로 변환됨
+                                p_scaled = p * applied_scale
+                                wp = t_world_obj + (R_world_obj @ p_scaled)
                                 min_up = min(min_up, float(wp[axis_index]))
                     target_up = float(floor_height) + clearance_u
                     if min_up < target_up:
@@ -895,11 +951,14 @@ def generate_class_dataset(part_config, class_index: int):
                 bbox_npy = os.path.join(tmp_output_dir, f"bounding_box_2d_tight_{fid}.npy")
                 bbox_lbl = os.path.join(tmp_output_dir, f"bounding_box_2d_tight_labels_{fid}.json")
 
-                ready = _wait_for_files([rgb_png, bbox_npy, bbox_lbl], timeout_s=3.0, poll_s=0.05)
-                if not ready:
-                    # 파일이 늦게 생성되는 경우가 있어, 일단 거부 처리하되 가능한 범위에서 정리한다.
+                # writer 출력이 비동기일 수 있어, bbox/labels와 rgb를 분리해서 대기한다.
+                # - bbox/labels: 유효성 판단에 필요
+                # - rgb: accept될 때만 최종 저장에 필요
+                ready_bbox = _wait_for_files([bbox_npy, bbox_lbl], timeout_s=3.0, poll_s=0.05)
+                if not ready_bbox:
                     _move_or_delete_attempt_files(tmp_output_dir, attempt_idx, class_output_dir, accepted, accept=False)
                     reject_count += 1
+                    reject_reasons["writer_timeout_bbox"] = reject_reasons.get("writer_timeout_bbox", 0) + 1
                     attempt_idx += 1
                     continue
 
@@ -917,6 +976,15 @@ def generate_class_dataset(part_config, class_index: int):
                         if reject_count % int(XY_RANGE_SHRINK_EVERY_REJECTS) == 0:
                             xy_range *= float(XY_RANGE_SHRINK_FACTOR)
                             print(f"  ⚠️  reject {reject_count}회 발생 → XY 이동 범위 축소: {xy_range:.4f} (reason={reason})")
+                    attempt_idx += 1
+                    continue
+
+                # accept 후보: rgb가 아직 안 내려왔으면 조금 더 기다린다.
+                ready_rgb = _wait_for_files([rgb_png], timeout_s=5.0, poll_s=0.05)
+                if not ready_rgb:
+                    _move_or_delete_attempt_files(tmp_output_dir, attempt_idx, class_output_dir, accepted, accept=False)
+                    reject_count += 1
+                    reject_reasons["writer_timeout_rgb"] = reject_reasons.get("writer_timeout_rgb", 0) + 1
                     attempt_idx += 1
                     continue
 
