@@ -1,27 +1,20 @@
 # ==========================================
 # 굴착기 부품 데이터셋 생성 스크립트 (Pose Estimation용)
-# Replicator rep.modify.pose() 사용 버전
+# class_estimation 코드 기반 - 안정적으로 작동하는 버전
 # ==========================================
 #
-# 핵심 원칙:
-# 1. 카메라 고정 (oblique view)
-# 2. 오브젝트에 rep.modify.pose() 적용하여 이동/회전
-# 3. Domain Randomization (조명, 배경 색상)
-# 4. 80% 이상 가시성 검증 (rejection sampling)
+# 핵심: class_estimation과 동일한 방식으로 이미지 생성 후,
+#       bbox 파일을 파싱하여 pose 라벨(pose_####.json) 추가 저장
 # ==========================================
 
 import os
 import sys
+import glob
 import shutil
 import json
 import time
-import math
-import random
-import glob
 import numpy as np
-from pathlib import Path
 
-# 프로젝트 경로 설정
 PROJECT_DIR = os.path.dirname(os.path.abspath(__file__))
 REPO_DIR = os.path.dirname(PROJECT_DIR)
 if REPO_DIR not in sys.path:
@@ -40,28 +33,10 @@ from pxr import Usd, UsdGeom, Semantics, Gf
 # 설정
 # ==========================================
 ASSETS_DIR = "/home/rebirther/isaac-sim/assets"
-OUTPUT_DIR = os.path.join(PROJECT_DIR, "dataset_pos")
+BASE_OUTPUT_DIR = os.path.join(PROJECT_DIR, "dataset_pos")
 IMAGES_PER_CLASS = 500
 RESOLUTION = (1024, 1024)
 CLEAR_EXISTING = True
-
-# 카메라 설정 (oblique view - 35도 각도로 내려다봄)
-CAMERA_ELEVATION_DEG = 35.0
-
-# 오브젝트 이동/회전 범위
-XY_OFFSET_RATIO = 0.10  # 부품 크기 대비 XY 오프셋 비율 (축소)
-Z_LIFT_RATIO = 1.0  # 부품 크기 대비 Z 들어올림 비율 (증가: 바닥 파묻힘 방지)
-Z_RANGE_RATIO = 0.1  # 추가 Z 변동 비율 (축소)
-
-ROLL_RANGE = (-20.0, 20.0)  # 축소 (테스트용)
-PITCH_RANGE = (-20.0, 20.0)  # 축소 (테스트용)
-YAW_RANGE = (0.0, 360.0)
-
-# 가시성 검증
-MIN_VISIBILITY = 0.80
-MIN_BBOX_AREA_RATIO = 0.02
-EDGE_MARGIN = 10
-MAX_REJECTS_PER_ACCEPT = 20
 
 
 def scan_usd_files(assets_dir):
@@ -79,7 +54,7 @@ def scan_usd_files(assets_dir):
 
 
 def compute_world_aabb(stage):
-    """스테이지의 모든 Mesh에 대해 월드 좌표계 AABB 계산"""
+    """스테이지의 모든 Mesh에 대해 월드 AABB 계산"""
     time_code = Usd.TimeCode.Default()
     xform_cache = UsdGeom.XformCache(time_code)
     
@@ -105,30 +80,39 @@ def compute_world_aabb(stage):
     
     size = world_max - world_min
     center = (world_min + world_max) / 2.0
+    up_axis = UsdGeom.GetStageUpAxis(stage)
+    axis_index = 2 if up_axis == UsdGeom.Tokens.z else (1 if up_axis == UsdGeom.Tokens.y else 0)
+    
     return {
         "min": world_min,
         "max": world_max,
         "size": size,
         "center": center,
-        "floor": world_min[2]
+        "floor": world_min[axis_index],
+        "up_axis": str(up_axis),
+        "axis_index": axis_index
     }
 
 
-def validate_bbox_data(bbox_data, labels_data, resolution, class_name, debug=False):
-    """BBox 데이터 검증"""
-    if bbox_data is None or len(bbox_data) == 0:
-        return False, "no_bbox", None
+def parse_bbox_file(bbox_npy_path, labels_json_path, class_name):
+    """bbox 파일을 파싱하여 클래스에 해당하는 bbox 정보 추출"""
+    if not os.path.exists(bbox_npy_path) or not os.path.exists(labels_json_path):
+        return None
     
-    id_to_labels = labels_data.get("idToLabels", {})
-    
-    if debug:
-        print(f"      [DEBUG] bbox count: {len(bbox_data)}, idToLabels: {id_to_labels}")
-    
-    best_bbox = None
-    best_area = 0
-    
-    for box in bbox_data:
-        try:
+    try:
+        bbox_data = np.load(bbox_npy_path)
+        with open(labels_json_path, 'r') as f:
+            labels_data = json.load(f)
+        
+        if len(bbox_data) == 0:
+            return None
+        
+        id_to_labels = labels_data.get("idToLabels", {})
+        
+        best_bbox = None
+        best_area = 0
+        
+        for box in bbox_data:
             if hasattr(box, 'dtype') and box.dtype.names:
                 semantic_id = str(int(box['semanticId']))
                 x_min, y_min = float(box['x_min']), float(box['y_min'])
@@ -136,67 +120,124 @@ def validate_bbox_data(bbox_data, labels_data, resolution, class_name, debug=Fal
                 occlusion = float(box['occlusionRatio']) if 'occlusionRatio' in box.dtype.names else 0.0
             else:
                 continue
+            
+            if semantic_id not in id_to_labels:
+                continue
+            
+            label_info = id_to_labels[semantic_id]
+            label_class = label_info.get("class", str(label_info)) if isinstance(label_info, dict) else str(label_info)
+            
+            if class_name not in label_class:
+                continue
+            
+            area = (x_max - x_min) * (y_max - y_min)
+            if area > best_area:
+                best_area = area
+                best_bbox = {
+                    "x_min": x_min,
+                    "y_min": y_min,
+                    "x_max": x_max,
+                    "y_max": y_max,
+                    "width": x_max - x_min,
+                    "height": y_max - y_min,
+                    "center_x": (x_min + x_max) / 2.0,
+                    "center_y": (y_min + y_max) / 2.0,
+                    "area": area,
+                    "visibility": 1.0 - occlusion
+                }
+        
+        return best_bbox
+    except Exception as e:
+        print(f"    ⚠️  bbox 파싱 에러: {e}")
+        return None
+
+
+def generate_pose_labels(class_output_dir, class_name, part_center, part_size, meters_per_unit):
+    """생성된 bbox 파일들을 읽어서 pose 라벨 생성"""
+    print(f"  📝 Pose 라벨 생성 중...")
+    
+    bbox_files = sorted(glob.glob(os.path.join(class_output_dir, "bounding_box_2d_tight_*.npy")))
+    generated_count = 0
+    
+    for bbox_npy_path in bbox_files:
+        # 파일 인덱스 추출
+        basename = os.path.basename(bbox_npy_path)
+        idx_str = basename.replace("bounding_box_2d_tight_", "").replace(".npy", "")
+        try:
+            frame_idx = int(idx_str)
         except:
             continue
         
-        # 클래스 확인 - 더 유연한 매칭
-        if semantic_id not in id_to_labels:
-            if debug:
-                print(f"      [DEBUG] semantic_id {semantic_id} not in idToLabels")
+        labels_json_path = os.path.join(class_output_dir, f"bounding_box_2d_tight_labels_{idx_str}.json")
+        rgb_path = os.path.join(class_output_dir, f"rgb_{idx_str}.png")
+        
+        if not os.path.exists(rgb_path):
             continue
         
-        label_info = id_to_labels[semantic_id]
-        # label_info가 dict인 경우 'class' 키 확인, 아니면 문자열 비교
-        label_class = label_info.get("class", str(label_info)) if isinstance(label_info, dict) else str(label_info)
+        bbox_info = parse_bbox_file(bbox_npy_path, labels_json_path, class_name)
         
-        if class_name not in label_class:
-            if debug:
-                print(f"      [DEBUG] class_name '{class_name}' not in label_class '{label_class}'")
-            continue
+        if bbox_info is None:
+            # bbox가 없어도 pose 파일은 생성 (빈 bbox로)
+            bbox_info = {
+                "x_min": 0, "y_min": 0, "x_max": 0, "y_max": 0,
+                "width": 0, "height": 0, "center_x": 0, "center_y": 0,
+                "area": 0, "visibility": 0
+            }
         
-        area = (x_max - x_min) * (y_max - y_min)
-        if area > best_area:
-            best_area = area
-            best_bbox = (x_min, y_min, x_max, y_max, occlusion)
+        # pose 라벨 생성
+        pose_data = {
+            "class_name": class_name,
+            "frame_index": frame_idx,
+            "bbox_2d": bbox_info,
+            "normalized_center": {
+                "x": bbox_info["center_x"] / RESOLUTION[0],
+                "y": bbox_info["center_y"] / RESOLUTION[1]
+            },
+            "object_info": {
+                "part_center_world": list(part_center) if hasattr(part_center, '__iter__') else [part_center, part_center, part_center],
+                "part_size": part_size,
+                "meters_per_unit": meters_per_unit
+            },
+            "image_info": {
+                "resolution": list(RESOLUTION),
+                "rgb_file": f"rgb_{idx_str}.png"
+            }
+        }
+        
+        pose_path = os.path.join(class_output_dir, f"pose_{idx_str}.json")
+        with open(pose_path, 'w', encoding='utf-8') as f:
+            json.dump(pose_data, f, indent=2, ensure_ascii=False)
+        
+        generated_count += 1
     
-    if best_bbox is None:
-        return False, "no_class_bbox", None
-    
-    x_min, y_min, x_max, y_max, occlusion = best_bbox
-    visibility = 1.0 - occlusion
-    
-    if visibility < MIN_VISIBILITY:
-        return False, f"low_vis_{visibility:.2f}", best_bbox
-    
-    if x_min < EDGE_MARGIN or y_min < EDGE_MARGIN:
-        return False, "edge_min", best_bbox
-    if x_max > resolution[0] - EDGE_MARGIN or y_max > resolution[1] - EDGE_MARGIN:
-        return False, "edge_max", best_bbox
-    
-    bbox_area = (x_max - x_min) * (y_max - y_min)
-    if bbox_area < resolution[0] * resolution[1] * MIN_BBOX_AREA_RATIO:
-        return False, "small_bbox", best_bbox
-    
-    return True, "ok", best_bbox
+    print(f"  ✓ Pose 라벨 {generated_count}개 생성 완료")
+    return generated_count
 
 
 def generate_class_dataset(part_config, class_index, total_classes):
-    """한 클래스의 데이터셋 생성 (Replicator 방식)"""
+    """한 클래스의 데이터셋 생성 (class_estimation 방식)"""
     usd_path = part_config["usd_path"]
     class_name = part_config["class_name"]
     display_name = part_config["display_name"]
     
-    class_output_dir = os.path.join(OUTPUT_DIR, class_name)
+    class_output_dir = os.path.join(BASE_OUTPUT_DIR, class_name)
     os.makedirs(class_output_dir, exist_ok=True)
     
     print(f"\n{'='*60}")
     print(f"[{class_index+1}/{total_classes}] {display_name}")
     print(f"{'='*60}")
     print(f"  USD: {usd_path}")
+    print(f"  출력: {class_output_dir}")
     
     if not os.path.exists(usd_path):
         print(f"  ⚠️  USD 파일 없음")
         return
+    
+    # 이전 클래스 정리
+    if class_index > 0:
+        for _ in range(10):
+            simulation_app.update()
+            time.sleep(0.05)
     
     # USD 로드
     print(f"  USD 로딩 중...")
@@ -223,27 +264,6 @@ def generate_class_dataset(part_config, class_index, total_classes):
     
     print(f"  부품 크기: {part_size:.4f}")
     print(f"  부품 중심: {part_center}")
-    print(f"  바닥 높이: {floor_height:.4f}")
-    
-    # 오브젝트 이동 범위 계산
-    xy_offset = part_size * XY_OFFSET_RATIO
-    z_base = floor_height + part_size * Z_LIFT_RATIO  # Z 들어올림
-    z_range = part_size * Z_RANGE_RATIO
-    
-    print(f"  XY 오프셋: ±{xy_offset:.4f}")
-    print(f"  Z 기본 높이: {z_base:.4f}")
-    print(f"  Z 범위: ±{z_range:.4f}")
-    print(f"  Roll/Pitch: {ROLL_RANGE}, Yaw: {YAW_RANGE}")
-    
-    # 카메라 위치 (oblique view)
-    camera_distance = part_size * 2.5
-    elev_rad = math.radians(CAMERA_ELEVATION_DEG)
-    cam_x = part_center[0] + camera_distance * math.cos(elev_rad)
-    cam_y = part_center[1]
-    cam_z = z_base + camera_distance * math.sin(elev_rad)
-    look_at = (part_center[0], part_center[1], z_base)
-    
-    print(f"  카메라: ({cam_x:.2f}, {cam_y:.2f}, {cam_z:.2f}) -> {look_at}")
     
     # Semantics 추가
     print(f"  Semantics 추가 중...")
@@ -254,277 +274,159 @@ def generate_class_dataset(part_config, class_index, total_classes):
             sem.CreateSemanticDataAttr().Set(class_name)
     
     # ==========================================
-    # Replicator 설정
+    # Replicator 설정 (class_estimation과 동일)
     # ==========================================
     print(f"  Replicator 설정 중...")
     
     try:
         with rep.new_layer():
-            # 기존 오브젝트 참조
+            # 메시 참조
+            mesh_prims = [p for p in stage.Traverse() if p.IsA(UsdGeom.Mesh)]
+            print(f"  메시 개수: {len(mesh_prims)}")
+            
+            if len(mesh_prims) == 0:
+                print(f"  ⚠️  메시 없음")
+                return
+            
             part_prim = rep.get.prims(semantics=[("class", class_name)])
-            print(f"  ✓ 오브젝트 참조 완료")
             
-            # ------------------------------------------
-            # Domain Randomization: 배경
-            # ------------------------------------------
+            # 배경 생성
             floor_size = part_size * 5
-            
-            # 바닥 평면
             floor_plane = rep.create.plane(
                 scale=(floor_size, floor_size, 1),
                 position=(part_center[0], part_center[1], floor_height),
                 rotation=(0, 0, 0),
                 semantics=[("class", "background")]
             )
-            print(f"  ✓ 바닥 생성")
             
-            # 뒷벽 평면
             back_wall = rep.create.plane(
                 scale=(floor_size, floor_size * 0.5, 1),
                 position=(part_center[0] - floor_size * 0.4, part_center[1], part_center[2]),
                 rotation=(0, 90, 0),
                 semantics=[("class", "background")]
             )
-            print(f"  ✓ 뒷벽 생성")
             
-            # ------------------------------------------
-            # Domain Randomization: 조명
-            # ------------------------------------------
-            dome_light = rep.create.light(
-                light_type="Dome",
-                intensity=800.0,
-                rotation=(270, 0, 0)
-            )
-            
+            # 조명 생성
+            dome_light = rep.create.light(light_type="Dome", intensity=800.0, rotation=(270, 0, 0))
             point_light1 = rep.create.light(
-                light_type="Sphere",
-                intensity=50000.0,
-                position=(part_center[0] + part_size, part_center[1] + part_size, z_base + part_size * 2),
+                light_type="Sphere", intensity=50000.0,
+                position=(part_center[0] + part_size, part_center[1] + part_size, part_center[2] + part_size * 2),
                 scale=0.5
             )
-            
             point_light2 = rep.create.light(
-                light_type="Sphere",
-                intensity=30000.0,
-                position=(part_center[0] - part_size, part_center[1] - part_size * 0.5, z_base + part_size),
+                light_type="Sphere", intensity=30000.0,
+                position=(part_center[0] - part_size, part_center[1] - part_size * 0.5, part_center[2] + part_size),
                 scale=0.3
             )
-            print(f"  ✓ 조명 생성 (Dome + Sphere x2)")
+            print(f"  ✓ 배경/조명 생성")
             
-            # ------------------------------------------
-            # 카메라 생성 (고정)
-            # ------------------------------------------
+            # 카메라 설정
+            size_value = (aabb["size"][0], aabb["size"][1], aabb["size"][2])
+            part_diagonal = np.sqrt(size_value[0]**2 + size_value[1]**2 + size_value[2]**2)
+            camera_fov_rad = np.radians(60)
+            min_camera_distance = (part_diagonal / 2.0) / np.tan(camera_fov_rad / 2.0) / 0.8
+            camera_distance_min = min_camera_distance * 0.9
+            camera_distance_max = min_camera_distance * 1.5
+            initial_camera_distance = (camera_distance_min + camera_distance_max) / 2.0
+            
             camera = rep.create.camera(
-                position=(cam_x, cam_y, cam_z),
-                look_at=look_at
+                position=(part_center[0] + initial_camera_distance * 0.7,
+                          part_center[1] + initial_camera_distance * 0.5,
+                          part_center[2] + initial_camera_distance * 0.5),
+                look_at=part_center
             )
             render_product = rep.create.render_product(camera, resolution=RESOLUTION)
-            print(f"  ✓ 카메라 생성 (고정)")
+            print(f"  ✓ 카메라 생성 (거리: {initial_camera_distance:.2f})")
             
-            # ------------------------------------------
             # 프레임별 랜덤화
-            # ------------------------------------------
-            with rep.trigger.on_frame(max_execs=IMAGES_PER_CLASS * (MAX_REJECTS_PER_ACCEPT + 1)):
-                # 오브젝트 위치/회전 랜덤화
-                with part_prim:
+            with rep.trigger.on_frame(max_execs=IMAGES_PER_CLASS):
+                # 카메라 위치 랜덤화
+                with rep.create.group([camera]):
                     rep.modify.pose(
                         position=rep.distribution.uniform(
-                            (part_center[0] - xy_offset, part_center[1] - xy_offset, z_base - z_range),
-                            (part_center[0] + xy_offset, part_center[1] + xy_offset, z_base + z_range)
+                            (part_center[0] - camera_distance_max * 0.7,
+                             part_center[1] - camera_distance_max * 0.5,
+                             part_center[2] + camera_distance_min * 0.3),
+                            (part_center[0] + camera_distance_max * 0.7,
+                             part_center[1] + camera_distance_max * 0.5,
+                             part_center[2] + camera_distance_max * 0.9)
                         ),
-                        rotation=rep.distribution.uniform(
-                            (ROLL_RANGE[0], PITCH_RANGE[0], YAW_RANGE[0]),
-                            (ROLL_RANGE[1], PITCH_RANGE[1], YAW_RANGE[1])
-                        )
+                        look_at=part_center
                     )
                 
-                # 바닥 색상 랜덤화
+                # 배경 색상 랜덤화
                 with floor_plane:
-                    rep.randomizer.color(
-                        colors=rep.distribution.uniform((0.2, 0.2, 0.2), (0.6, 0.5, 0.4))
-                    )
-                
-                # 뒷벽 색상 랜덤화
+                    rep.randomizer.color(colors=rep.distribution.uniform((0.2, 0.2, 0.2), (0.6, 0.5, 0.4)))
                 with back_wall:
-                    rep.randomizer.color(
-                        colors=rep.distribution.uniform((0.4, 0.4, 0.4), (0.9, 0.9, 0.85))
-                    )
+                    rep.randomizer.color(colors=rep.distribution.uniform((0.4, 0.4, 0.4), (0.9, 0.9, 0.85)))
                 
                 # 조명 위치 랜덤화
                 with point_light1:
-                    rep.modify.pose(
-                        position=rep.distribution.uniform(
-                            (part_center[0] + part_size * 0.5, part_center[1] - part_size, z_base + part_size * 1.5),
-                            (part_center[0] + part_size * 1.5, part_center[1] + part_size, z_base + part_size * 3)
-                        )
-                    )
-                
+                    rep.modify.pose(position=rep.distribution.uniform(
+                        (part_center[0] + part_size * 0.5, part_center[1] - part_size, part_center[2] + part_size * 1.5),
+                        (part_center[0] + part_size * 1.5, part_center[1] + part_size, part_center[2] + part_size * 3)
+                    ))
                 with point_light2:
-                    rep.modify.pose(
-                        position=rep.distribution.uniform(
-                            (part_center[0] - part_size * 1.5, part_center[1] - part_size, z_base + part_size * 0.5),
-                            (part_center[0] - part_size * 0.5, part_center[1] + part_size, z_base + part_size * 2)
-                        )
-                    )
+                    rep.modify.pose(position=rep.distribution.uniform(
+                        (part_center[0] - part_size * 1.5, part_center[1] - part_size, part_center[2] + part_size * 0.5),
+                        (part_center[0] - part_size * 0.5, part_center[1] + part_size, part_center[2] + part_size * 2)
+                    ))
             
-            print(f"  ✓ 프레임별 랜덤화 설정 완료")
-            print(f"    - 오브젝트 위치/회전")
-            print(f"    - 바닥/벽 색상")
-            print(f"    - 조명 위치")
+            print(f"  ✓ 프레임별 랜덤화 설정")
             
-            # ------------------------------------------
-            # Writer 및 Annotator
-            # ------------------------------------------
-            tmp_dir = os.path.join(class_output_dir, "_tmp")
-            if os.path.exists(tmp_dir):
-                shutil.rmtree(tmp_dir)
-            os.makedirs(tmp_dir)
-            
+            # Writer 설정
             writer = rep.WriterRegistry.get("BasicWriter")
-            writer.initialize(output_dir=tmp_dir, rgb=True, bounding_box_2d_tight=True)
+            writer.initialize(output_dir=class_output_dir, rgb=True, bounding_box_2d_tight=True)
             writer.attach([render_product])
-            print(f"  ✓ Writer 설정 완료")
+            print(f"  ✓ Writer 설정")
             
-            # 시뮬레이션 준비
-            print(f"  시뮬레이션 준비 중...")
-            for _ in range(10):
+            # 데이터 생성
+            print(f"\n  🎬 데이터 생성 시작 ({IMAGES_PER_CLASS}장)...")
+            
+            for i in range(10):
                 simulation_app.update()
-                time.sleep(0.05)
+                time.sleep(0.1)
             
-            # ------------------------------------------
-            # Rejection Sampling 루프
-            # ------------------------------------------
-            print(f"\n  🔄 Rejection Sampling 시작 (목표: {IMAGES_PER_CLASS}장)")
+            files_before = len(glob.glob(os.path.join(class_output_dir, "rgb_*.png")))
             
-            accepted = 0
-            frame_idx = 0
-            reject_counts = {}
-            last_log_frame = 0
+            # 핵심: run_until_complete() 사용
+            rep.orchestrator.run_until_complete()
             
-            while accepted < IMAGES_PER_CLASS:
-                # 최대 시도 횟수 체크
-                if frame_idx >= IMAGES_PER_CLASS * (MAX_REJECTS_PER_ACCEPT + 1):
-                    print(f"  ⚠️  최대 시도 초과, {accepted}장만 생성")
-                    break
-                
-                # 10프레임마다 진행 로그 (디버깅용)
-                if frame_idx > 0 and frame_idx % 10 == 0 and frame_idx != last_log_frame:
-                    last_log_frame = frame_idx
-                    top3 = sorted(reject_counts.items(), key=lambda x: -x[1])[:3]
-                    print(f"    [진행] 시도: {frame_idx}, 채택: {accepted}, 거부사유: {top3}")
-                
-                # 1프레임 실행
-                rep.orchestrator.step()
+            time.sleep(0.5)
+            for i in range(10):
                 simulation_app.update()
-                
-                # 파일 경로
-                bbox_npy = os.path.join(tmp_dir, f"bounding_box_2d_tight_{frame_idx:04d}.npy")
-                bbox_json = os.path.join(tmp_dir, f"bounding_box_2d_tight_labels_{frame_idx:04d}.json")
-                rgb_png = os.path.join(tmp_dir, f"rgb_{frame_idx:04d}.png")
-                
-                frame_idx += 1
-                
-                # 파일 대기 (최대 1초)
-                wait_end = time.time() + 1.0
-                while time.time() < wait_end:
-                    if os.path.exists(bbox_npy) and os.path.exists(bbox_json):
-                        break
-                    time.sleep(0.02)
-                
-                if not os.path.exists(bbox_npy) or not os.path.exists(bbox_json):
-                    reject_counts["no_file"] = reject_counts.get("no_file", 0) + 1
-                    continue
-                
-                # BBox 검증
-                try:
-                    bbox_data = np.load(bbox_npy)
-                    with open(bbox_json, 'r') as f:
-                        labels_data = json.load(f)
-                    
-                    # 첫 5프레임만 디버깅 로그 출력
-                    debug_mode = (frame_idx <= 5)
-                    valid, reason, bbox_info = validate_bbox_data(bbox_data, labels_data, RESOLUTION, class_name, debug=debug_mode)
-                    
-                    if not valid:
-                        reject_counts[reason] = reject_counts.get(reason, 0) + 1
-                        continue
-                    
-                    # RGB 대기
-                    wait_end = time.time() + 1.0
-                    while time.time() < wait_end:
-                        if os.path.exists(rgb_png) and os.path.getsize(rgb_png) > 1000:
-                            break
-                        time.sleep(0.02)
-                    
-                    if not os.path.exists(rgb_png) or os.path.getsize(rgb_png) < 1000:
-                        reject_counts["no_rgb"] = reject_counts.get("no_rgb", 0) + 1
-                        continue
-                    
-                    # 유효! 저장
-                    x_min, y_min, x_max, y_max, occlusion = bbox_info
-                    
-                    final_rgb = os.path.join(class_output_dir, f"rgb_{accepted:04d}.png")
-                    final_pose = os.path.join(class_output_dir, f"pose_{accepted:04d}.json")
-                    
-                    shutil.copy(rgb_png, final_rgb)
-                    
-                    # Pose 정보 (간소화)
-                    pose_data = {
-                        "class_name": class_name,
-                        "frame_index": accepted,
-                        "bbox_2d": {
-                            "x_min": x_min, "y_min": y_min,
-                            "x_max": x_max, "y_max": y_max,
-                            "visibility": 1.0 - occlusion
-                        },
-                        "camera": {
-                            "position": [cam_x, cam_y, cam_z],
-                            "look_at": list(look_at),
-                            "resolution": list(RESOLUTION)
-                        },
-                        "stage_info": {
-                            "meters_per_unit": meters_per_unit,
-                            "part_size": part_size
-                        }
-                    }
-                    
-                    with open(final_pose, 'w', encoding='utf-8') as f:
-                        json.dump(pose_data, f, indent=2, ensure_ascii=False)
-                    
-                    accepted += 1
-                    
-                    # 진행 로그
-                    if accepted % 50 == 0 or accepted == IMAGES_PER_CLASS:
-                        top_rejects = sorted(reject_counts.items(), key=lambda x: -x[1])[:3]
-                        rate = accepted / frame_idx * 100
-                        print(f"    ✓ {accepted}/{IMAGES_PER_CLASS} (시도: {frame_idx}, 채택률: {rate:.1f}%, 거부: {top_rejects})")
-                    
-                except Exception as e:
-                    reject_counts[f"err_{type(e).__name__}"] = reject_counts.get(f"err_{type(e).__name__}", 0) + 1
-                    continue
+                time.sleep(0.1)
             
-            print(f"\n  ✓ {display_name} 완료: {accepted}장")
-            print(f"    총 시도: {frame_idx}, 최종 채택률: {accepted/max(1,frame_idx)*100:.1f}%")
-            print(f"    거부 통계: {reject_counts}")
+            files_after = len(glob.glob(os.path.join(class_output_dir, "rgb_*.png")))
+            print(f"  ✓ 이미지 생성 완료: {files_after}장")
             
     except Exception as e:
-        print(f"  ⚠️  Replicator 에러: {e}")
+        print(f"  ⚠️  에러: {e}")
         import traceback
         traceback.print_exc()
         return
+    finally:
+        print(f"  정리 중...")
+        for _ in range(20):
+            simulation_app.update()
+            time.sleep(0.1)
     
-    # 정리
-    shutil.rmtree(tmp_dir, ignore_errors=True)
+    # Pose 라벨 생성 (bbox 파일 파싱)
+    pose_count = generate_pose_labels(class_output_dir, class_name, part_center, part_size, meters_per_unit)
     
     # 메타데이터 저장
     metadata = {
         "class_name": class_name,
-        "num_images": accepted,
-        "part_size": part_size,
+        "num_images": files_after,
+        "num_pose_labels": pose_count,
+        "part_size": float(part_size),
+        "part_center": list(part_center),
         "meters_per_unit": meters_per_unit
     }
     with open(os.path.join(class_output_dir, "metadata.json"), 'w', encoding='utf-8') as f:
         json.dump(metadata, f, indent=2, ensure_ascii=False)
+    
+    print(f"  ✓ {display_name} 완료!")
 
 
 # ==========================================
@@ -533,7 +435,7 @@ def generate_class_dataset(part_config, class_index, total_classes):
 if __name__ == "__main__":
     print("="*60)
     print("굴착기 부품 Pose Estimation 데이터셋 생성")
-    print("(Replicator rep.modify.pose 방식)")
+    print("(class_estimation 기반 안정 버전)")
     print("="*60)
     
     parts_config = scan_usd_files(ASSETS_DIR)
@@ -541,20 +443,21 @@ if __name__ == "__main__":
     for name in parts_config:
         print(f"  - {name}")
     
-    if CLEAR_EXISTING and os.path.exists(OUTPUT_DIR):
-        print(f"\n기존 데이터 삭제 중: {OUTPUT_DIR}")
-        shutil.rmtree(OUTPUT_DIR)
-    os.makedirs(OUTPUT_DIR, exist_ok=True)
+    if CLEAR_EXISTING and os.path.exists(BASE_OUTPUT_DIR):
+        print(f"\n기존 데이터 삭제 중: {BASE_OUTPUT_DIR}")
+        shutil.rmtree(BASE_OUTPUT_DIR)
+    os.makedirs(BASE_OUTPUT_DIR, exist_ok=True)
     
+    total_classes = len(parts_config)
     for idx, (name, config) in enumerate(parts_config.items()):
-        generate_class_dataset(config, idx, len(parts_config))
+        generate_class_dataset(config, idx, total_classes)
         
-        if idx < len(parts_config) - 1:
+        if idx < total_classes - 1:
             print("\n스테이지 정리 중...")
             rep.orchestrator.stop()
-            for _ in range(20):
+            for _ in range(30):
                 simulation_app.update()
-                time.sleep(0.05)
+                time.sleep(0.1)
             time.sleep(1.0)
     
     # 전체 메타데이터
@@ -565,7 +468,7 @@ if __name__ == "__main__":
         "classes": list(parts_config.keys()),
         "created_at": time.strftime("%Y-%m-%d %H:%M:%S")
     }
-    with open(os.path.join(OUTPUT_DIR, "dataset_info.json"), 'w', encoding='utf-8') as f:
+    with open(os.path.join(BASE_OUTPUT_DIR, "dataset_info.json"), 'w', encoding='utf-8') as f:
         json.dump(dataset_info, f, indent=2, ensure_ascii=False)
     
     print("\n" + "="*60)
@@ -573,10 +476,11 @@ if __name__ == "__main__":
     print("="*60)
     
     for name in parts_config:
-        class_dir = os.path.join(OUTPUT_DIR, name)
+        class_dir = os.path.join(BASE_OUTPUT_DIR, name)
         if os.path.exists(class_dir):
-            count = len(glob.glob(os.path.join(class_dir, "rgb_*.png")))
-            print(f"  {name}: {count}장")
+            rgb_count = len(glob.glob(os.path.join(class_dir, "rgb_*.png")))
+            pose_count = len(glob.glob(os.path.join(class_dir, "pose_*.json")))
+            print(f"  {name}: RGB {rgb_count}장, Pose {pose_count}개")
     
     print("\n종료하려면 Ctrl+C를 누르세요.")
     while simulation_app.is_running():
