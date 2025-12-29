@@ -37,7 +37,9 @@ from torchvision import models, transforms
 # 명령줄 인자
 # ================================================================================
 parser = argparse.ArgumentParser(description="굴착기 부품 작업대 XY 위치 추정 학습")
-parser.add_argument("--dataset_dir", type=str, default="/home/rebirther/isaac_data_output/dataset_pos", help="dataset_pos 경로")
+DEFAULT_DATASET_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "dataset_pos")
+DEFAULT_ARTIFACTS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "artifacts")
+parser.add_argument("--dataset_dir", type=str, default=DEFAULT_DATASET_DIR, help="dataset_pos 경로 (기본: pos_estimation/dataset_pos)")
 parser.add_argument("--image_size", type=int, default=224, help="입력 이미지 크기(ResNet 기본 224)")
 parser.add_argument("--test_size", type=float, default=0.2, help="테스트셋 비율")
 parser.add_argument("--seed", type=int, default=42, help="랜덤 시드")
@@ -45,8 +47,8 @@ parser.add_argument("--epochs", type=int, default=40, help="에포크")
 parser.add_argument("--batch_size", type=int, default=32, help="배치 크기")
 parser.add_argument("--lr", type=float, default=1e-3, help="학습률")
 parser.add_argument("--cpu", action="store_true", help="CPU 강제 실행")
-parser.add_argument("--model_out", type=str, default="best_parts_xy_regressor.pth", help="모델 저장 경로")
-parser.add_argument("--stats_out", type=str, default="xy_normalization_stats.json", help="정규화 통계 저장 경로")
+parser.add_argument("--model_out", type=str, default=os.path.join(DEFAULT_ARTIFACTS_DIR, "best_parts_xy_regressor.pth"), help="모델 저장 경로")
+parser.add_argument("--stats_out", type=str, default=os.path.join(DEFAULT_ARTIFACTS_DIR, "xy_normalization_stats.json"), help="정규화 통계 저장 경로")
 args = parser.parse_args()
 
 
@@ -60,6 +62,10 @@ if torch.cuda.is_available() and not args.cpu:
     torch.cuda.manual_seed_all(args.seed)
 
 device = torch.device("cpu" if args.cpu else ("cuda" if torch.cuda.is_available() else "cpu"))
+
+# artifacts 디렉토리 보장
+os.makedirs(os.path.dirname(os.path.abspath(args.model_out)), exist_ok=True)
+os.makedirs(os.path.dirname(os.path.abspath(args.stats_out)), exist_ok=True)
 
 
 # ================================================================================

@@ -1,7 +1,7 @@
 """
 굴착기 부품 데이터셋 생성 스크립트 (분류 + 6DoF 포즈)
 
-- 출력: /home/rebirther/isaac_data_output/dataset_pos
+- 출력: /home/rebirther/isaac_data_output/pos_estimation/dataset_pos
 - 방식(A안): 카메라 고정(상단 사선), 부품 이동(작업대 위, 평평하게)
 - 저장:
   - rgb_{frame:04d}.png
@@ -25,8 +25,10 @@ import numpy as np
 import shutil
 
 SCRIPT_DIR = "/home/rebirther/isaac_data_output"
-if SCRIPT_DIR not in sys.path:
-    sys.path.insert(0, SCRIPT_DIR)
+PROJECT_DIR = os.path.dirname(os.path.abspath(__file__))
+REPO_DIR = os.path.dirname(PROJECT_DIR)
+if REPO_DIR not in sys.path:
+    sys.path.insert(0, REPO_DIR)
 
 from utils.logger import setup_logging, reinit_logging, finish_logging
 
@@ -49,7 +51,7 @@ reinit_logging(LOG_PATH)
 # 설정
 # =========================
 ASSETS_DIR = "/home/rebirther/isaac-sim/assets"
-BASE_OUTPUT_DIR = "/home/rebirther/isaac_data_output/dataset_pos"
+BASE_OUTPUT_DIR = os.path.join(PROJECT_DIR, "dataset_pos")
 IMAGES_PER_CLASS = 500
 CLEAR_EXISTING_DATA = True
 

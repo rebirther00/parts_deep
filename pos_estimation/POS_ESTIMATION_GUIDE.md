@@ -118,14 +118,14 @@ err = \\sqrt{(x-\\hat x)^2 + (y-\\hat y)^2}
 `dataset_pos`로 학습하려면 bbox crop 옵션을 켭니다.
 
 - 예:
-  - `python 02_parts_classification.py --dataset_dir /home/rebirther/isaac_data_output/dataset_pos --bbox_crop`
+  - `python class_estimation/02_parts_classification.py --dataset_dir /home/rebirther/isaac_data_output/pos_estimation/dataset_pos --bbox_crop`
 
 ### 9.2 XY 위치 회귀 학습
 - 예:
-  - `python pos_estimation/02_parts_pos_estimation.py --dataset_dir /home/rebirther/isaac_data_output/dataset_pos`
+  - `python pos_estimation/02_parts_pos_estimation.py --dataset_dir /home/rebirther/isaac_data_output/pos_estimation/dataset_pos`
 
 출력:
-- `best_parts_xy_regressor.pth` (기본값)
-- `xy_normalization_stats.json` (정규화 통계)
+- `pos_estimation/artifacts/best_parts_xy_regressor.pth` (기본값)
+- `pos_estimation/artifacts/xy_normalization_stats.json` (정규화 통계)
 
 

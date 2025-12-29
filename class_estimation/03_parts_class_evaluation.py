@@ -15,6 +15,7 @@ import sys
 import json
 import argparse
 import glob
+from sklearn.model_selection import train_test_split
 
 # ================================================================================
 # 명령줄 인자 파싱
@@ -37,8 +38,9 @@ args = parser.parse_args()
 # ================================================================================
 # 로깅 설정
 # ================================================================================
-SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, SCRIPT_DIR)
+PROJECT_DIR = os.path.dirname(os.path.abspath(__file__))
+REPO_DIR = os.path.dirname(PROJECT_DIR)
+sys.path.insert(0, REPO_DIR)
 from utils.logger import setup_logging, finish_logging
 
 LOG_PATH = setup_logging("03_evaluation")
@@ -46,13 +48,16 @@ LOG_PATH = setup_logging("03_evaluation")
 # ================================================================================
 # 설정 변수
 # ================================================================================
-MODEL_PATH = "best_parts_model.pth"
-TRAIN_INDICES_PATH = "training_indices_parts.json"
-CLASS_NAMES_PATH = "class_names.json"
+ARTIFACTS_DIR = os.path.join(PROJECT_DIR, "artifacts")
+os.makedirs(ARTIFACTS_DIR, exist_ok=True)
+
+MODEL_PATH = os.path.join(ARTIFACTS_DIR, "best_parts_model.pth")
+TRAIN_INDICES_PATH = os.path.join(ARTIFACTS_DIR, "training_indices_parts.json")
+CLASS_NAMES_PATH = os.path.join(ARTIFACTS_DIR, "class_names.json")
 IMAGE_SIZE = 224
 BATCH_SIZE = 32
-OUTPUT_IMAGE_PATH = "evaluation_results_parts.png"
-OUTPUT_WRONG_IMAGE_PATH = "evaluation_wrong_predictions.png"  # 틀린 예측 결과 이미지
+OUTPUT_IMAGE_PATH = os.path.join(ARTIFACTS_DIR, "evaluation_results_parts.png")
+OUTPUT_WRONG_IMAGE_PATH = os.path.join(ARTIFACTS_DIR, "evaluation_wrong_predictions.png")  # 틀린 예측 결과 이미지
 
 # ================================================================================
 # 1. 데이터 및 모델 정보 로드
@@ -445,19 +450,8 @@ def create_result_grid(image_paths, labels, predictions, confidences, class_name
         text_line1 = f"{symbol} Actual: {actual}"
         text_line2 = f"Pred: {predicted}"
         text_line3 = f"Conf: {conf:.1f}%"
-        # 어떤 원본 파일을 평가했는지 표시(상대 경로 우선)
-        try:
-            if args.dataset_dir:
-                rel = os.path.relpath(image_paths[idx], args.dataset_dir)
-            else:
-                # dataset_dir 미지정 시에도 class/rgb_####.png 형태로 짧게 표시
-                rel = os.path.join(os.path.basename(os.path.dirname(image_paths[idx])), os.path.basename(image_paths[idx]))
-        except Exception:
-            rel = os.path.basename(image_paths[idx])
-        # 너무 길면 잘라서 표시
-        if len(rel) > 34:
-            rel = "..." + rel[-31:]
-        text_line4 = f"src: {rel}"
+        # 어떤 원본 파일을 평가했는지 표시(요청: 폴더명 생략하고 rgb_####.png만)
+        text_line4 = f"src: {os.path.basename(image_paths[idx])}"
         
         draw.text((x + 5, text_y), text_line1, fill=text_color, font=font)
         draw.text((x + 5, text_y + 20), text_line2, fill=(0, 0, 0), font=font)
@@ -530,16 +524,8 @@ def create_wrong_predictions_grid(image_paths, labels, predictions, confidences,
         actual = class_names[labels[data_idx]]
         predicted = class_names[predictions[data_idx]]
         conf = confidences[data_idx]
-        # 원본 파일 표시(상대 경로 우선)
-        try:
-            if args.dataset_dir:
-                rel = os.path.relpath(image_paths[data_idx], args.dataset_dir)
-            else:
-                rel = os.path.join(os.path.basename(os.path.dirname(image_paths[data_idx])), os.path.basename(image_paths[data_idx]))
-        except Exception:
-            rel = os.path.basename(image_paths[data_idx])
-        if len(rel) > 34:
-            rel = "..." + rel[-31:]
+        # 원본 파일 표시(요청: 폴더명 생략하고 rgb_####.png만)
+        rel = os.path.basename(image_paths[data_idx])
         
         # 배경색 (틀린 예측이므로 빨간색 계열)
         bg_color = (255, 220, 220)

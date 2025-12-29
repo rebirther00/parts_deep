@@ -26,8 +26,9 @@ import glob
 parser = argparse.ArgumentParser(description='굴착기 부품 분류 모델 학습')
 parser.add_argument('-cpu', '--cpu', action='store_true', 
                     help='CPU로 강제 실행 (기본값: GPU 사용 가능 시 GPU 사용)')
-parser.add_argument('--dataset_dir', type=str, default="/home/rebirther/isaac_data_output/datasets",
-                    help='데이터셋 경로 (기본: datasets, 예: dataset_pos)')
+DEFAULT_DATASET_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "datasets")
+parser.add_argument('--dataset_dir', type=str, default=DEFAULT_DATASET_DIR,
+                    help='데이터셋 경로 (기본: class_estimation/datasets)')
 parser.add_argument('--bbox_crop', action='store_true',
                     help='bounding_box_2d_tight로 부품 bbox crop 후 학습 (dataset_pos 학습 시 권장)')
 args = parser.parse_args()
@@ -35,8 +36,9 @@ args = parser.parse_args()
 # ================================================================================
 # 로깅 설정
 # ================================================================================
-SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, SCRIPT_DIR)
+PROJECT_DIR = os.path.dirname(os.path.abspath(__file__))
+REPO_DIR = os.path.dirname(PROJECT_DIR)
+sys.path.insert(0, REPO_DIR)
 from utils.logger import setup_logging, finish_logging
 
 LOG_PATH = setup_logging("02_classification")
@@ -45,8 +47,11 @@ LOG_PATH = setup_logging("02_classification")
 # 설정 변수
 # ================================================================================
 DATASET_DIR = args.dataset_dir  # 데이터셋 경로
-MODEL_SAVE_PATH = "best_parts_model.pth"  # 모델 저장 경로
-TRAIN_INDICES_PATH = "training_indices_parts.json"  # 학습 인덱스 저장 경로
+ARTIFACTS_DIR = os.path.join(PROJECT_DIR, "artifacts")
+os.makedirs(ARTIFACTS_DIR, exist_ok=True)
+
+MODEL_SAVE_PATH = os.path.join(ARTIFACTS_DIR, "best_parts_model.pth")  # 모델 저장 경로
+TRAIN_INDICES_PATH = os.path.join(ARTIFACTS_DIR, "training_indices_parts.json")  # 학습 인덱스 저장 경로
 
 BATCH_SIZE = None   # None: 자동 조정, 숫자: 고정 배치 사이즈
 RANDOM_SEED = 42    # 재현성을 위한 랜덤 시드
@@ -114,7 +119,7 @@ print(f"\n총 이미지 수: {len(image_paths)}장")
 print(f"클래스 수: {num_classes}개")
 
 # 클래스 이름 저장 (평가 시 사용)
-class_names_path = "class_names.json"
+class_names_path = os.path.join(ARTIFACTS_DIR, "class_names.json")
 with open(class_names_path, 'w', encoding='utf-8') as f:
     json.dump(class_names, f, ensure_ascii=False, indent=2)
 print(f"클래스 이름 저장: {class_names_path}")

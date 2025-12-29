@@ -6,9 +6,10 @@
 # 로깅 설정 (SimulationApp 초기화 전에 설정해야 함)
 import os
 import sys
-SCRIPT_DIR = "/home/rebirther/isaac_data_output"
-if SCRIPT_DIR not in sys.path:
-    sys.path.insert(0, SCRIPT_DIR)
+PROJECT_DIR = os.path.dirname(os.path.abspath(__file__))
+REPO_DIR = os.path.dirname(PROJECT_DIR)
+if REPO_DIR not in sys.path:
+    sys.path.insert(0, REPO_DIR)
 from utils.logger import setup_logging, reinit_logging, finish_logging
 
 # 로그 파일 생성
@@ -202,9 +203,9 @@ print(f"📂 Assets 폴더 스캔 완료: {ASSETS_DIR}")
 print(f"   발견된 USD 파일: {len(EXCAVATOR_PARTS_CONFIG)}개")
 for name, config in EXCAVATOR_PARTS_CONFIG.items():
     print(f"   - {name}: {config['usd_path']}")
-
+ 
 # 데이터셋 설정
-BASE_OUTPUT_DIR = "/home/rebirther/isaac_data_output/datasets"
+BASE_OUTPUT_DIR = os.path.join(PROJECT_DIR, "datasets")
 IMAGES_PER_CLASS = 500  # 각 클래스당 생성할 이미지 수
 TOTAL_FRAMES = IMAGES_PER_CLASS * len(EXCAVATOR_PARTS_CONFIG)
 CLEAR_EXISTING_DATA = True  # True: 기존 데이터셋 폴더 삭제 후 새로 생성
