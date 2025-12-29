@@ -1,10 +1,12 @@
 # ==========================================
 # 굴착기 부품 데이터셋 생성 스크립트 (Pose Estimation용)
-# class_estimation 코드 기반 - 안정적으로 작동하는 버전
+# B안: step() 루프로 각 프레임마다 카메라 위치 추적
 # ==========================================
 #
-# 핵심: class_estimation과 동일한 방식으로 이미지 생성 후,
-#       bbox 파일을 파싱하여 pose 라벨(pose_####.json) 추가 저장
+# 핵심:
+# 1. class_estimation과 동일한 방식으로 이미지 생성
+# 2. 각 프레임마다 카메라 prim에서 월드 좌표 읽기
+# 3. 카메라→오브젝트 상대 pose 계산하여 pose_####.json 저장
 # ==========================================
 
 import os
@@ -13,6 +15,7 @@ import glob
 import shutil
 import json
 import time
+import math
 import numpy as np
 
 PROJECT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -94,8 +97,44 @@ def compute_world_aabb(stage):
     }
 
 
-def parse_bbox_file(bbox_npy_path, labels_json_path, class_name):
-    """bbox 파일을 파싱하여 클래스에 해당하는 bbox 정보 추출"""
+def get_camera_world_transform(stage, camera_prim_path):
+    """카메라 prim의 월드 좌표 변환 행렬 가져오기"""
+    camera_prim = stage.GetPrimAtPath(camera_prim_path)
+    if not camera_prim or not camera_prim.IsValid():
+        return None, None
+    
+    xform_cache = UsdGeom.XformCache(Usd.TimeCode.Default())
+    world_matrix = xform_cache.GetLocalToWorldTransform(camera_prim)
+    
+    # 위치 추출
+    position = world_matrix.ExtractTranslation()
+    
+    # 회전 추출 (rotation matrix → euler angles)
+    rotation = world_matrix.ExtractRotation()
+    
+    return (position[0], position[1], position[2]), rotation
+
+
+def compute_relative_pose(camera_pos, object_center, meters_per_unit):
+    """카메라 기준 오브젝트 상대 위치 계산 (미터 단위)"""
+    # 오브젝트 위치 - 카메라 위치 = 카메라 기준 오브젝트 위치
+    rel_x = (object_center[0] - camera_pos[0]) * meters_per_unit
+    rel_y = (object_center[1] - camera_pos[1]) * meters_per_unit
+    rel_z = (object_center[2] - camera_pos[2]) * meters_per_unit
+    
+    return (rel_x, rel_y, rel_z)
+
+
+def find_camera_prim_path(stage):
+    """스테이지에서 카메라 prim 경로 찾기"""
+    for prim in stage.Traverse():
+        if prim.IsA(UsdGeom.Camera):
+            return str(prim.GetPath())
+    return None
+
+
+def parse_bbox_from_file(bbox_npy_path, labels_json_path, class_name):
+    """bbox 파일에서 클래스에 해당하는 bbox 추출"""
     if not os.path.exists(bbox_npy_path) or not os.path.exists(labels_json_path):
         return None
     
@@ -134,88 +173,20 @@ def parse_bbox_file(bbox_npy_path, labels_json_path, class_name):
             if area > best_area:
                 best_area = area
                 best_bbox = {
-                    "x_min": x_min,
-                    "y_min": y_min,
-                    "x_max": x_max,
-                    "y_max": y_max,
-                    "width": x_max - x_min,
-                    "height": y_max - y_min,
+                    "x_min": x_min, "y_min": y_min,
+                    "x_max": x_max, "y_max": y_max,
                     "center_x": (x_min + x_max) / 2.0,
                     "center_y": (y_min + y_max) / 2.0,
-                    "area": area,
                     "visibility": 1.0 - occlusion
                 }
         
         return best_bbox
-    except Exception as e:
-        print(f"    ⚠️  bbox 파싱 에러: {e}")
+    except:
         return None
 
 
-def generate_pose_labels(class_output_dir, class_name, part_center, part_size, meters_per_unit):
-    """생성된 bbox 파일들을 읽어서 pose 라벨 생성"""
-    print(f"  📝 Pose 라벨 생성 중...")
-    
-    bbox_files = sorted(glob.glob(os.path.join(class_output_dir, "bounding_box_2d_tight_*.npy")))
-    generated_count = 0
-    
-    for bbox_npy_path in bbox_files:
-        # 파일 인덱스 추출
-        basename = os.path.basename(bbox_npy_path)
-        idx_str = basename.replace("bounding_box_2d_tight_", "").replace(".npy", "")
-        try:
-            frame_idx = int(idx_str)
-        except:
-            continue
-        
-        labels_json_path = os.path.join(class_output_dir, f"bounding_box_2d_tight_labels_{idx_str}.json")
-        rgb_path = os.path.join(class_output_dir, f"rgb_{idx_str}.png")
-        
-        if not os.path.exists(rgb_path):
-            continue
-        
-        bbox_info = parse_bbox_file(bbox_npy_path, labels_json_path, class_name)
-        
-        if bbox_info is None:
-            # bbox가 없어도 pose 파일은 생성 (빈 bbox로)
-            bbox_info = {
-                "x_min": 0, "y_min": 0, "x_max": 0, "y_max": 0,
-                "width": 0, "height": 0, "center_x": 0, "center_y": 0,
-                "area": 0, "visibility": 0
-            }
-        
-        # pose 라벨 생성
-        pose_data = {
-            "class_name": class_name,
-            "frame_index": frame_idx,
-            "bbox_2d": bbox_info,
-            "normalized_center": {
-                "x": bbox_info["center_x"] / RESOLUTION[0],
-                "y": bbox_info["center_y"] / RESOLUTION[1]
-            },
-            "object_info": {
-                "part_center_world": list(part_center) if hasattr(part_center, '__iter__') else [part_center, part_center, part_center],
-                "part_size": part_size,
-                "meters_per_unit": meters_per_unit
-            },
-            "image_info": {
-                "resolution": list(RESOLUTION),
-                "rgb_file": f"rgb_{idx_str}.png"
-            }
-        }
-        
-        pose_path = os.path.join(class_output_dir, f"pose_{idx_str}.json")
-        with open(pose_path, 'w', encoding='utf-8') as f:
-            json.dump(pose_data, f, indent=2, ensure_ascii=False)
-        
-        generated_count += 1
-    
-    print(f"  ✓ Pose 라벨 {generated_count}개 생성 완료")
-    return generated_count
-
-
 def generate_class_dataset(part_config, class_index, total_classes):
-    """한 클래스의 데이터셋 생성 (class_estimation 방식)"""
+    """한 클래스의 데이터셋 생성 (step 루프 + 카메라 위치 추적)"""
     usd_path = part_config["usd_path"]
     class_name = part_config["class_name"]
     display_name = part_config["display_name"]
@@ -262,8 +233,17 @@ def generate_class_dataset(part_config, class_index, total_classes):
     part_center = (aabb["center"][0], aabb["center"][1], aabb["center"][2])
     floor_height = aabb["floor"]
     
-    print(f"  부품 크기: {part_size:.4f}")
-    print(f"  부품 중심: {part_center}")
+    # 오브젝트 월드 좌표 (고정)
+    object_world_pos = part_center
+    object_world_pos_m = (
+        object_world_pos[0] * meters_per_unit,
+        object_world_pos[1] * meters_per_unit,
+        object_world_pos[2] * meters_per_unit
+    )
+    
+    print(f"  부품 크기: {part_size:.4f} ({part_size * meters_per_unit:.4f} m)")
+    print(f"  부품 중심 (world): {part_center}")
+    print(f"  부품 중심 (m): {object_world_pos_m}")
     
     # Semantics 추가
     print(f"  Semantics 추가 중...")
@@ -274,9 +254,12 @@ def generate_class_dataset(part_config, class_index, total_classes):
             sem.CreateSemanticDataAttr().Set(class_name)
     
     # ==========================================
-    # Replicator 설정 (class_estimation과 동일)
+    # Replicator 설정
     # ==========================================
     print(f"  Replicator 설정 중...")
+    
+    camera_prim_path = None
+    generated_frames = 0
     
     try:
         with rep.new_layer():
@@ -380,25 +363,96 @@ def generate_class_dataset(part_config, class_index, total_classes):
             writer.attach([render_product])
             print(f"  ✓ Writer 설정")
             
-            # 데이터 생성
-            print(f"\n  🎬 데이터 생성 시작 ({IMAGES_PER_CLASS}장)...")
-            
-            for i in range(10):
+            # 시뮬레이션 준비
+            print(f"\n  🎬 데이터 생성 시작 ({IMAGES_PER_CLASS}장, step 루프)...")
+            for _ in range(10):
                 simulation_app.update()
                 time.sleep(0.1)
             
-            files_before = len(glob.glob(os.path.join(class_output_dir, "rgb_*.png")))
+            # 카메라 prim 경로 찾기
+            stage = omni.usd.get_context().get_stage()
+            camera_prim_path = find_camera_prim_path(stage)
+            print(f"  카메라 prim: {camera_prim_path}")
             
-            # 핵심: run_until_complete() 사용
-            rep.orchestrator.run_until_complete()
-            
-            time.sleep(0.5)
-            for i in range(10):
+            # ==========================================
+            # Step 루프: 각 프레임마다 카메라 위치 추적
+            # ==========================================
+            for frame_idx in range(IMAGES_PER_CLASS):
+                # 1프레임 생성
+                rep.orchestrator.step()
                 simulation_app.update()
-                time.sleep(0.1)
+                
+                # 카메라 월드 좌표 읽기
+                stage = omni.usd.get_context().get_stage()
+                camera_pos, camera_rot = get_camera_world_transform(stage, camera_prim_path)
+                
+                if camera_pos is None:
+                    camera_pos = (0, 0, 0)
+                
+                # 카메라 위치 (미터)
+                camera_pos_m = (
+                    camera_pos[0] * meters_per_unit,
+                    camera_pos[1] * meters_per_unit,
+                    camera_pos[2] * meters_per_unit
+                )
+                
+                # 카메라 기준 오브젝트 상대 위치 (미터)
+                rel_pos_m = compute_relative_pose(camera_pos, object_world_pos, meters_per_unit)
+                
+                # 파일 경로
+                idx_str = f"{frame_idx:04d}"
+                rgb_path = os.path.join(class_output_dir, f"rgb_{idx_str}.png")
+                bbox_npy_path = os.path.join(class_output_dir, f"bounding_box_2d_tight_{idx_str}.npy")
+                labels_json_path = os.path.join(class_output_dir, f"bounding_box_2d_tight_labels_{idx_str}.json")
+                pose_path = os.path.join(class_output_dir, f"pose_{idx_str}.json")
+                
+                # 파일 대기 (최대 2초)
+                wait_start = time.time()
+                while time.time() - wait_start < 2.0:
+                    if os.path.exists(rgb_path) and os.path.getsize(rgb_path) > 1000:
+                        break
+                    time.sleep(0.02)
+                
+                # bbox 파싱
+                bbox_info = parse_bbox_from_file(bbox_npy_path, labels_json_path, class_name)
+                if bbox_info is None:
+                    bbox_info = {"x_min": 0, "y_min": 0, "x_max": 0, "y_max": 0, "center_x": 0, "center_y": 0, "visibility": 0}
+                
+                # Pose 라벨 저장
+                pose_data = {
+                    "class_name": class_name,
+                    "frame_index": frame_idx,
+                    "raw_pose_world": {
+                        "t_xyz_m": list(object_world_pos_m),  # 오브젝트 월드 좌표 (고정)
+                        "r_xyz_deg": [0.0, 0.0, 0.0]  # 오브젝트 회전 (고정)
+                    },
+                    "camera_pose_world": {
+                        "t_xyz_m": list(camera_pos_m)  # 카메라 월드 좌표
+                    },
+                    "camTobj": {
+                        "t_xyz_m": list(rel_pos_m)  # 카메라 기준 오브젝트 상대 위치
+                    },
+                    "bbox_2d": bbox_info,
+                    "image_info": {
+                        "resolution": list(RESOLUTION),
+                        "rgb_file": f"rgb_{idx_str}.png"
+                    },
+                    "stage_info": {
+                        "meters_per_unit": meters_per_unit,
+                        "part_size_m": part_size * meters_per_unit
+                    }
+                }
+                
+                with open(pose_path, 'w', encoding='utf-8') as f:
+                    json.dump(pose_data, f, indent=2, ensure_ascii=False)
+                
+                generated_frames += 1
+                
+                # 진행 로그 (50장마다)
+                if (frame_idx + 1) % 50 == 0 or frame_idx == 0:
+                    print(f"    진행: {frame_idx + 1}/{IMAGES_PER_CLASS} | 카메라: ({camera_pos_m[0]:.2f}, {camera_pos_m[1]:.2f}, {camera_pos_m[2]:.2f})m")
             
-            files_after = len(glob.glob(os.path.join(class_output_dir, "rgb_*.png")))
-            print(f"  ✓ 이미지 생성 완료: {files_after}장")
+            print(f"  ✓ 이미지 생성 완료: {generated_frames}장")
             
     except Exception as e:
         print(f"  ⚠️  에러: {e}")
@@ -411,16 +465,12 @@ def generate_class_dataset(part_config, class_index, total_classes):
             simulation_app.update()
             time.sleep(0.1)
     
-    # Pose 라벨 생성 (bbox 파일 파싱)
-    pose_count = generate_pose_labels(class_output_dir, class_name, part_center, part_size, meters_per_unit)
-    
     # 메타데이터 저장
     metadata = {
         "class_name": class_name,
-        "num_images": files_after,
-        "num_pose_labels": pose_count,
-        "part_size": float(part_size),
-        "part_center": list(part_center),
+        "num_images": generated_frames,
+        "part_size_m": float(part_size * meters_per_unit),
+        "part_center_world_m": list(object_world_pos_m),
         "meters_per_unit": meters_per_unit
     }
     with open(os.path.join(class_output_dir, "metadata.json"), 'w', encoding='utf-8') as f:
@@ -435,7 +485,7 @@ def generate_class_dataset(part_config, class_index, total_classes):
 if __name__ == "__main__":
     print("="*60)
     print("굴착기 부품 Pose Estimation 데이터셋 생성")
-    print("(class_estimation 기반 안정 버전)")
+    print("(B안: step 루프 + 카메라 위치 추적)")
     print("="*60)
     
     parts_config = scan_usd_files(ASSETS_DIR)
