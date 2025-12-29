@@ -97,11 +97,40 @@ def compute_world_aabb(stage):
     }
 
 
+def rotation_matrix_to_euler_xyz(rot_matrix):
+    """3x3 회전 행렬 → Euler XYZ angles (degrees) 변환"""
+    # rot_matrix는 Gf.Matrix3d 또는 row-major 3x3
+    # XYZ 순서 (Roll, Pitch, Yaw)
+    import math
+    
+    # Gf.Matrix3d에서 요소 추출
+    r00, r01, r02 = rot_matrix[0][0], rot_matrix[0][1], rot_matrix[0][2]
+    r10, r11, r12 = rot_matrix[1][0], rot_matrix[1][1], rot_matrix[1][2]
+    r20, r21, r22 = rot_matrix[2][0], rot_matrix[2][1], rot_matrix[2][2]
+    
+    # Gimbal lock 체크
+    if abs(r20) >= 1.0 - 1e-6:
+        # Gimbal lock
+        yaw = 0.0
+        if r20 < 0:
+            pitch = math.pi / 2.0
+            roll = math.atan2(r01, r02)
+        else:
+            pitch = -math.pi / 2.0
+            roll = math.atan2(-r01, -r02)
+    else:
+        pitch = -math.asin(r20)
+        roll = math.atan2(r21 / math.cos(pitch), r22 / math.cos(pitch))
+        yaw = math.atan2(r10 / math.cos(pitch), r00 / math.cos(pitch))
+    
+    return (math.degrees(roll), math.degrees(pitch), math.degrees(yaw))
+
+
 def get_camera_world_transform(stage, camera_prim_path):
     """카메라 prim의 월드 좌표 변환 행렬 가져오기"""
     camera_prim = stage.GetPrimAtPath(camera_prim_path)
     if not camera_prim or not camera_prim.IsValid():
-        return None, None
+        return None, None, None
     
     xform_cache = UsdGeom.XformCache(Usd.TimeCode.Default())
     world_matrix = xform_cache.GetLocalToWorldTransform(camera_prim)
@@ -109,10 +138,11 @@ def get_camera_world_transform(stage, camera_prim_path):
     # 위치 추출
     position = world_matrix.ExtractTranslation()
     
-    # 회전 추출 (rotation matrix → euler angles)
-    rotation = world_matrix.ExtractRotation()
+    # 회전 행렬 추출 → Euler angles (degrees)
+    rot_matrix = world_matrix.ExtractRotationMatrix()
+    euler_xyz_deg = rotation_matrix_to_euler_xyz(rot_matrix)
     
-    return (position[0], position[1], position[2]), rotation
+    return (position[0], position[1], position[2]), euler_xyz_deg, rot_matrix
 
 
 def compute_relative_pose(camera_pos, object_center, meters_per_unit):
@@ -382,12 +412,13 @@ def generate_class_dataset(part_config, class_index, total_classes):
                 rep.orchestrator.step()
                 simulation_app.update()
                 
-                # 카메라 월드 좌표 읽기
+                # 카메라 월드 좌표 및 회전 읽기
                 stage = omni.usd.get_context().get_stage()
-                camera_pos, camera_rot = get_camera_world_transform(stage, camera_prim_path)
+                camera_pos, camera_euler_deg, camera_rot_matrix = get_camera_world_transform(stage, camera_prim_path)
                 
                 if camera_pos is None:
                     camera_pos = (0, 0, 0)
+                    camera_euler_deg = (0, 0, 0)
                 
                 # 카메라 위치 (미터)
                 camera_pos_m = (
@@ -398,6 +429,15 @@ def generate_class_dataset(part_config, class_index, total_classes):
                 
                 # 카메라 기준 오브젝트 상대 위치 (미터)
                 rel_pos_m = compute_relative_pose(camera_pos, object_world_pos, meters_per_unit)
+                
+                # 카메라 기준 오브젝트 상대 회전 (오브젝트 고정이므로 카메라 회전의 역)
+                # 카메라가 오브젝트를 바라볼 때, 카메라 좌표계에서 오브젝트의 방향
+                # 간단히: 카메라 회전의 반대 = 오브젝트가 카메라에서 어떻게 보이는지
+                camTobj_euler_deg = (
+                    -camera_euler_deg[0],  # roll
+                    -camera_euler_deg[1],  # pitch
+                    -camera_euler_deg[2]   # yaw
+                )
                 
                 # 파일 경로
                 idx_str = f"{frame_idx:04d}"
@@ -427,10 +467,12 @@ def generate_class_dataset(part_config, class_index, total_classes):
                         "r_xyz_deg": [0.0, 0.0, 0.0]  # 오브젝트 회전 (고정)
                     },
                     "camera_pose_world": {
-                        "t_xyz_m": list(camera_pos_m)  # 카메라 월드 좌표
+                        "t_xyz_m": list(camera_pos_m),  # 카메라 월드 좌표
+                        "r_xyz_deg": list(camera_euler_deg)  # 카메라 월드 회전 (roll, pitch, yaw)
                     },
                     "camTobj": {
-                        "t_xyz_m": list(rel_pos_m)  # 카메라 기준 오브젝트 상대 위치
+                        "t_xyz_m": list(rel_pos_m),  # 카메라 기준 오브젝트 상대 위치
+                        "r_xyz_deg": list(camTobj_euler_deg)  # 카메라 기준 오브젝트 상대 회전
                     },
                     "bbox_2d": bbox_info,
                     "image_info": {
