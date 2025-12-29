@@ -42,10 +42,12 @@ ARTIFACTS_DIR = os.path.join(PROJECT_DIR, "artifacts")
 
 # 학습 설정
 BATCH_SIZE = 16
-NUM_EPOCHS = 50
-LEARNING_RATE = 1e-4
-WEIGHT_DECAY = 1e-5
+NUM_EPOCHS = 150  # 50 → 150 에폭 증가
+LEARNING_RATE = 5e-5  # 더 낮은 초기 LR
+WEIGHT_DECAY = 1e-4  # 더 강한 정규화
 TRAIN_RATIO = 0.8
+USE_RESNET50 = True  # ResNet50 사용 여부
+USE_DATA_AUGMENTATION = True  # 데이터 증강 사용 여부
 
 # 카메라 내재 파라미터
 CAMERA_INTRINSICS = {
@@ -136,10 +138,13 @@ def rotation_matrix_to_euler(R):
 class RGBDPoseDataset(Dataset):
     """RGB + Depth → 6DoF Pose 데이터셋"""
     
-    def __init__(self, dataset_dir, split='train', train_ratio=TRAIN_RATIO):
+    def __init__(self, dataset_dir, split='train', train_ratio=TRAIN_RATIO, 
+                 use_augmentation=USE_DATA_AUGMENTATION, position_stats=None):
         self.dataset_dir = dataset_dir
         self.split = split
         self.samples = []
+        self.use_augmentation = use_augmentation and (split == 'train')
+        self.position_stats = position_stats  # 위치 정규화용 통계
         
         # 클래스별 폴더 스캔
         class_dirs = sorted(glob.glob(os.path.join(dataset_dir, "*")))
@@ -178,14 +183,43 @@ class RGBDPoseDataset(Dataset):
         else:
             self.samples = all_samples[split_idx:]
         
-        # RGB 변환
-        self.rgb_transform = transforms.Compose([
-            transforms.Resize((224, 224)),
-            transforms.ToTensor(),
-            transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
-        ])
+        # RGB 변환 (데이터 증강 포함)
+        if self.use_augmentation:
+            self.rgb_transform = transforms.Compose([
+                transforms.Resize((224, 224)),
+                transforms.ColorJitter(brightness=0.3, contrast=0.3, saturation=0.2, hue=0.1),
+                transforms.RandomHorizontalFlip(p=0.3),
+                transforms.ToTensor(),
+                transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+            ])
+        else:
+            self.rgb_transform = transforms.Compose([
+                transforms.Resize((224, 224)),
+                transforms.ToTensor(),
+                transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+            ])
         
-        print(f"[{split}] 샘플 수: {len(self.samples)}, 클래스 수: {len(self.class_names)}")
+        # 위치 통계 계산 (train 데이터에서만)
+        if split == 'train' and position_stats is None:
+            self._compute_position_stats()
+        
+        print(f"[{split}] 샘플 수: {len(self.samples)}, 클래스 수: {len(self.class_names)}, 증강: {self.use_augmentation}")
+    
+    def _compute_position_stats(self):
+        """위치 정규화를 위한 통계 계산"""
+        positions = []
+        for sample in self.samples:
+            with open(sample['pose_path'], 'r') as f:
+                pose_data = json.load(f)
+            t = pose_data['camTobj']['t_xyz_m']
+            positions.append(t)
+        
+        positions = np.array(positions)
+        self.position_stats = {
+            'mean': positions.mean(axis=0).tolist(),
+            'std': positions.std(axis=0).tolist()
+        }
+        print(f"  위치 통계: mean={self.position_stats['mean']}, std={self.position_stats['std']}")
     
     def __len__(self):
         return len(self.samples)
@@ -206,6 +240,12 @@ class RGBDPoseDataset(Dataset):
         depth = np.clip(depth, 0.1, 10.0)  # 유효 범위 제한
         depth = (depth - 0.1) / (10.0 - 0.1)  # 0~1 정규화
         
+        # Depth 증강 (학습 시에만)
+        if self.use_augmentation:
+            # Gaussian Noise 추가
+            noise = np.random.normal(0, 0.02, depth.shape).astype(np.float32)
+            depth = np.clip(depth + noise, 0, 1)
+        
         # 리사이즈 (PIL 사용)
         depth_pil = Image.fromarray((depth * 255).astype(np.uint8))
         depth_pil = depth_pil.resize((224, 224), Image.BILINEAR)
@@ -216,9 +256,20 @@ class RGBDPoseDataset(Dataset):
         with open(sample['pose_path'], 'r') as f:
             pose_data = json.load(f)
         
-        # 위치 (카메라 기준)
+        # 위치 (카메라 기준) - 정규화 적용
         t = pose_data['camTobj']['t_xyz_m']
-        position = torch.tensor(t, dtype=torch.float32)
+        if self.position_stats is not None:
+            # Mean/Std 정규화
+            t_normalized = [
+                (t[i] - self.position_stats['mean'][i]) / (self.position_stats['std'][i] + 1e-6)
+                for i in range(3)
+            ]
+            position = torch.tensor(t_normalized, dtype=torch.float32)
+        else:
+            position = torch.tensor(t, dtype=torch.float32)
+        
+        # 원본 위치도 저장 (역정규화용)
+        position_raw = torch.tensor(t, dtype=torch.float32)
         
         # 회전 (카메라 기준) → 6D representation
         r = pose_data['camTobj']['r_xyz_deg']
@@ -232,7 +283,8 @@ class RGBDPoseDataset(Dataset):
         return {
             'rgb': rgb,
             'depth': depth,
-            'position': position,  # (3,)
+            'position': position,  # (3,) 정규화됨
+            'position_raw': position_raw,  # (3,) 원본
             'rotation': rotation,  # (6,)
             'class_idx': class_idx
         }
@@ -242,28 +294,41 @@ class RGBDPoseDataset(Dataset):
 # 모델 아키텍처
 # ==========================================
 class DepthEncoder(nn.Module):
-    """Depth 인코더 (간단한 CNN)"""
+    """Depth 인코더 (개선된 깊은 CNN)"""
     
-    def __init__(self, out_features=256):
+    def __init__(self, out_features=512):
         super().__init__()
         
+        # 더 깊은 구조 (6층 → 더 풍부한 특징 추출)
         self.conv = nn.Sequential(
+            # Block 1: 1 → 32
             nn.Conv2d(1, 32, 3, stride=2, padding=1),
             nn.BatchNorm2d(32),
             nn.ReLU(),
+            # Block 2: 32 → 64
             nn.Conv2d(32, 64, 3, stride=2, padding=1),
             nn.BatchNorm2d(64),
             nn.ReLU(),
+            # Block 3: 64 → 128
             nn.Conv2d(64, 128, 3, stride=2, padding=1),
             nn.BatchNorm2d(128),
             nn.ReLU(),
+            # Block 4: 128 → 256 (추가)
             nn.Conv2d(128, 256, 3, stride=2, padding=1),
             nn.BatchNorm2d(256),
+            nn.ReLU(),
+            # Block 5: 256 → 512 (추가)
+            nn.Conv2d(256, 512, 3, stride=2, padding=1),
+            nn.BatchNorm2d(512),
             nn.ReLU(),
             nn.AdaptiveAvgPool2d(1)
         )
         
-        self.fc = nn.Linear(256, out_features)
+        self.fc = nn.Sequential(
+            nn.Linear(512, out_features),
+            nn.ReLU(),
+            nn.Dropout(0.2)
+        )
     
     def forward(self, x):
         x = self.conv(x)
@@ -273,27 +338,49 @@ class DepthEncoder(nn.Module):
 
 
 class Deep6DoFModel(nn.Module):
-    """RGB + Depth → 6DoF Pose 모델
+    """RGB + Depth → 6DoF Pose 모델 (개선된 아키텍처)
     
     DenseFusion 스타일의 Feature Fusion
+    - ResNet18 또는 ResNet50 선택 가능
+    - 더 넓은 Pose Head (512 → 1024 → 512)
     """
     
-    def __init__(self, num_classes=4, rgb_features=512, depth_features=256):
+    def __init__(self, num_classes=4, use_resnet50=USE_RESNET50):
         super().__init__()
         
-        # RGB Encoder (ResNet18)
-        resnet = models.resnet18(weights=models.ResNet18_Weights.DEFAULT)
-        self.rgb_encoder = nn.Sequential(*list(resnet.children())[:-1])  # 마지막 FC 제외
-        self.rgb_fc = nn.Linear(512, rgb_features)
+        self.use_resnet50 = use_resnet50
         
-        # Depth Encoder
+        # RGB Encoder (ResNet18 또는 ResNet50)
+        if use_resnet50:
+            resnet = models.resnet50(weights=models.ResNet50_Weights.DEFAULT)
+            resnet_out_features = 2048
+            rgb_features = 1024
+        else:
+            resnet = models.resnet18(weights=models.ResNet18_Weights.DEFAULT)
+            resnet_out_features = 512
+            rgb_features = 512
+        
+        self.rgb_encoder = nn.Sequential(*list(resnet.children())[:-1])  # 마지막 FC 제외
+        self.rgb_fc = nn.Sequential(
+            nn.Linear(resnet_out_features, rgb_features),
+            nn.ReLU(),
+            nn.Dropout(0.2)
+        )
+        
+        # Depth Encoder (개선됨)
+        depth_features = 512
         self.depth_encoder = DepthEncoder(out_features=depth_features)
         
-        # Fusion + Pose Head
+        # Fusion + Pose Head (더 넓고 깊은 구조)
         fusion_features = rgb_features + depth_features
         
         self.pose_head = nn.Sequential(
-            nn.Linear(fusion_features, 512),
+            nn.Linear(fusion_features, 1024),
+            nn.BatchNorm1d(1024),
+            nn.ReLU(),
+            nn.Dropout(0.4),
+            nn.Linear(1024, 512),
+            nn.BatchNorm1d(512),
             nn.ReLU(),
             nn.Dropout(0.3),
             nn.Linear(512, 256),
@@ -301,14 +388,26 @@ class Deep6DoFModel(nn.Module):
             nn.Dropout(0.2),
         )
         
-        # 위치 출력 (x, y, z)
-        self.position_head = nn.Linear(256, 3)
+        # 위치 출력 (x, y, z) - 별도의 미니 네트워크
+        self.position_head = nn.Sequential(
+            nn.Linear(256, 128),
+            nn.ReLU(),
+            nn.Linear(128, 3)
+        )
         
-        # 회전 출력 (6D representation)
-        self.rotation_head = nn.Linear(256, 6)
+        # 회전 출력 (6D representation) - 별도의 미니 네트워크
+        self.rotation_head = nn.Sequential(
+            nn.Linear(256, 128),
+            nn.ReLU(),
+            nn.Linear(128, 6)
+        )
         
-        # 분류 출력 (optional)
+        # 분류 출력
         self.class_head = nn.Linear(256, num_classes)
+        
+        print(f"  모델: {'ResNet50' if use_resnet50 else 'ResNet18'} + DeepDepthEncoder")
+        print(f"  RGB features: {rgb_features}, Depth features: {depth_features}")
+        print(f"  Fusion features: {fusion_features}")
     
     def forward(self, rgb, depth):
         # RGB Encoding
@@ -403,13 +502,19 @@ def compute_metrics(pred_pos, target_pos, pred_rot, target_rot, pred_class, targ
 # 학습 루프
 # ==========================================
 def train_model(dataset_dir=DATASET_DIR):
-    """모델 학습"""
+    """모델 학습 (개선된 버전)"""
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print(f"Device: {device}")
     
-    # 데이터셋 로드
-    train_dataset = RGBDPoseDataset(dataset_dir, split='train')
-    test_dataset = RGBDPoseDataset(dataset_dir, split='test')
+    # 데이터셋 로드 (train에서 위치 통계 계산)
+    train_dataset = RGBDPoseDataset(dataset_dir, split='train', use_augmentation=USE_DATA_AUGMENTATION)
+    
+    # test 데이터셋은 train의 position_stats를 사용
+    test_dataset = RGBDPoseDataset(
+        dataset_dir, split='test', 
+        use_augmentation=False,
+        position_stats=train_dataset.position_stats
+    )
     
     if len(train_dataset) == 0:
         print(f"⚠️  데이터셋이 없습니다: {dataset_dir}")
@@ -419,25 +524,37 @@ def train_model(dataset_dir=DATASET_DIR):
     train_loader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True, num_workers=4)
     test_loader = DataLoader(test_dataset, batch_size=BATCH_SIZE, shuffle=False, num_workers=4)
     
+    # 위치 정규화 통계 저장
+    position_stats = train_dataset.position_stats
+    
     # 모델 생성
     num_classes = len(train_dataset.class_names)
-    model = Deep6DoFModel(num_classes=num_classes).to(device)
+    model = Deep6DoFModel(num_classes=num_classes, use_resnet50=USE_RESNET50).to(device)
     
     # 손실 함수 및 옵티마이저
     criterion = PoseLoss()
     optimizer = torch.optim.AdamW(model.parameters(), lr=LEARNING_RATE, weight_decay=WEIGHT_DECAY)
-    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=NUM_EPOCHS)
+    
+    # Warmup + Cosine Annealing 스케줄러
+    warmup_epochs = 10
+    scheduler = torch.optim.lr_scheduler.CosineAnnealingWarmRestarts(
+        optimizer, T_0=warmup_epochs, T_mult=2, eta_min=1e-6
+    )
     
     # 결과 저장
     os.makedirs(ARTIFACTS_DIR, exist_ok=True)
     best_pos_error = float('inf')
+    patience_counter = 0
+    early_stop_patience = 30
     
     print(f"\n{'='*70}")
-    print("딥러닝 6DoF Pose Estimation 학습")
+    print("딥러닝 6DoF Pose Estimation 학습 (개선된 버전)")
     print(f"{'='*70}")
     print(f"Train 샘플: {len(train_dataset)}, Test 샘플: {len(test_dataset)}")
     print(f"클래스: {train_dataset.class_names}")
     print(f"Epochs: {NUM_EPOCHS}, Batch: {BATCH_SIZE}, LR: {LEARNING_RATE}")
+    print(f"데이터 증강: {USE_DATA_AUGMENTATION}, ResNet50: {USE_RESNET50}")
+    print(f"위치 정규화: mean={position_stats['mean'] if position_stats else 'None'}")
     print()
     
     for epoch in range(NUM_EPOCHS):
@@ -445,10 +562,10 @@ def train_model(dataset_dir=DATASET_DIR):
         model.train()
         train_losses = {'total': 0, 'position': 0, 'rotation': 0, 'class': 0}
         
-        for batch in tqdm(train_loader, desc=f"Epoch {epoch+1:02d} Train", leave=False):
+        for batch in tqdm(train_loader, desc=f"Epoch {epoch+1:03d} Train", leave=False):
             rgb = batch['rgb'].to(device)
             depth = batch['depth'].to(device)
-            position = batch['position'].to(device)
+            position = batch['position'].to(device)  # 정규화된 위치
             rotation = batch['rotation'].to(device)
             class_idx = batch['class_idx'].to(device)
             
@@ -456,6 +573,10 @@ def train_model(dataset_dir=DATASET_DIR):
             pred = model(rgb, depth)
             losses = criterion(pred, position, rotation, class_idx)
             losses['total'].backward()
+            
+            # Gradient Clipping
+            torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
+            
             optimizer.step()
             
             for k in train_losses:
@@ -464,79 +585,122 @@ def train_model(dataset_dir=DATASET_DIR):
         for k in train_losses:
             train_losses[k] /= len(train_loader)
         
-        # Evaluation
+        # Evaluation (역정규화하여 실제 mm 오차 계산)
         model.eval()
-        test_metrics = {'position_error_mm': 0, 'rotation_error': 0, 'class_accuracy': 0}
+        all_pos_errors = []
+        all_rot_errors = []
+        correct = 0
+        total = 0
         
         with torch.no_grad():
             for batch in test_loader:
                 rgb = batch['rgb'].to(device)
                 depth = batch['depth'].to(device)
-                position = batch['position'].to(device)
+                position_raw = batch['position_raw'].to(device)  # 원본 위치
                 rotation = batch['rotation'].to(device)
                 class_idx = batch['class_idx'].to(device)
                 
                 pred = model(rgb, depth)
-                metrics = compute_metrics(
-                    pred['position'], position,
-                    pred['rotation'], rotation,
-                    pred['class_logits'], class_idx
-                )
                 
-                for k in test_metrics:
-                    test_metrics[k] += metrics[k]
+                # 예측값 역정규화
+                if position_stats is not None:
+                    mean = torch.tensor(position_stats['mean'], device=device)
+                    std = torch.tensor(position_stats['std'], device=device)
+                    pred_pos_raw = pred['position'] * (std + 1e-6) + mean
+                else:
+                    pred_pos_raw = pred['position']
+                
+                # 위치 오차 (mm) - 원본 스케일에서 계산
+                pos_error = torch.sqrt(((pred_pos_raw - position_raw) ** 2).sum(dim=1)) * 1000
+                all_pos_errors.extend(pos_error.cpu().numpy())
+                
+                # 회전 오차
+                rot_error = torch.sqrt(((pred['rotation'] - rotation) ** 2).sum(dim=1))
+                all_rot_errors.extend(rot_error.cpu().numpy())
+                
+                # 분류 정확도
+                _, pred_labels = torch.max(pred['class_logits'], 1)
+                correct += (pred_labels == class_idx).sum().item()
+                total += class_idx.size(0)
         
-        for k in test_metrics:
-            test_metrics[k] /= len(test_loader)
+        avg_pos_error = np.mean(all_pos_errors)
+        avg_rot_error = np.mean(all_rot_errors)
+        class_acc = 100 * correct / total
         
         scheduler.step()
         
         # Best 모델 저장
-        if test_metrics['position_error_mm'] < best_pos_error:
-            best_pos_error = test_metrics['position_error_mm']
+        if avg_pos_error < best_pos_error:
+            best_pos_error = avg_pos_error
+            patience_counter = 0
             torch.save({
                 'epoch': epoch,
                 'model_state_dict': model.state_dict(),
                 'optimizer_state_dict': optimizer.state_dict(),
                 'class_names': train_dataset.class_names,
-                'best_pos_error': best_pos_error
+                'position_stats': position_stats,
+                'best_pos_error': best_pos_error,
+                'use_resnet50': USE_RESNET50
             }, os.path.join(ARTIFACTS_DIR, 'deep_6dof_best.pt'))
+        else:
+            patience_counter += 1
         
         # 로그 출력 (5 에폭마다)
         if (epoch + 1) % 5 == 0 or epoch == 0:
-            print(f"Epoch [{epoch+1:02d}/{NUM_EPOCHS}] "
+            lr = optimizer.param_groups[0]['lr']
+            print(f"Epoch [{epoch+1:03d}/{NUM_EPOCHS}] "
                   f"Loss={train_losses['total']:.4f} | "
-                  f"PosErr={test_metrics['position_error_mm']:.1f}mm | "
-                  f"RotErr={test_metrics['rotation_error']:.4f} | "
-                  f"ClassAcc={test_metrics['class_accuracy']:.1f}% | "
-                  f"best={best_pos_error:.1f}mm")
+                  f"PosErr={avg_pos_error:.1f}mm | "
+                  f"RotErr={avg_rot_error:.4f} | "
+                  f"ClassAcc={class_acc:.1f}% | "
+                  f"best={best_pos_error:.1f}mm | "
+                  f"lr={lr:.2e}")
+        
+        # Early Stopping
+        if patience_counter >= early_stop_patience:
+            print(f"\n⚠️  Early stopping at epoch {epoch+1} (no improvement for {early_stop_patience} epochs)")
+            break
     
     print(f"\n{'='*70}")
     print(f"학습 완료! 최고 위치 오차: {best_pos_error:.2f}mm")
     print(f"모델 저장: {os.path.join(ARTIFACTS_DIR, 'deep_6dof_best.pt')}")
+    
+    # 위치 오차 분포 출력
+    print(f"\n위치 오차 분포 (마지막 에폭):")
+    print(f"  < 10mm: {100 * sum(1 for e in all_pos_errors if e < 10) / len(all_pos_errors):.1f}%")
+    print(f"  < 50mm: {100 * sum(1 for e in all_pos_errors if e < 50) / len(all_pos_errors):.1f}%")
+    print(f"  < 100mm: {100 * sum(1 for e in all_pos_errors if e < 100) / len(all_pos_errors):.1f}%")
 
 
 def evaluate_model(dataset_dir=DATASET_DIR):
-    """모델 평가"""
+    """모델 평가 (개선된 버전)"""
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     
-    # 데이터셋 로드
-    test_dataset = RGBDPoseDataset(dataset_dir, split='test')
+    # 모델 로드 (먼저 로드해서 position_stats 얻기)
+    model_path = os.path.join(ARTIFACTS_DIR, 'deep_6dof_best.pt')
+    if not os.path.exists(model_path):
+        print(f"모델 파일 없음: {model_path}")
+        return
+    
+    checkpoint = torch.load(model_path, map_location=device)
+    position_stats = checkpoint.get('position_stats', None)
+    use_resnet50 = checkpoint.get('use_resnet50', False)
+    
+    # 데이터셋 로드 (position_stats 전달)
+    test_dataset = RGBDPoseDataset(
+        dataset_dir, split='test', 
+        use_augmentation=False,
+        position_stats=position_stats
+    )
     if len(test_dataset) == 0:
         print("테스트 데이터셋이 없습니다.")
         return
     
     test_loader = DataLoader(test_dataset, batch_size=BATCH_SIZE, shuffle=False, num_workers=4)
     
-    # 모델 로드
-    model_path = os.path.join(ARTIFACTS_DIR, 'deep_6dof_best.pt')
-    if not os.path.exists(model_path):
-        print(f"모델 파일 없음: {model_path}")
-        return
-    
+    # 모델 생성 및 가중치 로드
     num_classes = len(test_dataset.class_names)
-    model = Deep6DoFModel(num_classes=num_classes).to(device)
-    checkpoint = torch.load(model_path, map_location=device)
+    model = Deep6DoFModel(num_classes=num_classes, use_resnet50=use_resnet50).to(device)
     model.load_state_dict(checkpoint['model_state_dict'])
     model.eval()
     
@@ -545,25 +709,43 @@ def evaluate_model(dataset_dir=DATASET_DIR):
     print(f"{'='*70}")
     print(f"모델: {model_path}")
     print(f"테스트 샘플: {len(test_dataset)}")
+    print(f"ResNet50: {use_resnet50}")
+    print(f"위치 정규화: {position_stats is not None}")
     
     all_pos_errors = []
     all_rot_errors = []
     correct = 0
     total = 0
     
+    # 클래스별 오차 추적
+    class_pos_errors = {name: [] for name in test_dataset.class_names}
+    
     with torch.no_grad():
         for batch in tqdm(test_loader, desc="Evaluating"):
             rgb = batch['rgb'].to(device)
             depth = batch['depth'].to(device)
-            position = batch['position'].to(device)
+            position_raw = batch['position_raw'].to(device)  # 원본 위치
             rotation = batch['rotation'].to(device)
             class_idx = batch['class_idx'].to(device)
             
             pred = model(rgb, depth)
             
+            # 예측값 역정규화
+            if position_stats is not None:
+                mean = torch.tensor(position_stats['mean'], device=device)
+                std = torch.tensor(position_stats['std'], device=device)
+                pred_pos_raw = pred['position'] * (std + 1e-6) + mean
+            else:
+                pred_pos_raw = pred['position']
+            
             # 위치 오차 (mm)
-            pos_error = torch.sqrt(((pred['position'] - position) ** 2).sum(dim=1)) * 1000
+            pos_error = torch.sqrt(((pred_pos_raw - position_raw) ** 2).sum(dim=1)) * 1000
             all_pos_errors.extend(pos_error.cpu().numpy())
+            
+            # 클래스별 오차 기록
+            for i, idx in enumerate(class_idx.cpu().numpy()):
+                class_name = test_dataset.class_names[idx]
+                class_pos_errors[class_name].append(pos_error[i].cpu().item())
             
             # 회전 오차
             rot_error = torch.sqrt(((pred['rotation'] - rotation) ** 2).sum(dim=1))
@@ -575,14 +757,24 @@ def evaluate_model(dataset_dir=DATASET_DIR):
             total += class_idx.size(0)
     
     # 결과 출력
-    print(f"\n결과:")
+    print(f"\n{'='*50}")
+    print(f"전체 결과:")
+    print(f"{'='*50}")
     print(f"  평균 위치 오차: {np.mean(all_pos_errors):.2f}mm (std={np.std(all_pos_errors):.2f})")
     print(f"  평균 회전 오차: {np.mean(all_rot_errors):.4f}")
     print(f"  분류 정확도: {100 * correct / total:.2f}%")
-    print(f"\n  위치 오차 분포:")
-    print(f"    < 5mm: {100 * sum(1 for e in all_pos_errors if e < 5) / len(all_pos_errors):.1f}%")
-    print(f"    < 10mm: {100 * sum(1 for e in all_pos_errors if e < 10) / len(all_pos_errors):.1f}%")
-    print(f"    < 20mm: {100 * sum(1 for e in all_pos_errors if e < 20) / len(all_pos_errors):.1f}%")
+    
+    print(f"\n위치 오차 분포:")
+    print(f"  < 10mm: {100 * sum(1 for e in all_pos_errors if e < 10) / len(all_pos_errors):.1f}%")
+    print(f"  < 50mm: {100 * sum(1 for e in all_pos_errors if e < 50) / len(all_pos_errors):.1f}%")
+    print(f"  < 100mm: {100 * sum(1 for e in all_pos_errors if e < 100) / len(all_pos_errors):.1f}%")
+    print(f"  < 200mm: {100 * sum(1 for e in all_pos_errors if e < 200) / len(all_pos_errors):.1f}%")
+    
+    print(f"\n클래스별 위치 오차:")
+    for class_name in test_dataset.class_names:
+        errors = class_pos_errors[class_name]
+        if errors:
+            print(f"  {class_name}: {np.mean(errors):.2f}mm (std={np.std(errors):.2f}, n={len(errors)})")
 
 
 # ==========================================
