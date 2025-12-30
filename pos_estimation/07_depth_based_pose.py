@@ -159,12 +159,13 @@ class DepthGTDataset(Dataset):
     """Depth에서 Ground Truth를 계산하는 데이터셋"""
     
     def __init__(self, dataset_dir, split='train', train_ratio=TRAIN_RATIO, 
-                 use_augmentation=True, position_stats=None):
+                 use_augmentation=True, position_stats=None, use_bbox_crop=False):
         self.dataset_dir = dataset_dir
         self.split = split
         self.samples = []
         self.use_augmentation = use_augmentation and (split == 'train')
         self.position_stats = position_stats
+        self.use_bbox_crop = use_bbox_crop
         
         # 카메라 파라미터
         self.fx = CAMERA_INTRINSICS["fx"]
@@ -231,13 +232,44 @@ class DepthGTDataset(Dataset):
                 )
                 
                 if valid:
+                    # pose 파일 읽기 (bbox와 rotation 정보)
+                    bbox = None
+                    rotation_6d = None
+                    pose_file = os.path.join(class_dir, f"pose_{frame_idx:04d}.json")
+                    
+                    if os.path.exists(pose_file):
+                        with open(pose_file) as f:
+                            pose_data = json.load(f)
+                        
+                        # bbox_2d 읽기
+                        if self.use_bbox_crop:
+                            bbox_data = pose_data.get("bbox_2d", {})
+                            if bbox_data.get("x_max", 0) > 0:
+                                bbox = {
+                                    'x_min': int(bbox_data.get("x_min", 0)),
+                                    'y_min': int(bbox_data.get("y_min", 0)),
+                                    'x_max': int(bbox_data.get("x_max", 1024)),
+                                    'y_max': int(bbox_data.get("y_max", 1024))
+                                }
+                        
+                        # rotation 읽기 (camTobj.r_xyz_deg → 6D)
+                        camTobj = pose_data.get("camTobj", {})
+                        euler_deg = camTobj.get("r_xyz_deg", [0, 0, 0])
+                        R = euler_to_rotation_matrix(euler_deg)
+                        rotation_6d = rotation_matrix_to_6d(R).tolist()
+                    else:
+                        # pose 파일이 없으면 단위 회전
+                        rotation_6d = [1, 0, 0, 0, 1, 0]  # Identity rotation
+                    
                     all_samples.append({
                         'rgb_path': rgb_file,
                         'depth_path': depth_file,
                         'gt_position': centroid.tolist(),  # Depth 기반 GT
+                        'gt_rotation_6d': rotation_6d,  # 6D Rotation GT
                         'class_name': class_name,
                         'class_idx': self.class_to_idx[class_name],
-                        'scale_factor': scale_factor  # Depth 스케일 보정용
+                        'scale_factor': scale_factor,  # Depth 스케일 보정용
+                        'bbox': bbox  # bbox_2d 정보
                     })
                     valid_count += 1
                 else:
@@ -294,12 +326,34 @@ class DepthGTDataset(Dataset):
         
         # RGB 로드
         rgb = Image.open(sample['rgb_path']).convert('RGB')
-        rgb = self.rgb_transform(rgb)
         
         # Depth 로드 및 전처리
         depth = np.load(sample['depth_path'])
         if len(depth.shape) == 3:
             depth = depth[:, :, 0]
+        
+        # bbox crop 적용
+        bbox = sample.get('bbox')
+        if self.use_bbox_crop and bbox is not None:
+            x_min, y_min = bbox['x_min'], bbox['y_min']
+            x_max, y_max = bbox['x_max'], bbox['y_max']
+            
+            # 10% 마진 추가
+            w, h = x_max - x_min, y_max - y_min
+            margin_x, margin_y = int(w * 0.1), int(h * 0.1)
+            x_min = max(0, x_min - margin_x)
+            y_min = max(0, y_min - margin_y)
+            x_max = min(rgb.width, x_max + margin_x)
+            y_max = min(rgb.height, y_max + margin_y)
+            
+            # RGB crop
+            rgb = rgb.crop((x_min, y_min, x_max, y_max))
+            
+            # Depth crop
+            depth = depth[y_min:y_max, x_min:x_max]
+        
+        # RGB transform
+        rgb = self.rgb_transform(rgb)
         
         # Depth 스케일 적용 (클래스별로 저장된 scale_factor 사용)
         depth = depth * sample.get('scale_factor', 1.0)
@@ -322,8 +376,9 @@ class DepthGTDataset(Dataset):
         
         # Ground Truth (Depth에서 계산된 것)
         gt_pos = np.array(sample['gt_position'], dtype=np.float32)
+        gt_rot_6d = np.array(sample['gt_rotation_6d'], dtype=np.float32)
         
-        # 정규화
+        # 위치 정규화
         if self.position_stats is not None:
             mean = np.array(self.position_stats['mean'], dtype=np.float32)
             std = np.array(self.position_stats['std'], dtype=np.float32) + 1e-6
@@ -336,8 +391,104 @@ class DepthGTDataset(Dataset):
             'depth': depth_tensor,
             'position': torch.tensor(position_normalized),
             'position_raw': torch.tensor(gt_pos),
+            'rotation_6d': torch.tensor(gt_rot_6d),
             'class_idx': sample['class_idx']
         }
+
+
+# ==========================================
+# 회전 표현 변환 함수
+# ==========================================
+def euler_to_rotation_matrix(euler_deg):
+    """Euler angles (degrees) → Rotation Matrix (3x3)"""
+    roll, pitch, yaw = np.radians(euler_deg)
+    
+    # Roll (X축 회전)
+    Rx = np.array([
+        [1, 0, 0],
+        [0, np.cos(roll), -np.sin(roll)],
+        [0, np.sin(roll), np.cos(roll)]
+    ])
+    
+    # Pitch (Y축 회전)
+    Ry = np.array([
+        [np.cos(pitch), 0, np.sin(pitch)],
+        [0, 1, 0],
+        [-np.sin(pitch), 0, np.cos(pitch)]
+    ])
+    
+    # Yaw (Z축 회전)
+    Rz = np.array([
+        [np.cos(yaw), -np.sin(yaw), 0],
+        [np.sin(yaw), np.cos(yaw), 0],
+        [0, 0, 1]
+    ])
+    
+    # ZYX 순서로 결합
+    R = Rz @ Ry @ Rx
+    return R
+
+
+def rotation_matrix_to_6d(R):
+    """Rotation Matrix (3x3) → 6D Representation
+    
+    6D = 회전 행렬의 처음 두 열 (6개 값)
+    """
+    return np.concatenate([R[:, 0], R[:, 1]])
+
+
+def rotation_6d_to_matrix(rot_6d):
+    """6D Representation → Rotation Matrix (3x3)
+    
+    Gram-Schmidt 정규화로 직교 행렬 복원
+    """
+    a1 = rot_6d[:3]
+    a2 = rot_6d[3:6]
+    
+    # 첫 번째 열 정규화
+    b1 = a1 / (np.linalg.norm(a1) + 1e-8)
+    
+    # 두 번째 열: a2에서 b1 방향 성분 제거 후 정규화
+    b2 = a2 - np.dot(b1, a2) * b1
+    b2 = b2 / (np.linalg.norm(b2) + 1e-8)
+    
+    # 세 번째 열: 외적
+    b3 = np.cross(b1, b2)
+    
+    R = np.stack([b1, b2, b3], axis=1)
+    return R
+
+
+def rotation_6d_to_matrix_batch(rot_6d):
+    """6D Representation → Rotation Matrix (배치 처리, PyTorch)"""
+    a1 = rot_6d[:, :3]
+    a2 = rot_6d[:, 3:6]
+    
+    b1 = F.normalize(a1, dim=1)
+    b2 = a2 - (b1 * a2).sum(dim=1, keepdim=True) * b1
+    b2 = F.normalize(b2, dim=1)
+    b3 = torch.cross(b1, b2, dim=1)
+    
+    R = torch.stack([b1, b2, b3], dim=2)
+    return R
+
+
+def compute_rotation_error(pred_6d, gt_6d):
+    """두 6D 회전 표현 간의 각도 오차 (degrees)"""
+    R_pred = rotation_6d_to_matrix_batch(pred_6d)
+    R_gt = rotation_6d_to_matrix_batch(gt_6d)
+    
+    # R_pred^T @ R_gt의 trace로 각도 계산
+    R_diff = torch.bmm(R_pred.transpose(1, 2), R_gt)
+    trace = R_diff[:, 0, 0] + R_diff[:, 1, 1] + R_diff[:, 2, 2]
+    
+    # trace = 1 + 2*cos(theta) → theta = arccos((trace-1)/2)
+    cos_angle = (trace - 1) / 2
+    cos_angle = torch.clamp(cos_angle, -1, 1)
+    angle_rad = torch.acos(cos_angle)
+    angle_deg = torch.rad2deg(angle_rad)
+    
+    return angle_deg
 
 
 # ==========================================
@@ -406,6 +557,17 @@ class RGBDepthTo3DModel(nn.Module):
             nn.Linear(256, 3)  # X, Y, Z
         )
         
+        # Rotation Head (6D 회전 표현 예측)
+        self.rotation_head = nn.Sequential(
+            nn.Linear(fusion_dim, 512),
+            nn.ReLU(),
+            nn.Dropout(0.3),
+            nn.Linear(512, 256),
+            nn.ReLU(),
+            nn.Dropout(0.2),
+            nn.Linear(256, 6)  # 6D Rotation Representation
+        )
+        
         # Classification Head
         self.class_head = nn.Sequential(
             nn.Linear(fusion_dim, 256),
@@ -414,8 +576,9 @@ class RGBDepthTo3DModel(nn.Module):
             nn.Linear(256, num_classes)
         )
         
-        print(f"  모델: {'ResNet50' if use_resnet50 else 'ResNet18'} + DepthEncoder → 3D Position")
+        print(f"  모델: {'ResNet50' if use_resnet50 else 'ResNet18'} + DepthEncoder → 6DoF Pose")
         print(f"  RGB features: 512, Depth features: {depth_features}, Fusion: {fusion_dim}")
+        print(f"  출력: Position(3) + Rotation(6D) + Class({num_classes})")
     
     def forward(self, rgb, depth):
         # RGB Encoding
@@ -431,10 +594,12 @@ class RGBDepthTo3DModel(nn.Module):
         
         # Predictions
         position = self.position_head(fused)
+        rotation_6d = self.rotation_head(fused)
         class_logits = self.class_head(fused)
         
         return {
             'position': position,
+            'rotation_6d': rotation_6d,
             'class_logits': class_logits
         }
 
@@ -442,18 +607,23 @@ class RGBDepthTo3DModel(nn.Module):
 # ==========================================
 # 학습
 # ==========================================
-def train_model(dataset_dir=DATASET_DIR):
+def train_model(dataset_dir=DATASET_DIR, use_resnet50=False, use_bbox_crop=False):
     """모델 학습"""
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print(f"Device: {device}")
     
     # 데이터셋 로드
-    train_dataset = DepthGTDataset(dataset_dir, split='train', use_augmentation=True)
+    train_dataset = DepthGTDataset(dataset_dir, split='train', use_augmentation=True, 
+                                    use_bbox_crop=use_bbox_crop)
     test_dataset = DepthGTDataset(
         dataset_dir, split='test', 
         use_augmentation=False,
-        position_stats=train_dataset.position_stats
+        position_stats=train_dataset.position_stats,
+        use_bbox_crop=use_bbox_crop
     )
+    
+    if use_bbox_crop:
+        print(f"  BBox Crop: ✅ 활성화")
     
     if len(train_dataset) == 0:
         print("데이터셋이 비어있습니다.")
@@ -466,16 +636,18 @@ def train_model(dataset_dir=DATASET_DIR):
     
     # 모델 생성 (RGB + Depth 융합)
     num_classes = len(train_dataset.class_names)
-    model = RGBDepthTo3DModel(num_classes=num_classes, use_resnet50=False, depth_features=256).to(device)
+    model = RGBDepthTo3DModel(num_classes=num_classes, use_resnet50=use_resnet50, depth_features=256).to(device)
     
     # 손실 함수 및 옵티마이저
     position_criterion = nn.SmoothL1Loss()
+    rotation_criterion = nn.SmoothL1Loss()  # 6D rotation에 대한 L1 loss
     class_criterion = nn.CrossEntropyLoss()
     optimizer = torch.optim.AdamW(model.parameters(), lr=LEARNING_RATE, weight_decay=WEIGHT_DECAY)
     scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=NUM_EPOCHS)
     
     os.makedirs(ARTIFACTS_DIR, exist_ok=True)
     best_pos_error = float('inf')
+    best_rot_error = float('inf')
     patience_counter = 0
     early_stop_patience = 20
     
@@ -497,14 +669,18 @@ def train_model(dataset_dir=DATASET_DIR):
             rgb = batch['rgb'].to(device)
             depth = batch['depth'].to(device)
             position = batch['position'].to(device)
+            rotation_6d = batch['rotation_6d'].to(device)
             class_idx = batch['class_idx'].to(device)
             
             optimizer.zero_grad()
             pred = model(rgb, depth)  # RGB + Depth 입력
             
             pos_loss = position_criterion(pred['position'], position)
+            rot_loss = rotation_criterion(pred['rotation_6d'], rotation_6d)
             cls_loss = class_criterion(pred['class_logits'], class_idx)
-            loss = pos_loss + 0.1 * cls_loss
+            
+            # 가중치 조합: 위치(1.0) + 회전(0.5) + 분류(0.1)
+            loss = pos_loss + 0.5 * rot_loss + 0.1 * cls_loss
             
             loss.backward()
             torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
@@ -517,6 +693,7 @@ def train_model(dataset_dir=DATASET_DIR):
         # Evaluation
         model.eval()
         all_pos_errors = []
+        all_rot_errors = []
         correct = 0
         total = 0
         
@@ -525,6 +702,7 @@ def train_model(dataset_dir=DATASET_DIR):
                 rgb = batch['rgb'].to(device)
                 depth = batch['depth'].to(device)
                 position_raw = batch['position_raw'].to(device)
+                rotation_6d_gt = batch['rotation_6d'].to(device)
                 class_idx = batch['class_idx'].to(device)
                 
                 pred = model(rgb, depth)  # RGB + Depth 입력
@@ -538,12 +716,17 @@ def train_model(dataset_dir=DATASET_DIR):
                 pos_error = torch.sqrt(((pred_pos_raw - position_raw) ** 2).sum(dim=1)) * 1000
                 all_pos_errors.extend(pos_error.cpu().numpy())
                 
+                # 회전 오차 (degrees)
+                rot_error = compute_rotation_error(pred['rotation_6d'], rotation_6d_gt)
+                all_rot_errors.extend(rot_error.cpu().numpy())
+                
                 # 분류 정확도
                 _, pred_labels = torch.max(pred['class_logits'], 1)
                 correct += (pred_labels == class_idx).sum().item()
                 total += class_idx.size(0)
         
         avg_pos_error = np.mean(all_pos_errors)
+        avg_rot_error = np.mean(all_rot_errors)
         class_acc = 100 * correct / total
         
         scheduler.step()
@@ -551,14 +734,16 @@ def train_model(dataset_dir=DATASET_DIR):
         # Best 모델 저장
         if avg_pos_error < best_pos_error:
             best_pos_error = avg_pos_error
+            best_rot_error = avg_rot_error
             patience_counter = 0
             torch.save({
                 'epoch': epoch,
                 'model_state_dict': model.state_dict(),
                 'class_names': train_dataset.class_names,
                 'position_stats': position_stats,
-                'best_pos_error': best_pos_error
-            }, os.path.join(ARTIFACTS_DIR, 'depth_gt_pose_best.pt'))
+                'best_pos_error': best_pos_error,
+                'best_rot_error': best_rot_error
+            }, os.path.join(ARTIFACTS_DIR, 'depth_gt_6dof_best.pt'))
         else:
             patience_counter += 1
         
@@ -567,6 +752,7 @@ def train_model(dataset_dir=DATASET_DIR):
             print(f"Epoch [{epoch+1:03d}/{NUM_EPOCHS}] "
                   f"Loss={train_loss:.4f} | "
                   f"PosErr={avg_pos_error:.1f}mm | "
+                  f"RotErr={avg_rot_error:.1f}° | "
                   f"ClassAcc={class_acc:.1f}% | "
                   f"best={best_pos_error:.1f}mm")
         
@@ -576,15 +762,24 @@ def train_model(dataset_dir=DATASET_DIR):
             break
     
     print(f"\n{'='*70}")
-    print(f"학습 완료! 최고 위치 오차: {best_pos_error:.2f}mm")
-    print(f"모델 저장: {os.path.join(ARTIFACTS_DIR, 'depth_gt_pose_best.pt')}")
+    print(f"🎯 6DoF 학습 완료!")
+    print(f"  최고 위치 오차: {best_pos_error:.2f}mm")
+    print(f"  최고 회전 오차: {best_rot_error:.2f}°")
+    print(f"모델 저장: {os.path.join(ARTIFACTS_DIR, 'depth_gt_6dof_best.pt')}")
     
-    # 오차 분포
+    # 위치 오차 분포
     print(f"\n위치 오차 분포:")
     print(f"  < 10mm: {100 * sum(1 for e in all_pos_errors if e < 10) / len(all_pos_errors):.1f}%")
     print(f"  < 50mm: {100 * sum(1 for e in all_pos_errors if e < 50) / len(all_pos_errors):.1f}%")
     print(f"  < 100mm: {100 * sum(1 for e in all_pos_errors if e < 100) / len(all_pos_errors):.1f}%")
     print(f"  < 200mm: {100 * sum(1 for e in all_pos_errors if e < 200) / len(all_pos_errors):.1f}%")
+    
+    # 회전 오차 분포
+    print(f"\n회전 오차 분포:")
+    print(f"  < 5°: {100 * sum(1 for e in all_rot_errors if e < 5) / len(all_rot_errors):.1f}%")
+    print(f"  < 10°: {100 * sum(1 for e in all_rot_errors if e < 10) / len(all_rot_errors):.1f}%")
+    print(f"  < 20°: {100 * sum(1 for e in all_rot_errors if e < 20) / len(all_rot_errors):.1f}%")
+    print(f"  < 45°: {100 * sum(1 for e in all_rot_errors if e < 45) / len(all_rot_errors):.1f}%")
 
 
 def verify_depth_gt(dataset_dir=DATASET_DIR, num_samples=5):
@@ -670,6 +865,121 @@ def verify_depth_gt(dataset_dir=DATASET_DIR, num_samples=5):
 
 
 # ==========================================
+# 평가 (Train/Test 오차 통계)
+# ==========================================
+def evaluate_model(dataset_dir=DATASET_DIR, use_resnet50=False, use_bbox_crop=False):
+    """저장된 모델로 Train/Test 데이터 평가"""
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    print(f"Device: {device}")
+    
+    # 모델 로드
+    model_path = os.path.join(ARTIFACTS_DIR, 'depth_gt_6dof_best.pt')
+    if not os.path.exists(model_path):
+        print(f"❌ 모델 파일이 없습니다: {model_path}")
+        return
+    
+    checkpoint = torch.load(model_path, map_location=device, weights_only=False)
+    position_stats = checkpoint['position_stats']
+    class_names = checkpoint['class_names']
+    num_classes = len(class_names)
+    
+    print(f"모델 로드: {model_path}")
+    print(f"  클래스: {class_names}")
+    print(f"  위치 정규화: mean={position_stats['mean']}")
+    
+    # 모델 생성 및 가중치 로드
+    model = RGBDepthTo3DModel(num_classes=num_classes, use_resnet50=use_resnet50, depth_features=256).to(device)
+    model.load_state_dict(checkpoint['model_state_dict'])
+    model.eval()
+    
+    # 데이터셋 로드
+    print("\n데이터셋 로드 중...")
+    train_dataset = DepthGTDataset(dataset_dir, split='train', use_augmentation=False, 
+                                    use_bbox_crop=use_bbox_crop)
+    test_dataset = DepthGTDataset(
+        dataset_dir, split='test', 
+        use_augmentation=False,
+        position_stats=train_dataset.position_stats,
+        use_bbox_crop=use_bbox_crop
+    )
+    
+    train_loader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=False, num_workers=4)
+    test_loader = DataLoader(test_dataset, batch_size=BATCH_SIZE, shuffle=False, num_workers=4)
+    
+    def compute_errors(data_loader, split_name):
+        """데이터셋에 대한 오차 계산"""
+        all_pos_errors = []
+        all_rot_errors = []
+        
+        with torch.no_grad():
+            for batch in tqdm(data_loader, desc=f"{split_name} 평가"):
+                rgb = batch['rgb'].to(device)
+                depth = batch['depth'].to(device)
+                position_raw = batch['position_raw'].to(device)
+                rotation_6d_gt = batch['rotation_6d'].to(device)
+                
+                pred = model(rgb, depth)
+                
+                # 역정규화
+                mean = torch.tensor(position_stats['mean'], device=device)
+                std = torch.tensor(position_stats['std'], device=device) + 1e-6
+                pred_pos_raw = pred['position'] * std + mean
+                
+                # 위치 오차 (mm)
+                pos_error = torch.sqrt(((pred_pos_raw - position_raw) ** 2).sum(dim=1)) * 1000
+                all_pos_errors.extend(pos_error.cpu().numpy())
+                
+                # 회전 오차 (degrees)
+                rot_error = compute_rotation_error(pred['rotation_6d'], rotation_6d_gt)
+                all_rot_errors.extend(rot_error.cpu().numpy())
+        
+        return np.array(all_pos_errors), np.array(all_rot_errors)
+    
+    # Train 데이터 평가
+    train_pos_errors, train_rot_errors = compute_errors(train_loader, "Train")
+    
+    # Test 데이터 평가
+    test_pos_errors, test_rot_errors = compute_errors(test_loader, "Test")
+    
+    # 결과 출력
+    print(f"\n{'='*70}")
+    print("📊 Train/Test 오차 통계")
+    print(f"{'='*70}")
+    
+    print(f"\n=== Train 데이터 ({len(train_pos_errors):,}장) ===")
+    print(f"  위치 오차: 평균 {train_pos_errors.mean():.2f} mm, 표준편차 {train_pos_errors.std():.2f} mm")
+    print(f"  회전 오차: 평균 {train_rot_errors.mean():.2f}°, 표준편차 {train_rot_errors.std():.2f}°")
+    print(f"  위치 오차 범위: {train_pos_errors.min():.2f} ~ {train_pos_errors.max():.2f} mm")
+    print(f"  회전 오차 범위: {train_rot_errors.min():.2f} ~ {train_rot_errors.max():.2f}°")
+    
+    print(f"\n=== Test 데이터 ({len(test_pos_errors):,}장) ===")
+    print(f"  위치 오차: 평균 {test_pos_errors.mean():.2f} mm, 표준편차 {test_pos_errors.std():.2f} mm")
+    print(f"  회전 오차: 평균 {test_rot_errors.mean():.2f}°, 표준편차 {test_rot_errors.std():.2f}°")
+    print(f"  위치 오차 범위: {test_pos_errors.min():.2f} ~ {test_pos_errors.max():.2f} mm")
+    print(f"  회전 오차 범위: {test_rot_errors.min():.2f} ~ {test_rot_errors.max():.2f}°")
+    
+    # 위치 오차 분포
+    print(f"\n=== 위치 오차 분포 ===")
+    print(f"{'기준':<12} {'Train':>12} {'Test':>12}")
+    print(f"{'-'*36}")
+    for threshold in [10, 20, 50, 100, 200]:
+        train_pct = 100 * (train_pos_errors < threshold).sum() / len(train_pos_errors)
+        test_pct = 100 * (test_pos_errors < threshold).sum() / len(test_pos_errors)
+        print(f"< {threshold}mm{'':<6} {train_pct:>10.1f}% {test_pct:>10.1f}%")
+    
+    # 회전 오차 분포
+    print(f"\n=== 회전 오차 분포 ===")
+    print(f"{'기준':<12} {'Train':>12} {'Test':>12}")
+    print(f"{'-'*36}")
+    for threshold in [1, 2, 5, 10, 20]:
+        train_pct = 100 * (train_rot_errors < threshold).sum() / len(train_rot_errors)
+        test_pct = 100 * (test_rot_errors < threshold).sum() / len(test_rot_errors)
+        print(f"< {threshold}°{'':<8} {train_pct:>10.1f}% {test_pct:>10.1f}%")
+    
+    print(f"\n{'='*70}")
+
+
+# ==========================================
 # 메인
 # ==========================================
 if __name__ == "__main__":
@@ -677,17 +987,23 @@ if __name__ == "__main__":
     
     parser = argparse.ArgumentParser(description="Depth 기반 6DoF Pose Estimation")
     parser.add_argument('--mode', type=str, default='train', 
-                        choices=['train', 'verify'],
+                        choices=['train', 'verify', 'eval'],
                         help='실행 모드')
     parser.add_argument('--dataset_dir', type=str, default=DATASET_DIR)
     parser.add_argument('--epochs', type=int, default=NUM_EPOCHS)
+    parser.add_argument('--resnet50', action='store_true', 
+                        help='ResNet50 사용 (기본: ResNet18)')
+    parser.add_argument('--bbox_crop', action='store_true',
+                        help='bbox_2d로 이미지 크롭 후 학습')
     
     args = parser.parse_args()
     
     NUM_EPOCHS = args.epochs
     
     if args.mode == 'train':
-        train_model(args.dataset_dir)
+        train_model(args.dataset_dir, use_resnet50=args.resnet50, use_bbox_crop=args.bbox_crop)
     elif args.mode == 'verify':
         verify_depth_gt(args.dataset_dir)
+    elif args.mode == 'eval':
+        evaluate_model(args.dataset_dir, use_resnet50=args.resnet50, use_bbox_crop=args.bbox_crop)
 
