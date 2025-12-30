@@ -22,6 +22,7 @@ import json
 import time
 import math
 import numpy as np
+from PIL import Image
 
 PROJECT_DIR = os.path.dirname(os.path.abspath(__file__))
 REPO_DIR = os.path.dirname(PROJECT_DIR)
@@ -230,7 +231,8 @@ def parse_bbox_from_file(bbox_npy_path, labels_json_path, class_name):
         if len(bbox_data) == 0:
             return None
         
-        id_to_labels = labels_data.get("idToLabels", {})
+        # idToLabels 키가 있으면 사용, 없으면 labels_data 자체가 id→label 매핑
+        id_to_labels = labels_data.get("idToLabels", labels_data)
         
         best_bbox = None
         best_area = 0
@@ -528,6 +530,29 @@ def generate_class_dataset(part_config, class_index, total_classes):
                 bbox_info = parse_bbox_from_file(bbox_npy_path, labels_json_path, class_name)
                 if bbox_info is None:
                     bbox_info = {"x_min": 0, "y_min": 0, "x_max": 0, "y_max": 0, "center_x": 0, "center_y": 0, "visibility": 0}
+                
+                # 100장당 1장씩 crop 샘플 저장 (bbox 품질 확인용)
+                if frame_idx % 100 == 0 and bbox_info["x_max"] > 0:
+                    try:
+                        crop_samples_dir = os.path.join(class_output_dir, "crop_samples")
+                        os.makedirs(crop_samples_dir, exist_ok=True)
+                        
+                        # RGB 이미지 로드 및 crop
+                        if os.path.exists(rgb_path):
+                            img = Image.open(rgb_path)
+                            x_min = int(bbox_info["x_min"])
+                            y_min = int(bbox_info["y_min"])
+                            x_max = int(bbox_info["x_max"])
+                            y_max = int(bbox_info["y_max"])
+                            
+                            # crop 영역이 유효한지 확인
+                            if x_max > x_min and y_max > y_min:
+                                cropped = img.crop((x_min, y_min, x_max, y_max))
+                                crop_filename = f"crop_{idx_str}_bbox_{x_min}_{y_min}_{x_max}_{y_max}.png"
+                                cropped.save(os.path.join(crop_samples_dir, crop_filename))
+                                print(f"    📷 Crop 샘플 저장: {crop_filename}")
+                    except Exception as crop_err:
+                        print(f"    ⚠️ Crop 저장 실패: {crop_err}")
                 
                 # Pose 라벨 저장
                 pose_data = {
