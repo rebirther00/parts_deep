@@ -236,7 +236,8 @@ class DepthGTDataset(Dataset):
                         'depth_path': depth_file,
                         'gt_position': centroid.tolist(),  # Depth 기반 GT
                         'class_name': class_name,
-                        'class_idx': self.class_to_idx[class_name]
+                        'class_idx': self.class_to_idx[class_name],
+                        'scale_factor': scale_factor  # Depth 스케일 보정용
                     })
                     valid_count += 1
                 else:
@@ -295,6 +296,30 @@ class DepthGTDataset(Dataset):
         rgb = Image.open(sample['rgb_path']).convert('RGB')
         rgb = self.rgb_transform(rgb)
         
+        # Depth 로드 및 전처리
+        depth = np.load(sample['depth_path'])
+        if len(depth.shape) == 3:
+            depth = depth[:, :, 0]
+        
+        # Depth 스케일 적용 (클래스별로 저장된 scale_factor 사용)
+        depth = depth * sample.get('scale_factor', 1.0)
+        
+        # Depth 정규화 (0~1 범위로)
+        depth_valid = depth[(depth > DEPTH_MIN) & (depth < DEPTH_MAX)]
+        if len(depth_valid) > 0:
+            depth_min = depth_valid.min()
+            depth_max = depth_valid.max()
+            depth_normalized = (depth - depth_min) / (depth_max - depth_min + 1e-6)
+        else:
+            depth_normalized = depth / (DEPTH_MAX + 1e-6)
+        
+        depth_normalized = np.clip(depth_normalized, 0, 1).astype(np.float32)
+        
+        # Depth 리사이즈 (224x224)
+        depth_pil = Image.fromarray((depth_normalized * 255).astype(np.uint8))
+        depth_pil = depth_pil.resize((224, 224), Image.BILINEAR)
+        depth_tensor = torch.tensor(np.array(depth_pil) / 255.0, dtype=torch.float32).unsqueeze(0)
+        
         # Ground Truth (Depth에서 계산된 것)
         gt_pos = np.array(sample['gt_position'], dtype=np.float32)
         
@@ -308,6 +333,7 @@ class DepthGTDataset(Dataset):
         
         return {
             'rgb': rgb,
+            'depth': depth_tensor,
             'position': torch.tensor(position_normalized),
             'position_raw': torch.tensor(gt_pos),
             'class_idx': sample['class_idx']
@@ -315,31 +341,63 @@ class DepthGTDataset(Dataset):
 
 
 # ==========================================
-# 모델: RGB → 3D 위치
+# Depth Encoder
 # ==========================================
-class RGBTo3DModel(nn.Module):
-    """RGB 이미지 → 3D 위치 예측 모델
+class DepthEncoder(nn.Module):
+    """Depth 이미지를 인코딩하는 CNN"""
     
-    Depth를 입력으로 사용하지 않음!
-    RGB만 보고 3D 위치를 예측하는 것이 목표
+    def __init__(self, out_features=256):
+        super().__init__()
+        self.conv = nn.Sequential(
+            nn.Conv2d(1, 32, 3, stride=2, padding=1), nn.BatchNorm2d(32), nn.ReLU(),
+            nn.Conv2d(32, 64, 3, stride=2, padding=1), nn.BatchNorm2d(64), nn.ReLU(),
+            nn.Conv2d(64, 128, 3, stride=2, padding=1), nn.BatchNorm2d(128), nn.ReLU(),
+            nn.Conv2d(128, 256, 3, stride=2, padding=1), nn.BatchNorm2d(256), nn.ReLU(),
+            nn.Conv2d(256, 256, 3, stride=2, padding=1), nn.BatchNorm2d(256), nn.ReLU(),
+            nn.AdaptiveAvgPool2d(1)
+        )
+        self.fc = nn.Linear(256, out_features)
+    
+    def forward(self, x):
+        x = self.conv(x)
+        x = x.view(x.size(0), -1)
+        x = self.fc(x)
+        return x
+
+
+# ==========================================
+# 모델: RGB + Depth → 3D 위치
+# ==========================================
+class RGBDepthTo3DModel(nn.Module):
+    """RGB + Depth 융합 → 3D 위치 예측 모델
+    
+    RGB: 시각적 특징 (물체 인식, 형태)
+    Depth: 거리 정보 (Z 좌표에 직접적 기여)
     """
     
-    def __init__(self, num_classes=4, use_resnet50=False):
+    def __init__(self, num_classes=4, use_resnet50=False, depth_features=256):
         super().__init__()
         
-        # RGB Encoder
+        # RGB Encoder (ResNet)
         if use_resnet50:
             resnet = models.resnet50(weights=models.ResNet50_Weights.DEFAULT)
-            resnet_out = 2048
+            rgb_out = 2048
         else:
             resnet = models.resnet18(weights=models.ResNet18_Weights.DEFAULT)
-            resnet_out = 512
+            rgb_out = 512
         
-        self.encoder = nn.Sequential(*list(resnet.children())[:-1])
+        self.rgb_encoder = nn.Sequential(*list(resnet.children())[:-1])
+        self.rgb_fc = nn.Linear(rgb_out, 512)
+        
+        # Depth Encoder (Custom CNN)
+        self.depth_encoder = DepthEncoder(out_features=depth_features)
+        
+        # Fusion dimension
+        fusion_dim = 512 + depth_features  # RGB(512) + Depth(256) = 768
         
         # Position Head (3D 좌표 예측)
         self.position_head = nn.Sequential(
-            nn.Linear(resnet_out, 512),
+            nn.Linear(fusion_dim, 512),
             nn.ReLU(),
             nn.Dropout(0.3),
             nn.Linear(512, 256),
@@ -350,22 +408,30 @@ class RGBTo3DModel(nn.Module):
         
         # Classification Head
         self.class_head = nn.Sequential(
-            nn.Linear(resnet_out, 256),
+            nn.Linear(fusion_dim, 256),
             nn.ReLU(),
             nn.Dropout(0.2),
             nn.Linear(256, num_classes)
         )
         
-        print(f"  모델: {'ResNet50' if use_resnet50 else 'ResNet18'} → 3D Position")
+        print(f"  모델: {'ResNet50' if use_resnet50 else 'ResNet18'} + DepthEncoder → 3D Position")
+        print(f"  RGB features: 512, Depth features: {depth_features}, Fusion: {fusion_dim}")
     
-    def forward(self, rgb):
-        # Encoding
-        feat = self.encoder(rgb)
-        feat = feat.view(feat.size(0), -1)
+    def forward(self, rgb, depth):
+        # RGB Encoding
+        rgb_feat = self.rgb_encoder(rgb)
+        rgb_feat = rgb_feat.view(rgb_feat.size(0), -1)
+        rgb_feat = self.rgb_fc(rgb_feat)
+        
+        # Depth Encoding
+        depth_feat = self.depth_encoder(depth)
+        
+        # Fusion
+        fused = torch.cat([rgb_feat, depth_feat], dim=1)
         
         # Predictions
-        position = self.position_head(feat)
-        class_logits = self.class_head(feat)
+        position = self.position_head(fused)
+        class_logits = self.class_head(fused)
         
         return {
             'position': position,
@@ -398,9 +464,9 @@ def train_model(dataset_dir=DATASET_DIR):
     
     position_stats = train_dataset.position_stats
     
-    # 모델 생성
+    # 모델 생성 (RGB + Depth 융합)
     num_classes = len(train_dataset.class_names)
-    model = RGBTo3DModel(num_classes=num_classes, use_resnet50=False).to(device)
+    model = RGBDepthTo3DModel(num_classes=num_classes, use_resnet50=False, depth_features=256).to(device)
     
     # 손실 함수 및 옵티마이저
     position_criterion = nn.SmoothL1Loss()
@@ -429,11 +495,12 @@ def train_model(dataset_dir=DATASET_DIR):
         
         for batch in tqdm(train_loader, desc=f"Epoch {epoch+1:03d} Train", leave=False):
             rgb = batch['rgb'].to(device)
+            depth = batch['depth'].to(device)
             position = batch['position'].to(device)
             class_idx = batch['class_idx'].to(device)
             
             optimizer.zero_grad()
-            pred = model(rgb)
+            pred = model(rgb, depth)  # RGB + Depth 입력
             
             pos_loss = position_criterion(pred['position'], position)
             cls_loss = class_criterion(pred['class_logits'], class_idx)
@@ -456,10 +523,11 @@ def train_model(dataset_dir=DATASET_DIR):
         with torch.no_grad():
             for batch in test_loader:
                 rgb = batch['rgb'].to(device)
+                depth = batch['depth'].to(device)
                 position_raw = batch['position_raw'].to(device)
                 class_idx = batch['class_idx'].to(device)
                 
-                pred = model(rgb)
+                pred = model(rgb, depth)  # RGB + Depth 입력
                 
                 # 역정규화
                 mean = torch.tensor(position_stats['mean'], device=device)
