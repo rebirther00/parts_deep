@@ -8,12 +8,14 @@ import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import Dataset, DataLoader
 from torchvision import transforms, models
+from torchvision.models import ResNet18_Weights
 from PIL import Image
 import numpy as np
 from sklearn.model_selection import train_test_split
 import random
 import psutil
 import os
+import multiprocessing
 import sys
 import argparse
 import time
@@ -297,15 +299,36 @@ def adjust_batch_size(data_size, force_cpu=False):
     else:
         batch_size = 64
     
-    # GPU 메모리 고려
+    # GPU 메모리 고려 (대용량 GPU 지원 추가)
     if torch.cuda.is_available() and not force_cpu:
         gpu_memory_gb = torch.cuda.get_device_properties(0).total_memory / (1024**3)
         if gpu_memory_gb < 4:
             batch_size = min(batch_size, 16)
         elif gpu_memory_gb < 8:
             batch_size = min(batch_size, 32)
+        elif gpu_memory_gb < 16:
+            batch_size = max(batch_size, 64)
+        elif gpu_memory_gb < 32:
+            batch_size = max(batch_size, 128)
+        else:
+            # 32GB 이상 대용량 GPU (GB10 등)
+            batch_size = max(batch_size, 256)
     
     return batch_size
+
+
+def get_optimal_num_workers(force_cpu=False):
+    """최적의 num_workers 값 계산"""
+    cpu_count = multiprocessing.cpu_count()
+    
+    if force_cpu:
+        # CPU 모드에서는 절반만 사용 (학습에도 CPU 필요)
+        return max(1, cpu_count // 2)
+    
+    # GPU 모드에서는 CPU 코어의 1/4 ~ 8개 사이로 설정
+    # 너무 많으면 오히려 오버헤드 발생
+    optimal = min(max(4, cpu_count // 4), 8)
+    return optimal
 
 if BATCH_SIZE is None:
     batch_size = adjust_batch_size(len(train_paths), force_cpu=args.cpu)
@@ -318,8 +341,10 @@ else:
 train_dataset = ExcavatorPartsDataset(train_paths, train_labels, transform=train_transform, bbox_crop=args.bbox_crop)
 test_dataset = ExcavatorPartsDataset(test_paths, test_labels, transform=val_transform, bbox_crop=args.bbox_crop)
 
-num_workers = 0  # 메모리 효율성을 위해 0으로 설정
+# num_workers 자동 조정 (데이터 로딩 병목 해소)
+num_workers = get_optimal_num_workers(force_cpu=args.cpu)
 pin_memory = torch.cuda.is_available() and not args.cpu
+print(f"DataLoader num_workers: {num_workers}")
 
 train_loader = DataLoader(
     train_dataset,
@@ -353,7 +378,9 @@ step4_start_time = time.time()
 
 def create_resnet_model(num_classes, pretrained=True):
     """ResNet18 기반 Transfer Learning 모델 생성"""
-    model = models.resnet18(pretrained=pretrained)
+    # PyTorch 최신 버전 권장 방식: weights 파라미터 사용
+    weights = ResNet18_Weights.IMAGENET1K_V1 if pretrained else None
+    model = models.resnet18(weights=weights)
     
     # 마지막 FC layer를 우리의 분류 작업에 맞게 수정
     num_features = model.fc.in_features
@@ -373,11 +400,27 @@ if args.cpu:
     device = torch.device('cpu')
     print("\n[디바이스 설정] CPU로 강제 실행 (--cpu 플래그 사용)")
 else:
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    if torch.cuda.is_available():
-        print(f"\n[디바이스 설정] GPU 사용: {torch.cuda.get_device_name(0)}")
-    else:
-        print("\n[디바이스 설정] CUDA 사용 불가, CPU로 실행")
+    # GPU 사용 불가 시 에러와 함께 종료
+    if not torch.cuda.is_available():
+        print("\n" + "=" * 80)
+        print("❌ [오류] CUDA 사용 불가!")
+        print("=" * 80)
+        print("\nGPU를 사용할 수 없습니다. 가능한 원인:")
+        print("  1. PyTorch가 CPU 버전으로 설치됨 (현재: torch+cpu)")
+        print("  2. NVIDIA 드라이버가 설치되지 않음")
+        print("  3. CUDA 버전 불일치")
+        print("\n해결 방법:")
+        print("  # CUDA 지원 PyTorch 설치")
+        print("  pip uninstall torch torchvision -y")
+        print("  pip install torch torchvision --index-url https://download.pytorch.org/whl/cu128")
+        print("\n  또는 CPU로 실행하려면:")
+        print("  python 02_parts_classification.py --cpu")
+        print("=" * 80)
+        finish_logging()
+        sys.exit(1)
+    
+    device = torch.device('cuda')
+    print(f"\n[디바이스 설정] GPU 사용: {torch.cuda.get_device_name(0)}")
 
 # 모델 초기화
 model = create_resnet_model(num_classes=num_classes, pretrained=True).to(device)
@@ -415,6 +458,15 @@ optimizer = optim.Adam(model.parameters(), lr=0.001)
 # Learning Rate Scheduler (옵션)
 scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', patience=3, factor=0.5)
 
+# Mixed Precision Training 설정 (GPU에서만 사용)
+use_amp = torch.cuda.is_available() and not args.cpu
+if use_amp:
+    scaler = torch.amp.GradScaler('cuda')
+    print("\nMixed Precision Training (AMP) 활성화")
+else:
+    scaler = None
+    print("\nMixed Precision Training 비활성화 (CPU 모드)")
+
 print("\n손실 함수: Cross Entropy Loss (클래스 가중치 적용)")
 print("옵티마이저: Adam (lr=0.001)")
 print("스케줄러: ReduceLROnPlateau (patience=3, factor=0.5)")
@@ -431,23 +483,33 @@ print("=" * 80)
 step6_start_time = time.time()
 
 
-def train_one_epoch(model, dataloader, criterion, optimizer, device):
-    """한 에포크 학습"""
+def train_one_epoch(model, dataloader, criterion, optimizer, device, scaler=None):
+    """한 에포크 학습 (Mixed Precision 지원)"""
     model.train()
     running_loss = 0.0
     correct = 0
     total = 0
+    use_amp = scaler is not None
     
     for images, labels in dataloader:
         images = images.to(device)
         labels = labels.to(device)
         
         optimizer.zero_grad()
-        outputs = model(images)
-        loss = criterion(outputs, labels)
         
-        loss.backward()
-        optimizer.step()
+        # Mixed Precision Training
+        if use_amp:
+            with torch.amp.autocast('cuda'):
+                outputs = model(images)
+                loss = criterion(outputs, labels)
+            scaler.scale(loss).backward()
+            scaler.step(optimizer)
+            scaler.update()
+        else:
+            outputs = model(images)
+            loss = criterion(outputs, labels)
+            loss.backward()
+            optimizer.step()
         
         running_loss += loss.item() * images.size(0)
         _, predicted = torch.max(outputs.data, 1)
@@ -460,8 +522,8 @@ def train_one_epoch(model, dataloader, criterion, optimizer, device):
     return epoch_loss, epoch_accuracy
 
 
-def evaluate(model, dataloader, criterion, device, class_names):
-    """모델 평가 (클래스별 정확도 포함)"""
+def evaluate(model, dataloader, criterion, device, class_names, use_amp=False):
+    """모델 평가 (클래스별 정확도 포함, Mixed Precision 지원)"""
     model.eval()
     running_loss = 0.0
     correct = 0
@@ -474,8 +536,14 @@ def evaluate(model, dataloader, criterion, device, class_names):
             images = images.to(device)
             labels = labels.to(device)
             
-            outputs = model(images)
-            loss = criterion(outputs, labels)
+            # Mixed Precision 평가
+            if use_amp:
+                with torch.amp.autocast('cuda'):
+                    outputs = model(images)
+                    loss = criterion(outputs, labels)
+            else:
+                outputs = model(images)
+                loss = criterion(outputs, labels)
             
             running_loss += loss.item() * images.size(0)
             _, predicted = torch.max(outputs.data, 1)
@@ -526,11 +594,11 @@ print(f"Early Stopping Patience: {EARLY_STOPPING_PATIENCE} 에포크")
 print("\n학습 시작...\n")
 
 for epoch in range(NUM_EPOCHS):
-    # 학습
-    train_loss, train_acc = train_one_epoch(model, train_loader, criterion, optimizer, device)
+    # 학습 (Mixed Precision 적용)
+    train_loss, train_acc = train_one_epoch(model, train_loader, criterion, optimizer, device, scaler)
     
-    # 검증 (Test 데이터 사용)
-    val_loss, val_acc, class_accs = evaluate(model, test_loader, criterion, device, class_names)
+    # 검증 (Test 데이터 사용, Mixed Precision 적용)
+    val_loss, val_acc, class_accs = evaluate(model, test_loader, criterion, device, class_names, use_amp)
     
     # Learning Rate 스케줄러 업데이트
     scheduler.step(val_loss)
@@ -545,9 +613,8 @@ for epoch in range(NUM_EPOCHS):
     else:
         patience_counter += 1
     
-    # GPU 메모리 정리
-    if torch.cuda.is_available() and not args.cpu:
-        torch.cuda.empty_cache()
+    # GPU 메모리 정리 (Early Stopping 직전에만 수행하여 오버헤드 최소화)
+    # 매 에포크마다 호출하면 메모리 재할당 비용으로 오히려 성능 저하 발생
     
     # 진행 상황 출력 (5 에포크마다 또는 첫 에포크)
     if (epoch + 1) % 5 == 0 or epoch == 0:
@@ -586,8 +653,8 @@ step8_start_time = time.time()
 model.load_state_dict(torch.load(MODEL_SAVE_PATH, map_location=device))
 model.eval()
 
-# 최종 테스트 평가
-final_loss, final_acc, final_class_accs = evaluate(model, test_loader, criterion, device, class_names)
+# 최종 테스트 평가 (Mixed Precision 적용)
+final_loss, final_acc, final_class_accs = evaluate(model, test_loader, criterion, device, class_names, use_amp)
 
 print(f"\n최종 테스트 결과:")
 print(f"  Loss: {final_loss:.4f}")

@@ -1,9 +1,24 @@
 # 데이터셋 (용량이 커서 Git에서 제외)
 datasets/
+dataset_pos/
+dataset_pos_depth/
+dataset_pos_depth_bbox_zero/
 # 예외: 스몰 프로젝트 폴더 구조 유지를 위한 .gitkeep는 추적
 !class_estimation/datasets/
 !class_estimation/datasets/.gitkeep
 !pos_estimation/dataset_pos/.gitkeep
+
+# 모델 파일 (대용량)
+*.pt
+*.pth
+artifacts/
+
+# 압축 파일
+*.tar.gz
+*.zip
+
+# Cursor IDE
+.cursor/
 
 # Python
 __pycache__/
