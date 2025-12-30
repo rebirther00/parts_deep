@@ -1,0 +1,36 @@
+# ==========================================
+# 굴착기 부품 분류 프로젝트 (class_estimation)
+# ==========================================
+
+# PyTorch (CUDA 버전은 시스템에 맞게 선택)
+# GPU 사용 시: https://pytorch.org/get-started/locally/ 참조
+torch>=2.0.0
+torchvision>=0.15.0
+
+# 이미지 처리
+Pillow>=9.0.0
+
+# 데이터 처리 및 분석
+numpy>=1.21.0
+scikit-learn>=1.0.0
+
+# 시스템 모니터링
+psutil>=5.8.0
+
+# ==========================================
+# Isaac Sim (01_generate_multi_class_dataset.py 실행 시 필요)
+# ==========================================
+# Isaac Sim은 pip으로 설치할 수 없으며, NVIDIA에서 별도로 설치해야 합니다.
+# 설치 가이드: https://docs.omniverse.nvidia.com/isaacsim/latest/installation/
+# 
+# 필요한 Isaac Sim 패키지:
+# - isaacsim
+# - omni.replicator.core
+# - omni.usd
+# - pxr (USD Python API)
+#
+# Isaac Sim 설치 후, 다음 명령으로 Python 환경 설정:
+#   source <ISAAC_SIM_PATH>/setup_conda_env.sh
+# 또는
+#   source <ISAAC_SIM_PATH>/setup_python_env.sh
+

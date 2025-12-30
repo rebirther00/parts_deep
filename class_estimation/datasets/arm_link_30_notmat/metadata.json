@@ -1,0 +1,18 @@
+{
+  "class_name": "arm_link_30_notmat",
+  "display_name": "arm_link_30_notmat",
+  "usd_path": "/home/rebirther/isaac-sim/assets/arm_link_30_notmat.usd",
+  "num_images": 500,
+  "part_center": [
+    -5.457187719786453,
+    -0.0299999556485539,
+    2.910410726774058
+  ],
+  "part_size": 4.176135232263745,
+  "background_mode": "random",
+  "background_ratios": {
+    "none": 0.2,
+    "solid": 0.3,
+    "factory": 0.5
+  }
+}

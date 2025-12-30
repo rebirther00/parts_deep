@@ -1,0 +1,13 @@
+{
+  "class_name": "arm_link_25_nomat",
+  "num_images": 500,
+  "part_size_m": 4.064339528157431,
+  "part_center_world_m": [
+    1.0598231859206106,
+    0.0,
+    0.2699373173888107
+  ],
+  "meters_per_unit": 1.0,
+  "meters_per_unit_raw": 1.0,
+  "scale_corrected": false
+}

@@ -1,0 +1,63 @@
+{
+  "class_name": "boom_link_25_nomat",
+  "frame_index": 87,
+  "raw_pose_world": {
+    "t_xyz_m": [
+      3.4152536548278807,
+      0.0,
+      0.10839154440555732
+    ],
+    "r_xyz_deg": [
+      0.0,
+      0.0,
+      0.0
+    ]
+  },
+  "camera_pose_world": {
+    "t_xyz_m": [
+      -0.5839927196502686,
+      1.3174819946289062,
+      8.483627319335938
+    ],
+    "r_xyz_deg": [
+      8.939760042113809,
+      25.25362109540649,
+      110.24009976922082
+    ]
+  },
+  "camTobj": {
+    "t_xyz_m": [
+      3.9992463744781492,
+      -1.3174819946289062,
+      -8.37523577493038
+    ],
+    "r_xyz_deg": [
+      -8.939760042113809,
+      -25.25362109540649,
+      -110.24009976922082
+    ]
+  },
+  "bbox_2d": {
+    "x_min": 0,
+    "y_min": 0,
+    "x_max": 0,
+    "y_max": 0,
+    "center_x": 0,
+    "center_y": 0,
+    "visibility": 0
+  },
+  "image_info": {
+    "resolution": [
+      1024,
+      1024
+    ],
+    "rgb_file": "rgb_0087.png",
+    "depth_file": "distance_to_camera_0087.npy"
+  },
+  "stage_info": {
+    "meters_per_unit": 1.0,
+    "meters_per_unit_raw": 1.0,
+    "scale_corrected": false,
+    "part_size_m": 6.088515436031239
+  }
+}

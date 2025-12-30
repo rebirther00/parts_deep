@@ -1,0 +1,60 @@
+---
+alwaysApply: true
+description: ROS2 path_planner package development guide
+---
+
+# ROS2 Path Planner Package Development Guide
+
+## Package Structure
+- **Main Node**: [path_planner_node.py](mdc:src/path_planner/path_planner/path_planner_node.py) - 핵심 경로 계획 및 굴착기 제어 노드
+- **Web Server**: [simple_web_server.py](mdc:src/path_planner/path_planner/simple_web_server.py) - Flask 기반 웹 제어 인터페이스
+- **Package Config**: [package.xml](mdc:src/path_planner/package.xml), [setup.py](mdc:src/path_planner/setup.py)
+
+## Key ROS2 Topics
+- `joint_angles` (JointAngles): 굴착기 관절 각도 데이터
+- `excavator_response` (ExcavatorResponse): 굴착기 상태 응답
+- `excavator_command` (ExcavatorCommand): 굴착기 제어 명령 (CAN + ROS2 토픽)
+- `excavator_goal` (ExcavatorGoal): 주행 목표점
+
+## Services
+- `generate_path` (GeneratePath): Step 기반 경로 생성 서비스
+
+## Development Guidelines
+
+### Code Style
+- 한글 주석 사용 권장
+- Git commit 메시지는 한글로 작성
+- 복잡한 작업은 todo 리스트 활용
+- 단계별 진행 시 설명 코멘트 추가
+
+### Web Server Development
+- Flask 로그 레벨을 ERROR로 설정하여 GET 요청 로그 최소화
+- 토픽 데이터 업데이트 주기는 3초 (과도한 로그 방지)
+- 반응형 3열 그리드 레이아웃 (모바일: 1열, 태블릿: 2열)
+
+### Step System
+- Step -1: 현재 위치 전송
+- Step 0-9: 메인 굴착 시퀀스 (빨간색 버튼)
+- Step 10-14: 추가/테스트 기능 (파란색 버튼)
+- Step 50+: 주행 관련 기능
+- Step 60+: CAN 메시지 테스트
+
+### CAN Communication
+- CAN 전송과 ROS2 토픽 퍼블리시를 동시에 수행
+- 에러 처리 및 재시도 로직 포함
+- 버퍼 오버플로우 대응
+
+### Build Process
+```bash
+colcon build --packages-select path_planner
+source install/setup.bash
+```
+
+### Testing
+- 시뮬레이션 모드: `self.sim_mode = True`
+- 웹 서버 테스트: http://localhost:8080
+- 토픽 확인: `ros2 topic echo /topic_name`
+
+### 이 프로젝트의 최조 설정은 터미널 오픈 후, 
+```bash
+source set_ros.bash

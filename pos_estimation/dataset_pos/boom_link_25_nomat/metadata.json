@@ -1,0 +1,13 @@
+{
+  "class_name": "boom_link_25_nomat",
+  "num_images": 500,
+  "part_size_m": 6.088515436031239,
+  "part_center_world_m": [
+    3.4152536548278807,
+    0.0,
+    0.10839154440555732
+  ],
+  "meters_per_unit": 1.0,
+  "meters_per_unit_raw": 1.0,
+  "scale_corrected": false
+}

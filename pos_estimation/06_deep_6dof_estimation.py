@@ -41,7 +41,7 @@ DATASET_DIR = os.path.join(PROJECT_DIR, "dataset_pos_depth")
 ARTIFACTS_DIR = os.path.join(PROJECT_DIR, "artifacts")
 
 # 학습 설정
-BATCH_SIZE = 16
+BATCH_SIZE = 8  # 16 → 8 (RTX 4070 8GB용)
 NUM_EPOCHS = 150  # 50 → 150 에폭 증가
 LEARNING_RATE = 5e-5  # 더 낮은 초기 LR
 WEIGHT_DECAY = 1e-4  # 더 강한 정규화

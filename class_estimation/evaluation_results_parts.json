@@ -1,0 +1,14 @@
+{
+  "accuracy": 96.75,
+  "total_samples": 400,
+  "correct_samples": 387,
+  "class_accuracies": {
+    "arm_link_25_nomat": 98.0,
+    "arm_link_30_notmat": 91.0,
+    "boom_link_25_nomat": 99.0,
+    "boom_link_30_notmat": 99.0
+  },
+  "avg_precision": 96.84932392125671,
+  "avg_recall": 96.75,
+  "avg_f1": 96.74947769126024
+}

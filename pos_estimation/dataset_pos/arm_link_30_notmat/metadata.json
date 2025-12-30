@@ -1,0 +1,13 @@
+{
+  "class_name": "arm_link_30_notmat",
+  "num_images": 500,
+  "part_size_m": 4.176135232263745,
+  "part_center_world_m": [
+    -5.457187719786453,
+    -0.0299999556485539,
+    2.910410726774058
+  ],
+  "meters_per_unit": 1.0,
+  "meters_per_unit_raw": 0.009999999776482582,
+  "scale_corrected": true
+}

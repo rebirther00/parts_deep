@@ -1,0 +1,63 @@
+{
+  "class_name": "arm_link_30_notmat",
+  "frame_index": 123,
+  "raw_pose_world": {
+    "t_xyz_m": [
+      -5.457187719786453,
+      -0.0299999556485539,
+      2.910410726774058
+    ],
+    "r_xyz_deg": [
+      0.0,
+      0.0,
+      0.0
+    ]
+  },
+  "camera_pose_world": {
+    "t_xyz_m": [
+      -8.081673622131348,
+      2.053638458251953,
+      4.411233425140381
+    ],
+    "r_xyz_deg": [
+      54.235193885578305,
+      45.62457605519982,
+      152.75863297743138
+    ]
+  },
+  "camTobj": {
+    "t_xyz_m": [
+      2.6244859023448948,
+      -2.083638413900507,
+      -1.5008226983663229
+    ],
+    "r_xyz_deg": [
+      -54.235193885578305,
+      -45.62457605519982,
+      -152.75863297743138
+    ]
+  },
+  "bbox_2d": {
+    "x_min": 0,
+    "y_min": 0,
+    "x_max": 0,
+    "y_max": 0,
+    "center_x": 0,
+    "center_y": 0,
+    "visibility": 0
+  },
+  "image_info": {
+    "resolution": [
+      1024,
+      1024
+    ],
+    "rgb_file": "rgb_0123.png",
+    "depth_file": "distance_to_camera_0123.npy"
+  },
+  "stage_info": {
+    "meters_per_unit": 1.0,
+    "meters_per_unit_raw": 0.009999999776482582,
+    "scale_corrected": true,
+    "part_size_m": 4.176135232263745
+  }
+}

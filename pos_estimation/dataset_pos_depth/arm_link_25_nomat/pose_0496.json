@@ -1,0 +1,63 @@
+{
+  "class_name": "arm_link_25_nomat",
+  "frame_index": 496,
+  "raw_pose_world": {
+    "t_xyz_m": [
+      1.0598231859206106,
+      0.0,
+      0.2699373173888107
+    ],
+    "r_xyz_deg": [
+      0.0,
+      0.0,
+      0.0
+    ]
+  },
+  "camera_pose_world": {
+    "t_xyz_m": [
+      -2.2832679748535156,
+      -0.48341798782348633,
+      3.677835702896118
+    ],
+    "r_xyz_deg": [
+      -8.073669191583713,
+      44.16471482336335,
+      78.49192604237375
+    ]
+  },
+  "camTobj": {
+    "t_xyz_m": [
+      3.3430911607741263,
+      0.48341798782348633,
+      -3.4078983855073073
+    ],
+    "r_xyz_deg": [
+      8.073669191583713,
+      -44.16471482336335,
+      -78.49192604237375
+    ]
+  },
+  "bbox_2d": {
+    "x_min": 0,
+    "y_min": 0,
+    "x_max": 0,
+    "y_max": 0,
+    "center_x": 0,
+    "center_y": 0,
+    "visibility": 0
+  },
+  "image_info": {
+    "resolution": [
+      1024,
+      1024
+    ],
+    "rgb_file": "rgb_0496.png",
+    "depth_file": "distance_to_camera_0496.npy"
+  },
+  "stage_info": {
+    "meters_per_unit": 1.0,
+    "meters_per_unit_raw": 1.0,
+    "scale_corrected": false,
+    "part_size_m": 4.064339528157431
+  }
+}

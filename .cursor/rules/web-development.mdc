@@ -1,0 +1,39 @@
+---
+globs: *.html,*.css,*.js,*.py
+description: Web development guidelines for Flask and frontend
+---
+
+# Web Development Guidelines
+
+## Flask Application Structure
+- 로그 레벨 설정으로 과도한 HTTP 요청 로그 방지
+- `logging.getLogger('werkzeug').setLevel(logging.ERROR)`
+- CORS 활성화로 크로스 오리진 요청 허용
+
+## Frontend Design Patterns
+- **Grid Layout**: CSS Grid 사용하여 반응형 버튼 배치
+- **Color Coding**: 기능별 버튼 색상 구분
+  - 메인 기능: 빨간색 그라디언트 (#e74c3c → #c0392b)
+  - 보조 기능: 파란색 그라디언트 (#3498db → #2980b9)
+- **Status Monitoring**: 실시간 데이터 표시용 상태창
+
+## JavaScript Best Practices
+- 실시간 데이터 업데이트는 적절한 간격 설정 (3초 권장)
+- 에러 처리 및 타임스탬프 표시
+- 사용자 피드백을 위한 로딩/성공/실패 상태 표시
+
+## Responsive Design
+```css
+@media (max-width: 768px) {
+    .button-grid { grid-template-columns: repeat(3, 1fr); }
+    .status-container { grid-template-columns: 1fr; }
+}
+@media (max-width: 1024px) and (min-width: 769px) {
+    .status-container { grid-template-columns: 1fr 1fr; }
+}
+```
+
+## API Design
+- RESTful 엔드포인트 설계
+- JSON 응답 형식 통일
+- 적절한 HTTP 상태 코드 사용

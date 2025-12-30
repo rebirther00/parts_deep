@@ -31,6 +31,10 @@ class DualLogger:
         self.terminal.flush()
         self.log_file.flush()
     
+    def fileno(self):
+        """터미널의 파일 디스크립터 반환 (faulthandler 호환)"""
+        return self.terminal.fileno()
+    
     def close(self):
         """로그 파일 닫기"""
         self.log_file.close()
@@ -51,6 +55,10 @@ class DualErrorLogger:
     def flush(self):
         self.terminal.flush()
         self.log_file.flush()
+    
+    def fileno(self):
+        """터미널의 파일 디스크립터 반환 (faulthandler 호환)"""
+        return self.terminal.fileno()
 
 
 def setup_logging(script_name, log_dir=None):
@@ -99,6 +107,64 @@ def setup_logging(script_name, log_dir=None):
     print(f"🖥️  스크립트: {script_name}")
     print("=" * 80)
     print()
+    
+    return log_file_path
+
+
+def reinit_logging(log_file_path=None):
+    """
+    로깅 재초기화 (SimulationApp 등이 stdout을 변경한 후 다시 설정)
+    
+    Args:
+        log_file_path: 기존 로그 파일 경로 (없으면 새로 생성)
+    
+    Usage:
+        # SimulationApp 초기화 후
+        from utils.logger import reinit_logging
+        reinit_logging(LOG_PATH)
+    """
+    # 기존 로그 파일이 있으면 append 모드로 열기
+    if log_file_path and os.path.exists(log_file_path):
+        log_file = open(log_file_path, 'a', encoding='utf-8')
+    else:
+        # 새 로그 파일 생성
+        log_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "logs")
+        os.makedirs(log_dir, exist_ok=True)
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        log_file_path = os.path.join(log_dir, f"reinit_{timestamp}.log")
+        log_file = open(log_file_path, 'w', encoding='utf-8')
+    
+    # DualLogger 재설정
+    class ReinitDualLogger:
+        def __init__(self, log_file, terminal):
+            self.terminal = terminal
+            self.log_file = log_file
+            self.log_file_path = log_file_path
+        
+        def write(self, message):
+            self.terminal.write(message)
+            self.log_file.write(message)
+            self.log_file.flush()
+        
+        def flush(self):
+            self.terminal.flush()
+            self.log_file.flush()
+        
+        def fileno(self):
+            return self.terminal.fileno()
+        
+        def close(self):
+            self.log_file.close()
+    
+    # 현재 stdout을 저장하고 새 DualLogger로 교체
+    current_stdout = sys.stdout
+    sys.stdout = ReinitDualLogger(log_file, current_stdout)
+    
+    # stderr도 설정
+    current_stderr = sys.stderr
+    sys.stderr = ReinitDualLogger(log_file, current_stderr)
+    
+    print(f"\n🔄 로깅 재초기화 완료 (SimulationApp 이후)")
     
     return log_file_path
 

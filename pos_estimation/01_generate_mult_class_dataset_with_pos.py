@@ -42,7 +42,7 @@ from pxr import Usd, UsdGeom, Semantics, Gf
 # ==========================================
 ASSETS_DIR = "/home/rebirther/isaac-sim/assets"
 BASE_OUTPUT_DIR = os.path.join(PROJECT_DIR, "dataset_pos_depth")  # Depth 포함 데이터셋
-IMAGES_PER_CLASS = 500
+IMAGES_PER_CLASS = 2000  # 클래스당 이미지 수 (공장 스타일 정제 데이터)
 RESOLUTION = (1024, 1024)
 CLEAR_EXISTING = True
 ENABLE_DEPTH = True  # Depth 맵 생성 활성화
@@ -417,15 +417,17 @@ def generate_class_dataset(part_config, class_index, total_classes):
             # 프레임별 랜덤화
             with rep.trigger.on_frame(max_execs=IMAGES_PER_CLASS):
                 # 카메라 위치 랜덤화
+                # 공장 스타일: X,Y ±0.1, Z 고정 (선반 위 부품 촬영)
+                # Roll=0 (look_at 기본), Pitch 고정 (Z 고정), Yaw만 약간 변동
                 with rep.create.group([camera]):
                     rep.modify.pose(
                         position=rep.distribution.uniform(
-                            (part_center[0] - camera_distance_max * 0.7,
-                             part_center[1] - camera_distance_max * 0.5,
-                             part_center[2] + camera_distance_min * 0.3),
-                            (part_center[0] + camera_distance_max * 0.7,
-                             part_center[1] + camera_distance_max * 0.5,
-                             part_center[2] + camera_distance_max * 0.9)
+                            (part_center[0] - camera_distance_max * 0.1,
+                             part_center[1] - camera_distance_max * 0.1,
+                             part_center[2] + camera_distance_max * 0.95),
+                            (part_center[0] + camera_distance_max * 0.1,
+                             part_center[1] + camera_distance_max * 0.1,
+                             part_center[2] + camera_distance_max * 0.95)
                         ),
                         look_at=part_center
                     )
