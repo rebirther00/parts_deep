@@ -417,17 +417,17 @@ def generate_class_dataset(part_config, class_index, total_classes):
             # 프레임별 랜덤화
             with rep.trigger.on_frame(max_execs=IMAGES_PER_CLASS):
                 # 카메라 위치 랜덤화
-                # 공장 스타일: X,Y ±0.1, Z 고정 (선반 위 부품 촬영)
-                # Roll=0 (look_at 기본), Pitch 고정 (Z 고정), Yaw만 약간 변동
+                # 사선 구도: 측면 + 윗면 동시에 보이게
+                # X: 0.3~0.7 (측면), Y: 0.1~0.5 (앞쪽), Z: 0.2~0.4 (다양한 사선 각도)
                 with rep.create.group([camera]):
                     rep.modify.pose(
                         position=rep.distribution.uniform(
-                            (part_center[0] - camera_distance_max * 0.1,
-                             part_center[1] - camera_distance_max * 0.1,
-                             part_center[2] + camera_distance_max * 0.95),
-                            (part_center[0] + camera_distance_max * 0.1,
+                            (part_center[0] + camera_distance_max * 0.3,
                              part_center[1] + camera_distance_max * 0.1,
-                             part_center[2] + camera_distance_max * 0.95)
+                             part_center[2] + camera_distance_max * 0.2),
+                            (part_center[0] + camera_distance_max * 0.7,
+                             part_center[1] + camera_distance_max * 0.5,
+                             part_center[2] + camera_distance_max * 0.4)
                         ),
                         look_at=part_center
                     )
