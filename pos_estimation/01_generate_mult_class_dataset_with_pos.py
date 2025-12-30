@@ -14,8 +14,18 @@
 # - pose_####.json: 6DoF 라벨 (위치 + 자세)
 # ==========================================
 
+# 로깅 설정 (SimulationApp 초기화 전에 설정해야 함)
 import os
 import sys
+PROJECT_DIR = os.path.dirname(os.path.abspath(__file__))
+REPO_DIR = os.path.dirname(PROJECT_DIR)
+if REPO_DIR not in sys.path:
+    sys.path.insert(0, REPO_DIR)
+from utils.logger import setup_logging, reinit_logging, finish_logging
+
+# 로그 파일 생성
+LOG_PATH = setup_logging("01_generate_pos")
+
 import glob
 import shutil
 import json
@@ -24,14 +34,12 @@ import math
 import numpy as np
 from PIL import Image
 
-PROJECT_DIR = os.path.dirname(os.path.abspath(__file__))
-REPO_DIR = os.path.dirname(PROJECT_DIR)
-if REPO_DIR not in sys.path:
-    sys.path.insert(0, REPO_DIR)
-
 # Isaac Sim 초기화
 from isaacsim import SimulationApp
 simulation_app = SimulationApp({"headless": False})
+
+# 로깅 재초기화 (SimulationApp이 stdout을 변경한 후 다시 설정)
+reinit_logging(LOG_PATH)
 
 # Isaac Sim 모듈 (App 실행 후 임포트)
 import omni.replicator.core as rep
@@ -677,6 +685,9 @@ if __name__ == "__main__":
             depth_count = len(glob.glob(os.path.join(class_dir, "distance_to_camera_*.npy")))
             pose_count = len(glob.glob(os.path.join(class_dir, "pose_*.json")))
             print(f"  {name}: RGB {rgb_count}장, Depth {depth_count}장, Pose {pose_count}개")
+    
+    # 로깅 종료
+    finish_logging()
     
     print("\n종료하려면 Ctrl+C를 누르세요.")
     while simulation_app.is_running():

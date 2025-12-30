@@ -32,9 +32,16 @@ from torchvision.models import ResNet50_Weights
 from PIL import Image
 
 # ==========================================
-# 경로 설정
+# 로깅 설정
 # ==========================================
 PROJECT_DIR = os.path.dirname(os.path.abspath(__file__))
+REPO_DIR = os.path.dirname(PROJECT_DIR)
+sys.path.insert(0, REPO_DIR)
+from utils.logger import setup_logging, finish_logging
+
+# ==========================================
+# 경로 설정
+# ==========================================
 DATASET_DIR = os.path.join(PROJECT_DIR, "dataset_pos_depth")
 ARTIFACTS_DIR = os.path.join(PROJECT_DIR, "artifacts")
 
@@ -809,5 +816,11 @@ if __name__ == "__main__":
     
     args = parser.parse_args()
     
+    # 로그 파일 생성
+    LOG_PATH = setup_logging("08_pose_evaluation")
+    
     evaluate(args)
+    
+    # 로깅 종료
+    finish_logging()
 

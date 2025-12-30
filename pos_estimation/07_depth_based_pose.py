@@ -32,9 +32,16 @@ from torchvision import transforms, models
 from PIL import Image
 
 # ==========================================
-# 설정
+# 로깅 설정
 # ==========================================
 PROJECT_DIR = os.path.dirname(os.path.abspath(__file__))
+REPO_DIR = os.path.dirname(PROJECT_DIR)
+sys.path.insert(0, REPO_DIR)
+from utils.logger import setup_logging, finish_logging
+
+# ==========================================
+# 설정
+# ==========================================
 DATASET_DIR = os.path.join(PROJECT_DIR, "dataset_pos_depth")
 ARTIFACTS_DIR = os.path.join(PROJECT_DIR, "artifacts")
 
@@ -998,6 +1005,9 @@ if __name__ == "__main__":
     
     args = parser.parse_args()
     
+    # 로그 파일 생성
+    LOG_PATH = setup_logging(f"07_pose_{args.mode}")
+    
     NUM_EPOCHS = args.epochs
     
     if args.mode == 'train':
@@ -1006,4 +1016,7 @@ if __name__ == "__main__":
         verify_depth_gt(args.dataset_dir)
     elif args.mode == 'eval':
         evaluate_model(args.dataset_dir, use_resnet50=args.resnet50, use_bbox_crop=args.bbox_crop)
+    
+    # 로깅 종료
+    finish_logging()
 
