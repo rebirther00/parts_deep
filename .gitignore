@@ -11,6 +11,11 @@ dataset_pos_depth_bbox_zero/
 # 모델 파일 (대용량)
 *.pt
 *.pth
+*.onnx
+*.h5
+*.pkl
+*.joblib
+*.safetensors
 artifacts/
 
 # Numpy 배열 파일 (대용량)
