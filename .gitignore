@@ -16,6 +16,9 @@ artifacts/
 # Numpy 배열 파일 (대용량)
 *.npy
 
+# 이미지 파일
+*.png
+
 # 압축 파일
 *.tar.gz
 *.zip
