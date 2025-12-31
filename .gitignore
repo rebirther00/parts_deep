@@ -1,5 +1,6 @@
 # 데이터셋 (용량이 커서 Git에서 제외)
 datasets/
+*.npy
 # 예외: 스몰 프로젝트 폴더 구조 유지를 위한 .gitkeep는 추적
 !class_estimation/datasets/
 !class_estimation/datasets/.gitkeep
