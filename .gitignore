@@ -13,6 +13,9 @@ dataset_pos_depth_bbox_zero/
 *.pth
 artifacts/
 
+# Numpy 배열 파일 (대용량)
+*.npy
+
 # 압축 파일
 *.tar.gz
 *.zip
