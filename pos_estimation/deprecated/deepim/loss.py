@@ -182,6 +182,12 @@ def compute_pose_error(pred_pos, pred_rot, gt_pos, gt_rot):
         pos_error_mm: (N,) 위치 오차 (mm)
         rot_error_deg: (N,) 회전 오차 (degrees)
     """
+    # Mixed Precision Training 호환을 위해 float32로 변환
+    pred_pos = pred_pos.float()
+    pred_rot = pred_rot.float()
+    gt_pos = gt_pos.float()
+    gt_rot = gt_rot.float()
+    
     # Position error (mm)
     pos_error = torch.sqrt(((pred_pos - gt_pos) ** 2).sum(dim=1)) * 1000
     

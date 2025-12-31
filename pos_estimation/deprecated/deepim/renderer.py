@@ -25,6 +25,32 @@ except ImportError:
 PYTORCH3D_AVAILABLE = RENDERER_AVAILABLE
 
 
+def detect_cad_scale(vertices):
+    """CAD 파일의 스케일 자동 감지 (미터 단위로 변환하기 위한 계수)
+    
+    link_25 (mm 단위)와 link_30 (m 단위)의 스케일 차이를 처리.
+    대략적인 부품 크기가 1~10m라고 가정.
+    
+    Args:
+        vertices: (N, 3) 정점 좌표 배열
+    
+    Returns:
+        scale: 스케일 계수 (mm→m: 0.001, cm→m: 0.01, m: 1.0)
+    """
+    if len(vertices) == 0:
+        return 1.0
+    
+    # 좌표 범위 확인
+    max_coord = np.abs(vertices).max()
+    
+    if max_coord > 1000:  # mm 단위로 추정 (좌표가 1000 이상)
+        return 0.001  # mm → m
+    elif max_coord > 100:  # cm 단위로 추정 (좌표가 100~1000)
+        return 0.01  # cm → m
+    else:
+        return 1.0  # 이미 m 단위
+
+
 class MeshRenderer:
     """trimesh + pyrender 기반 3D 메쉬 렌더러"""
     
@@ -43,6 +69,9 @@ class MeshRenderer:
         self.image_size = image_size
         self.assets_dir = assets_dir
         self.class_names = class_names
+        
+        # 클래스별 스케일 저장
+        self.mesh_scales = {}
         
         # 메쉬 로드
         self.meshes = {}
@@ -64,7 +93,7 @@ class MeshRenderer:
         self.renderer = pyrender.OffscreenRenderer(image_size, image_size)
     
     def _load_meshes(self):
-        """OBJ 파일들 로드"""
+        """OBJ 파일들 로드 (스케일 자동 보정 포함)"""
         print(f"📦 3D 메쉬 로드 중...")
         
         for class_name in self.class_names:
@@ -77,6 +106,17 @@ class MeshRenderer:
             try:
                 # trimesh로 OBJ 로드
                 mesh = trimesh.load(obj_path, force='mesh')
+                
+                # 스케일 자동 감지 (link_25는 mm, link_30은 m 단위)
+                scale = detect_cad_scale(mesh.vertices)
+                self.mesh_scales[class_name] = scale
+                
+                # 스케일 적용 (mm → m 등)
+                if scale != 1.0:
+                    mesh.vertices = mesh.vertices * scale
+                    scale_str = 'mm→m' if scale == 0.001 else 'cm→m' if scale == 0.01 else f'×{scale}'
+                else:
+                    scale_str = 'm (원본)'
                 
                 # 중심을 원점으로 이동
                 mesh.vertices -= mesh.centroid
@@ -95,7 +135,7 @@ class MeshRenderer:
                     'centroid': mesh.centroid.copy(),
                 }
                 
-                print(f"  ✅ {class_name}: {len(mesh.vertices)} vertices, {len(mesh.faces)} faces")
+                print(f"  ✅ {class_name}: {len(mesh.vertices)} vertices, {len(mesh.faces)} faces, scale={scale_str}")
                 
             except Exception as e:
                 print(f"  ❌ {class_name} 로드 실패: {e}")

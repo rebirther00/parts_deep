@@ -282,7 +282,7 @@ class DeepIMDataset(Dataset):
     """
     
     def __init__(self, dataset_dir, split='train', train_ratio=0.8,
-                 position_stats=None, noise_position=0.05, noise_rotation=10.0):
+                 position_stats=None, noise_position=0.05, noise_rotation=3.0):
         """
         Args:
             noise_position: 위치 노이즈 표준편차 (meters)
@@ -820,7 +820,7 @@ if __name__ == "__main__":
     parser.add_argument('--num_iterations', type=int, default=NUM_ITERATIONS)
     parser.add_argument('--noise_position', type=float, default=0.05,
                         help='초기 포즈 위치 노이즈 (meters)')
-    parser.add_argument('--noise_rotation', type=float, default=10.0,
+    parser.add_argument('--noise_rotation', type=float, default=3.0,
                         help='초기 포즈 회전 노이즈 (degrees)')
     parser.add_argument('--cpu', action='store_true')
     
