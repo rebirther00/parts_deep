@@ -40,7 +40,7 @@ sys.path.insert(0, REPO_DIR)
 from utils.logger import setup_logging, finish_logging
 
 # 로그 설정
-LOG_PATH = setup_logging("13_pose_eval_v2")
+LOG_PATH = setup_logging("10_pose_eval_v2")
 
 DATASET_DIR = os.path.join(PROJECT_DIR, "dataset_pos_depth")
 ARTIFACTS_DIR = os.path.join(PROJECT_DIR, "artifacts")
