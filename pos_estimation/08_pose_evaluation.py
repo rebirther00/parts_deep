@@ -35,6 +35,13 @@ from PIL import Image
 # 경로 설정
 # ==========================================
 PROJECT_DIR = os.path.dirname(os.path.abspath(__file__))
+REPO_DIR = os.path.dirname(PROJECT_DIR)
+sys.path.insert(0, REPO_DIR)
+from utils.logger import setup_logging, finish_logging
+
+# 로그 설정
+LOG_PATH = setup_logging("08_pose_eval")
+
 DATASET_DIR = os.path.join(PROJECT_DIR, "dataset_pos_depth")
 ARTIFACTS_DIR = os.path.join(PROJECT_DIR, "artifacts")
 
@@ -822,4 +829,7 @@ if __name__ == "__main__":
         model_path = os.path.join(ARTIFACTS_DIR, args.model)
     
     evaluate(args, model_path=model_path)
+    
+    # 로깅 종료
+    finish_logging()
 

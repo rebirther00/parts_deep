@@ -37,6 +37,13 @@ from PIL import Image
 # 설정
 # ==========================================
 PROJECT_DIR = os.path.dirname(os.path.abspath(__file__))
+REPO_DIR = os.path.dirname(PROJECT_DIR)
+sys.path.insert(0, REPO_DIR)
+from utils.logger import setup_logging, finish_logging
+
+# 로그 설정
+LOG_PATH = setup_logging("07_depth_pose_v1")
+
 DATASET_DIR = os.path.join(PROJECT_DIR, "dataset_pos_depth")
 ARTIFACTS_DIR = os.path.join(PROJECT_DIR, "artifacts")
 
@@ -1339,4 +1346,7 @@ if __name__ == "__main__":
         train_model(args.dataset_dir, force_cpu=args.cpu, use_bbox_crop=args.bbox_crop)
     elif args.mode in ['evaluate', 'eval']:
         evaluate_model(args.dataset_dir, use_bbox_crop=args.bbox_crop, num_samples=args.num_samples)
+    
+    # 로깅 종료
+    finish_logging()
 

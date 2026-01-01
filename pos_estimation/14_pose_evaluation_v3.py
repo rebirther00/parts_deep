@@ -1,16 +1,15 @@
 #!/usr/bin/env python3
 # ==========================================
-# Depth 기반 6DoF Pose Estimation V4 평가 스크립트
-# Swin Transformer V2-B + 1024×1024 고해상도
+# Depth 기반 6DoF Pose Estimation V3 평가 스크립트
+# ConvNeXt-Small + 224×224
 # ==========================================
 #
-# V4 모델(Swin V2-B + 1024×1024)의 위치 및 자세 추정 정확도를 평가합니다.
+# V3 모델(ConvNeXt-Small)의 위치 및 자세 추정 정확도를 평가합니다.
 #
 # 사용법:
-#   python 12_pose_evaluation_v4.py
-#   python 12_pose_evaluation_v4.py --num_samples 100
-#   python 12_pose_evaluation_v4.py --bbox_crop
-#   python 12_pose_evaluation_v4.py --save_results --verbose
+#   python 14_pose_evaluation_v3.py
+#   python 14_pose_evaluation_v3.py --num_samples 100
+#   python 14_pose_evaluation_v3.py --save_results --verbose
 #
 # ==========================================
 
@@ -29,7 +28,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch.utils.data import Dataset, DataLoader
 from torchvision import transforms, models
-from torchvision.models import swin_v2_b, Swin_V2_B_Weights
+from torchvision.models import ConvNeXt_Small_Weights
 from PIL import Image
 
 # ==========================================
@@ -41,13 +40,13 @@ sys.path.insert(0, REPO_DIR)
 from utils.logger import setup_logging, finish_logging
 
 # 로그 설정
-LOG_PATH = setup_logging("12_pose_eval_v4")
+LOG_PATH = setup_logging("14_pose_eval_v3")
 
 DATASET_DIR = os.path.join(PROJECT_DIR, "dataset_pos_depth")
 ARTIFACTS_DIR = os.path.join(PROJECT_DIR, "artifacts")
 
-MODEL_PATH = os.path.join(ARTIFACTS_DIR, "depth_gt_pose_v4_best.pt")
-RESULTS_PATH = os.path.join(ARTIFACTS_DIR, "evaluation_results_v4.json")
+MODEL_PATH = os.path.join(ARTIFACTS_DIR, "depth_gt_pose_v3_best.pt")
+RESULTS_PATH = os.path.join(ARTIFACTS_DIR, "evaluation_results_v3.json")
 
 # ==========================================
 # Depth 설정
@@ -62,8 +61,8 @@ CAMERA_INTRINSICS = {
     "width": 1024, "height": 1024
 }
 
-# V4 기본 입력 해상도
-INPUT_SIZE = 1024
+# V3 입력 해상도
+INPUT_SIZE = 224
 
 
 # ==========================================
@@ -221,20 +220,19 @@ def compute_object_centroid_from_depth(depth, fx, fy, cx, cy, scale_factor=1.0):
 
 
 # ==========================================
-# V4 평가용 데이터셋 (1024×1024)
+# V3 평가용 데이터셋 (224×224)
 # ==========================================
-class PoseEvalDatasetV4(Dataset):
-    """V4 평가 전용 데이터셋 (1024×1024 고해상도)"""
+class PoseEvalDatasetV3(Dataset):
+    """V3 평가 전용 데이터셋 (224×224)"""
     
     def __init__(self, dataset_dir, position_stats, class_names, 
-                 use_bbox_crop=False, train_ratio=0.8, input_size=1024):
+                 use_bbox_crop=False, train_ratio=0.8):
         self.dataset_dir = dataset_dir
         self.samples = []
         self.position_stats = position_stats
         self.class_names = class_names
         self.class_to_idx = {name: idx for idx, name in enumerate(class_names)}
         self.use_bbox_crop = use_bbox_crop
-        self.input_size = input_size  # V4: 1024
         
         self.fx = CAMERA_INTRINSICS["fx"]
         self.fy = CAMERA_INTRINSICS["fy"]
@@ -274,14 +272,14 @@ class PoseEvalDatasetV4(Dataset):
         # 테스트 샘플 수집
         self._collect_test_samples(class_dirs, train_ratio)
         
-        # V4: 1024×1024 RGB Transform
+        # V3: 224×224 RGB Transform
         self.rgb_transform = transforms.Compose([
-            transforms.Resize((self.input_size, self.input_size)),
+            transforms.Resize((INPUT_SIZE, INPUT_SIZE)),
             transforms.ToTensor(),
             transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
         ])
         
-        print(f"        입력 해상도: {self.input_size}×{self.input_size}")
+        print(f"        입력 해상도: {INPUT_SIZE}×{INPUT_SIZE}")
     
     def _collect_test_samples(self, class_dirs, train_ratio):
         """테스트 샘플만 수집"""
@@ -396,10 +394,10 @@ class PoseEvalDatasetV4(Dataset):
             rgb = rgb.crop((x_min, y_min, x_max, y_max))
             depth = depth[y_min:y_max, x_min:x_max]
         
-        # RGB transform (1024×1024)
+        # RGB transform (224×224)
         rgb = self.rgb_transform(rgb)
         
-        # Depth 정규화 및 리사이즈 (1024×1024)
+        # Depth 정규화 및 리사이즈 (224×224)
         depth = depth * sample.get('scale_factor', 1.0)
         depth_valid = depth[(depth > DEPTH_MIN) & (depth < DEPTH_MAX)]
         if len(depth_valid) > 0:
@@ -411,7 +409,7 @@ class PoseEvalDatasetV4(Dataset):
         
         depth_normalized = np.clip(depth_normalized, 0, 1).astype(np.float32)
         depth_pil = Image.fromarray((depth_normalized * 255).astype(np.uint8))
-        depth_pil = depth_pil.resize((self.input_size, self.input_size), Image.BILINEAR)
+        depth_pil = depth_pil.resize((INPUT_SIZE, INPUT_SIZE), Image.BILINEAR)
         depth_tensor = torch.tensor(np.array(depth_pil) / 255.0, dtype=torch.float32).unsqueeze(0)
         
         # 위치 정규화
@@ -440,38 +438,23 @@ class PoseEvalDatasetV4(Dataset):
 
 
 # ==========================================
-# Depth Encoder V4: 1024 입력 최적화
+# Depth Encoder V3 (GELU 사용)
 # ==========================================
-class DepthEncoderV4(nn.Module):
-    """V4: 1024×1024 입력에 최적화된 Depth Encoder"""
+class DepthEncoderV3(nn.Module):
+    """V3: GELU 활성화 함수를 사용하는 Depth Encoder"""
     
-    def __init__(self, out_features=256, input_size=1024):
+    def __init__(self, out_features=256):
         super().__init__()
-        self.input_size = input_size
-        
-        # 1024 → 512 → 256 → 128 → 64 → 32 → 16 → 8 (7단계)
         self.conv = nn.Sequential(
-            # 1024 → 512
-            nn.Conv2d(1, 32, 7, stride=2, padding=3), nn.BatchNorm2d(32), nn.GELU(),
-            # 512 → 256
+            nn.Conv2d(1, 32, 3, stride=2, padding=1), nn.BatchNorm2d(32), nn.GELU(),
             nn.Conv2d(32, 64, 3, stride=2, padding=1), nn.BatchNorm2d(64), nn.GELU(),
-            # 256 → 128
             nn.Conv2d(64, 128, 3, stride=2, padding=1), nn.BatchNorm2d(128), nn.GELU(),
-            # 128 → 64
             nn.Conv2d(128, 256, 3, stride=2, padding=1), nn.BatchNorm2d(256), nn.GELU(),
-            # 64 → 32
-            nn.Conv2d(256, 512, 3, stride=2, padding=1), nn.BatchNorm2d(512), nn.GELU(),
-            # 32 → 16
-            nn.Conv2d(512, 512, 3, stride=2, padding=1), nn.BatchNorm2d(512), nn.GELU(),
-            # 16 → 8
-            nn.Conv2d(512, 512, 3, stride=2, padding=1), nn.BatchNorm2d(512), nn.GELU(),
+            nn.Conv2d(256, 256, 3, stride=2, padding=1), nn.BatchNorm2d(256), nn.GELU(),
             nn.AdaptiveAvgPool2d(1)
         )
-        self.fc = nn.Sequential(
-            nn.Linear(512, out_features),
-            nn.LayerNorm(out_features),
-            nn.GELU()
-        )
+        # 학습 스크립트와 동일: 단순 Linear
+        self.fc = nn.Linear(256, out_features)
     
     def forward(self, x):
         x = self.conv(x)
@@ -481,38 +464,33 @@ class DepthEncoderV4(nn.Module):
 
 
 # ==========================================
-# V4 모델: Swin Transformer V2-B + Depth → 6DoF Pose
+# V3 모델: ConvNeXt-Small + Depth → 6DoF Pose
 # ==========================================
-class RGBDepthTo3DModelV4(nn.Module):
-    """V4: Swin Transformer V2-B + Depth 융합 → 6DoF Pose 예측"""
+class RGBDepthTo3DModelV3(nn.Module):
+    """V3: ConvNeXt-Small + Depth 융합 → 6DoF Pose 예측"""
     
-    def __init__(self, num_classes=4, depth_features=256, use_rotation=True, input_size=1024):
+    def __init__(self, num_classes=4, depth_features=256, use_rotation=True):
         super().__init__()
         self.use_rotation = use_rotation
-        self.input_size = input_size
         
-        # V4: Swin Transformer V2-B 사용
-        swin = swin_v2_b(weights=Swin_V2_B_Weights.IMAGENET1K_V1)
-        rgb_out = 1024  # Swin V2-B 출력 차원
+        # V3: ConvNeXt-Small 사용
+        convnext = models.convnext_small(weights=ConvNeXt_Small_Weights.IMAGENET1K_V1)
+        rgb_out = 768  # ConvNeXt-Small 출력 차원
         
-        # 마지막 분류층 제거 (features까지만 사용)
-        self.rgb_encoder = nn.Sequential(
-            swin.features,
-            swin.norm,
-            swin.permute,
-            swin.avgpool,
-            swin.flatten
-        )
+        # 마지막 분류층 제거
+        self.rgb_encoder = nn.Sequential(*list(convnext.children())[:-1])
         
+        # 학습 스크립트와 동일: Flatten 포함
         self.rgb_fc = nn.Sequential(
+            nn.Flatten(),
             nn.Linear(rgb_out, 512),
             nn.LayerNorm(512),
             nn.GELU(),
-            nn.Dropout(0.1)
+            nn.Dropout(0.2)
         )
         
-        # Depth Encoder (1024 입력 최적화)
-        self.depth_encoder = DepthEncoderV4(out_features=depth_features, input_size=input_size)
+        # Depth Encoder (GELU 사용)
+        self.depth_encoder = DepthEncoderV3(out_features=depth_features)
         
         # Fusion dimension
         fusion_dim = 512 + depth_features  # 768
@@ -554,8 +532,9 @@ class RGBDepthTo3DModelV4(nn.Module):
         )
     
     def forward(self, rgb, depth):
-        # RGB Encoding (Swin V2-B)
+        # RGB Encoding (ConvNeXt-Small)
         rgb_feat = self.rgb_encoder(rgb)
+        # Flatten은 rgb_fc 내부에서 처리됨
         rgb_feat = self.rgb_fc(rgb_feat)
         
         # Depth Encoding
@@ -584,21 +563,21 @@ class RGBDepthTo3DModelV4(nn.Module):
 # 메인 평가 함수
 # ==========================================
 def evaluate(args, model_path=None):
-    """V4 모델의 위치 및 자세 추정 정확도 평가"""
+    """V3 모델의 위치 및 자세 추정 정확도 평가"""
     
     # 모델 경로 결정
     if model_path is None:
         model_path = MODEL_PATH
     
     print("=" * 80)
-    print("📊 V4 6DoF Pose Estimation 모델 평가")
-    print("   (Swin Transformer V2-B + 1024×1024 고해상도)")
+    print("📊 V3 6DoF Pose Estimation 모델 평가")
+    print("   (ConvNeXt-Small + 224×224)")
     print("=" * 80)
     
     # 모델 로드
     if not os.path.exists(model_path):
         print(f"❌ 모델 파일을 찾을 수 없습니다: {model_path}")
-        print("   먼저 학습을 실행하세요: python 11_depth_based_pose_v4.py --mode train")
+        print("   먼저 학습을 실행하세요: python 10_depth_based_pose_v3.py --mode train")
         sys.exit(1)
     
     print(f"\n✅ 모델 로드: {model_path}")
@@ -609,11 +588,10 @@ def evaluate(args, model_path=None):
     use_rotation = checkpoint.get('use_rotation', True)
     best_pos_error = checkpoint.get('best_pos_error', 0)
     best_rot_error = checkpoint.get('best_rot_error', 0)
-    input_size = checkpoint.get('input_size', 1024)
-    model_version = checkpoint.get('model_version', 'V4_SwinV2B_1024')
+    model_version = checkpoint.get('model_version', 'V3_ConvNeXt_Small')
     
     print(f"   모델 버전: {model_version}")
-    print(f"   입력 해상도: {input_size}×{input_size}")
+    print(f"   입력 해상도: {INPUT_SIZE}×{INPUT_SIZE}")
     print(f"   학습 시 최고 위치 오차: {best_pos_error:.2f}mm")
     if use_rotation:
         print(f"   학습 시 최고 자세 오차: {best_rot_error:.2f}°")
@@ -631,11 +609,10 @@ def evaluate(args, model_path=None):
     
     # 모델 생성 및 가중치 로드
     num_classes = len(class_names)
-    model = RGBDepthTo3DModelV4(
+    model = RGBDepthTo3DModelV3(
         num_classes=num_classes, 
         depth_features=256, 
-        use_rotation=use_rotation,
-        input_size=input_size
+        use_rotation=use_rotation
     )
     model.load_state_dict(checkpoint['model_state_dict'])
     model = model.to(device)
@@ -646,12 +623,11 @@ def evaluate(args, model_path=None):
     if args.bbox_crop:
         print("   📦 bbox_2d ROI crop 모드")
     
-    test_dataset = PoseEvalDatasetV4(
+    test_dataset = PoseEvalDatasetV3(
         args.dataset_dir,
         position_stats=position_stats,
         class_names=class_names,
-        use_bbox_crop=args.bbox_crop,
-        input_size=input_size
+        use_bbox_crop=args.bbox_crop
     )
     
     if len(test_dataset) == 0:
@@ -680,9 +656,6 @@ def evaluate(args, model_path=None):
     class_pos_errors = {name: [] for name in class_names}
     class_rot_errors = {name: [] for name in class_names}
     
-    # 상세 결과 저장
-    detailed_results = []
-    
     with torch.no_grad():
         for i in tqdm(range(num_samples), desc="평가 중"):
             sample = test_dataset[i]
@@ -694,7 +667,6 @@ def evaluate(args, model_path=None):
             gt_euler = sample['euler_deg'].numpy() if use_rotation else None
             class_idx = sample['class_idx']
             class_name = sample['class_name']
-            rgb_path = sample['rgb_path']
             
             # 예측
             pred = model(rgb, depth)
@@ -734,24 +706,6 @@ def evaluate(args, model_path=None):
                 class_correct += 1
             class_total += 1
             
-            # 상세 결과 저장
-            result_entry = {
-                'sample_idx': i,
-                'class_name': class_name,
-                'rgb_path': rgb_path,
-                'gt_position': [float(v) for v in gt_pos_raw],
-                'pred_position': [float(v) for v in pred_pos_raw],
-                'pos_error_mm': float(pos_error),
-                'pos_error_xyz_mm': [float(x_error), float(y_error), float(z_error)],
-                'pred_class': class_names[pred_class],
-                'class_correct': pred_class == class_idx
-            }
-            if use_rotation:
-                result_entry['gt_euler_deg'] = [float(v) for v in gt_euler]
-                result_entry['pred_euler_deg'] = [float(v) for v in pred_euler]
-                result_entry['rot_error_deg'] = float(rot_error)
-            detailed_results.append(result_entry)
-            
             # 샘플 출력 (처음 5개)
             if args.verbose and i < 5:
                 print(f"\n샘플 {i+1} ({class_name}):")
@@ -765,7 +719,7 @@ def evaluate(args, model_path=None):
     
     # 결과 요약
     print(f"\n{'='*80}")
-    print("📈 V4 평가 결과 요약")
+    print("📈 V3 평가 결과 요약")
     print(f"{'='*80}")
     
     avg_pos_error = np.mean(all_pos_errors)
@@ -825,7 +779,7 @@ def evaluate(args, model_path=None):
     if args.save_results:
         summary_results = {
             'model_version': model_version,
-            'input_size': input_size,
+            'input_size': INPUT_SIZE,
             'num_samples': num_samples,
             'position_error': {
                 'mean_mm': float(avg_pos_error),
@@ -856,16 +810,9 @@ def evaluate(args, model_path=None):
         with open(RESULTS_PATH, 'w', encoding='utf-8') as f:
             json.dump(summary_results, f, indent=2, ensure_ascii=False)
         print(f"\n💾 결과 저장: {RESULTS_PATH}")
-        
-        # 상세 결과 저장
-        if args.save_detailed:
-            detailed_path = os.path.join(ARTIFACTS_DIR, "evaluation_detailed_results_v4.json")
-            with open(detailed_path, 'w', encoding='utf-8') as f:
-                json.dump(detailed_results, f, indent=2, ensure_ascii=False)
-            print(f"💾 상세 결과 저장: {detailed_path}")
     
     print(f"\n{'='*80}")
-    print("✅ V4 평가 완료")
+    print("✅ V3 평가 완료")
     print(f"{'='*80}")
 
 
@@ -873,9 +820,9 @@ def evaluate(args, model_path=None):
 # 메인
 # ==========================================
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="V4 6DoF Pose Estimation 모델 평가 (Swin V2-B + 1024×1024)")
-    parser.add_argument('--model', type=str, default='depth_gt_pose_v4_best.pt',
-                        help='모델 파일명 (기본: depth_gt_pose_v4_best.pt)')
+    parser = argparse.ArgumentParser(description="V3 6DoF Pose Estimation 모델 평가 (ConvNeXt-Small)")
+    parser.add_argument('--model', type=str, default='depth_gt_pose_v3_best.pt',
+                        help='모델 파일명 (기본: depth_gt_pose_v3_best.pt)')
     parser.add_argument('--dataset_dir', type=str, default=DATASET_DIR,
                         help='평가 데이터셋 경로')
     parser.add_argument('--num_samples', type=int, default=None,
@@ -884,8 +831,6 @@ if __name__ == "__main__":
                         help='bbox_2d로 ROI crop 사용')
     parser.add_argument('--save_results', action='store_true',
                         help='평가 결과를 JSON으로 저장')
-    parser.add_argument('--save_detailed', action='store_true',
-                        help='샘플별 상세 결과 저장')
     parser.add_argument('--verbose', action='store_true',
                         help='상세 출력 (처음 5개 샘플)')
     
