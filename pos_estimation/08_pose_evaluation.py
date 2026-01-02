@@ -29,7 +29,7 @@ import torch.nn.functional as F
 from torch.utils.data import Dataset, DataLoader
 from torchvision import transforms, models
 from torchvision.models import ResNet50_Weights
-from PIL import Image
+from PIL import Image, ImageDraw, ImageFont
 
 # ==========================================
 # 로깅 설정
@@ -47,6 +47,8 @@ ARTIFACTS_DIR = os.path.join(PROJECT_DIR, "artifacts")
 
 MODEL_PATH = os.path.join(ARTIFACTS_DIR, "depth_gt_6dof_best.pt")
 RESULTS_PATH = os.path.join(ARTIFACTS_DIR, "evaluation_results_pose.json")
+OUTPUT_IMAGE_PATH = os.path.join(ARTIFACTS_DIR, "evaluation_pose_results.png")
+OUTPUT_HIGH_ERROR_PATH = os.path.join(ARTIFACTS_DIR, "evaluation_pose_high_error.png")
 
 # ==========================================
 # Depth 설정
@@ -530,6 +532,301 @@ class RGBDepthTo3DModel(nn.Module):
 
 
 # ==========================================
+# 시각화 함수
+# ==========================================
+def get_original_image(path, bbox_crop=False, bbox_path=None):
+    """원본 이미지 로드 (bbox_crop 옵션 적용)"""
+    image = Image.open(path).convert('RGB')
+    
+    if bbox_crop and bbox_path and os.path.exists(bbox_path):
+        try:
+            bbox_data = np.load(bbox_path, allow_pickle=True)
+            for bbox in bbox_data:
+                if bbox['semanticId'] != 0:
+                    x_min = int(bbox['x_min'])
+                    y_min = int(bbox['y_min'])
+                    x_max = int(bbox['x_max'])
+                    y_max = int(bbox['y_max'])
+                    if x_max > x_min and y_max > y_min:
+                        w, h = image.size
+                        x_min = max(0, min(w - 1, x_min))
+                        y_min = max(0, min(h - 1, y_min))
+                        x_max = max(0, min(w - 1, x_max))
+                        y_max = max(0, min(h - 1, y_max))
+                        image = image.crop((x_min, y_min, x_max + 1, y_max + 1))
+                    break
+        except:
+            pass
+    
+    return image
+
+
+def get_error_color(pos_error, rot_error=None, use_rotation=True):
+    """오차에 따른 배경색 반환 (녹색 → 노란색 → 빨간색)"""
+    # 위치 오차 기준: <25mm 녹색, 25-50mm 노란색, >50mm 빨간색
+    if pos_error < 25:
+        pos_score = 0  # 좋음
+    elif pos_error < 50:
+        pos_score = 1  # 보통
+    else:
+        pos_score = 2  # 나쁨
+    
+    # 자세 오차 기준: <5° 녹색, 5-10° 노란색, >10° 빨간색
+    if use_rotation and rot_error is not None:
+        if rot_error < 5:
+            rot_score = 0
+        elif rot_error < 10:
+            rot_score = 1
+        else:
+            rot_score = 2
+        # 둘 중 더 나쁜 점수 사용
+        score = max(pos_score, rot_score)
+    else:
+        score = pos_score
+    
+    if score == 0:
+        return (220, 255, 220)  # 녹색
+    elif score == 1:
+        return (255, 255, 200)  # 노란색
+    else:
+        return (255, 220, 220)  # 빨간색
+
+
+def create_pose_result_grid(results, class_names, output_path, use_rotation=True,
+                            num_cols=5, img_size=200, max_images=50):
+    """Pose 평가 결과를 그리드 형태로 시각화"""
+    num_images = min(len(results), max_images)
+    if num_images == 0:
+        print("시각화할 결과가 없습니다.")
+        return None
+    
+    num_rows = (num_images + num_cols - 1) // num_cols
+    
+    # 자세 정보가 있으면 더 많은 텍스트 공간 필요
+    text_height = 140 if use_rotation else 100
+    cell_width = img_size
+    cell_height = img_size + text_height
+    
+    grid_width = num_cols * cell_width
+    grid_height = num_rows * cell_height
+    grid_image = Image.new('RGB', (grid_width, grid_height), color='white')
+    
+    # 폰트 로드
+    try:
+        font_paths = [
+            '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf',
+            '/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf',
+        ]
+        font = None
+        small_font = None
+        for path in font_paths:
+            try:
+                font = ImageFont.truetype(path, 11)
+                small_font = ImageFont.truetype(path, 9)
+                break
+            except:
+                continue
+        if font is None:
+            font = ImageFont.load_default()
+            small_font = font
+    except:
+        font = ImageFont.load_default()
+        small_font = font
+    
+    for idx in range(num_images):
+        r = results[idx]
+        row = idx // num_cols
+        col = idx % num_cols
+        
+        x = col * cell_width
+        y = row * cell_height
+        
+        # 이미지 로드 및 리사이즈
+        img = get_original_image(r['rgb_path'], r.get('bbox_crop', False), r.get('bbox_path'))
+        img = img.resize((img_size, img_size), Image.Resampling.LANCZOS)
+        grid_image.paste(img, (x, y))
+        
+        # 텍스트 정보
+        draw = ImageDraw.Draw(grid_image)
+        text_y = y + img_size + 3
+        
+        pos_error = r['pos_error_mm']
+        rot_error = r.get('rot_error_deg', 0)
+        
+        # 배경색 (오차에 따라)
+        bg_color = get_error_color(pos_error, rot_error, use_rotation)
+        draw.rectangle([x, y + img_size, x + cell_width, y + cell_height], fill=bg_color)
+        
+        # 클래스 정보
+        class_text = f"{r['class_name']}"
+        draw.text((x + 3, text_y), class_text, fill=(0, 0, 0), font=font)
+        
+        # 위치 오차
+        pos_color = (0, 120, 0) if pos_error < 25 else ((180, 140, 0) if pos_error < 50 else (200, 0, 0))
+        pos_text = f"Pos: {pos_error:.1f}mm"
+        draw.text((x + 3, text_y + 14), pos_text, fill=pos_color, font=font)
+        
+        # 자세 오차 (있는 경우)
+        if use_rotation and 'rot_error_deg' in r:
+            rot_color = (0, 120, 0) if rot_error < 5 else ((180, 140, 0) if rot_error < 10 else (200, 0, 0))
+            rot_text = f"Rot: {rot_error:.1f}deg"
+            draw.text((x + 3, text_y + 28), rot_text, fill=rot_color, font=font)
+            next_y = text_y + 42
+        else:
+            next_y = text_y + 28
+        
+        # GT/Pred 위치 (간략화)
+        gt_pos = r['gt_position']
+        pred_pos = r['pred_position']
+        gt_text = f"GT:[{gt_pos[0]:.2f},{gt_pos[1]:.2f},{gt_pos[2]:.2f}]"
+        pred_text = f"Pr:[{pred_pos[0]:.2f},{pred_pos[1]:.2f},{pred_pos[2]:.2f}]"
+        draw.text((x + 3, next_y), gt_text, fill=(60, 60, 60), font=small_font)
+        draw.text((x + 3, next_y + 12), pred_text, fill=(60, 60, 60), font=small_font)
+        
+        # 자세 GT/Pred (있는 경우)
+        if use_rotation and 'gt_euler_deg' in r and 'pred_euler_deg' in r:
+            gt_euler = r['gt_euler_deg']
+            pred_euler = r['pred_euler_deg']
+            gt_rot_text = f"GT:[{gt_euler[0]:.0f},{gt_euler[1]:.0f},{gt_euler[2]:.0f}]deg"
+            pred_rot_text = f"Pr:[{pred_euler[0]:.0f},{pred_euler[1]:.0f},{pred_euler[2]:.0f}]deg"
+            draw.text((x + 3, next_y + 24), gt_rot_text, fill=(80, 80, 80), font=small_font)
+            draw.text((x + 3, next_y + 36), pred_rot_text, fill=(80, 80, 80), font=small_font)
+        
+        # 파일명
+        filename = os.path.basename(r['rgb_path'])
+        draw.text((x + 3, y + img_size + text_height - 12), filename[:20], fill=(100, 100, 100), font=small_font)
+    
+    # 결과 이미지 저장
+    grid_image.save(output_path, 'PNG', quality=95)
+    print(f"\n📸 결과 이미지 저장: {output_path}")
+    
+    return grid_image
+
+
+def create_high_error_grid(results, class_names, output_path, use_rotation=True,
+                           pos_threshold=50.0, rot_threshold=10.0,
+                           num_cols=5, img_size=200):
+    """오차가 큰 샘플들만 그리드 형태로 시각화"""
+    
+    # 오차가 큰 샘플 필터링
+    high_error_results = []
+    for r in results:
+        pos_error = r['pos_error_mm']
+        rot_error = r.get('rot_error_deg', 0)
+        
+        if pos_error >= pos_threshold:
+            high_error_results.append(r)
+        elif use_rotation and rot_error >= rot_threshold:
+            high_error_results.append(r)
+    
+    if len(high_error_results) == 0:
+        print(f"\n✓ 모든 샘플이 기준 이내입니다! (위치 < {pos_threshold}mm, 자세 < {rot_threshold}°)")
+        return None
+    
+    # 오차 큰 순으로 정렬
+    high_error_results.sort(key=lambda x: x['pos_error_mm'], reverse=True)
+    
+    num_images = len(high_error_results)
+    num_rows = (num_images + num_cols - 1) // num_cols
+    
+    text_height = 140 if use_rotation else 100
+    cell_width = img_size
+    cell_height = img_size + text_height
+    
+    grid_width = num_cols * cell_width
+    grid_height = num_rows * cell_height
+    grid_image = Image.new('RGB', (grid_width, grid_height), color='white')
+    
+    # 폰트 로드
+    try:
+        font_paths = [
+            '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf',
+            '/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf',
+        ]
+        font = None
+        small_font = None
+        for path in font_paths:
+            try:
+                font = ImageFont.truetype(path, 11)
+                small_font = ImageFont.truetype(path, 9)
+                break
+            except:
+                continue
+        if font is None:
+            font = ImageFont.load_default()
+            small_font = font
+    except:
+        font = ImageFont.load_default()
+        small_font = font
+    
+    for idx, r in enumerate(high_error_results):
+        row = idx // num_cols
+        col = idx % num_cols
+        
+        x = col * cell_width
+        y = row * cell_height
+        
+        # 이미지 로드 및 리사이즈
+        img = get_original_image(r['rgb_path'], r.get('bbox_crop', False), r.get('bbox_path'))
+        img = img.resize((img_size, img_size), Image.Resampling.LANCZOS)
+        grid_image.paste(img, (x, y))
+        
+        # 텍스트 정보
+        draw = ImageDraw.Draw(grid_image)
+        text_y = y + img_size + 3
+        
+        pos_error = r['pos_error_mm']
+        rot_error = r.get('rot_error_deg', 0)
+        
+        # 배경색 (오차가 크므로 빨간색 계열)
+        bg_color = (255, 210, 210)
+        draw.rectangle([x, y + img_size, x + cell_width, y + cell_height], fill=bg_color)
+        
+        # 클래스 정보
+        class_text = f"X {r['class_name']}"
+        draw.text((x + 3, text_y), class_text, fill=(200, 0, 0), font=font)
+        
+        # 위치 오차
+        pos_text = f"Pos: {pos_error:.1f}mm"
+        draw.text((x + 3, text_y + 14), pos_text, fill=(200, 0, 0), font=font)
+        
+        # 자세 오차
+        if use_rotation and 'rot_error_deg' in r:
+            rot_text = f"Rot: {rot_error:.1f}deg"
+            draw.text((x + 3, text_y + 28), rot_text, fill=(200, 0, 0), font=font)
+            next_y = text_y + 42
+        else:
+            next_y = text_y + 28
+        
+        # GT/Pred 위치
+        gt_pos = r['gt_position']
+        pred_pos = r['pred_position']
+        gt_text = f"GT:[{gt_pos[0]:.2f},{gt_pos[1]:.2f},{gt_pos[2]:.2f}]"
+        pred_text = f"Pr:[{pred_pos[0]:.2f},{pred_pos[1]:.2f},{pred_pos[2]:.2f}]"
+        draw.text((x + 3, next_y), gt_text, fill=(60, 60, 60), font=small_font)
+        draw.text((x + 3, next_y + 12), pred_text, fill=(60, 60, 60), font=small_font)
+        
+        # 자세 GT/Pred
+        if use_rotation and 'gt_euler_deg' in r and 'pred_euler_deg' in r:
+            gt_euler = r['gt_euler_deg']
+            pred_euler = r['pred_euler_deg']
+            gt_rot_text = f"GT:[{gt_euler[0]:.0f},{gt_euler[1]:.0f},{gt_euler[2]:.0f}]deg"
+            pred_rot_text = f"Pr:[{pred_euler[0]:.0f},{pred_euler[1]:.0f},{pred_euler[2]:.0f}]deg"
+            draw.text((x + 3, next_y + 24), gt_rot_text, fill=(80, 80, 80), font=small_font)
+            draw.text((x + 3, next_y + 36), pred_rot_text, fill=(80, 80, 80), font=small_font)
+        
+        # 파일명
+        filename = os.path.basename(r['rgb_path'])
+        draw.text((x + 3, y + img_size + text_height - 12), filename[:20], fill=(100, 100, 100), font=small_font)
+    
+    # 결과 이미지 저장
+    grid_image.save(output_path, 'PNG', quality=95)
+    print(f"📸 오차 큰 샘플 이미지 저장: {output_path} ({num_images}개)")
+    
+    return grid_image
+
+
+# ==========================================
 # 메인 평가 함수
 # ==========================================
 def evaluate(args):
@@ -673,8 +970,15 @@ def evaluate(args):
                 'pos_error_mm': float(pos_error),
                 'pos_error_xyz_mm': [float(x_error), float(y_error), float(z_error)],
                 'pred_class': class_names[pred_class],
-                'class_correct': pred_class == class_idx
+                'class_correct': pred_class == class_idx,
+                'bbox_crop': args.bbox_crop
             }
+            # bbox_path 추가 (시각화용)
+            frame_idx = int(os.path.basename(rgb_path).split('_')[-1].split('.')[0])
+            bbox_path = os.path.join(os.path.dirname(rgb_path), f"bounding_box_2d_tight_{frame_idx:04d}.npy")
+            if os.path.exists(bbox_path):
+                result_entry['bbox_path'] = bbox_path
+            
             if use_rotation:
                 result_entry['gt_euler_deg'] = gt_euler.tolist()
                 result_entry['pred_euler_deg'] = list(pred_euler)
@@ -790,6 +1094,24 @@ def evaluate(args):
             with open(detailed_path, 'w', encoding='utf-8') as f:
                 json.dump(detailed_results, f, indent=2, ensure_ascii=False)
             print(f"💾 상세 결과 저장: {detailed_path}")
+    
+    # 시각화 생성
+    print(f"\n{'='*80}")
+    print("📸 시각화 생성")
+    print(f"{'='*80}")
+    
+    # 전체 결과 그리드 (상위 50개)
+    create_pose_result_grid(
+        detailed_results, class_names, OUTPUT_IMAGE_PATH,
+        use_rotation=use_rotation, num_cols=5, img_size=200, max_images=50
+    )
+    
+    # 오차 큰 샘플 그리드
+    create_high_error_grid(
+        detailed_results, class_names, OUTPUT_HIGH_ERROR_PATH,
+        use_rotation=use_rotation, pos_threshold=50.0, rot_threshold=10.0,
+        num_cols=5, img_size=200
+    )
     
     print(f"\n{'='*80}")
     print("✅ 평가 완료")
