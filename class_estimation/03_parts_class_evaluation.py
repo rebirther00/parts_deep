@@ -15,6 +15,7 @@ import sys
 import json
 import argparse
 import glob
+import time
 from sklearn.model_selection import train_test_split
 
 # ================================================================================
@@ -60,11 +61,17 @@ OUTPUT_IMAGE_PATH = os.path.join(ARTIFACTS_DIR, "evaluation_results_parts.png")
 OUTPUT_WRONG_IMAGE_PATH = os.path.join(ARTIFACTS_DIR, "evaluation_wrong_predictions.png")  # 틀린 예측 결과 이미지
 
 # ================================================================================
+# 전체 실행 시간 측정 시작
+# ================================================================================
+total_start_time = time.time()
+
+# ================================================================================
 # 1. 데이터 및 모델 정보 로드
 # ================================================================================
 print("=" * 80)
 print("굴착기 부품 분류 모델 평가")
 print("=" * 80)
+step1_start_time = time.time()
 
 def scan_dataset_for_eval(dataset_dir, class_names):
     """dataset_dir에서 rgb_*.png를 스캔하여 평가 경로 리스트 생성 (class_names에 있는 클래스만 포함)"""
@@ -137,6 +144,9 @@ if args.dataset_dir:
     print(f"test_size(새 split 시): {args.test_size}, seed(새 split 시): {args.seed}")
 print(f"bbox_crop 평가: {args.bbox_crop}")
 
+step1_time = time.time() - step1_start_time
+print(f"\n[1단계 완료] 소요 시간: {step1_time:.2f}초")
+
 # 평가할 샘플 수 결정
 if args.num_samples and args.num_samples < len(test_paths):
     random.seed(42)
@@ -145,8 +155,14 @@ if args.num_samples and args.num_samples < len(test_paths):
 
 
 # ================================================================================
-# 2. Dataset 클래스 정의
+# 2. Dataset 클래스 정의 및 DataLoader 생성
 # ================================================================================
+print("\n" + "=" * 80)
+print("2단계: Dataset 클래스 정의 및 DataLoader 생성")
+print("=" * 80)
+step2_start_time = time.time()
+
+
 class ExcavatorPartsDataset(Dataset):
     """굴착기 부품 이미지 Dataset 클래스"""
     
@@ -235,13 +251,16 @@ test_loader = DataLoader(test_dataset, batch_size=BATCH_SIZE, shuffle=False)
 
 print(f"\n테스트 배치 개수: {len(test_loader)}")
 
+step2_time = time.time() - step2_start_time
+print(f"\n[2단계 완료] 소요 시간: {step2_time:.2f}초")
 
 # ================================================================================
 # 3. 모델 정의 및 로드
 # ================================================================================
 print("\n" + "=" * 80)
-print("모델 로드")
+print("3단계: 모델 정의 및 로드")
 print("=" * 80)
+step3_start_time = time.time()
 
 
 def create_resnet_model(num_classes, pretrained=False):
@@ -276,13 +295,16 @@ model.load_state_dict(torch.load(MODEL_PATH, map_location=device))
 model.eval()
 print("모델 로드 완료!")
 
+step3_time = time.time() - step3_start_time
+print(f"\n[3단계 완료] 소요 시간: {step3_time:.2f}초")
 
 # ================================================================================
 # 4. 평가 실행
 # ================================================================================
 print("\n" + "=" * 80)
-print("평가 실행")
+print("4단계: 평가 실행")
 print("=" * 80)
+step4_start_time = time.time()
 
 correct = 0
 total = 0
@@ -377,13 +399,16 @@ with torch.no_grad():
 if sample_idx > 50:
     print(f"... ({sample_idx - 50}개 결과 생략)")
 
+step4_time = time.time() - step4_start_time
+print(f"\n[4단계 완료] 소요 시간: {step4_time:.2f}초")
 
 # ================================================================================
 # 5. 결과 시각화
 # ================================================================================
 print("\n" + "=" * 80)
-print("결과 시각화")
+print("5단계: 결과 시각화")
 print("=" * 80)
+step5_start_time = time.time()
 
 
 def create_result_grid(image_paths, labels, predictions, confidences, class_names,
@@ -557,13 +582,16 @@ create_result_grid(all_image_paths, all_labels, all_predictions, all_confidences
 print("\n틀린 예측 이미지 생성 중...")
 create_wrong_predictions_grid(all_image_paths, all_labels, all_predictions, all_confidences, class_names)
 
+step5_time = time.time() - step5_start_time
+print(f"\n[5단계 완료] 소요 시간: {step5_time:.2f}초")
 
 # ================================================================================
 # 6. 최종 결과 요약
 # ================================================================================
 print("\n" + "=" * 80)
-print("평가 결과 요약")
+print("6단계: 평가 결과 요약")
 print("=" * 80)
+step6_start_time = time.time()
 
 overall_accuracy = 100.0 * correct / total
 
@@ -643,8 +671,24 @@ avg_recall = np.mean(all_recall) * 100
 avg_f1 = np.mean(all_f1) * 100
 print(f"{'평균 (Macro)':<20s} {avg_precision:>9.2f}% {avg_recall:>9.2f}% {avg_f1:>9.2f}%")
 
+step6_time = time.time() - step6_start_time
+print(f"\n[6단계 완료] 소요 시간: {step6_time:.2f}초")
+
+# 전체 실행 시간 계산
+total_time = time.time() - total_start_time
+
 print("\n" + "=" * 80)
 print("평가 완료!")
+print("=" * 80)
+print(f"\n[전체 실행 시간 요약]")
+print(f"  1단계 (데이터 및 모델 정보 로드): {step1_time:.2f}초")
+print(f"  2단계 (Dataset/DataLoader 생성): {step2_time:.2f}초")
+print(f"  3단계 (모델 정의 및 로드): {step3_time:.2f}초")
+print(f"  4단계 (평가 실행): {step4_time:.2f}초")
+print(f"  5단계 (결과 시각화): {step5_time:.2f}초")
+print(f"  6단계 (결과 요약): {step6_time:.2f}초")
+print(f"  ─────────────────────────────────────────────")
+print(f"  총 실행 시간: {total_time:.2f}초 ({total_time/60:.2f}분)")
 print("=" * 80)
 
 # 결과 저장

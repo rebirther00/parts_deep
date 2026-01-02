@@ -19,6 +19,7 @@ import json
 import glob
 import random
 import argparse
+import time
 import numpy as np
 from pathlib import Path
 from tqdm import tqdm
@@ -832,9 +833,18 @@ def create_high_error_grid(results, class_names, output_path, use_rotation=True,
 def evaluate(args):
     """학습된 모델의 위치 및 자세 추정 정확도 평가"""
     
+    # 전체 실행 시간 측정 시작
+    total_start_time = time.time()
+    
     print("=" * 80)
     print("📊 6DoF Pose Estimation 모델 평가")
     print("=" * 80)
+    
+    # ==========================================
+    # 1단계: 모델 로드
+    # ==========================================
+    print("\n[1단계] 모델 로드")
+    step1_start_time = time.time()
     
     # 모델 로드
     if not os.path.exists(MODEL_PATH):
@@ -868,8 +878,17 @@ def evaluate(args):
     model = model.to(device)
     model.eval()
     
+    step1_time = time.time() - step1_start_time
+    print(f"[1단계 완료] 소요 시간: {step1_time:.2f}초")
+    
+    # ==========================================
+    # 2단계: 데이터셋 로드
+    # ==========================================
+    print("\n[2단계] 데이터셋 로드")
+    step2_start_time = time.time()
+    
     # 테스트 데이터셋 로드
-    print(f"\n📂 데이터셋 로드: {args.dataset_dir}")
+    print(f"📂 데이터셋 로드: {args.dataset_dir}")
     if args.bbox_crop:
         print("   📦 bbox_2d ROI crop 모드")
     
@@ -891,7 +910,17 @@ def evaluate(args):
         num_samples = len(test_dataset)
     
     print(f"\n평가 샘플 수: {num_samples} / {len(test_dataset)}")
+    
+    step2_time = time.time() - step2_start_time
+    print(f"[2단계 완료] 소요 시간: {step2_time:.2f}초")
+    
+    # ==========================================
+    # 3단계: 평가 수행
+    # ==========================================
+    print("\n" + "=" * 80)
+    print("[3단계] 평가 수행")
     print("=" * 80)
+    step3_start_time = time.time()
     
     # 평가 수행
     all_pos_errors = []
@@ -996,10 +1025,16 @@ def evaluate(args):
                     print(f"  자세 예측:  [R:{pred_euler[0]:.1f}°, P:{pred_euler[1]:.1f}°, Y:{pred_euler[2]:.1f}°]")
                     print(f"  자세 오차:  {rot_error:.2f}°")
     
-    # 결과 요약
+    step3_time = time.time() - step3_start_time
+    print(f"\n[3단계 완료] 소요 시간: {step3_time:.2f}초")
+    
+    # ==========================================
+    # 4단계: 결과 요약
+    # ==========================================
     print(f"\n{'='*80}")
-    print("📈 평가 결과 요약")
+    print("[4단계] 평가 결과 요약")
     print(f"{'='*80}")
+    step4_start_time = time.time()
     
     avg_pos_error = np.mean(all_pos_errors)
     std_pos_error = np.std(all_pos_errors)
@@ -1095,10 +1130,16 @@ def evaluate(args):
                 json.dump(detailed_results, f, indent=2, ensure_ascii=False)
             print(f"💾 상세 결과 저장: {detailed_path}")
     
-    # 시각화 생성
+    step4_time = time.time() - step4_start_time
+    print(f"\n[4단계 완료] 소요 시간: {step4_time:.2f}초")
+    
+    # ==========================================
+    # 5단계: 시각화 생성
+    # ==========================================
     print(f"\n{'='*80}")
-    print("📸 시각화 생성")
+    print("[5단계] 시각화 생성")
     print(f"{'='*80}")
+    step5_start_time = time.time()
     
     # 전체 결과 그리드 (상위 50개)
     create_pose_result_grid(
@@ -1113,9 +1154,24 @@ def evaluate(args):
         num_cols=5, img_size=200
     )
     
+    step5_time = time.time() - step5_start_time
+    print(f"\n[5단계 완료] 소요 시간: {step5_time:.2f}초")
+    
+    # 전체 실행 시간 계산
+    total_time = time.time() - total_start_time
+    
     print(f"\n{'='*80}")
     print("✅ 평가 완료")
     print(f"{'='*80}")
+    print(f"\n[전체 실행 시간 요약]")
+    print(f"  1단계 (모델 로드): {step1_time:.2f}초")
+    print(f"  2단계 (데이터셋 로드): {step2_time:.2f}초")
+    print(f"  3단계 (평가 수행): {step3_time:.2f}초")
+    print(f"  4단계 (결과 요약): {step4_time:.2f}초")
+    print(f"  5단계 (시각화 생성): {step5_time:.2f}초")
+    print(f"  ─────────────────────────────────────────────")
+    print(f"  총 실행 시간: {total_time:.2f}초 ({total_time/60:.2f}분)")
+    print("=" * 80)
 
 
 # ==========================================
