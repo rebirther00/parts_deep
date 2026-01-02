@@ -17,6 +17,7 @@ import os
 import sys
 import json
 import glob
+import time
 import random
 import argparse
 import numpy as np
@@ -565,6 +566,9 @@ class RGBDepthTo3DModelV3(nn.Module):
 def evaluate(args, model_path=None):
     """V3 모델의 위치 및 자세 추정 정확도 평가"""
     
+    # 전체 평가 시간 측정 시작
+    total_start_time = time.time()
+    
     # 모델 경로 결정
     if model_path is None:
         model_path = MODEL_PATH
@@ -811,8 +815,12 @@ def evaluate(args, model_path=None):
             json.dump(summary_results, f, indent=2, ensure_ascii=False)
         print(f"\n💾 결과 저장: {RESULTS_PATH}")
     
+    # 전체 평가 시간 계산
+    total_time = time.time() - total_start_time
+    
     print(f"\n{'='*80}")
     print("✅ V3 평가 완료")
+    print(f"   총 평가 시간: {total_time/60:.1f}분 ({total_time:.1f}초)")
     print(f"{'='*80}")
 
 

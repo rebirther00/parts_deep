@@ -20,6 +20,7 @@ import os
 import sys
 import json
 import glob
+import time
 import random
 import multiprocessing
 import math
@@ -790,6 +791,9 @@ class WarmupCosineScheduler:
 def train_model(dataset_dir=DATASET_DIR, force_cpu=FORCE_CPU, use_bbox_crop=USE_BBOX_CROP):
     """V2 모델 학습"""
     
+    # 전체 학습 시간 측정 시작
+    total_start_time = time.time()
+    
     if not force_cpu and not torch.cuda.is_available():
         print("\n" + "=" * 80)
         print("❌ [오류] CUDA 사용 불가!")
@@ -1010,11 +1014,15 @@ def train_model(dataset_dir=DATASET_DIR, force_cpu=FORCE_CPU, use_bbox_crop=USE_
             print(f"\n⚠️  Early stopping at epoch {epoch+1}")
             break
     
+    # 전체 학습 시간 계산
+    total_time = time.time() - total_start_time
+    
     print(f"\n{'='*70}")
     print(f"🎉 V2 학습 완료!")
     print(f"   최고 위치 오차: {best_pos_error:.2f}mm")
     if use_rotation:
         print(f"   최고 자세 오차: {best_rot_error:.2f}°")
+    print(f"   총 학습 시간: {total_time/60:.1f}분 ({total_time/3600:.2f}시간)")
     print(f"   모델 저장: {os.path.join(ARTIFACTS_DIR, 'depth_gt_pose_v2_best.pt')}")
     
     # 오차 분포
