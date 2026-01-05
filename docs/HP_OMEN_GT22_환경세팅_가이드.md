@@ -19,31 +19,34 @@
 | **PSU** | - | 1,200W 80 Plus Gold |
 | **네트워크** | - | 1Gbps LAN, Wi-Fi 6E, Bluetooth |
 
-### 기존 소프트웨어 환경
+### 기존 소프트웨어 환경 vs 새 환경
 
-| 항목 | 버전 | 비고 |
-|------|------|------|
-| **OS** | Ubuntu 22.04.5 LTS | 커널 6.8.0-90 |
-| **NVIDIA Driver** | 580.95.05 | CUDA 13.0 포함 |
-| **Python** | 3.10.12 | 시스템 기본 |
-| **ROS2** | Humble | /opt/ros/humble |
-| **Isaac Sim** | 5.1.0-rc.19 | ~/isaac-sim |
-| **PyTorch** | 2.9.1 | torchvision 0.24.1 |
+| 항목 | 기존 PC | 새 PC (목표) |
+|------|---------|--------------|
+| **OS** | Ubuntu 22.04.5 LTS | Ubuntu 24.04 LTS (Noble) |
+| **NVIDIA Driver** | 580.95.05 | 565+ (RTX 50 시리즈 지원) |
+| **Python** | 3.10.12 | 3.12.x (시스템 기본) |
+| **ROS2** | Humble | **Jazzy Jalisco** |
+| **DDS** | - | **CycloneDDS** |
+| **Isaac Sim** | 5.1.0-rc.19 | 5.1.0+ |
+| **PyTorch** | 2.9.1 | 2.x (CUDA 12.4+) |
 
 ---
 
-## 📦 1단계: Ubuntu 22.04 LTS 설치
+## 📦 1단계: Ubuntu 24.04 LTS 설치
+
+> ⚠️ **중요**: ROS2 Jazzy는 **Ubuntu 24.04 LTS (Noble Numbat)** 를 공식 지원합니다.
 
 ### 1.1 부팅 USB 준비
 
-1. **ISO 다운로드**: https://releases.ubuntu.com/22.04/
+1. **ISO 다운로드**: https://releases.ubuntu.com/24.04/
 2. **USB 제작 도구**:
    - Windows: [Rufus](https://rufus.ie/) 또는 [balenaEtcher](https://etcher.balena.io/)
    - Linux: `dd` 명령어 또는 balenaEtcher
 
 ```bash
 # Linux에서 USB 제작 (예시)
-sudo dd if=ubuntu-22.04.5-desktop-amd64.iso of=/dev/sdX bs=4M status=progress
+sudo dd if=ubuntu-24.04-desktop-amd64.iso of=/dev/sdX bs=4M status=progress
 sync
 ```
 
@@ -132,7 +135,7 @@ nvidia-smi
 ### 3.1 시스템 Python 확인
 
 ```bash
-python3 --version  # 3.10.12 확인
+python3 --version  # Ubuntu 24.04는 Python 3.12.x
 pip3 --version
 ```
 
@@ -158,7 +161,9 @@ pip3 install --upgrade pip setuptools wheel
 
 ---
 
-## 🤖 4단계: ROS2 Humble 설치
+## 🤖 4단계: ROS2 Jazzy 설치
+
+> 📌 **ROS2 Jazzy Jalisco**: 2024년 5월 출시, Ubuntu 24.04 LTS 공식 지원, 2029년 5월까지 지원 (5년 LTS)
 
 ### 4.1 로케일 설정
 
@@ -181,20 +186,20 @@ sudo apt update && sudo apt install curl -y
 sudo curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key \
     -o /usr/share/keyrings/ros-archive-keyring.gpg
 
-# ROS2 저장소 추가
+# ROS2 Jazzy 저장소 추가
 echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] \
     http://packages.ros.org/ros2/ubuntu $(. /etc/os-release && echo $UBUNTU_CODENAME) main" | \
     sudo tee /etc/apt/sources.list.d/ros2.list > /dev/null
 ```
 
-### 4.3 ROS2 Humble Desktop 설치
+### 4.3 ROS2 Jazzy Desktop 설치
 
 ```bash
 sudo apt update
 sudo apt upgrade -y
 
-# ROS2 Humble Desktop Full 설치
-sudo apt install ros-humble-desktop -y
+# ROS2 Jazzy Desktop Full 설치
+sudo apt install ros-jazzy-desktop -y
 
 # 개발 도구 설치
 sudo apt install -y \
@@ -211,16 +216,88 @@ rosdep update
 ### 4.4 ROS2 환경 테스트
 
 ```bash
-source /opt/ros/humble/setup.bash
+source /opt/ros/jazzy/setup.bash
 ros2 --version
 ros2 topic list
 ```
 
 ---
 
-## 🎮 5단계: Isaac Sim 설치
+## 🌀 5단계: CycloneDDS 설치 및 설정
 
-### 5.1 NVIDIA Omniverse Launcher 설치
+> 📌 **CycloneDDS**: Eclipse Foundation에서 개발한 고성능 DDS 구현체. FastDDS 대비 낮은 레이턴시와 안정성이 장점.
+
+### 5.1 CycloneDDS 설치
+
+```bash
+# CycloneDDS RMW (ROS Middleware) 설치
+sudo apt install ros-jazzy-rmw-cyclonedds-cpp -y
+```
+
+### 5.2 CycloneDDS를 기본 DDS로 설정
+
+```bash
+# ~/.bashrc에 환경 변수 추가
+echo 'export RMW_IMPLEMENTATION=rmw_cyclonedds_cpp' >> ~/.bashrc
+source ~/.bashrc
+```
+
+### 5.3 CycloneDDS 설정 파일 생성 (선택사항)
+
+```bash
+# CycloneDDS 설정 파일 생성
+mkdir -p ~/.ros
+cat << 'EOF' > ~/.ros/cyclonedds.xml
+<?xml version="1.0" encoding="UTF-8" ?>
+<CycloneDDS xmlns="https://cdds.io/config" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="https://cdds.io/config https://raw.githubusercontent.com/eclipse-cyclonedds/cyclonedds/master/etc/cyclonedds.xsd">
+    <Domain id="any">
+        <General>
+            <NetworkInterfaceAddress>auto</NetworkInterfaceAddress>
+            <AllowMulticast>true</AllowMulticast>
+            <MaxMessageSize>65500B</MaxMessageSize>
+        </General>
+        <Internal>
+            <Watermarks>
+                <WhcHigh>500kB</WhcHigh>
+            </Watermarks>
+        </Internal>
+        <Tracing>
+            <Verbosity>warning</Verbosity>
+            <OutputFile>stdout</OutputFile>
+        </Tracing>
+    </Domain>
+</CycloneDDS>
+EOF
+```
+
+### 5.4 CycloneDDS 설정 파일 적용
+
+```bash
+# ~/.bashrc에 설정 파일 경로 추가
+echo 'export CYCLONEDDS_URI=file://$HOME/.ros/cyclonedds.xml' >> ~/.bashrc
+source ~/.bashrc
+```
+
+### 5.5 DDS 설정 확인
+
+```bash
+# RMW 구현체 확인
+echo $RMW_IMPLEMENTATION
+# 출력: rmw_cyclonedds_cpp
+
+# ROS2 데몬 재시작
+ros2 daemon stop
+ros2 daemon start
+
+# 테스트
+ros2 topic list
+```
+
+---
+
+## 🎮 6단계: Isaac Sim 설치
+
+### 6.1 NVIDIA Omniverse Launcher 설치
 
 1. **다운로드**: https://www.nvidia.com/en-us/omniverse/download/
 2. **NVIDIA 계정 로그인 필요**
@@ -231,7 +308,7 @@ chmod +x omniverse-launcher-linux.AppImage
 ./omniverse-launcher-linux.AppImage
 ```
 
-### 5.2 Omniverse Launcher에서 Isaac Sim 설치
+### 6.2 Omniverse Launcher에서 Isaac Sim 설치
 
 1. Omniverse Launcher 실행
 2. **Exchange** 탭 클릭
@@ -239,14 +316,14 @@ chmod +x omniverse-launcher-linux.AppImage
 4. **Install** 버튼 클릭 (버전 5.1.0 이상 권장)
 5. 설치 경로: `~/isaac-sim` 권장
 
-### 5.3 Isaac Sim 호환성 확인
+### 6.3 Isaac Sim 호환성 확인
 
 ```bash
 cd ~/isaac-sim
 ./isaac-sim.compatibility_check.sh
 ```
 
-### 5.4 Isaac Sim 실행 테스트
+### 6.4 Isaac Sim 실행 테스트
 
 ```bash
 cd ~/isaac-sim
@@ -257,16 +334,16 @@ cd ~/isaac-sim
 
 ---
 
-## 🔥 6단계: PyTorch 설치 (CUDA 지원)
+## 🔥 7단계: PyTorch 설치 (CUDA 지원)
 
-### 6.1 RTX 5090용 PyTorch 설치
+### 7.1 RTX 5090용 PyTorch 설치
 
 ```bash
 # CUDA 12.4 호환 PyTorch 설치 (RTX 50 시리즈 지원)
 pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu124
 ```
 
-### 6.2 설치 확인
+### 7.2 설치 확인
 
 ```bash
 python3 << 'EOF'
@@ -289,25 +366,27 @@ VRAM: 32.0 GB
 
 ---
 
-## 📦 7단계: 프로젝트 패키지 설치
+## 📦 8단계: 프로젝트 패키지 설치
 
-### 7.1 기존 환경 패키지 목록 (주요 패키지)
+### 8.1 기존 환경 패키지 목록 (주요 패키지)
 
 ```bash
 pip3 install \
-    numpy==2.2.6 \
-    scipy==1.15.2 \
-    opencv-python==4.12.0.88 \
+    numpy \
+    scipy \
+    opencv-python \
     matplotlib \
     pandas \
     pillow \
     pyyaml \
     flask \
     aiohttp \
-    anthropic
+    anthropic \
+    tqdm \
+    scikit-learn
 ```
 
-### 7.2 전체 패키지 복원 (requirements.txt 사용)
+### 8.2 전체 패키지 복원 (requirements.txt 사용)
 
 ```bash
 # 기존 PC에서 패키지 목록 생성
@@ -319,9 +398,9 @@ pip3 install -r ~/requirements_backup.txt
 
 ---
 
-## 🛠️ 8단계: 추가 개발 도구 설치
+## 🛠️ 9단계: 추가 개발 도구 설치
 
-### 8.1 NVM (Node.js 버전 관리자)
+### 9.1 NVM (Node.js 버전 관리자)
 
 ```bash
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
@@ -331,7 +410,7 @@ nvm use --lts
 node --version
 ```
 
-### 8.2 Git 설정
+### 9.2 Git 설정
 
 ```bash
 git config --global user.name "Your Name"
@@ -339,7 +418,7 @@ git config --global user.email "your.email@example.com"
 git config --global init.defaultBranch main
 ```
 
-### 8.3 Cursor IDE 설치
+### 9.3 Cursor IDE 설치
 
 ```bash
 # Cursor AppImage 다운로드
@@ -350,7 +429,7 @@ chmod +x ~/cursor.AppImage
 ~/cursor.AppImage
 ```
 
-### 8.4 기타 유용한 도구
+### 9.4 기타 유용한 도구
 
 ```bash
 sudo apt install -y \
@@ -364,9 +443,9 @@ sudo apt install -y \
 
 ---
 
-## 📝 9단계: ~/.bashrc 환경 설정
+## 📝 10단계: ~/.bashrc 환경 설정
 
-### 9.1 환경 변수 추가
+### 10.1 환경 변수 추가
 
 ```bash
 cat << 'EOF' >> ~/.bashrc
@@ -383,8 +462,12 @@ export NVM_DIR="$HOME/.nvm"
 # MuJoCo GL 설정 (Isaac Sim 호환)
 export MUJOCO_GL=egl
 
-# ROS2 Humble alias
-alias humble='source /opt/ros/humble/setup.bash; echo "ROS2 humble activated"'
+# ROS2 Jazzy alias
+alias jazzy='source /opt/ros/jazzy/setup.bash; echo "ROS2 Jazzy activated"'
+
+# CycloneDDS 설정
+export RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
+export CYCLONEDDS_URI=file://$HOME/.ros/cyclonedds.xml
 
 # Isaac Sim alias
 alias isaacsim='cd ~/isaac-sim && ./isaac-sim.sh'
@@ -395,10 +478,13 @@ alias la='ls -A'
 alias gpu='nvidia-smi'
 alias gpuwatch='watch -n 1 nvidia-smi'
 
+# ROS2 자동 source (선택사항)
+# source /opt/ros/jazzy/setup.bash
+
 EOF
 ```
 
-### 9.2 환경 적용
+### 10.2 환경 적용
 
 ```bash
 source ~/.bashrc
@@ -406,9 +492,9 @@ source ~/.bashrc
 
 ---
 
-## 📂 10단계: 프로젝트 마이그레이션
+## 📂 11단계: 프로젝트 마이그레이션
 
-### 10.1 Git 저장소 클론
+### 11.1 Git 저장소 클론
 
 ```bash
 cd ~
@@ -416,7 +502,7 @@ git clone <your-repository-url> isaac_data_output
 cd isaac_data_output
 ```
 
-### 10.2 대용량 데이터 전송 (네트워크 사용)
+### 11.2 대용량 데이터 전송 (네트워크 사용)
 
 ```bash
 # 기존 PC에서 새 PC로 rsync
@@ -425,7 +511,7 @@ rsync -avzP --progress \
     ~/isaac_data_output/
 ```
 
-### 10.3 외장 드라이브 사용 시
+### 11.3 외장 드라이브 사용 시
 
 ```bash
 # 외장 드라이브 마운트
@@ -440,16 +526,16 @@ sudo umount /mnt
 
 ---
 
-## 💾 11단계: HDD 마운트 설정 (2TB HDD)
+## 💾 12단계: HDD 마운트 설정 (2TB HDD)
 
-### 11.1 HDD 파티션 확인
+### 12.1 HDD 파티션 확인
 
 ```bash
 lsblk
 sudo fdisk -l
 ```
 
-### 11.2 영구 마운트 설정
+### 12.2 영구 마운트 설정
 
 ```bash
 # 마운트 포인트 생성
@@ -468,9 +554,9 @@ df -h
 
 ---
 
-## ✅ 12단계: 최종 설치 확인 체크리스트
+## ✅ 13단계: 최종 설치 확인 체크리스트
 
-### 12.1 확인 스크립트
+### 13.1 확인 스크립트
 
 ```bash
 #!/bin/bash
@@ -509,12 +595,17 @@ echo "----------------------------------------"
 python3 -c "import torch; print(f'PyTorch {torch.__version__}, CUDA: {torch.cuda.is_available()}')" 2>/dev/null || echo "PyTorch 미설치"
 echo ""
 
-echo "7. ROS2:"
+echo "7. ROS2 Jazzy:"
 echo "----------------------------------------"
-source /opt/ros/humble/setup.bash 2>/dev/null && ros2 --version 2>/dev/null || echo "ROS2 미설치 또는 source 필요"
+source /opt/ros/jazzy/setup.bash 2>/dev/null && ros2 --version 2>/dev/null || echo "ROS2 미설치 또는 source 필요"
 echo ""
 
-echo "8. Isaac Sim:"
+echo "8. DDS 구현체:"
+echo "----------------------------------------"
+echo "RMW_IMPLEMENTATION: $RMW_IMPLEMENTATION"
+echo ""
+
+echo "9. Isaac Sim:"
 echo "----------------------------------------"
 if [ -f ~/isaac-sim/VERSION ]; then
     echo "Isaac Sim $(cat ~/isaac-sim/VERSION)"
@@ -528,12 +619,12 @@ echo "✅ 환경 확인 완료"
 echo "=========================================="
 ```
 
-### 12.2 스크립트 실행
+### 13.2 스크립트 저장 및 실행
 
 ```bash
-# 스크립트 저장 및 실행
+# 스크립트 저장
 cat > ~/check_environment.sh << 'SCRIPT'
-# 위 스크립트 내용
+# 위 스크립트 내용 붙여넣기
 SCRIPT
 
 chmod +x ~/check_environment.sh
@@ -565,12 +656,32 @@ torch.cuda.set_per_process_memory_fraction(0.9)  # 90% VRAM 사용
 
 ---
 
+## 🔄 ROS2 Jazzy vs Humble 차이점
+
+| 항목 | Humble | Jazzy |
+|------|--------|-------|
+| **Ubuntu 버전** | 22.04 | 24.04 |
+| **Python 버전** | 3.10 | 3.12 |
+| **지원 기간** | 2027년 5월 | 2029년 5월 |
+| **기본 DDS** | FastDDS | FastDDS (CycloneDDS 권장) |
+| **주요 개선** | - | 향상된 타입 지원, 새로운 로깅 시스템 |
+
+### CycloneDDS 선택 이유
+
+1. **낮은 레이턴시**: FastDDS 대비 더 빠른 메시지 전달
+2. **안정성**: 대규모 시스템에서 검증된 안정성
+3. **메모리 효율**: 더 적은 메모리 사용
+4. **호환성**: 다양한 플랫폼에서 일관된 동작
+
+---
+
 ## 📚 참고 자료
 
 - [HP OMEN GT22-3002KL 지원 페이지](https://support.hp.com/kr-ko/product/omen-45l-gt22-3002kl)
-- [Ubuntu 22.04 공식 문서](https://ubuntu.com/server/docs)
+- [Ubuntu 24.04 공식 문서](https://ubuntu.com/server/docs)
 - [NVIDIA Linux 드라이버](https://www.nvidia.com/Download/index.aspx)
-- [ROS2 Humble 설치 가이드](https://docs.ros.org/en/humble/Installation.html)
+- [ROS2 Jazzy 설치 가이드](https://docs.ros.org/en/jazzy/Installation.html)
+- [CycloneDDS 문서](https://cyclonedds.io/docs/)
 - [Isaac Sim 문서](https://developer.nvidia.com/isaac-sim)
 - [PyTorch 설치 가이드](https://pytorch.org/get-started/locally/)
 
@@ -579,7 +690,9 @@ torch.cuda.set_per_process_memory_fraction(0.9)  # 90% VRAM 사용
 ## 📅 문서 정보
 
 - **작성일**: 2025년 12월 31일
+- **수정일**: 2026년 1월 6일
 - **대상 하드웨어**: HP OMEN GT22-3002KL (Ultra 9 285K + RTX 5090)
+- **대상 소프트웨어**: Ubuntu 24.04 LTS + ROS2 Jazzy + CycloneDDS
 - **기존 환경 소스**: Intel Ultra 9 185H + RTX 4070 SUPER
 
 ---
