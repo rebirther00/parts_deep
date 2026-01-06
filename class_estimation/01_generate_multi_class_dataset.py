@@ -40,7 +40,8 @@ reinit_logging(LOG_PATH)
 # 설정: 굴착기 부품 정의 (자동 스캔)
 # ==========================================
 # assets 폴더의 모든 USD 파일을 자동으로 스캔하여 데이터 생성
-ASSETS_DIR = "/home/rebirther/isaac-sim/assets"
+# 동적 경로: 사용자 홈 디렉토리를 자동으로 가져옴 (PC 변경 시에도 동작)
+ASSETS_DIR = os.path.expanduser("~/isaac-sim/assets")
 
 def scan_usd_files(assets_dir):
     """
@@ -741,6 +742,9 @@ dataset_metadata = {
     "created_at": time.strftime("%Y-%m-%d %H:%M:%S"),
     "note": "배경의 유무가 학습에 큰 영향을 줍니다. background_impact_analysis.md 참조."
 }
+
+# 출력 디렉토리가 없으면 생성 (클래스가 0개일 때도 메타데이터 저장 가능)
+os.makedirs(BASE_OUTPUT_DIR, exist_ok=True)
 
 dataset_metadata_path = os.path.join(BASE_OUTPUT_DIR, "dataset_info.json")
 with open(dataset_metadata_path, 'w', encoding='utf-8') as f:
