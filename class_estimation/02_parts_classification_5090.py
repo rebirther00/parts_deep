@@ -57,8 +57,8 @@ TRAIN_INDICES_PATH = os.path.join(ARTIFACTS_DIR, "training_indices_parts_5090.js
 BATCH_SIZE = None   # None: 자동 조정, 숫자: 고정 배치 사이즈
 RANDOM_SEED = 42    # 재현성을 위한 랜덤 시드
 TEST_SIZE = 0.2     # 테스트셋 비율 (20%)
-NUM_EPOCHS = 30     # 학습 에포크 수
-EARLY_STOPPING_PATIENCE = 5  # Early Stopping patience
+NUM_EPOCHS = 60     # 학습 에포크 수 (배치 128에 맞게 2배 증가)
+EARLY_STOPPING_PATIENCE = 10  # Early Stopping patience (배치 128에 맞게 2배 증가)
 
 # 이미지 크기 (데이터셋 이미지 크기에 따라 자동 조정)
 # Isaac Sim에서 생성한 이미지는 1024x1024이지만, ResNet은 224x224 사용
@@ -440,16 +440,16 @@ print(f"클래스 가중치: {dict(zip(class_names, [f'{w:.4f}' for w in class_w
 # Cross Entropy Loss (클래스 가중치 적용)
 criterion = nn.CrossEntropyLoss(weight=class_weights)
 
-# Adam optimizer (배치 사이즈 128에 맞게 학습률 조정: Linear Scaling Rule)
-# 기본 버전 배치 32 → 5090 버전 배치 128 (4배) → 학습률도 4배
-LEARNING_RATE = 0.004  # 기본 0.001 * 4 = 0.004
+# Adam optimizer
+# Note: Adam은 적응적 학습률을 사용하므로 배치 사이즈에 따른 학습률 스케일링이 불필요
+LEARNING_RATE = 0.001
 optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE)
 
 # Learning Rate Scheduler (옵션)
 scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', patience=3, factor=0.5)
 
 print("\n손실 함수: Cross Entropy Loss (클래스 가중치 적용)")
-print(f"옵티마이저: Adam (lr={LEARNING_RATE}) - Linear Scaling Rule 적용")
+print(f"옵티마이저: Adam (lr={LEARNING_RATE})")
 print("스케줄러: ReduceLROnPlateau (patience=3, factor=0.5)")
 
 step5_time = time.time() - step5_start_time
