@@ -1,14 +1,14 @@
 {
-  "accuracy": 96.75,
+  "accuracy": 94.5,
   "total_samples": 400,
-  "correct_samples": 387,
+  "correct_samples": 378,
   "class_accuracies": {
-    "arm_link_25_nomat": 98.0,
-    "arm_link_30_notmat": 91.0,
-    "boom_link_25_nomat": 99.0,
-    "boom_link_30_notmat": 99.0
+    "arm_link_25_nomat": 86.0,
+    "arm_link_30_notmat": 95.0,
+    "boom_link_25_nomat": 97.0,
+    "boom_link_30_notmat": 100.0
   },
-  "avg_precision": 96.84932392125671,
-  "avg_recall": 96.75,
-  "avg_f1": 96.74947769126024
+  "avg_precision": 94.71294955582515,
+  "avg_recall": 94.5,
+  "avg_f1": 94.50979218302975
 }

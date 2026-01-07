@@ -3,11 +3,19 @@ datasets/
 *.npy
 *.png
 
+# 대용량 JSON 데이터셋들
+pos_estimation/dataset_pos_depth/
+pos_estimation/dataset_pos/
+class_estimation/datasets/arm_link_*/
+class_estimation/datasets/boom_link_*/
+class_estimation/datasets/bucket_link_*/
+class_estimation/datasets/quick_coupler_*/
+
 # 모델 파일 (대용량)
 *.pt
 *.pth
+
 # 예외: 스몰 프로젝트 폴더 구조 유지를 위한 .gitkeep는 추적
-!class_estimation/datasets/
 !class_estimation/datasets/.gitkeep
 !pos_estimation/dataset_pos/.gitkeep
 
@@ -19,6 +27,12 @@ __pycache__/
 .Python
 *.egg-info/
 .eggs/
+
+# 가상환경
+venv/
+env/
+ENV/
+.venv
 
 # IDE
 .vscode/
