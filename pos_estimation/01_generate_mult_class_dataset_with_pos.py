@@ -49,7 +49,8 @@ from pxr import Usd, UsdGeom, Semantics, Gf
 # ==========================================
 # 설정
 # ==========================================
-ASSETS_DIR = "/home/rebirther/isaac-sim/assets"
+# 동적 경로: 사용자 홈 디렉토리를 자동으로 가져옴 (PC 변경 시에도 동작)
+ASSETS_DIR = os.path.expanduser("~/isaac-sim/assets")
 BASE_OUTPUT_DIR = os.path.join(PROJECT_DIR, "dataset_pos_depth")  # Depth 포함 데이터셋
 IMAGES_PER_CLASS = 2000  # 클래스당 이미지 수 (공장 스타일 정제 데이터)
 RESOLUTION = (1024, 1024)
