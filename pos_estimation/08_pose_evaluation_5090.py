@@ -1,0 +1,1183 @@
+#!/usr/bin/env python3
+# ==========================================
+# Depth 기반 6DoF Pose Estimation 평가 스크립트 (RTX 5090 최적화)
+# ==========================================
+#
+# RTX 5090 최적화:
+# - 배치 사이즈 증가 (16 → 64)
+# - DataLoader 멀티프로세싱 최적화 (num_workers=8)
+# - non_blocking 데이터 전송
+# - 5090 버전 모델 파일 사용
+#
+# 사용법:
+#   python 08_pose_evaluation_5090.py
+#   python 08_pose_evaluation_5090.py --num_samples 100
+#   python 08_pose_evaluation_5090.py --bbox_crop
+#   python 08_pose_evaluation_5090.py --save_results
+#
+# ==========================================
+
+import os
+import sys
+import json
+import glob
+import random
+import argparse
+import time
+import numpy as np
+from pathlib import Path
+from tqdm import tqdm
+
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+from torch.utils.data import Dataset, DataLoader
+from torchvision import transforms, models
+from torchvision.models import ResNet50_Weights
+from PIL import Image, ImageDraw, ImageFont
+
+# ==========================================
+# 로깅 설정
+# ==========================================
+PROJECT_DIR = os.path.dirname(os.path.abspath(__file__))
+REPO_DIR = os.path.dirname(PROJECT_DIR)
+sys.path.insert(0, REPO_DIR)
+from utils.logger import setup_logging, finish_logging
+
+# ==========================================
+# 경로 설정 (RTX 5090 버전)
+# ==========================================
+DATASET_DIR = os.path.join(PROJECT_DIR, "dataset_pos_depth")
+ARTIFACTS_DIR = os.path.join(PROJECT_DIR, "artifacts")
+
+# 5090 버전 파일 경로
+MODEL_PATH = os.path.join(ARTIFACTS_DIR, "depth_gt_6dof_best_5090.pt")
+RESULTS_PATH = os.path.join(ARTIFACTS_DIR, "evaluation_results_pose_5090.json")
+OUTPUT_IMAGE_PATH = os.path.join(ARTIFACTS_DIR, "evaluation_pose_results_5090.png")
+OUTPUT_HIGH_ERROR_PATH = os.path.join(ARTIFACTS_DIR, "evaluation_pose_high_error_5090.png")
+
+# ==========================================
+# RTX 5090 최적화 설정
+# ==========================================
+BATCH_SIZE = 64  # 5090: 16 → 64
+NUM_WORKERS = 8  # 5090: 멀티프로세싱
+PIN_MEMORY = True
+PREFETCH_FACTOR = 2
+PERSISTENT_WORKERS = True
+
+# ==========================================
+# Depth 설정
+# ==========================================
+DEPTH_MIN = 0.01
+DEPTH_MAX = 100.0
+FOREGROUND_PERCENTILE = 10
+
+CAMERA_INTRINSICS = {
+    "fx": 768.0, "fy": 768.0,
+    "cx": 512.0, "cy": 512.0,
+    "width": 1024, "height": 1024
+}
+
+
+# ==========================================
+# 6D Rotation 함수들
+# ==========================================
+def euler_to_rotation_matrix(roll, pitch, yaw, degrees=True):
+    """Euler angles (XYZ 순서) → 3x3 회전 행렬"""
+    if degrees:
+        roll = np.radians(roll)
+        pitch = np.radians(pitch)
+        yaw = np.radians(yaw)
+    
+    Rx = np.array([
+        [1, 0, 0],
+        [0, np.cos(roll), -np.sin(roll)],
+        [0, np.sin(roll), np.cos(roll)]
+    ])
+    Ry = np.array([
+        [np.cos(pitch), 0, np.sin(pitch)],
+        [0, 1, 0],
+        [-np.sin(pitch), 0, np.cos(pitch)]
+    ])
+    Rz = np.array([
+        [np.cos(yaw), -np.sin(yaw), 0],
+        [np.sin(yaw), np.cos(yaw), 0],
+        [0, 0, 1]
+    ])
+    
+    R = Rz @ Ry @ Rx
+    return R.astype(np.float32)
+
+
+def rotation_matrix_to_6d(R):
+    """3x3 회전 행렬 → 6D 연속 표현"""
+    return np.concatenate([R[:, 0], R[:, 1]], axis=0).astype(np.float32)
+
+
+def rotation_6d_to_matrix(rot_6d):
+    """6D 표현 → 3x3 회전 행렬 (Gram-Schmidt 정규화)"""
+    if isinstance(rot_6d, torch.Tensor):
+        if rot_6d.dim() == 1:
+            rot_6d = rot_6d.unsqueeze(0)
+        
+        a1 = rot_6d[:, :3]
+        a2 = rot_6d[:, 3:6]
+        
+        b1 = F.normalize(a1, dim=1)
+        b2 = a2 - (b1 * a2).sum(dim=1, keepdim=True) * b1
+        b2 = F.normalize(b2, dim=1)
+        b3 = torch.cross(b1, b2, dim=1)
+        
+        R = torch.stack([b1, b2, b3], dim=2)
+        return R.squeeze(0) if R.size(0) == 1 else R
+    else:
+        if rot_6d.ndim == 1:
+            rot_6d = rot_6d.reshape(1, 6)
+        
+        a1 = rot_6d[:, :3]
+        a2 = rot_6d[:, 3:6]
+        
+        b1 = a1 / (np.linalg.norm(a1, axis=1, keepdims=True) + 1e-8)
+        b2 = a2 - np.sum(b1 * a2, axis=1, keepdims=True) * b1
+        b2 = b2 / (np.linalg.norm(b2, axis=1, keepdims=True) + 1e-8)
+        b3 = np.cross(b1, b2, axis=1)
+        
+        R = np.stack([b1, b2, b3], axis=2)
+        return R.squeeze(0) if R.shape[0] == 1 else R
+
+
+def rotation_matrix_to_euler(R, degrees=True):
+    """3x3 회전 행렬 → Euler angles (XYZ 순서)"""
+    if isinstance(R, torch.Tensor):
+        R = R.cpu().numpy()
+    
+    sy = np.sqrt(R[0, 0]**2 + R[1, 0]**2)
+    singular = sy < 1e-6
+    
+    if not singular:
+        roll = np.arctan2(R[2, 1], R[2, 2])
+        pitch = np.arctan2(-R[2, 0], sy)
+        yaw = np.arctan2(R[1, 0], R[0, 0])
+    else:
+        roll = np.arctan2(-R[1, 2], R[1, 1])
+        pitch = np.arctan2(-R[2, 0], sy)
+        yaw = 0
+    
+    if degrees:
+        return np.degrees(roll), np.degrees(pitch), np.degrees(yaw)
+    return roll, pitch, yaw
+
+
+def euler_to_6d(roll, pitch, yaw, degrees=True):
+    """Euler angles → 6D rotation representation"""
+    R = euler_to_rotation_matrix(roll, pitch, yaw, degrees)
+    return rotation_matrix_to_6d(R)
+
+
+def compute_rotation_error(pred_6d, gt_6d):
+    """두 6D 회전 표현 간의 각도 오차 (degrees)"""
+    if isinstance(pred_6d, torch.Tensor):
+        pred_6d = pred_6d.detach().cpu().numpy()
+    if isinstance(gt_6d, torch.Tensor):
+        gt_6d = gt_6d.detach().cpu().numpy()
+    
+    R_pred = rotation_6d_to_matrix(pred_6d)
+    R_gt = rotation_6d_to_matrix(gt_6d)
+    
+    R_rel = R_pred.T @ R_gt
+    trace = np.trace(R_rel)
+    cos_theta = np.clip((trace - 1) / 2, -1, 1)
+    theta = np.arccos(cos_theta)
+    
+    return np.degrees(theta)
+
+
+# ==========================================
+# Depth → 객체 중심 계산
+# ==========================================
+def depth_to_pointcloud(depth, fx, fy, cx, cy):
+    """Depth 이미지 → Point Cloud 변환"""
+    h, w = depth.shape
+    valid_mask = (depth > DEPTH_MIN) & (depth < DEPTH_MAX) & np.isfinite(depth)
+    
+    u = np.arange(w)
+    v = np.arange(h)
+    u, v = np.meshgrid(u, v)
+    
+    z = depth
+    x = (u - cx) * z / fx
+    y = (v - cy) * z / fy
+    
+    points = np.stack([x[valid_mask], y[valid_mask], z[valid_mask]], axis=1)
+    return points, valid_mask
+
+
+def compute_object_centroid_from_depth(depth, fx, fy, cx, cy, scale_factor=1.0):
+    """Depth에서 객체 중심 좌표 계산"""
+    depth_scaled = depth * scale_factor
+    points, valid_mask = depth_to_pointcloud(depth_scaled, fx, fy, cx, cy)
+    
+    if len(points) < 100:
+        return np.array([0, 0, 0]), False
+    
+    z_values = points[:, 2]
+    foreground_threshold = np.percentile(z_values, FOREGROUND_PERCENTILE)
+    
+    foreground_mask = z_values < foreground_threshold
+    foreground_points = points[foreground_mask]
+    
+    if len(foreground_points) < 50:
+        return np.array([0, 0, 0]), False
+    
+    centroid = foreground_points.mean(axis=0)
+    return centroid, True
+
+
+# ==========================================
+# 평가용 데이터셋 (Lazy Loading)
+# ==========================================
+class PoseEvalDataset(Dataset):
+    """평가 전용 데이터셋 (Lazy Loading)"""
+    
+    def __init__(self, dataset_dir, position_stats, class_names, 
+                 use_bbox_crop=False, train_ratio=0.8):
+        self.dataset_dir = dataset_dir
+        self.samples = []
+        self.position_stats = position_stats
+        self.class_names = class_names
+        self.class_to_idx = {name: idx for idx, name in enumerate(class_names)}
+        self.use_bbox_crop = use_bbox_crop
+        
+        self.fx = CAMERA_INTRINSICS["fx"]
+        self.fy = CAMERA_INTRINSICS["fy"]
+        self.cx = CAMERA_INTRINSICS["cx"]
+        self.cy = CAMERA_INTRINSICS["cy"]
+        
+        # 클래스별 스케일 팩터
+        self.class_scale_factors = {}
+        class_dirs = sorted(glob.glob(os.path.join(dataset_dir, "*")))
+        class_dirs = [d for d in class_dirs if os.path.isdir(d) and not d.endswith('__pycache__')]
+        
+        for class_dir in class_dirs:
+            class_name = os.path.basename(class_dir)
+            if class_name not in self.class_to_idx:
+                continue
+                
+            depth_files = sorted(glob.glob(os.path.join(class_dir, "distance_to_camera_*.npy")))
+            if depth_files:
+                sample_depth = np.load(depth_files[0])
+                if len(sample_depth.shape) == 3:
+                    sample_depth = sample_depth[:, :, 0]
+                valid_depth = sample_depth[(sample_depth > 0.001) & np.isfinite(sample_depth)]
+                if len(valid_depth) > 0:
+                    depth_mean = valid_depth.mean()
+                    if depth_mean < 0.5:
+                        scale_factor = 100.0
+                    elif depth_mean < 1.0:
+                        scale_factor = 10.0
+                    else:
+                        scale_factor = 1.0
+                else:
+                    scale_factor = 1.0
+            else:
+                scale_factor = 1.0
+            self.class_scale_factors[class_name] = scale_factor
+        
+        # 테스트 샘플 수집
+        self._collect_test_samples(class_dirs, train_ratio)
+        
+        # RGB Transform
+        self.rgb_transform = transforms.Compose([
+            transforms.Resize((224, 224)),
+            transforms.ToTensor(),
+            transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+        ])
+    
+    def _collect_test_samples(self, class_dirs, train_ratio):
+        """테스트 샘플만 수집"""
+        all_samples = []
+        
+        for class_dir in class_dirs:
+            class_name = os.path.basename(class_dir)
+            if class_name not in self.class_to_idx:
+                continue
+            
+            scale_factor = self.class_scale_factors.get(class_name, 1.0)
+            depth_files = sorted(glob.glob(os.path.join(class_dir, "distance_to_camera_*.npy")))
+            
+            for depth_file in depth_files:
+                frame_idx = int(os.path.basename(depth_file).split('_')[-1].split('.')[0])
+                rgb_file = os.path.join(class_dir, f"rgb_{frame_idx:04d}.png")
+                bbox_file = os.path.join(class_dir, f"bounding_box_2d_tight_{frame_idx:04d}.npy")
+                pose_file = os.path.join(class_dir, f"pose_{frame_idx:04d}.json")
+                
+                if not os.path.exists(rgb_file):
+                    continue
+                if self.use_bbox_crop and not os.path.exists(bbox_file):
+                    continue
+                
+                sample_data = {
+                    'rgb_path': rgb_file,
+                    'depth_path': depth_file,
+                    'pose_path': pose_file if os.path.exists(pose_file) else None,
+                    'class_name': class_name,
+                    'class_idx': self.class_to_idx[class_name],
+                    'scale_factor': scale_factor
+                }
+                if os.path.exists(bbox_file):
+                    sample_data['bbox_path'] = bbox_file
+                
+                all_samples.append(sample_data)
+        
+        # Train/Test 분할 (학습 시와 동일한 seed 사용)
+        random.seed(42)
+        random.shuffle(all_samples)
+        split_idx = int(len(all_samples) * train_ratio)
+        
+        # 테스트 샘플만 사용
+        self.samples = all_samples[split_idx:]
+        print(f"  테스트 샘플: {len(self.samples)} / 전체 {len(all_samples)}")
+    
+    def __len__(self):
+        return len(self.samples)
+    
+    def _get_object_bbox(self, bbox_path):
+        """bbox_2d 파일에서 물체의 bbox 추출"""
+        try:
+            bbox_data = np.load(bbox_path, allow_pickle=True)
+            for bbox in bbox_data:
+                if bbox['semanticId'] != 0:
+                    x_min = int(bbox['x_min'])
+                    y_min = int(bbox['y_min'])
+                    x_max = int(bbox['x_max'])
+                    y_max = int(bbox['y_max'])
+                    if x_max > x_min and y_max > y_min:
+                        return (x_min, y_min, x_max, y_max)
+            return None
+        except:
+            return None
+    
+    def __getitem__(self, idx):
+        sample = self.samples[idx]
+        
+        # RGB 로드
+        rgb = Image.open(sample['rgb_path']).convert('RGB')
+        
+        # Depth 로드
+        depth_raw = np.load(sample['depth_path'])
+        if len(depth_raw.shape) == 3:
+            depth_raw = depth_raw[:, :, 0]
+        
+        # Depth GT 계산 (Lazy)
+        scale_factor = sample.get('scale_factor', 1.0)
+        centroid, valid = compute_object_centroid_from_depth(
+            depth_raw, self.fx, self.fy, self.cx, self.cy, scale_factor
+        )
+        gt_pos = centroid if valid else np.array([0, 0, 0])
+        
+        # 자세 정보 로드
+        if sample.get('pose_path'):
+            try:
+                with open(sample['pose_path'], 'r') as f:
+                    pose_data = json.load(f)
+                r_xyz_deg = pose_data.get('camTobj', {}).get('r_xyz_deg', [0, 0, 0])
+                gt_rotation_6d = euler_to_6d(r_xyz_deg[0], r_xyz_deg[1], r_xyz_deg[2], degrees=True)
+                gt_euler_deg = np.array(r_xyz_deg, dtype=np.float32)
+            except:
+                gt_rotation_6d = euler_to_6d(0, 0, 0)
+                gt_euler_deg = np.array([0, 0, 0], dtype=np.float32)
+        else:
+            gt_rotation_6d = euler_to_6d(0, 0, 0)
+            gt_euler_deg = np.array([0, 0, 0], dtype=np.float32)
+        
+        # bbox crop 적용
+        depth = depth_raw.copy()
+        bbox = None
+        if self.use_bbox_crop and 'bbox_path' in sample:
+            bbox = self._get_object_bbox(sample['bbox_path'])
+        
+        if bbox is not None:
+            x_min, y_min, x_max, y_max = bbox
+            img_width, img_height = rgb.size
+            x_min = max(0, x_min)
+            y_min = max(0, y_min)
+            x_max = min(img_width, x_max)
+            y_max = min(img_height, y_max)
+            rgb = rgb.crop((x_min, y_min, x_max, y_max))
+            depth = depth[y_min:y_max, x_min:x_max]
+        
+        # RGB transform
+        rgb = self.rgb_transform(rgb)
+        
+        # Depth 정규화
+        depth = depth * sample.get('scale_factor', 1.0)
+        depth_valid = depth[(depth > DEPTH_MIN) & (depth < DEPTH_MAX)]
+        if len(depth_valid) > 0:
+            depth_min = depth_valid.min()
+            depth_max = depth_valid.max()
+            depth_normalized = (depth - depth_min) / (depth_max - depth_min + 1e-6)
+        else:
+            depth_normalized = depth / (DEPTH_MAX + 1e-6)
+        
+        depth_normalized = np.clip(depth_normalized, 0, 1).astype(np.float32)
+        depth_pil = Image.fromarray((depth_normalized * 255).astype(np.uint8))
+        depth_pil = depth_pil.resize((224, 224), Image.BILINEAR)
+        depth_tensor = torch.tensor(np.array(depth_pil) / 255.0, dtype=torch.float32).unsqueeze(0)
+        
+        # 위치 정규화
+        gt_pos = np.array(gt_pos, dtype=np.float32)
+        if self.position_stats is not None:
+            mean = np.array(self.position_stats['mean'], dtype=np.float32)
+            std = np.array(self.position_stats['std'], dtype=np.float32) + 1e-6
+            position_normalized = (gt_pos - mean) / std
+        else:
+            position_normalized = gt_pos
+        
+        if isinstance(gt_rotation_6d, np.ndarray):
+            gt_rotation_6d = gt_rotation_6d.astype(np.float32)
+        
+        return {
+            'rgb': rgb,
+            'depth': depth_tensor,
+            'position': torch.tensor(position_normalized),
+            'position_raw': torch.tensor(gt_pos),
+            'rotation_6d': torch.tensor(gt_rotation_6d),
+            'euler_deg': torch.tensor(gt_euler_deg),
+            'class_idx': sample['class_idx'],
+            'class_name': sample['class_name'],
+            'rgb_path': sample['rgb_path']
+        }
+
+
+# ==========================================
+# Depth Encoder
+# ==========================================
+class DepthEncoder(nn.Module):
+    """Depth 이미지를 인코딩하는 CNN"""
+    
+    def __init__(self, out_features=256):
+        super().__init__()
+        self.conv = nn.Sequential(
+            nn.Conv2d(1, 32, 3, stride=2, padding=1), nn.BatchNorm2d(32), nn.ReLU(),
+            nn.Conv2d(32, 64, 3, stride=2, padding=1), nn.BatchNorm2d(64), nn.ReLU(),
+            nn.Conv2d(64, 128, 3, stride=2, padding=1), nn.BatchNorm2d(128), nn.ReLU(),
+            nn.Conv2d(128, 256, 3, stride=2, padding=1), nn.BatchNorm2d(256), nn.ReLU(),
+            nn.Conv2d(256, 256, 3, stride=2, padding=1), nn.BatchNorm2d(256), nn.ReLU(),
+            nn.AdaptiveAvgPool2d(1)
+        )
+        self.fc = nn.Linear(256, out_features)
+    
+    def forward(self, x):
+        x = self.conv(x)
+        x = x.view(x.size(0), -1)
+        x = self.fc(x)
+        return x
+
+
+# ==========================================
+# RGB+Depth → 6DoF Pose 모델
+# ==========================================
+class RGBDepthTo3DModel(nn.Module):
+    """RGB + Depth 융합 → 6DoF Pose 예측 모델"""
+    
+    def __init__(self, num_classes=4, depth_features=256, use_rotation=True):
+        super().__init__()
+        self.use_rotation = use_rotation
+        
+        resnet = models.resnet50(weights=ResNet50_Weights.IMAGENET1K_V1)
+        rgb_out = 2048
+        
+        self.rgb_encoder = nn.Sequential(*list(resnet.children())[:-1])
+        self.rgb_fc = nn.Linear(rgb_out, 512)
+        
+        self.depth_encoder = DepthEncoder(out_features=depth_features)
+        
+        fusion_dim = 512 + depth_features
+        
+        self.position_head = nn.Sequential(
+            nn.Linear(fusion_dim, 512),
+            nn.ReLU(),
+            nn.Dropout(0.3),
+            nn.Linear(512, 256),
+            nn.ReLU(),
+            nn.Dropout(0.2),
+            nn.Linear(256, 3)
+        )
+        
+        if use_rotation:
+            self.rotation_head = nn.Sequential(
+                nn.Linear(fusion_dim, 512),
+                nn.ReLU(),
+                nn.Dropout(0.3),
+                nn.Linear(512, 256),
+                nn.ReLU(),
+                nn.Dropout(0.2),
+                nn.Linear(256, 6)
+            )
+        
+        self.class_head = nn.Sequential(
+            nn.Linear(fusion_dim, 256),
+            nn.ReLU(),
+            nn.Dropout(0.2),
+            nn.Linear(256, num_classes)
+        )
+    
+    def forward(self, rgb, depth):
+        rgb_feat = self.rgb_encoder(rgb)
+        rgb_feat = rgb_feat.view(rgb_feat.size(0), -1)
+        rgb_feat = self.rgb_fc(rgb_feat)
+        
+        depth_feat = self.depth_encoder(depth)
+        
+        fused = torch.cat([rgb_feat, depth_feat], dim=1)
+        
+        position = self.position_head(fused)
+        class_logits = self.class_head(fused)
+        
+        result = {
+            'position': position,
+            'class_logits': class_logits
+        }
+        
+        if self.use_rotation:
+            rotation = self.rotation_head(fused)
+            result['rotation'] = rotation
+        
+        return result
+
+
+# ==========================================
+# 시각화 함수
+# ==========================================
+def get_original_image(path, bbox_crop=False, bbox_path=None):
+    """원본 이미지 로드 (bbox_crop 옵션 적용)"""
+    image = Image.open(path).convert('RGB')
+    
+    if bbox_crop and bbox_path and os.path.exists(bbox_path):
+        try:
+            bbox_data = np.load(bbox_path, allow_pickle=True)
+            for bbox in bbox_data:
+                if bbox['semanticId'] != 0:
+                    x_min = int(bbox['x_min'])
+                    y_min = int(bbox['y_min'])
+                    x_max = int(bbox['x_max'])
+                    y_max = int(bbox['y_max'])
+                    if x_max > x_min and y_max > y_min:
+                        w, h = image.size
+                        x_min = max(0, min(w - 1, x_min))
+                        y_min = max(0, min(h - 1, y_min))
+                        x_max = max(0, min(w - 1, x_max))
+                        y_max = max(0, min(h - 1, y_max))
+                        image = image.crop((x_min, y_min, x_max + 1, y_max + 1))
+                    break
+        except:
+            pass
+    
+    return image
+
+
+def get_error_color(pos_error, rot_error=None, use_rotation=True):
+    """오차에 따른 배경색 반환 (녹색 → 노란색 → 빨간색)"""
+    if pos_error < 25:
+        pos_score = 0
+    elif pos_error < 50:
+        pos_score = 1
+    else:
+        pos_score = 2
+    
+    if use_rotation and rot_error is not None:
+        if rot_error < 5:
+            rot_score = 0
+        elif rot_error < 10:
+            rot_score = 1
+        else:
+            rot_score = 2
+        score = max(pos_score, rot_score)
+    else:
+        score = pos_score
+    
+    if score == 0:
+        return (220, 255, 220)
+    elif score == 1:
+        return (255, 255, 200)
+    else:
+        return (255, 220, 220)
+
+
+def create_pose_result_grid(results, class_names, output_path, use_rotation=True,
+                            num_cols=5, img_size=200, max_images=50):
+    """Pose 평가 결과를 그리드 형태로 시각화"""
+    num_images = min(len(results), max_images)
+    if num_images == 0:
+        print("시각화할 결과가 없습니다.")
+        return None
+    
+    num_rows = (num_images + num_cols - 1) // num_cols
+    
+    text_height = 140 if use_rotation else 100
+    cell_width = img_size
+    cell_height = img_size + text_height
+    
+    grid_width = num_cols * cell_width
+    grid_height = num_rows * cell_height
+    grid_image = Image.new('RGB', (grid_width, grid_height), color='white')
+    
+    try:
+        font_paths = [
+            '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf',
+            '/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf',
+        ]
+        font = None
+        small_font = None
+        for path in font_paths:
+            try:
+                font = ImageFont.truetype(path, 11)
+                small_font = ImageFont.truetype(path, 9)
+                break
+            except:
+                continue
+        if font is None:
+            font = ImageFont.load_default()
+            small_font = font
+    except:
+        font = ImageFont.load_default()
+        small_font = font
+    
+    for idx in range(num_images):
+        r = results[idx]
+        row = idx // num_cols
+        col = idx % num_cols
+        
+        x = col * cell_width
+        y = row * cell_height
+        
+        img = get_original_image(r['rgb_path'], r.get('bbox_crop', False), r.get('bbox_path'))
+        img = img.resize((img_size, img_size), Image.Resampling.LANCZOS)
+        grid_image.paste(img, (x, y))
+        
+        draw = ImageDraw.Draw(grid_image)
+        text_y = y + img_size + 3
+        
+        pos_error = r['pos_error_mm']
+        rot_error = r.get('rot_error_deg', 0)
+        
+        bg_color = get_error_color(pos_error, rot_error, use_rotation)
+        draw.rectangle([x, y + img_size, x + cell_width, y + cell_height], fill=bg_color)
+        
+        class_text = f"{r['class_name']}"
+        draw.text((x + 3, text_y), class_text, fill=(0, 0, 0), font=font)
+        
+        pos_color = (0, 120, 0) if pos_error < 25 else ((180, 140, 0) if pos_error < 50 else (200, 0, 0))
+        pos_text = f"Pos: {pos_error:.1f}mm"
+        draw.text((x + 3, text_y + 14), pos_text, fill=pos_color, font=font)
+        
+        if use_rotation and 'rot_error_deg' in r:
+            rot_color = (0, 120, 0) if rot_error < 5 else ((180, 140, 0) if rot_error < 10 else (200, 0, 0))
+            rot_text = f"Rot: {rot_error:.1f}deg"
+            draw.text((x + 3, text_y + 28), rot_text, fill=rot_color, font=font)
+            next_y = text_y + 42
+        else:
+            next_y = text_y + 28
+        
+        gt_pos = r['gt_position']
+        pred_pos = r['pred_position']
+        gt_text = f"GT:[{gt_pos[0]:.2f},{gt_pos[1]:.2f},{gt_pos[2]:.2f}]"
+        pred_text = f"Pr:[{pred_pos[0]:.2f},{pred_pos[1]:.2f},{pred_pos[2]:.2f}]"
+        draw.text((x + 3, next_y), gt_text, fill=(60, 60, 60), font=small_font)
+        draw.text((x + 3, next_y + 12), pred_text, fill=(60, 60, 60), font=small_font)
+        
+        if use_rotation and 'gt_euler_deg' in r and 'pred_euler_deg' in r:
+            gt_euler = r['gt_euler_deg']
+            pred_euler = r['pred_euler_deg']
+            gt_rot_text = f"GT:[{gt_euler[0]:.0f},{gt_euler[1]:.0f},{gt_euler[2]:.0f}]deg"
+            pred_rot_text = f"Pr:[{pred_euler[0]:.0f},{pred_euler[1]:.0f},{pred_euler[2]:.0f}]deg"
+            draw.text((x + 3, next_y + 24), gt_rot_text, fill=(80, 80, 80), font=small_font)
+            draw.text((x + 3, next_y + 36), pred_rot_text, fill=(80, 80, 80), font=small_font)
+        
+        filename = os.path.basename(r['rgb_path'])
+        draw.text((x + 3, y + img_size + text_height - 12), filename[:20], fill=(100, 100, 100), font=small_font)
+    
+    grid_image.save(output_path, 'PNG', quality=95)
+    print(f"\n📸 결과 이미지 저장: {output_path}")
+    
+    return grid_image
+
+
+def create_high_error_grid(results, class_names, output_path, use_rotation=True,
+                           pos_threshold=50.0, rot_threshold=10.0,
+                           num_cols=5, img_size=200):
+    """오차가 큰 샘플들만 그리드 형태로 시각화"""
+    
+    high_error_results = []
+    for r in results:
+        pos_error = r['pos_error_mm']
+        rot_error = r.get('rot_error_deg', 0)
+        
+        if pos_error >= pos_threshold:
+            high_error_results.append(r)
+        elif use_rotation and rot_error >= rot_threshold:
+            high_error_results.append(r)
+    
+    if len(high_error_results) == 0:
+        print(f"\n✓ 모든 샘플이 기준 이내입니다! (위치 < {pos_threshold}mm, 자세 < {rot_threshold}°)")
+        return None
+    
+    high_error_results.sort(key=lambda x: x['pos_error_mm'], reverse=True)
+    
+    num_images = len(high_error_results)
+    num_rows = (num_images + num_cols - 1) // num_cols
+    
+    text_height = 140 if use_rotation else 100
+    cell_width = img_size
+    cell_height = img_size + text_height
+    
+    grid_width = num_cols * cell_width
+    grid_height = num_rows * cell_height
+    grid_image = Image.new('RGB', (grid_width, grid_height), color='white')
+    
+    try:
+        font_paths = [
+            '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf',
+            '/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf',
+        ]
+        font = None
+        small_font = None
+        for path in font_paths:
+            try:
+                font = ImageFont.truetype(path, 11)
+                small_font = ImageFont.truetype(path, 9)
+                break
+            except:
+                continue
+        if font is None:
+            font = ImageFont.load_default()
+            small_font = font
+    except:
+        font = ImageFont.load_default()
+        small_font = font
+    
+    for idx, r in enumerate(high_error_results):
+        row = idx // num_cols
+        col = idx % num_cols
+        
+        x = col * cell_width
+        y = row * cell_height
+        
+        img = get_original_image(r['rgb_path'], r.get('bbox_crop', False), r.get('bbox_path'))
+        img = img.resize((img_size, img_size), Image.Resampling.LANCZOS)
+        grid_image.paste(img, (x, y))
+        
+        draw = ImageDraw.Draw(grid_image)
+        text_y = y + img_size + 3
+        
+        pos_error = r['pos_error_mm']
+        rot_error = r.get('rot_error_deg', 0)
+        
+        bg_color = (255, 210, 210)
+        draw.rectangle([x, y + img_size, x + cell_width, y + cell_height], fill=bg_color)
+        
+        class_text = f"X {r['class_name']}"
+        draw.text((x + 3, text_y), class_text, fill=(200, 0, 0), font=font)
+        
+        pos_text = f"Pos: {pos_error:.1f}mm"
+        draw.text((x + 3, text_y + 14), pos_text, fill=(200, 0, 0), font=font)
+        
+        if use_rotation and 'rot_error_deg' in r:
+            rot_text = f"Rot: {rot_error:.1f}deg"
+            draw.text((x + 3, text_y + 28), rot_text, fill=(200, 0, 0), font=font)
+            next_y = text_y + 42
+        else:
+            next_y = text_y + 28
+        
+        gt_pos = r['gt_position']
+        pred_pos = r['pred_position']
+        gt_text = f"GT:[{gt_pos[0]:.2f},{gt_pos[1]:.2f},{gt_pos[2]:.2f}]"
+        pred_text = f"Pr:[{pred_pos[0]:.2f},{pred_pos[1]:.2f},{pred_pos[2]:.2f}]"
+        draw.text((x + 3, next_y), gt_text, fill=(60, 60, 60), font=small_font)
+        draw.text((x + 3, next_y + 12), pred_text, fill=(60, 60, 60), font=small_font)
+        
+        if use_rotation and 'gt_euler_deg' in r and 'pred_euler_deg' in r:
+            gt_euler = r['gt_euler_deg']
+            pred_euler = r['pred_euler_deg']
+            gt_rot_text = f"GT:[{gt_euler[0]:.0f},{gt_euler[1]:.0f},{gt_euler[2]:.0f}]deg"
+            pred_rot_text = f"Pr:[{pred_euler[0]:.0f},{pred_euler[1]:.0f},{pred_euler[2]:.0f}]deg"
+            draw.text((x + 3, next_y + 24), gt_rot_text, fill=(80, 80, 80), font=small_font)
+            draw.text((x + 3, next_y + 36), pred_rot_text, fill=(80, 80, 80), font=small_font)
+        
+        filename = os.path.basename(r['rgb_path'])
+        draw.text((x + 3, y + img_size + text_height - 12), filename[:20], fill=(100, 100, 100), font=small_font)
+    
+    grid_image.save(output_path, 'PNG', quality=95)
+    print(f"📸 오차 큰 샘플 이미지 저장: {output_path} ({num_images}개)")
+    
+    return grid_image
+
+
+# ==========================================
+# 메인 평가 함수
+# ==========================================
+def evaluate(args):
+    """학습된 모델의 위치 및 자세 추정 정확도 평가 (RTX 5090 최적화)"""
+    
+    total_start_time = time.time()
+    
+    print("=" * 80)
+    print("📊 6DoF Pose Estimation 모델 평가 (RTX 5090 최적화)")
+    print("=" * 80)
+    print(f"\n🚀 RTX 5090 최적화 설정:")
+    print(f"   배치 사이즈: {BATCH_SIZE}")
+    print(f"   num_workers: {NUM_WORKERS}")
+    print(f"   pin_memory: {PIN_MEMORY}")
+    print(f"   prefetch_factor: {PREFETCH_FACTOR}")
+    print(f"   persistent_workers: {PERSISTENT_WORKERS}")
+    
+    # ==========================================
+    # 1단계: 모델 로드
+    # ==========================================
+    print("\n[1단계] 모델 로드")
+    step1_start_time = time.time()
+    
+    if not os.path.exists(MODEL_PATH):
+        print(f"❌ 모델 파일을 찾을 수 없습니다: {MODEL_PATH}")
+        print("   먼저 학습을 실행하세요: python 07_depth_based_pose_5090.py --mode train")
+        sys.exit(1)
+    
+    print(f"\n✅ 모델 로드: {MODEL_PATH}")
+    checkpoint = torch.load(MODEL_PATH, map_location='cpu', weights_only=False)
+    
+    position_stats = checkpoint['position_stats']
+    class_names = checkpoint['class_names']
+    use_rotation = checkpoint.get('use_rotation', True)
+    best_pos_error = checkpoint.get('best_pos_error', 0)
+    best_rot_error = checkpoint.get('best_rot_error', 0)
+    
+    print(f"   학습 시 최고 위치 오차: {best_pos_error:.2f}mm")
+    if use_rotation:
+        print(f"   학습 시 최고 자세 오차: {best_rot_error:.2f}°")
+    print(f"   클래스: {class_names}")
+    print(f"   자세 예측: {'활성화' if use_rotation else '비활성화'}")
+    
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    print(f"   디바이스: {device}")
+    
+    num_classes = len(class_names)
+    model = RGBDepthTo3DModel(num_classes=num_classes, depth_features=256, use_rotation=use_rotation)
+    model.load_state_dict(checkpoint['model_state_dict'])
+    model = model.to(device)
+    model.eval()
+    
+    step1_time = time.time() - step1_start_time
+    print(f"[1단계 완료] 소요 시간: {step1_time:.2f}초")
+    
+    # ==========================================
+    # 2단계: 데이터셋 로드
+    # ==========================================
+    print("\n[2단계] 데이터셋 로드")
+    step2_start_time = time.time()
+    
+    print(f"📂 데이터셋 로드: {args.dataset_dir}")
+    if args.bbox_crop:
+        print("   📦 bbox_2d ROI crop 모드")
+    
+    test_dataset = PoseEvalDataset(
+        args.dataset_dir,
+        position_stats=position_stats,
+        class_names=class_names,
+        use_bbox_crop=args.bbox_crop
+    )
+    
+    if len(test_dataset) == 0:
+        print("❌ 테스트 데이터셋이 비어있습니다.")
+        sys.exit(1)
+    
+    # RTX 5090 최적화 DataLoader
+    test_loader = DataLoader(
+        test_dataset,
+        batch_size=BATCH_SIZE,
+        shuffle=False,
+        num_workers=NUM_WORKERS,
+        pin_memory=PIN_MEMORY,
+        prefetch_factor=PREFETCH_FACTOR,
+        persistent_workers=PERSISTENT_WORKERS
+    )
+    
+    if args.num_samples is not None:
+        num_samples = min(args.num_samples, len(test_dataset))
+    else:
+        num_samples = len(test_dataset)
+    
+    print(f"\n평가 샘플 수: {num_samples} / {len(test_dataset)}")
+    print(f"배치 수: {(num_samples + BATCH_SIZE - 1) // BATCH_SIZE}")
+    
+    step2_time = time.time() - step2_start_time
+    print(f"[2단계 완료] 소요 시간: {step2_time:.2f}초")
+    
+    # ==========================================
+    # 3단계: 평가 수행
+    # ==========================================
+    print("\n" + "=" * 80)
+    print("[3단계] 평가 수행")
+    print("=" * 80)
+    step3_start_time = time.time()
+    
+    all_pos_errors = []
+    all_rot_errors = []
+    all_x_errors = []
+    all_y_errors = []
+    all_z_errors = []
+    class_correct = 0
+    class_total = 0
+    
+    class_pos_errors = {name: [] for name in class_names}
+    class_rot_errors = {name: [] for name in class_names}
+    
+    detailed_results = []
+    sample_count = 0
+    
+    with torch.no_grad():
+        for batch in tqdm(test_loader, desc="평가 중"):
+            if sample_count >= num_samples:
+                break
+            
+            # non_blocking 데이터 전송 (RTX 5090 최적화)
+            rgb = batch['rgb'].to(device, non_blocking=True)
+            depth = batch['depth'].to(device, non_blocking=True)
+            
+            pred = model(rgb, depth)
+            
+            batch_size = rgb.size(0)
+            for i in range(batch_size):
+                if sample_count >= num_samples:
+                    break
+                
+                gt_pos_raw = batch['position_raw'][i].numpy()
+                gt_rot_6d = batch['rotation_6d'][i].numpy() if use_rotation else None
+                gt_euler = batch['euler_deg'][i].numpy() if use_rotation else None
+                class_idx = batch['class_idx'][i].item()
+                class_name = batch['class_name'][i]
+                rgb_path = batch['rgb_path'][i]
+                
+                mean = np.array(position_stats['mean'])
+                std = np.array(position_stats['std']) + 1e-6
+                pred_pos_raw = pred['position'][i].cpu().numpy() * std + mean
+                
+                pos_error = np.sqrt(np.sum((pred_pos_raw - gt_pos_raw) ** 2)) * 1000
+                x_error = abs(pred_pos_raw[0] - gt_pos_raw[0]) * 1000
+                y_error = abs(pred_pos_raw[1] - gt_pos_raw[1]) * 1000
+                z_error = abs(pred_pos_raw[2] - gt_pos_raw[2]) * 1000
+                
+                all_pos_errors.append(pos_error)
+                all_x_errors.append(x_error)
+                all_y_errors.append(y_error)
+                all_z_errors.append(z_error)
+                class_pos_errors[class_name].append(pos_error)
+                
+                rot_error = 0.0
+                pred_euler = [0, 0, 0]
+                if use_rotation and 'rotation' in pred:
+                    pred_rot_6d = pred['rotation'][i].float().cpu().numpy()
+                    rot_error = compute_rotation_error(pred_rot_6d, gt_rot_6d)
+                    all_rot_errors.append(rot_error)
+                    class_rot_errors[class_name].append(rot_error)
+                    
+                    pred_R = rotation_6d_to_matrix(pred_rot_6d)
+                    pred_euler = rotation_matrix_to_euler(pred_R, degrees=True)
+                
+                pred_class = torch.argmax(pred['class_logits'][i]).item()
+                if pred_class == class_idx:
+                    class_correct += 1
+                class_total += 1
+                
+                result_entry = {
+                    'sample_idx': sample_count,
+                    'class_name': class_name,
+                    'rgb_path': rgb_path,
+                    'gt_position': gt_pos_raw.tolist(),
+                    'pred_position': pred_pos_raw.tolist(),
+                    'pos_error_mm': float(pos_error),
+                    'pos_error_xyz_mm': [float(x_error), float(y_error), float(z_error)],
+                    'pred_class': class_names[pred_class],
+                    'class_correct': pred_class == class_idx,
+                    'bbox_crop': args.bbox_crop
+                }
+                
+                frame_idx = int(os.path.basename(rgb_path).split('_')[-1].split('.')[0])
+                bbox_path = os.path.join(os.path.dirname(rgb_path), f"bounding_box_2d_tight_{frame_idx:04d}.npy")
+                if os.path.exists(bbox_path):
+                    result_entry['bbox_path'] = bbox_path
+                
+                if use_rotation:
+                    result_entry['gt_euler_deg'] = gt_euler.tolist()
+                    result_entry['pred_euler_deg'] = list(pred_euler)
+                    result_entry['rot_error_deg'] = float(rot_error)
+                detailed_results.append(result_entry)
+                
+                sample_count += 1
+    
+    step3_time = time.time() - step3_start_time
+    print(f"\n[3단계 완료] 소요 시간: {step3_time:.2f}초")
+    
+    # ==========================================
+    # 4단계: 결과 요약
+    # ==========================================
+    print(f"\n{'='*80}")
+    print("[4단계] 평가 결과 요약")
+    print(f"{'='*80}")
+    step4_start_time = time.time()
+    
+    avg_pos_error = np.mean(all_pos_errors)
+    std_pos_error = np.std(all_pos_errors)
+    median_pos_error = np.median(all_pos_errors)
+    
+    print(f"\n📍 위치 오차 (Position Error):")
+    print(f"   평균: {avg_pos_error:.2f}mm (±{std_pos_error:.2f}mm)")
+    print(f"   중앙값: {median_pos_error:.2f}mm")
+    print(f"   최소: {np.min(all_pos_errors):.2f}mm")
+    print(f"   최대: {np.max(all_pos_errors):.2f}mm")
+    print(f"\n   축별 오차:")
+    print(f"   X: {np.mean(all_x_errors):.2f}mm (±{np.std(all_x_errors):.2f}mm)")
+    print(f"   Y: {np.mean(all_y_errors):.2f}mm (±{np.std(all_y_errors):.2f}mm)")
+    print(f"   Z: {np.mean(all_z_errors):.2f}mm (±{np.std(all_z_errors):.2f}mm)")
+    
+    print(f"\n   분포:")
+    print(f"   < 10mm:  {100 * sum(1 for e in all_pos_errors if e < 10) / len(all_pos_errors):.1f}%")
+    print(f"   < 25mm:  {100 * sum(1 for e in all_pos_errors if e < 25) / len(all_pos_errors):.1f}%")
+    print(f"   < 50mm:  {100 * sum(1 for e in all_pos_errors if e < 50) / len(all_pos_errors):.1f}%")
+    print(f"   < 100mm: {100 * sum(1 for e in all_pos_errors if e < 100) / len(all_pos_errors):.1f}%")
+    
+    if use_rotation and all_rot_errors:
+        avg_rot_error = np.mean(all_rot_errors)
+        std_rot_error = np.std(all_rot_errors)
+        median_rot_error = np.median(all_rot_errors)
+        
+        print(f"\n🔄 자세 오차 (Rotation Error):")
+        print(f"   평균: {avg_rot_error:.2f}° (±{std_rot_error:.2f}°)")
+        print(f"   중앙값: {median_rot_error:.2f}°")
+        print(f"   최소: {np.min(all_rot_errors):.2f}°")
+        print(f"   최대: {np.max(all_rot_errors):.2f}°")
+        
+        print(f"\n   분포:")
+        print(f"   < 2°:  {100 * sum(1 for e in all_rot_errors if e < 2) / len(all_rot_errors):.1f}%")
+        print(f"   < 5°:  {100 * sum(1 for e in all_rot_errors if e < 5) / len(all_rot_errors):.1f}%")
+        print(f"   < 10°: {100 * sum(1 for e in all_rot_errors if e < 10) / len(all_rot_errors):.1f}%")
+        print(f"   < 15°: {100 * sum(1 for e in all_rot_errors if e < 15) / len(all_rot_errors):.1f}%")
+    
+    print(f"\n🏷️ 분류 정확도: {100 * class_correct / class_total:.1f}%")
+    
+    print(f"\n{'='*80}")
+    print("📊 클래스별 결과")
+    print(f"{'='*80}")
+    for name in class_names:
+        if class_pos_errors[name]:
+            pos_mean = np.mean(class_pos_errors[name])
+            pos_std = np.std(class_pos_errors[name])
+            if use_rotation and class_rot_errors[name]:
+                rot_mean = np.mean(class_rot_errors[name])
+                print(f"  {name}: 위치 {pos_mean:.1f}mm (±{pos_std:.1f}), 자세 {rot_mean:.2f}°")
+            else:
+                print(f"  {name}: 위치 {pos_mean:.1f}mm (±{pos_std:.1f})")
+    
+    if args.save_results:
+        summary_results = {
+            'num_samples': sample_count,
+            'position_error': {
+                'mean_mm': float(avg_pos_error),
+                'std_mm': float(std_pos_error),
+                'median_mm': float(median_pos_error),
+                'min_mm': float(np.min(all_pos_errors)),
+                'max_mm': float(np.max(all_pos_errors)),
+                'x_mean_mm': float(np.mean(all_x_errors)),
+                'y_mean_mm': float(np.mean(all_y_errors)),
+                'z_mean_mm': float(np.mean(all_z_errors)),
+            },
+            'classification_accuracy': float(100 * class_correct / class_total),
+            'class_names': class_names,
+            'class_position_errors': {name: float(np.mean(errors)) for name, errors in class_pos_errors.items() if errors}
+        }
+        
+        if use_rotation and all_rot_errors:
+            summary_results['rotation_error'] = {
+                'mean_deg': float(np.mean(all_rot_errors)),
+                'std_deg': float(np.std(all_rot_errors)),
+                'median_deg': float(np.median(all_rot_errors)),
+                'min_deg': float(np.min(all_rot_errors)),
+                'max_deg': float(np.max(all_rot_errors)),
+            }
+            summary_results['class_rotation_errors'] = {name: float(np.mean(errors)) for name, errors in class_rot_errors.items() if errors}
+        
+        with open(RESULTS_PATH, 'w', encoding='utf-8') as f:
+            json.dump(summary_results, f, indent=2, ensure_ascii=False)
+        print(f"\n💾 결과 저장: {RESULTS_PATH}")
+        
+        if args.save_detailed:
+            detailed_path = os.path.join(ARTIFACTS_DIR, "evaluation_detailed_results_5090.json")
+            with open(detailed_path, 'w', encoding='utf-8') as f:
+                json.dump(detailed_results, f, indent=2, ensure_ascii=False)
+            print(f"💾 상세 결과 저장: {detailed_path}")
+    
+    step4_time = time.time() - step4_start_time
+    print(f"\n[4단계 완료] 소요 시간: {step4_time:.2f}초")
+    
+    # ==========================================
+    # 5단계: 시각화 생성
+    # ==========================================
+    print(f"\n{'='*80}")
+    print("[5단계] 시각화 생성")
+    print(f"{'='*80}")
+    step5_start_time = time.time()
+    
+    create_pose_result_grid(
+        detailed_results, class_names, OUTPUT_IMAGE_PATH,
+        use_rotation=use_rotation, num_cols=5, img_size=200, max_images=50
+    )
+    
+    create_high_error_grid(
+        detailed_results, class_names, OUTPUT_HIGH_ERROR_PATH,
+        use_rotation=use_rotation, pos_threshold=50.0, rot_threshold=10.0,
+        num_cols=5, img_size=200
+    )
+    
+    step5_time = time.time() - step5_start_time
+    print(f"\n[5단계 완료] 소요 시간: {step5_time:.2f}초")
+    
+    total_time = time.time() - total_start_time
+    
+    print(f"\n{'='*80}")
+    print("✅ 평가 완료 (RTX 5090 최적화)")
+    print(f"{'='*80}")
+    print(f"\n[전체 실행 시간 요약]")
+    print(f"  1단계 (모델 로드): {step1_time:.2f}초")
+    print(f"  2단계 (데이터셋 로드): {step2_time:.2f}초")
+    print(f"  3단계 (평가 수행): {step3_time:.2f}초")
+    print(f"  4단계 (결과 요약): {step4_time:.2f}초")
+    print(f"  5단계 (시각화 생성): {step5_time:.2f}초")
+    print(f"  ─────────────────────────────────────────────")
+    print(f"  총 실행 시간: {total_time:.2f}초 ({total_time/60:.2f}분)")
+    print("=" * 80)
+
+
+# ==========================================
+# 메인
+# ==========================================
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="6DoF Pose Estimation 모델 평가 (RTX 5090 최적화)")
+    parser.add_argument('--dataset_dir', type=str, default=DATASET_DIR,
+                        help='평가 데이터셋 경로')
+    parser.add_argument('--num_samples', type=int, default=None,
+                        help='평가할 샘플 수 (None: 전체)')
+    parser.add_argument('--bbox_crop', action='store_true',
+                        help='bbox_2d로 ROI crop 사용')
+    parser.add_argument('--save_results', action='store_true',
+                        help='평가 결과를 JSON으로 저장')
+    parser.add_argument('--save_detailed', action='store_true',
+                        help='샘플별 상세 결과 저장')
+    parser.add_argument('--verbose', action='store_true',
+                        help='상세 출력 (처음 5개 샘플)')
+    
+    args = parser.parse_args()
+    
+    LOG_PATH = setup_logging("08_pose_evaluation_5090")
+    
+    evaluate(args)
+    
+    finish_logging()
