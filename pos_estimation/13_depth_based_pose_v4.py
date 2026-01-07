@@ -40,6 +40,13 @@ from PIL import Image
 # 설정
 # ==========================================
 PROJECT_DIR = os.path.dirname(os.path.abspath(__file__))
+REPO_DIR = os.path.dirname(PROJECT_DIR)
+sys.path.insert(0, REPO_DIR)
+from utils.logger import setup_logging, finish_logging
+
+# 로그 설정
+LOG_PATH = setup_logging("13_depth_pose_v4")
+
 DATASET_DIR = os.path.join(PROJECT_DIR, "dataset_pos_depth")
 ARTIFACTS_DIR = os.path.join(PROJECT_DIR, "artifacts")
 
@@ -1027,6 +1034,9 @@ def train_model(dataset_dir=DATASET_DIR, force_cpu=FORCE_CPU, use_bbox_crop=USE_
         print(f"  < 2°:  {100 * sum(1 for e in all_rot_errors if e < 2) / len(all_rot_errors):.1f}%")
         print(f"  < 5°:  {100 * sum(1 for e in all_rot_errors if e < 5) / len(all_rot_errors):.1f}%")
         print(f"  < 10°: {100 * sum(1 for e in all_rot_errors if e < 10) / len(all_rot_errors):.1f}%")
+    
+    # 로그 마무리
+    finish_logging(LOG_PATH)
 
 
 # ==========================================
