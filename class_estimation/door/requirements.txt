@@ -1,0 +1,14 @@
+# Door Classification Dataset Builder
+flask
+opencv-python
+numpy
+
+# ZED SDK (Jetson 환경에서 별도 설치 필요)
+# pip install pyzed 또는 ZED SDK 설치 후 자동 포함
+# ZED SDK가 없으면 OpenCV 카메라로 자동 폴백됨
+
+# 학습 및 평가 (Phase 2)
+# torch
+# torchvision
+# scikit-learn
+# matplotlib
