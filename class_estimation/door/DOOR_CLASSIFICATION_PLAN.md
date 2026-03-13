@@ -253,40 +253,42 @@ door/
 ```
 parts_deep/class_estimation/door/
 │
-├── DOOR_CLASSIFICATION_PLAN.md        # 본 문서 (Plan & Design)
-├── requirements.txt                   # 의존성 패키지
+├── DOOR_CLASSIFICATION_PLAN.md                # 본 문서 (Plan & Design)
+├── requirements.txt                           # 의존성 패키지
+├── camera_utils.py                            # 카메라 유틸리티
 │
-├── 01_capture_dataset.py              # Flask 서버 + ZED 카메라 이미지 획득
-├── 02_door_classification.py          # 분류 모델 학습 (ResNet18)
-├── 03_door_class_evaluation.py        # 모델 평가
+├── 01_capture_dataset.py                      # Flask 서버 + ZED 카메라 이미지 획득
+├── 02_door_classification_5090.py             # 분류 모델 학습 (ResNet18, RTX 5090)
+├── 03_door_class_evaluation_5090.py           # 모델 평가 (RTX 5090)
 │
 ├── templates/
-│   └── index.html                     # Flask UI 템플릿
+│   └── index.html                             # Flask UI 템플릿
 │
 ├── static/
 │   ├── css/
-│   │   └── style.css                  # UI 스타일
+│   │   └── style.css                          # UI 스타일
 │   └── js/
-│       └── app.js                     # UI 동작 (AJAX, 이미지 선별)
+│       └── app.js                             # UI 동작 (AJAX, 이미지 선별)
 │
 ├── datasets/
 │   ├── dataset_info.json
-│   ├── E25_door_RH/
-│   ├── E25_door_LH_FRT/
-│   ├── E25_door_LH_RR/
-│   ├── E30_door_RH/
-│   ├── E30_door_LH_FRT/
-│   ├── E30_door_LH_RR/
-│   ├── E38_door_RH/
-│   ├── E38_door_LH_FRT/
-│   └── E38_door_LH_RR/
+│   ├── E25_door_LH_FRT/                       # 110장 (촬영 완료)
+│   ├── E25_door_LH_RR/                        # 미촬영
+│   ├── E25_door_RH/                           # 미촬영
+│   ├── E30_door_LH_FRT/                       # 108장 (촬영 완료)
+│   ├── E30_door_LH_RR/                        # 미촬영
+│   ├── E30_door_RH/                           # 미촬영
+│   ├── E38_door_LH_FRT/                       # 119장 (촬영 완료)
+│   ├── E38_door_LH_RR/                        # 미촬영
+│   └── E38_door_RH/                           # 미촬영
 │
-├── temp_frames/                       # 녹화 중 임시 프레임 저장
-│
-└── artifacts/
-    ├── class_names.json
-    ├── best_door_model.pth
-    └── training_indices_door.json
+└── artifacts/                                 # .gitignore 대상
+    ├── best_door_model_5090.pth               # 학습된 모델 가중치
+    ├── best_door_model_5090.onnx              # ONNX 변환 모델
+    ├── class_names_door_5090.json             # 클래스 이름
+    ├── training_indices_door_5090.json        # Train/Test 분할 정보
+    ├── evaluation_results_door_5090.json      # 평가 결과
+    └── evaluation_results_door_5090.png       # 평가 시각화
 ```
 
 ---
@@ -403,9 +405,114 @@ Step 7) 실물 + 합성 데이터 혼합 학습
 
 ---
 
-## 12. 향후 확장 계획
+## 12. 진행 이력
 
-1. **CAD 기반 합성 데이터**: CAD 모델 확보 후 Isaac Sim으로 추가 합성 데이터 생성
-2. **데이터 증강**: 실물 이미지에 대한 augmentation (회전, 색상, 노이즈 등)
-3. **모델 고도화**: ResNet18 → EfficientNet 등 경량 모델 비교 실험
-4. **배포**: 실시간 추론 파이프라인 (ZED X Mini → 모델 → 분류 결과)
+### 2026-03-13: 실제 이미지 취득 및 3종 분류 모델 학습/평가 완료
+
+#### 12.1 데이터셋 취득
+
+`01_capture_dataset.py` Flask 웹 UI를 통해 ZED X Mini 카메라로 3종 도어(LH_FRT)를 촬영하여 데이터셋 구축 완료.
+
+| 클래스 | 이미지 수 | 해상도 |
+|--------|-----------|--------|
+| E25_door_LH_FRT | 110장 | 1920×1080 |
+| E30_door_LH_FRT | 108장 | 1920×1080 |
+| E38_door_LH_FRT | 119장 | 1920×1080 |
+| **총합** | **337장** | |
+
+- 나머지 6개 클래스(LH_RR, RH)는 실물 미확보로 데이터 없음 (폴더만 생성)
+- 우선 **3종 분류**로 연습 진행
+
+#### 12.2 학습 스크립트 구현 (`02_door_classification_5090.py`)
+
+기존 `02_parts_classification_5090.py`를 참조하여 door 전용 학습 스크립트 작성.
+
+| 항목 | 설정 |
+|------|------|
+| 모델 | ResNet18 (ImageNet 사전학습, Transfer Learning) |
+| 데이터 분할 | Train 80% (269장) / Test 20% (68장), stratify 적용 |
+| 배치 사이즈 | 64 (RTX 5090 자동 조정) |
+| 에포크 | 60 (Early Stopping patience=10) |
+| 옵티마이저 | Adam (lr=0.001) + ReduceLROnPlateau |
+| 데이터 증강 | RandomHorizontalFlip, RandomRotation(15°), **RandomPerspective(0.2)**, ColorJitter |
+| 클래스 가중치 | CrossEntropyLoss에 불균형 보정 적용 |
+| ONNX 변환 | 학습 완료 후 자동 변환 (ZED Box Mini 추론용, opset 18) |
+
+기존 스크립트와의 주요 차이점:
+- `bbox_crop` 옵션 제거 (실제 이미지에는 bbox 데이터 없음)
+- 이미지가 0인 클래스 폴더 자동 제외 로직 추가
+- `RandomPerspective` 증강 추가 (실제 촬영 시점 변화 시뮬레이션)
+- 학습 완료 후 ONNX 변환 단계 추가 (9단계)
+
+#### 12.3 평가 스크립트 구현 (`03_door_class_evaluation_5090.py`)
+
+기존 `03_parts_class_evaluation_5090.py`를 참조하여 door 전용 평가 스크립트 작성.
+
+- Test 셋(68장) 예측 결과 출력
+- 결과 시각화 그리드 이미지 생성
+- 틀린 예측 그리드 이미지 생성
+- 혼동 행렬 출력
+- Precision, Recall, F1-Score 계산
+
+#### 12.4 학습/평가 결과
+
+**학습 결과:**
+- Epoch 17에서 Validation Accuracy **100.00%** 달성
+- Epoch 27에서 Early Stopping 발동
+- 학습 시간: 약 1.7분 (RTX 5090)
+
+**평가 결과:**
+
+| 지표 | 값 |
+|------|-----|
+| 전체 정확도 | **100.00%** (68/68) |
+| E25_door_LH_FRT | 100.00% (22/22) |
+| E30_door_LH_FRT | 100.00% (22/22) |
+| E38_door_LH_FRT | 100.00% (24/24) |
+| Precision (Macro) | 100.00% |
+| Recall (Macro) | 100.00% |
+| F1-Score (Macro) | 100.00% |
+| 오류 | 0개 |
+
+> **참고**: 3종 분류에서 100% 정확도는 데이터가 클래스 간 시각적 차이가 뚜렷하기 때문.
+> 6종/9종으로 확장 시 정확도가 낮아질 수 있으며, 추가 데이터 수집 및 증강이 필요할 수 있음.
+
+#### 12.5 생성된 Artifacts
+
+```
+artifacts/
+├── best_door_model_5090.pth          # 학습된 모델 가중치 (44MB)
+├── best_door_model_5090.onnx         # ONNX 변환 모델 (ZED Box Mini용)
+├── best_door_model_5090.onnx.data    # ONNX 외부 데이터
+├── class_names_door_5090.json        # 클래스 이름 목록
+├── training_indices_door_5090.json   # Train/Test 분할 정보
+├── evaluation_results_door_5090.json # 평가 결과 JSON
+└── evaluation_results_door_5090.png  # 평가 결과 시각화 이미지
+```
+
+#### 12.6 실행 방법
+
+```bash
+# conda 환경 활성화
+conda activate isaac311
+
+# 학습 실행
+python class_estimation/door/02_door_classification_5090.py
+
+# 평가 실행
+python class_estimation/door/03_door_class_evaluation_5090.py
+
+# CPU로 실행 시
+python class_estimation/door/02_door_classification_5090.py -cpu
+```
+
+---
+
+## 13. 향후 확장 계획
+
+1. **나머지 6종 데이터 수집**: LH_RR, RH 도어 실물 확보 후 촬영 → 9클래스 분류
+2. **CAD 기반 합성 데이터**: CAD 모델 확보 후 Isaac Sim으로 추가 합성 데이터 생성
+3. **데이터 증강**: 실물 이미지에 대한 augmentation (회전, 색상, 노이즈 등)
+4. **모델 고도화**: ResNet18 → EfficientNet 등 경량 모델 비교 실험
+5. **ZED Box Mini 배포**: ONNX → TensorRT 변환 후 실시간 추론 파이프라인 구축
+6. **추론 서버**: ZED Box Mini에서 카메라 입력 → 모델 추론 → 분류 결과 출력
