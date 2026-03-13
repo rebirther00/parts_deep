@@ -561,28 +561,38 @@ print("=" * 80)
 step9_start_time = time.time()
 
 try:
-    model.eval()
-    dummy_input = torch.randn(1, 3, IMAGE_SIZE, IMAGE_SIZE).to(device)
+    model_cpu = create_resnet_model(num_classes=num_classes, pretrained=False)
+    model_cpu.load_state_dict(torch.load(MODEL_SAVE_PATH, map_location='cpu'))
+    model_cpu.eval()
+    dummy_input = torch.randn(1, 3, IMAGE_SIZE, IMAGE_SIZE)
 
+    # dynamo=False: legacy exporter 사용 → 가중치가 단일 .onnx 파일에 내장됨
+    # (기본 dynamo=True는 외부 .onnx.data 파일로 분리되어 TensorRT 호환 문제 발생)
     torch.onnx.export(
-        model,
+        model_cpu,
         dummy_input,
         ONNX_SAVE_PATH,
         export_params=True,
-        opset_version=18,
+        opset_version=13,
         do_constant_folding=True,
         input_names=['input'],
         output_names=['output'],
         dynamic_axes={
             'input': {0: 'batch_size'},
             'output': {0: 'batch_size'}
-        }
+        },
+        dynamo=False
     )
 
-    print(f"ONNX 모델 저장: {ONNX_SAVE_PATH}")
+    # 외부 데이터 파일이 남아있으면 삭제
+    onnx_data_path = ONNX_SAVE_PATH + ".data"
+    if os.path.exists(onnx_data_path):
+        os.remove(onnx_data_path)
+        print(f"외부 데이터 파일 삭제: {onnx_data_path}")
 
     onnx_size_mb = os.path.getsize(ONNX_SAVE_PATH) / (1024 * 1024)
-    print(f"ONNX 모델 크기: {onnx_size_mb:.2f} MB")
+    print(f"ONNX 모델 저장: {ONNX_SAVE_PATH}")
+    print(f"ONNX 모델 크기: {onnx_size_mb:.2f} MB (가중치 내장)")
 except Exception as e:
     print(f"\n[경고] ONNX 변환 실패: {e}")
     print("  → pip install onnxscript onnx 설치 후 다시 실행하세요.")
