@@ -16,6 +16,7 @@ class_estimation/datasets/quick_coupler_*/
 *.pth
 *.onnx
 *.onnx.data
+*.trt
 
 # 학습 결과물 (artifacts)
 artifacts/
@@ -23,6 +24,9 @@ artifacts/
 # 예외: 스몰 프로젝트 폴더 구조 유지를 위한 .gitkeep는 추적
 !class_estimation/datasets/.gitkeep
 !pos_estimation/dataset_pos/.gitkeep
+
+# 임시 프레임
+temp_frames/
 
 # Python
 __pycache__/
