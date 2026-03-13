@@ -164,30 +164,33 @@ class DoorDataset(Dataset):
         return image, label
 
 
-# Train용: Data Augmentation 포함 (RandomPerspective 추가)
+# 도어 3종은 형태 유사, 가로 폭만 차이 → 종횡비 유지가 핵심
+# Train용: 종횡비 유지 리사이즈 + 폭 왜곡 최소화 증강
 train_transform = transforms.Compose([
-    transforms.Resize((IMAGE_SIZE, IMAGE_SIZE)),
-    transforms.RandomHorizontalFlip(p=0.5),
-    transforms.RandomRotation(degrees=15),
-    transforms.RandomPerspective(distortion_scale=0.2, p=0.3),
-    transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2),
+    transforms.Resize(IMAGE_SIZE),
+    transforms.CenterCrop((IMAGE_SIZE, IMAGE_SIZE)),
+    # RandomHorizontalFlip 제거: LH_FRT 도어는 좌우 비대칭 (힌지/손잡이 위치)
+    transforms.RandomRotation(degrees=5),
+    transforms.ColorJitter(brightness=0.3, contrast=0.3, saturation=0.2),
     transforms.ToTensor(),
     transforms.Normalize(mean=[0.485, 0.456, 0.406],
                         std=[0.229, 0.224, 0.225])
 ])
 
-# Validation/Test용: Augmentation 없이 기본 전처리만
+# Validation/Test용: 학습과 동일한 종횡비 유지 리사이즈
 val_transform = transforms.Compose([
-    transforms.Resize((IMAGE_SIZE, IMAGE_SIZE)),
+    transforms.Resize(IMAGE_SIZE),
+    transforms.CenterCrop((IMAGE_SIZE, IMAGE_SIZE)),
     transforms.ToTensor(),
     transforms.Normalize(mean=[0.485, 0.456, 0.406],
                         std=[0.229, 0.224, 0.225])
 ])
 
 print(f"이미지 전처리 설정 완료:")
-print(f"  입력 이미지 크기: {IMAGE_SIZE}x{IMAGE_SIZE}")
-print(f"  Train: Resize + Augmentation (Flip, Rotation, Perspective, ColorJitter) + Normalize")
-print(f"  Validation: Resize + Normalize")
+print(f"  입력 이미지 크기: {IMAGE_SIZE}x{IMAGE_SIZE} (종횡비 유지 + CenterCrop)")
+print(f"  Train: Resize(종횡비유지) + CenterCrop + Rotation(5°) + ColorJitter + Normalize")
+print(f"  Validation: Resize(종횡비유지) + CenterCrop + Normalize")
+print(f"  [개선] HorizontalFlip 제거, Rotation 15°→5°, Perspective 제거")
 
 step2_time = time.time() - step2_start_time
 print(f"\n[2단계 완료] 소요 시간: {step2_time:.2f}초")
