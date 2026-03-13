@@ -333,7 +333,7 @@ button:disabled {
 
 .frames-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(155px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
     gap: 8px;
     overflow-y: auto;
     flex: 1;
@@ -346,6 +346,9 @@ button:disabled {
     cursor: pointer;
     transition: all 0.12s;
     position: relative;
+    width: 100%;
+    min-width: 180px;
+    min-height: 180px;  /* img 140px + frame-info */
 }
 
 .frame-card:hover {
@@ -358,10 +361,14 @@ button:disabled {
 }
 
 .frame-card img {
-    width: 100%;
-    object-fit: contain;
-    display: block;
-    background: #000;
+    width: 100% !important;
+    min-width: 100% !important;
+    height: 140px !important;
+    min-height: 140px !important;
+    max-height: 140px !important;
+    object-fit: cover !important;
+    display: block !important;
+    background: #1e293b;
 }
 
 .frame-card .frame-info {

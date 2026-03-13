@@ -175,7 +175,7 @@ function renderFrames(frames) {
                 "')\">" +
                 '<img src="/temp_frames/' +
                 f.filename +
-                '" loading="lazy">' +
+                '" width="200" height="140" loading="lazy" style="width:100%;height:140px;min-height:140px;object-fit:cover;display:block;background:#1e293b;">' +
                 '<div class="check-mark">&#10003;</div>' +
                 '<div class="frame-info">' +
                 f.filename +

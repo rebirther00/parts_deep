@@ -7,6 +7,7 @@
 
 import json
 import shutil
+import time
 from datetime import datetime
 from pathlib import Path
 
@@ -104,7 +105,7 @@ def _generate_mjpeg():
 
 @app.route("/")
 def index():
-    return render_template("index.html", classes=CLASSES)
+    return render_template("index.html", classes=CLASSES, cache_bust=int(time.time()))
 
 
 @app.route("/video_feed")
