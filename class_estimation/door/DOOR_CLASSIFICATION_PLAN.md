@@ -608,9 +608,28 @@ python class_estimation/door/04_door_realtime_inference.py
 
 ## 13. 향후 확장 계획
 
-1. **나머지 6종 데이터 수집**: LH_RR, RH 도어 실물 확보 후 촬영 → 9클래스 분류
-2. **CAD 기반 합성 데이터**: CAD 모델 확보 후 Isaac Sim으로 추가 합성 데이터 생성
-3. **데이터 증강**: 실물 이미지에 대한 augmentation (회전, 색상, 노이즈 등)
-4. **모델 고도화**: ResNet18 → EfficientNet 등 경량 모델 비교 실험
-5. **Jetson GPU 추론**: NVIDIA 공식 Jetson PyTorch wheel 설치 후 GPU 추론 전환 (86ms → ~10ms 예상)
-6. **TensorRT 재시도**: Jetson 전용 PyTorch wheel + ONNX opset 조합 테스트로 TRT 호환성 확보
+### 13.1 정확도 개선 (우선)
+
+1. **Unknown 클래스 추가**: 비도어 이미지(바닥, 벽, 공구, 사람 등)를 `datasets/Unknown/`에 수집하여 4클래스로 재학습
+   - 현재 문제: 도어가 아닌 물체를 보여줘도 E38 등 특정 클래스를 100% 확률로 분류 (Closed-set 한계)
+   - 목표: 100장 이상의 비도어 이미지를 수집하여 "도어 아님" 판별 가능하게 개선
+2. **조명 환경 대응 강화**: 다양한 조명 조건(자연광, 형광등, 역광, 저조도 등)에서 추가 촬영
+   - 현재 문제: 학습 데이터와 다른 조명 환경에서 E30의 분류 정확도 저하 (E25/E38으로 오분류)
+   - 해결: 조명별 추가 데이터 수집 + ColorJitter 증강 파라미터 강화 (brightness, contrast 범위 확대)
+3. **E30 데이터 보강**: E30 도어를 다양한 각도/거리/조명에서 50~100장 추가 촬영
+   - E25↔E30 간 시각적 유사성으로 인한 혼동 해소
+
+### 13.2 클래스 확장
+
+4. **나머지 6종 데이터 수집**: LH_RR, RH 도어 실물 확보 후 촬영 → 9클래스 + Unknown = 10클래스 분류
+
+### 13.3 데이터 확장
+
+5. **CAD 기반 합성 데이터**: CAD 모델 확보 후 Isaac Sim으로 추가 합성 데이터 생성
+6. **데이터 증강 강화**: RandomPerspective 비율 증가, 밝기/대비/채도 변화 확대, 노이즈 추가
+
+### 13.4 모델 및 배포 최적화
+
+7. **모델 고도화**: ResNet18 → EfficientNet 등 경량 모델 비교 실험
+8. **Jetson GPU 추론**: NVIDIA 공식 Jetson PyTorch wheel 설치 후 GPU 추론 전환 (86ms → ~10ms 예상)
+9. **TensorRT 재시도**: Jetson 전용 PyTorch wheel + ONNX opset 조합 테스트로 TRT 호환성 확보
