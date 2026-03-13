@@ -508,11 +508,109 @@ python class_estimation/door/02_door_classification_5090.py -cpu
 
 ---
 
+### 2026-03-13 (2차): 실시간 추론 서버 구현 및 TensorRT 호환성 이슈 해결
+
+#### 12.7 실시간 추론 서버 구현 (`04_door_realtime_inference.py`)
+
+ZED X Mini 카메라 + 학습된 모델을 사용하여 3종 도어를 실시간 분류하는 Flask 웹 서버 구현.
+
+| 항목 | 내용 |
+|------|------|
+| 서버 포트 | 5001 (데이터셋 빌더 5000과 분리) |
+| 추론 간격 | 0.5초 |
+| UI 구성 | 카메라 스트리밍 + 분류 결과 오버레이 + 클래스별 확률 바 |
+| API | `/api/inference_result` (추론 결과 JSON) |
+
+#### 12.8 TensorRT 변환 시 모델 출력 불일치 문제 발견
+
+최초 구현 시 TensorRT 기반 추론 엔진을 사용했으나, **ONNX → TensorRT 변환 시 모델 출력이 완전히 달라지는 치명적 문제** 발견.
+
+**검증 과정:**
+
+1. `03_5_trt_evaluation.py` 스크립트를 작성하여 TRT 엔진으로 테스트셋 평가
+2. TRT 결과: **32.35% 정확도** — E30, E38을 모두 E25로 분류
+3. 동일한 입력으로 PyTorch vs TRT 출력 직접 비교:
+   - 입력 데이터 차이: **0** (완전 동일)
+   - 출력 차이: **최대 11.55** (완전히 다른 값)
+4. ONNX 파일 자체 검증: 가중치 내장 정상, 빈 파라미터 없음 (43.13 MB)
+5. opset 13 → 17 변경 후에도 동일한 문제 재현
+6. PyTorch 직접 평가: **98.53%** 정확도 확인 → ONNX/TRT 변환 과정의 문제
+
+**원인 추정:**
+- Jetson Orin (aarch64, TensorRT 10.3) + PyTorch 2.10 ONNX export 호환성 문제
+- ResNet18의 커스텀 fc 레이어(Dropout + Linear + ReLU + Dropout + Linear)가 TRT 최적화 과정에서 잘못 변환된 것으로 추정
+
+**해결:**
+- TensorRT → **PyTorch (.pth) 직접 추론**으로 전환
+- CPU 모드 사용 (Jetson용 PyTorch CUDA wheel이 아닌 x86 wheel이므로 GPU 사용 불가)
+- 추론 시간: 86ms/장 (CPU) — 0.5초 간격 추론에 충분
+
+#### 12.9 추론 파이프라인 평가 스크립트 (`03_5_trt_evaluation.py`)
+
+실시간 추론(04) 실행 전, 테스트 데이터셋에 대해 동일한 파이프라인으로 정확도를 검증하는 스크립트.
+
+| 항목 | 값 |
+|------|-----|
+| 전체 정확도 | **98.53%** (67/68) |
+| E25_door_LH_FRT | 100.0% (22/22) |
+| E30_door_LH_FRT | 95.5% (21/22) |
+| E38_door_LH_FRT | 100.0% (24/24) |
+| 오분류 | 1건 (E30 → E25, 59.3% 확률) |
+| 추론 엔진 | PyTorch 2.10.0 (CPU) |
+| 평균 추론 시간 | 86.18 ms/장 |
+
+#### 12.10 업데이트된 파일 구조
+
+```
+parts_deep/class_estimation/door/
+│
+├── 01_capture_dataset.py              # 데이터셋 캡처 서버 (포트 5000)
+├── 02_door_classification_5090.py     # 학습 (RTX 5090)
+├── 03_door_class_evaluation_5090.py   # PyTorch 평가 (RTX 5090)
+├── 03_5_trt_evaluation.py             # 추론 파이프라인 평가 (Jetson)
+├── 04_door_realtime_inference.py      # 실시간 추론 서버 (포트 5001)
+├── camera_utils.py                    # 카메라 유틸리티
+│
+├── templates/
+│   ├── index.html                     # 데이터셋 빌더 UI
+│   └── inference.html                 # 실시간 추론 UI
+│
+└── artifacts/
+    ├── best_door_model_5090.pth       # 학습된 모델 (44MB)
+    ├── best_door_model_5090.onnx      # ONNX 모델 (TRT 비호환, 참조용)
+    ├── class_names_door_5090.json     # 클래스 이름
+    ├── training_indices_door_5090.json
+    ├── inference_evaluation_results.json  # 추론 파이프라인 평가 결과
+    └── evaluation_results_door_5090.*
+```
+
+#### 12.11 Jetson 환경 (ZED Box Mini) 실행 방법
+
+```bash
+# zed_env 가상환경 활성화
+source ~/workspace/zed_env/bin/activate
+
+# 추론 전 모델 검증
+python class_estimation/door/03_5_trt_evaluation.py
+
+# 실시간 추론 서버 실행
+python class_estimation/door/04_door_realtime_inference.py
+# → 브라우저에서 http://<장비IP>:5001 접속
+```
+
+#### 12.12 주요 교훈
+
+1. **ONNX → TensorRT 변환은 반드시 출력 검증 필요** — 변환 성공해도 출력이 다를 수 있음
+2. **03_5 같은 파이프라인 검증 스크립트가 필수** — 실시간 추론 전 테스트셋으로 정확도 확인
+3. **Jetson 환경에서는 NVIDIA 공식 PyTorch wheel 사용 권장** — pip의 x86 wheel은 CUDA 미지원
+
+---
+
 ## 13. 향후 확장 계획
 
 1. **나머지 6종 데이터 수집**: LH_RR, RH 도어 실물 확보 후 촬영 → 9클래스 분류
 2. **CAD 기반 합성 데이터**: CAD 모델 확보 후 Isaac Sim으로 추가 합성 데이터 생성
 3. **데이터 증강**: 실물 이미지에 대한 augmentation (회전, 색상, 노이즈 등)
 4. **모델 고도화**: ResNet18 → EfficientNet 등 경량 모델 비교 실험
-5. **ZED Box Mini 배포**: ONNX → TensorRT 변환 후 실시간 추론 파이프라인 구축
-6. **추론 서버**: ZED Box Mini에서 카메라 입력 → 모델 추론 → 분류 결과 출력
+5. **Jetson GPU 추론**: NVIDIA 공식 Jetson PyTorch wheel 설치 후 GPU 추론 전환 (86ms → ~10ms 예상)
+6. **TensorRT 재시도**: Jetson 전용 PyTorch wheel + ONNX opset 조합 테스트로 TRT 호환성 확보

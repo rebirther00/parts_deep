@@ -1,6 +1,6 @@
 """굴착기 Door 실시간 분류 추론 서버
 
-ZED X Mini 카메라 + TensorRT ONNX 모델을 사용하여
+ZED X Mini 카메라 + PyTorch 모델을 사용하여
 3종 도어(E25/E30/E38)를 실시간 분류하고 결과를 웹에 표시한다.
 
 실행:
@@ -15,8 +15,9 @@ import time
 
 import cv2
 import numpy as np
-import tensorrt as trt
-from cuda import cudart
+import torch
+import torch.nn as nn
+from torchvision import models, transforms
 from flask import Flask, Response, jsonify, render_template
 from PIL import Image as PILImage
 
@@ -24,8 +25,7 @@ from camera_utils import CameraManager
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 ARTIFACTS_DIR = os.path.join(BASE_DIR, "artifacts")
-ONNX_PATH = os.path.join(ARTIFACTS_DIR, "best_door_model_5090.onnx")
-ENGINE_PATH = os.path.join(ARTIFACTS_DIR, "best_door_model_5090.trt")
+MODEL_PATH = os.path.join(ARTIFACTS_DIR, "best_door_model_5090.pth")
 CLASS_NAMES_PATH = os.path.join(ARTIFACTS_DIR, "class_names_door_5090.json")
 
 IMAGE_SIZE = 224
@@ -35,113 +35,41 @@ app = Flask(__name__)
 camera: CameraManager = None  # type: ignore[assignment]
 
 
-class TRTInferenceEngine:
-    """TensorRT 기반 ONNX 모델 추론 엔진 (cuda-python 사용)"""
+class PyTorchInferenceEngine:
+    """PyTorch 기반 추론 엔진"""
 
-    def __init__(self, onnx_path: str, engine_path: str, class_names: list):
+    def __init__(self, model_path: str, class_names: list):
         self.class_names = class_names
-        self.logger = trt.Logger(trt.Logger.WARNING)
+        self.device = torch.device("cpu")
 
-        cudart.cudaSetDevice(0)
-
-        self.engine = self._load_or_build_engine(onnx_path, engine_path)
-        self.context = self.engine.create_execution_context()
-        self.context.set_input_shape("input", (1, 3, IMAGE_SIZE, IMAGE_SIZE))
-
-        # CUDA 스트림
-        _, self.stream = cudart.cudaStreamCreate()
-
-        # GPU 메모리 사전 할당
-        input_size = 1 * 3 * IMAGE_SIZE * IMAGE_SIZE * 4  # float32
-        output_size = 1 * len(class_names) * 4
-        _, self.d_input = cudart.cudaMalloc(input_size)
-        _, self.d_output = cudart.cudaMalloc(output_size)
-        self.output_buf = np.zeros((1, len(class_names)), dtype=np.float32)
-
-        # ImageNet 정규화 파라미터
-        self.mean = np.array([0.485, 0.456, 0.406], dtype=np.float32).reshape(3, 1, 1)
-        self.std = np.array([0.229, 0.224, 0.225], dtype=np.float32).reshape(3, 1, 1)
-
-    def _load_or_build_engine(self, onnx_path, engine_path):
-        if os.path.exists(engine_path):
-            print(f"캐시된 TRT 엔진 로드: {engine_path}")
-            runtime = trt.Runtime(self.logger)
-            with open(engine_path, "rb") as f:
-                return runtime.deserialize_cuda_engine(f.read())
-
-        print("TRT 엔진 빌드 중 (최초 1회, 약 25초 소요)...")
-        builder = trt.Builder(self.logger)
-        network = builder.create_network(
-            1 << int(trt.NetworkDefinitionCreationFlag.EXPLICIT_BATCH)
+        self.model = models.resnet18(weights=None)
+        self.model.fc = nn.Sequential(
+            nn.Dropout(0.5),
+            nn.Linear(self.model.fc.in_features, 256),
+            nn.ReLU(),
+            nn.Dropout(0.3),
+            nn.Linear(256, len(class_names)),
         )
-        parser = trt.OnnxParser(network, self.logger)
+        self.model.load_state_dict(torch.load(model_path, map_location=self.device))
+        self.model.to(self.device)
+        self.model.eval()
 
-        original_cwd = os.getcwd()
-        os.chdir(os.path.dirname(onnx_path))
-        with open(os.path.basename(onnx_path), "rb") as f:
-            if not parser.parse(f.read()):
-                for i in range(parser.num_errors):
-                    print(f"  파싱 에러: {parser.get_error(i)}")
-                raise RuntimeError("ONNX 파싱 실패")
-        os.chdir(original_cwd)
-
-        config = builder.create_builder_config()
-        config.set_memory_pool_limit(trt.MemoryPoolType.WORKSPACE, 1 << 28)
-
-        profile = builder.create_optimization_profile()
-        profile.set_shape(
-            "input",
-            (1, 3, IMAGE_SIZE, IMAGE_SIZE),
-            (1, 3, IMAGE_SIZE, IMAGE_SIZE),
-            (1, 3, IMAGE_SIZE, IMAGE_SIZE),
-        )
-        config.add_optimization_profile(profile)
-
-        # FP32 유지 (FP16은 분류 정밀도 저하 가능)
-
-        serialized = builder.build_serialized_network(network, config)
-        if serialized is None:
-            raise RuntimeError("TRT 엔진 빌드 실패")
-
-        with open(engine_path, "wb") as f:
-            f.write(bytes(serialized))
-        print(f"TRT 엔진 저장 완료: {engine_path}")
-
-        runtime = trt.Runtime(self.logger)
-        return runtime.deserialize_cuda_engine(serialized)
-
-    def preprocess(self, frame: np.ndarray) -> np.ndarray:
-        # 학습과 동일하게 PIL.Image.resize (BILINEAR) 사용
-        pil_img = PILImage.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
-        pil_img = pil_img.resize((IMAGE_SIZE, IMAGE_SIZE), PILImage.BILINEAR)
-        img = np.array(pil_img, dtype=np.float32) / 255.0
-        img = img.transpose(2, 0, 1)
-        img = (img - self.mean) / self.std
-        return np.expand_dims(img, axis=0).astype(np.float32)
+        self.transform = transforms.Compose([
+            transforms.Resize((IMAGE_SIZE, IMAGE_SIZE)),
+            transforms.ToTensor(),
+            transforms.Normalize(mean=[0.485, 0.456, 0.406],
+                                 std=[0.229, 0.224, 0.225]),
+        ])
 
     def infer(self, frame: np.ndarray) -> tuple:
         """(클래스명, 확률, 전체확률리스트) 반환"""
-        input_tensor = self.preprocess(frame)
+        pil_img = PILImage.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
+        inp = self.transform(pil_img).unsqueeze(0).to(self.device)
 
-        cudart.cudaMemcpyAsync(
-            self.d_input, input_tensor.ctypes.data, input_tensor.nbytes,
-            cudart.cudaMemcpyKind.cudaMemcpyHostToDevice, self.stream,
-        )
+        with torch.no_grad():
+            output = self.model(inp)
 
-        self.context.set_tensor_address("input", self.d_input)
-        self.context.set_tensor_address("output", self.d_output)
-        self.context.execute_async_v3(self.stream)
-
-        cudart.cudaMemcpyAsync(
-            self.output_buf.ctypes.data, self.d_output, self.output_buf.nbytes,
-            cudart.cudaMemcpyKind.cudaMemcpyDeviceToHost, self.stream,
-        )
-        cudart.cudaStreamSynchronize(self.stream)
-
-        logits = self.output_buf[0]
-        exp_vals = np.exp(logits - np.max(logits))
-        probs = exp_vals / exp_vals.sum()
-
+        probs = torch.softmax(output, dim=1)[0].cpu().numpy()
         pred_idx = int(np.argmax(probs))
         return (
             self.class_names[pred_idx],
@@ -149,11 +77,6 @@ class TRTInferenceEngine:
             [{"class": self.class_names[i], "prob": float(probs[i])}
              for i in range(len(self.class_names))],
         )
-
-    def cleanup(self):
-        cudart.cudaFree(self.d_input)
-        cudart.cudaFree(self.d_output)
-        cudart.cudaStreamDestroy(self.stream)
 
 
 # ── 추론 상태 ───────────────────────────────────────────
@@ -166,7 +89,7 @@ inference_result = {
     "timestamp": 0,
 }
 result_lock = threading.Lock()
-engine: TRTInferenceEngine = None  # type: ignore[assignment]
+engine: PyTorchInferenceEngine = None  # type: ignore[assignment]
 
 
 def inference_loop():
@@ -210,7 +133,6 @@ def generate_mjpeg():
         with result_lock:
             r = inference_result.copy()
 
-        # 반투명 배경
         overlay = frame.copy()
         cv2.rectangle(overlay, (0, 0), (420, 110), (0, 0, 0), -1)
         cv2.addWeighted(overlay, 0.6, frame, 0.4, 0, frame)
@@ -266,8 +188,8 @@ if __name__ == "__main__":
         class_names = json.load(f)
     print(f"클래스: {class_names}")
 
-    engine = TRTInferenceEngine(ONNX_PATH, ENGINE_PATH, class_names)
-    print("TensorRT 엔진 준비 완료")
+    engine = PyTorchInferenceEngine(MODEL_PATH, class_names)
+    print(f"PyTorch 엔진 준비 완료 (디바이스: {engine.device})")
 
     camera = CameraManager()
     camera.start()
@@ -281,5 +203,4 @@ if __name__ == "__main__":
     try:
         app.run(host="0.0.0.0", port=5001, debug=False, threaded=True)
     finally:
-        engine.cleanup()
         camera.stop()
