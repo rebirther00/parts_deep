@@ -18,6 +18,7 @@ import numpy as np
 import tensorrt as trt
 from cuda import cudart
 from flask import Flask, Response, jsonify, render_template
+from PIL import Image as PILImage
 
 from camera_utils import CameraManager
 
@@ -96,8 +97,7 @@ class TRTInferenceEngine:
         )
         config.add_optimization_profile(profile)
 
-        if builder.platform_has_fast_fp16:
-            config.set_flag(trt.BuilderFlag.FP16)
+        # FP32 유지 (FP16은 분류 정밀도 저하 가능)
 
         serialized = builder.build_serialized_network(network, config)
         if serialized is None:
@@ -111,8 +111,10 @@ class TRTInferenceEngine:
         return runtime.deserialize_cuda_engine(serialized)
 
     def preprocess(self, frame: np.ndarray) -> np.ndarray:
-        img = cv2.resize(frame, (IMAGE_SIZE, IMAGE_SIZE))
-        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB).astype(np.float32) / 255.0
+        # 학습과 동일하게 PIL.Image.resize (BILINEAR) 사용
+        pil_img = PILImage.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
+        pil_img = pil_img.resize((IMAGE_SIZE, IMAGE_SIZE), PILImage.BILINEAR)
+        img = np.array(pil_img, dtype=np.float32) / 255.0
         img = img.transpose(2, 0, 1)
         img = (img - self.mean) / self.std
         return np.expand_dims(img, axis=0).astype(np.float32)
