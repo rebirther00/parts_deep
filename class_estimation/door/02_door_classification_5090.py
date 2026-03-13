@@ -560,28 +560,33 @@ print("9단계: ONNX 변환 (ZED Box Mini 추론용)")
 print("=" * 80)
 step9_start_time = time.time()
 
-model.eval()
-dummy_input = torch.randn(1, 3, IMAGE_SIZE, IMAGE_SIZE).to(device)
+try:
+    model.eval()
+    dummy_input = torch.randn(1, 3, IMAGE_SIZE, IMAGE_SIZE).to(device)
 
-torch.onnx.export(
-    model,
-    dummy_input,
-    ONNX_SAVE_PATH,
-    export_params=True,
-    opset_version=18,
-    do_constant_folding=True,
-    input_names=['input'],
-    output_names=['output'],
-    dynamic_axes={
-        'input': {0: 'batch_size'},
-        'output': {0: 'batch_size'}
-    }
-)
+    torch.onnx.export(
+        model,
+        dummy_input,
+        ONNX_SAVE_PATH,
+        export_params=True,
+        opset_version=18,
+        do_constant_folding=True,
+        input_names=['input'],
+        output_names=['output'],
+        dynamic_axes={
+            'input': {0: 'batch_size'},
+            'output': {0: 'batch_size'}
+        }
+    )
 
-print(f"ONNX 모델 저장: {ONNX_SAVE_PATH}")
+    print(f"ONNX 모델 저장: {ONNX_SAVE_PATH}")
 
-onnx_size_mb = os.path.getsize(ONNX_SAVE_PATH) / (1024 * 1024)
-print(f"ONNX 모델 크기: {onnx_size_mb:.2f} MB")
+    onnx_size_mb = os.path.getsize(ONNX_SAVE_PATH) / (1024 * 1024)
+    print(f"ONNX 모델 크기: {onnx_size_mb:.2f} MB")
+except Exception as e:
+    print(f"\n[경고] ONNX 변환 실패: {e}")
+    print("  → pip install onnxscript onnx 설치 후 다시 실행하세요.")
+    print("  → 학습된 모델(.pth)은 정상 저장되어 있습니다.")
 
 step9_time = time.time() - step9_start_time
 print(f"\n[9단계 완료] 소요 시간: {step9_time:.2f}초")
