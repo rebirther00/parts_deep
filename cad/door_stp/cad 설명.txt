@@ -1,0 +1,18 @@
+* 캐드 파일 단위 : mm
+
+* 특이 사항 : 
+ - E30_door_RH 와 E38_door_RH는 같은 부품임
+ - E30_E38_door_RH 캐드 파일로 통일함. 
+
+* 관찰 해야 하는 영역 (카메라가 바라봐야 하는 시점)
+
+- E25_door_LH_FRT :  -Z 방향
+- E25_door_LH_RR : -Z 방향
+- E25_door_RH : -Z 방향
+
+- E30_door_LH_FRT : +Z 방향
+- E30_door_LH_RR : +Z 방향
+- E30_E38_door_RH : -Z 방향
+
+- E38_door_LH_FRT : +Z 방향
+- E38_door_LH_RR : +Z 방향
