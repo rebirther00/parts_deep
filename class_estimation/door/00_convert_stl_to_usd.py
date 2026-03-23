@@ -26,7 +26,7 @@ from isaacsim import SimulationApp
 simulation_app = SimulationApp({"headless": True})
 
 import omni.kit.asset_converter as asset_converter
-from pxr import Usd, UsdGeom
+from pxr import Usd, UsdGeom, Gf
 
 reinit_logging(LOG_PATH)
 
@@ -65,12 +65,51 @@ CAMERA_VIEW_DIRECTIONS = {
 # ==========================================
 # STL → USD 변환
 # ==========================================
-def set_meters_per_unit(usd_path, meters_per_unit):
-    """USD 파일에 metersPerUnit 메타데이터 설정 (mm=0.001, cm=0.01, m=1.0)"""
+def fix_usd_units(usd_path):
+    """STL(mm 좌표) → 미터 단위로 변환 + 원점 센터링"""
     stage = Usd.Stage.Open(usd_path)
-    UsdGeom.SetStageMetersPerUnit(stage, meters_per_unit)
+
+    # 메시 AABB 계산 (원본 mm 좌표)
+    tc = Usd.TimeCode.Default()
+    xc = UsdGeom.XformCache(tc)
+    w_min = Gf.Vec3d(float("inf"), float("inf"), float("inf"))
+    w_max = Gf.Vec3d(float("-inf"), float("-inf"), float("-inf"))
+
+    for prim in stage.Traverse():
+        if not prim.IsA(UsdGeom.Mesh):
+            continue
+        pts = UsdGeom.Mesh(prim).GetPointsAttr().Get(tc)
+        if not pts:
+            continue
+        M = xc.GetLocalToWorldTransform(prim)
+        for p in pts:
+            wp = M.Transform(Gf.Vec3d(p[0], p[1], p[2]))
+            for i in range(3):
+                w_min[i] = min(w_min[i], wp[i])
+                w_max[i] = max(w_max[i], wp[i])
+
+    center = (w_min + w_max) / 2.0
+    size = w_max - w_min
+    max_dim = max(size[0], size[1], size[2])
+
+    # root prim에 Xform 적용: 센터링 → mm→m 스케일
+    root = stage.GetDefaultPrim()
+    if root:
+        xformable = UsdGeom.Xformable(root)
+        xformable.ClearXformOpOrder()
+        # 스케일(0.001) 먼저 정의 → 이동(-center) 나중 정의
+        # USD는 ops를 왼쪽→오른쪽 합성: M = M_scale * M_translate
+        # 점 v에 대해: v' = Scale * (v + Translate) = 0.001 * (v - center)
+        xformable.AddScaleOp().Set(Gf.Vec3d(0.001, 0.001, 0.001))
+        xformable.AddTranslateOp().Set(Gf.Vec3d(-center[0], -center[1], -center[2]))
+
+    UsdGeom.SetStageMetersPerUnit(stage, 1.0)
     stage.Save()
-    print(f"    metersPerUnit = {meters_per_unit} 설정 완료")
+
+    real_size_m = max_dim * 0.001
+    print(f"    원본 중심: ({center[0]:.1f}, {center[1]:.1f}, {center[2]:.1f}) mm")
+    print(f"    원본 최대 치수: {max_dim:.1f} mm → 실제 크기: {real_size_m:.3f} m")
+    print(f"    센터링 + 스케일(0.001) + metersPerUnit=1.0 적용 완료")
 
 
 def progress_callback(current_step, total_steps):
@@ -89,8 +128,7 @@ async def convert_stl_to_usd(stl_path, usd_path):
     context.ignore_camera = True
     context.ignore_light = True
     context.export_preview_surface = False
-    # STL은 단위 메타데이터가 없으므로 use_meter_as_world_unit은 효과 없음
-    # 변환 후 metersPerUnit = 0.001로 후처리하여 mm 단위 명시
+    # 변환 후 fix_usd_units()에서 스케일/센터링 처리
     context.use_meter_as_world_unit = False
     context.create_world_as_default_root_prim = True
 
@@ -147,8 +185,7 @@ async def convert_all():
             elapsed = time.time() - start_time
 
             if success:
-                # STL 좌표가 mm 단위이므로 metersPerUnit = 0.001 설정
-                set_meters_per_unit(usd_path, 0.001)
+                fix_usd_units(usd_path)
                 usd_size = os.path.getsize(usd_path) / 1e6 if os.path.exists(usd_path) else 0
                 print(f"    ✓ 변환 완료 ({elapsed:.1f}초, {usd_size:.1f}MB)")
             else:
