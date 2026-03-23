@@ -1,7 +1,7 @@
 """
 굴착기 도어 분류 모델 학습 스크립트 - CAD 합성 데이터 (RTX 5090 최적화)
 - Isaac Sim으로 생성한 CAD 합성 데이터셋 사용
-- ResNet18 Transfer Learning
+- ResNet50 Transfer Learning (448x448 고해상도)
 - RTX 5090 GPU에 최적화된 설정
 - 학습 완료 후 ONNX 변환 포함 (ZED Box Mini 추론용)
 """
@@ -24,7 +24,7 @@ import glob
 # ================================================================================
 # 명령줄 인자 파싱
 # ================================================================================
-parser = argparse.ArgumentParser(description='굴착기 도어 분류 모델 학습 - CAD 합성 데이터 (RTX 5090 최적화)')
+parser = argparse.ArgumentParser(description='굴착기 도어 분류 모델 학습 - CAD 합성 데이터 (ResNet50 + 448px, RTX 5090)')
 parser.add_argument('-cpu', '--cpu', action='store_true',
                     help='CPU로 강제 실행 (기본값: GPU 사용 가능 시 GPU 사용)')
 DEFAULT_DATASET_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "datasets_cad")
@@ -59,7 +59,7 @@ TEST_SIZE = 0.2
 NUM_EPOCHS = 60
 EARLY_STOPPING_PATIENCE = 10
 
-IMAGE_SIZE = 224
+IMAGE_SIZE = 448
 
 # RTX 5090 최적화 설정
 NUM_WORKERS = 8
@@ -239,33 +239,18 @@ for class_idx, class_name in enumerate(class_names):
 
 
 def adjust_batch_size_5090(data_size, force_cpu=False):
-    """RTX 5090 GPU에 최적화된 배치 사이즈 조정"""
-    if data_size < 100:
-        batch_size = 32
-    elif data_size < 500:
-        batch_size = 64
-    elif data_size < 2000:
-        batch_size = 128
-    else:
-        batch_size = 256
-
+    """RTX 5090 GPU에 최적화된 배치 사이즈 조정 (ResNet50 + 448px 기준)"""
+    # ResNet50 + 448x448: ResNet18 + 224x224 대비 ~10배 메모리 사용
     if torch.cuda.is_available() and not force_cpu:
         gpu_memory_gb = torch.cuda.get_device_properties(0).total_memory / (1024**3)
         if gpu_memory_gb >= 24:
-            if data_size >= 2000:
-                batch_size = min(batch_size, 512)
-            elif data_size >= 500:
-                batch_size = min(batch_size, 256)
+            batch_size = 32
         elif gpu_memory_gb >= 16:
-            if data_size >= 2000:
-                batch_size = min(batch_size, 256)
-            elif data_size >= 500:
-                batch_size = min(batch_size, 128)
-        elif gpu_memory_gb >= 8:
-            if data_size >= 2000:
-                batch_size = min(batch_size, 128)
-            elif data_size >= 500:
-                batch_size = min(batch_size, 64)
+            batch_size = 16
+        else:
+            batch_size = 8
+    else:
+        batch_size = 8
 
     return batch_size
 
@@ -311,26 +296,26 @@ step3_time = time.time() - step3_start_time
 print(f"\n[3단계 완료] 소요 시간: {step3_time:.2f}초")
 
 # ================================================================================
-# 4. Transfer Learning 모델 정의 (ResNet18)
+# 4. Transfer Learning 모델 정의 (ResNet50)
 # ================================================================================
 print("\n" + "=" * 80)
-print("4단계: Transfer Learning 모델 정의 (ResNet18)")
+print("4단계: Transfer Learning 모델 정의 (ResNet50)")
 print("=" * 80)
 step4_start_time = time.time()
 
 
 def create_resnet_model(num_classes, pretrained=True):
-    """ResNet18 기반 Transfer Learning 모델 생성"""
-    weights = models.ResNet18_Weights.IMAGENET1K_V1 if pretrained else None
-    model = models.resnet18(weights=weights)
+    """ResNet50 기반 Transfer Learning 모델 생성 (미세한 형태 차이 학습에 유리)"""
+    weights = models.ResNet50_Weights.IMAGENET1K_V2 if pretrained else None
+    model = models.resnet50(weights=weights)
 
     num_features = model.fc.in_features
     model.fc = nn.Sequential(
         nn.Dropout(0.5),
-        nn.Linear(num_features, 256),
+        nn.Linear(num_features, 512),
         nn.ReLU(),
         nn.Dropout(0.3),
-        nn.Linear(256, num_classes)
+        nn.Linear(512, num_classes)
     )
 
     return model
@@ -353,7 +338,7 @@ else:
 
 model = create_resnet_model(num_classes=num_classes, pretrained=True).to(device)
 
-print(f"사전학습된 ResNet18 모델 로드 완료 (ImageNet 가중치 사용)")
+print(f"사전학습된 ResNet50 모델 로드 완료 (ImageNet V2 가중치 사용)")
 print(f"출력 클래스 수: {num_classes}")
 print(f"모델 파라미터 개수: {sum(p.numel() for p in model.parameters()):,}")
 
@@ -427,14 +412,17 @@ def train_one_epoch(model, dataloader, criterion, optimizer, device):
     return epoch_loss, epoch_accuracy
 
 
-def evaluate(model, dataloader, criterion, device, class_names):
-    """모델 평가 (클래스별 정확도 포함)"""
+def evaluate(model, dataloader, criterion, device, class_names,
+             return_predictions=False):
+    """모델 평가 (클래스별 정확도 포함, 혼동 행렬용 예측 반환 옵션)"""
     model.eval()
     running_loss = 0.0
     correct = 0
     total = 0
     class_correct = [0] * len(class_names)
     class_total = [0] * len(class_names)
+    all_labels = []
+    all_preds = []
 
     with torch.no_grad():
         for images, labels in dataloader:
@@ -448,6 +436,10 @@ def evaluate(model, dataloader, criterion, device, class_names):
             _, predicted = torch.max(outputs.data, 1)
             total += labels.size(0)
             correct += (predicted == labels).sum().item()
+
+            if return_predictions:
+                all_labels.extend(labels.cpu().numpy())
+                all_preds.extend(predicted.cpu().numpy())
 
             for i in range(labels.size(0)):
                 label = labels[i].item()
@@ -465,6 +457,8 @@ def evaluate(model, dataloader, criterion, device, class_names):
         else:
             class_accuracies[name] = 0.0
 
+    if return_predictions:
+        return epoch_loss, epoch_accuracy, class_accuracies, all_labels, all_preds
     return epoch_loss, epoch_accuracy, class_accuracies
 
 
@@ -543,7 +537,9 @@ step8_start_time = time.time()
 model.load_state_dict(torch.load(MODEL_SAVE_PATH, map_location=device))
 model.eval()
 
-final_loss, final_acc, final_class_accs = evaluate(model, test_loader, criterion, device, class_names)
+final_loss, final_acc, final_class_accs, all_labels, all_preds = evaluate(
+    model, test_loader, criterion, device, class_names, return_predictions=True
+)
 
 print(f"\n최종 테스트 결과:")
 print(f"  Loss: {final_loss:.4f}")
@@ -551,6 +547,24 @@ print(f"  Accuracy: {final_acc:.2f}%")
 print(f"\n클래스별 정확도:")
 for name, acc in final_class_accs.items():
     print(f"  - {name}: {acc:.2f}%")
+
+# 혼동 행렬 출력
+n = len(class_names)
+conf_matrix = [[0] * n for _ in range(n)]
+for true_label, pred_label in zip(all_labels, all_preds):
+    conf_matrix[true_label][pred_label] += 1
+
+short_names = [name.replace("door_", "") for name in class_names]
+max_name_len = max(len(s) for s in short_names)
+col_width = max(max_name_len, 5)
+
+print(f"\n혼동 행렬 (행: 실제, 열: 예측):")
+header = " " * (max_name_len + 2) + " ".join(f"{s:>{col_width}}" for s in short_names)
+print(header)
+print(" " * (max_name_len + 2) + "-" * (len(short_names) * (col_width + 1)))
+for i, row in enumerate(conf_matrix):
+    row_str = " ".join(f"{v:>{col_width}}" for v in row)
+    print(f"{short_names[i]:>{max_name_len}} | {row_str}")
 
 step8_time = time.time() - step8_start_time
 print(f"\n[8단계 완료] 소요 시간: {step8_time:.2f}초")
