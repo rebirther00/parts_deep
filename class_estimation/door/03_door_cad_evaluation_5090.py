@@ -28,8 +28,10 @@ parser.add_argument('--num_samples', type=int, default=None,
                     help='평가할 샘플 수 (기본값: 전체 테스트셋)')
 parser.add_argument('--dataset_dir', type=str, default=None,
                     help='평가에 사용할 데이터셋 경로. 미지정 시 학습 시 저장된 test_paths 사용')
+parser.add_argument('--use_all', action='store_true',
+                    help='dataset_dir의 전체 이미지를 평가에 사용 (크로스 도메인 평가용)')
 parser.add_argument('--test_size', type=float, default=0.2,
-                    help='dataset_dir 스캔 시 test 비율 (기본 0.2)')
+                    help='dataset_dir 스캔 시 test 비율 (기본 0.2, --use_all 시 무시)')
 parser.add_argument('--seed', type=int, default=42,
                     help='dataset_dir 스캔 시 랜덤 시드 (기본 42)')
 args = parser.parse_args()
@@ -71,13 +73,18 @@ step1_start_time = time.time()
 
 
 def scan_dataset_for_eval(dataset_dir, class_names):
-    """dataset_dir에서 rgb_*.png를 스캔하여 평가 경로 리스트 생성"""
+    """dataset_dir에서 rgb_*.png를 스캔하여 평가 경로 리스트 생성 (빈 클래스 스킵)"""
     all_paths = []
     for class_name in class_names:
         class_dir = os.path.join(dataset_dir, class_name)
         if not os.path.isdir(class_dir):
+            print(f"  [스킵] {class_name}: 폴더 없음")
             continue
         pngs = sorted(glob.glob(os.path.join(class_dir, "rgb_*.png")))
+        if len(pngs) == 0:
+            print(f"  [스킵] {class_name}: 이미지 없음")
+            continue
+        print(f"  [로드] {class_name}: {len(pngs)}장")
         all_paths.extend(pngs)
     return all_paths
 
@@ -113,15 +120,19 @@ class_names = train_data_info['class_names']
 num_classes = len(class_names)
 
 if args.dataset_dir:
-    saved_test_paths = train_data_info.get("test_paths", [])
-    test_paths = [p for p in saved_test_paths if p.startswith(args.dataset_dir)]
+    all_paths = scan_dataset_for_eval(args.dataset_dir, class_names)
+    if len(all_paths) == 0:
+        raise FileNotFoundError(f"dataset_dir에서 rgb_*.png를 찾지 못했습니다: {args.dataset_dir}")
 
-    if len(test_paths) == 0:
-        all_paths = scan_dataset_for_eval(args.dataset_dir, class_names)
-        if len(all_paths) == 0:
-            raise FileNotFoundError(f"dataset_dir에서 rgb_*.png를 찾지 못했습니다: {args.dataset_dir}")
-        test_paths = split_paths_train_test(all_paths, class_names,
-                                            test_size=args.test_size, seed=args.seed)
+    if args.use_all:
+        test_paths = all_paths
+        print(f"\n[크로스 도메인 평가] 전체 이미지 사용 (--use_all)")
+    else:
+        saved_test_paths = train_data_info.get("test_paths", [])
+        test_paths = [p for p in saved_test_paths if p.startswith(args.dataset_dir)]
+        if len(test_paths) == 0:
+            test_paths = split_paths_train_test(all_paths, class_names,
+                                                test_size=args.test_size, seed=args.seed)
 else:
     test_paths = train_data_info['test_paths']
 
