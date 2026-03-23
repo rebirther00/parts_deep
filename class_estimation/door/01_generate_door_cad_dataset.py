@@ -26,7 +26,7 @@ simulation_app = SimulationApp({"headless": False})
 
 import omni.replicator.core as rep
 import omni.usd
-from pxr import Usd, UsdGeom, Semantics, Gf
+from pxr import Usd, UsdGeom, UsdShade, Semantics, Gf, Sdf
 
 reinit_logging(LOG_PATH)
 
@@ -35,22 +35,22 @@ reinit_logging(LOG_PATH)
 # ==========================================
 ASSETS_DIR = os.path.expanduser("~/isaac-sim/assets/door")
 BASE_OUTPUT_DIR = os.path.join(SCRIPT_DIR, "datasets_cad")
-IMAGES_PER_CLASS = 500
+IMAGES_PER_CLASS = 10
 CLEAR_EXISTING_DATA = True
 BACKGROUND_MODE = "random"
 BACKGROUND_RATIOS = {"none": 0.2, "solid": 0.3, "factory": 0.5}
 
-# 8클래스: USD 파일 + 카메라 관찰 방향 (복잡한 형상이 있는 후면)
-# 카메라는 지정된 방향 중심으로 ±45° 범위에서 랜덤 배치
+# 8클래스: USD 파일 + 카메라 관찰 방향
+# 사용자가 Isaac Sim에서 직접 생성한 USD (m 단위, -Z 축 통일)
 DOOR_CLASSES = {
     "E25_door_LH_FRT": {"usd": "E25_door_LH_FRT.usd", "view_dir": "-Z"},
     "E25_door_LH_RR":  {"usd": "E25_door_LH_RR.usd",  "view_dir": "-Z"},
     "E25_door_RH":     {"usd": "E25_door_RH.usd",      "view_dir": "-Z"},
-    "E30_door_LH_FRT": {"usd": "E30_door_LH_FRT.usd", "view_dir": "+Z"},
-    "E30_door_LH_RR":  {"usd": "E30_door_LH_RR.usd",  "view_dir": "+Z"},
+    "E30_door_LH_FRT": {"usd": "E30_door_LH_FRT.usd", "view_dir": "-Z"},
+    "E30_door_LH_RR":  {"usd": "E30_door_LH_RR.usd",  "view_dir": "-Z"},
     "E30_E38_door_RH": {"usd": "E30_E38_door_RH.usd", "view_dir": "-Z"},
-    "E38_door_LH_FRT": {"usd": "E38_door_LH_FRT.usd", "view_dir": "+Z"},
-    "E38_door_LH_RR":  {"usd": "E38_door_LH_RR.usd",  "view_dir": "+Z"},
+    "E38_door_LH_FRT": {"usd": "E38_door_LH_FRT.usd", "view_dir": "-Z"},
+    "E38_door_LH_RR":  {"usd": "E38_door_LH_RR.usd",  "view_dir": "-Z"},
 }
 
 TOTAL_FRAMES = IMAGES_PER_CLASS * len(DOOR_CLASSES)
@@ -129,18 +129,39 @@ def generate_class_dataset(class_name, class_config, class_index):
         print(f"  ⚠️  USD 파일 없음: {usd_path}")
         return
 
-    # USD 로드
+    # USD 로드 (충분한 대기)
     omni.usd.get_context().open_stage(usd_path)
-    time.sleep(1.0)
+    for _ in range(30):
+        simulation_app.update()
+        time.sleep(0.1)
+
     stage = omni.usd.get_context().get_stage()
     if not stage:
         print(f"  ⚠️  스테이지 로드 실패")
         return
 
-    # AABB 계산
+    # 스테이지 정보
     up_axis = UsdGeom.GetStageUpAxis(stage)
-    axis_idx = 1 if up_axis == UsdGeom.Tokens.y else 2
+    mpu = UsdGeom.GetStageMetersPerUnit(stage)
+    print(f"  스테이지: upAxis={up_axis}, metersPerUnit={mpu}")
 
+    # 프림 구조 디버깅
+    prim_count = 0
+    mesh_count = 0
+    for prim in stage.Traverse():
+        prim_count += 1
+        if prim.IsA(UsdGeom.Mesh):
+            mesh_count += 1
+    print(f"  프림 수: {prim_count}, 메시 수: {mesh_count}")
+
+    if mesh_count == 0:
+        print(f"  ⚠️  메시가 없습니다! USD 파일 내용 확인 필요")
+        for prim in stage.Traverse():
+            print(f"    - {prim.GetPath()} ({prim.GetTypeName()})")
+        return
+
+    # AABB 계산
+    axis_idx = 1 if up_axis == UsdGeom.Tokens.y else 2
     aabb = compute_world_aabb(stage)
     if not aabb:
         print(f"  ⚠️  AABB 계산 실패")
@@ -151,8 +172,37 @@ def generate_class_dataset(class_name, class_config, class_index):
     cx, cy, cz = center[0], center[1], center[2]
     floor_height = float(aabb["world_min"][axis_idx])
 
-    print(f"  크기: ({size[0]:.4f}, {size[1]:.4f}, {size[2]:.4f})")
-    print(f"  중심: ({cx:.4f}, {cy:.4f}, {cz:.4f})")
+    print(f"  AABB 크기: ({size[0]:.4f}, {size[1]:.4f}, {size[2]:.4f})")
+    print(f"  AABB 중심: ({cx:.4f}, {cy:.4f}, {cz:.4f})")
+    print(f"  AABB min: ({aabb['world_min'][0]:.4f}, {aabb['world_min'][1]:.4f}, {aabb['world_min'][2]:.4f})")
+    print(f"  AABB max: ({aabb['world_max'][0]:.4f}, {aabb['world_max'][1]:.4f}, {aabb['world_max'][2]:.4f})")
+    print(f"  최대 치수: {part_size:.4f}, 바닥 높이: {floor_height:.4f}")
+
+    # Material 확인 및 기본 material 적용 (STL 변환 USD에는 material 없음)
+    mesh_prims_list = [p for p in stage.Traverse() if p.IsA(UsdGeom.Mesh)]
+    has_material = False
+    for mp in mesh_prims_list:
+        binding = UsdShade.MaterialBindingAPI(mp)
+        mat, _ = binding.ComputeBoundMaterial()
+        if mat:
+            has_material = True
+            break
+
+    if not has_material:
+        print(f"  Material 없음 → 기본 OmniPBR 생성 중...")
+        mat_path = Sdf.Path("/World/DefaultDoorMaterial")
+        material = UsdShade.Material.Define(stage, mat_path)
+        shader = UsdShade.Shader.Define(stage, mat_path.AppendChild("Shader"))
+        shader.CreateIdAttr("UsdPreviewSurface")
+        shader.CreateInput("diffuseColor", Sdf.ValueTypeNames.Color3f).Set((0.6, 0.6, 0.65))
+        shader.CreateInput("metallic", Sdf.ValueTypeNames.Float).Set(0.7)
+        shader.CreateInput("roughness", Sdf.ValueTypeNames.Float).Set(0.3)
+        material.CreateSurfaceOutput().ConnectToSource(shader.ConnectableAPI(), "surface")
+        for mp in mesh_prims_list:
+            UsdShade.MaterialBindingAPI.Apply(mp).Bind(material)
+        print(f"  ✓ {len(mesh_prims_list)}개 메시에 material 바인딩 완료")
+    else:
+        print(f"  ✓ Material 이미 존재")
 
     # Semantics 추가
     for prim in stage.Traverse():
@@ -166,20 +216,40 @@ def generate_class_dataset(class_name, class_config, class_index):
     min_cam = (part_diag / 2.0) / np.tan(np.radians(30)) / 0.8
     cam_min, cam_max = min_cam * 0.9, min_cam * 1.5
 
-    # 카메라 방향별 위치 범위 (지정 방향 중심 ±45°)
-    lateral = cam_max * 0.7
-    if view_dir == "-Z":
-        cam_pos_lo = (cx - lateral, cy - lateral, cz - cam_max)
-        cam_pos_hi = (cx + lateral, cy + lateral, cz - cam_min * 0.5)
-        init_cam = (cx, cy, cz - min_cam)
-        wall_z = cz + part_size * 0.4
-    else:  # "+Z"
-        cam_pos_lo = (cx - lateral, cy - lateral, cz + cam_min * 0.5)
-        cam_pos_hi = (cx + lateral, cy + lateral, cz + cam_max)
-        init_cam = (cx, cy, cz + min_cam)
-        wall_z = cz - part_size * 0.4
+    # 카메라 방향별 장면 구성
+    # -Z 카메라: Z-up 좌표계에서 카메라가 -Z(아래)에서 +Z(위)로 올려다봄
+    #   카메라 뷰: X=좌우, Y=상하, Z=전후(깊이)
+    #   "바닥"(하단 배경) = Y 최소값, XZ 평면으로 세움
+    #   "뒷벽"(후면 배경) = +Z 방향, XY 평면
+    lateral_x = cam_max * 0.7
+    lateral_y = cam_max * 0.5
+    aabb_min_y = float(aabb["world_min"][1])
 
-    print(f"  카메라 거리: {cam_min:.3f} ~ {cam_max:.3f}")
+    if view_dir == "-Z":
+        cam_pos_lo = (cx - lateral_x, cy - lateral_y, cz - cam_max)
+        cam_pos_hi = (cx + lateral_x, cy + lateral_y, cz - cam_min * 0.3)
+        init_cam = (cx, cy, cz - min_cam)
+        # 바닥: Y 최소값 아래, XZ 평면 (카메라 뷰의 하단)
+        floor_pos = (cx, aabb_min_y - part_size * 0.3, cz)
+        floor_rot = (90, 0, 0)
+        # 뒷벽: +Z 방향 (도어 뒤), XY 평면
+        wall_pos = (cx, cy, cz + part_size * 0.5)
+        wall_rot = (0, 0, 0)
+    else:  # "+Z"
+        cam_pos_lo = (cx - lateral_x, cy - lateral_y, cz + cam_min * 0.3)
+        cam_pos_hi = (cx + lateral_x, cy + lateral_y, cz + cam_max)
+        init_cam = (cx, cy, cz + min_cam)
+        floor_pos = (cx, aabb_min_y - part_size * 0.3, cz)
+        floor_rot = (90, 0, 0)
+        wall_pos = (cx, cy, cz - part_size * 0.5)
+        wall_rot = (0, 0, 0)
+
+    print(f"  카메라 거리: {cam_min:.4f} ~ {cam_max:.4f}")
+    print(f"  초기 카메라: ({init_cam[0]:.4f}, {init_cam[1]:.4f}, {init_cam[2]:.4f})")
+    print(f"  카메라 lo: ({cam_pos_lo[0]:.4f}, {cam_pos_lo[1]:.4f}, {cam_pos_lo[2]:.4f})")
+    print(f"  카메라 hi: ({cam_pos_hi[0]:.4f}, {cam_pos_hi[1]:.4f}, {cam_pos_hi[2]:.4f})")
+    print(f"  바닥 위치: ({floor_pos[0]:.4f}, {floor_pos[1]:.4f}, {floor_pos[2]:.4f}), 회전: {floor_rot}")
+    print(f"  벽 위치: ({wall_pos[0]:.4f}, {wall_pos[1]:.4f}, {wall_pos[2]:.4f}), 회전: {wall_rot}")
 
     try:
         with rep.new_layer():
@@ -190,44 +260,38 @@ def generate_class_dataset(class_name, class_config, class_index):
 
             rep.get.prims(semantics=[("class", class_name)])
 
-            # 바닥 평면
             floor_size = part_size * 5
-            if axis_idx == 2:
-                floor_pos, floor_rot = (cx, cy, floor_height), (0, 0, 0)
-            else:
-                floor_pos, floor_rot = (cx, floor_height, cz), (90, 0, 0)
-
             floor_plane = rep.create.plane(
                 scale=(floor_size, floor_size, 1),
                 position=floor_pos, rotation=floor_rot,
                 semantics=[("class", "background")]
             )
 
-            # 뒷벽 (카메라 반대편)
             back_wall = rep.create.plane(
                 scale=(floor_size, floor_size * 0.5, 1),
-                position=(cx, cy, wall_z), rotation=(0, 0, 0),
+                position=wall_pos, rotation=wall_rot,
                 semantics=[("class", "background")]
             )
 
-            # 조명
             dome_light = rep.create.light(
-                light_type="Dome", intensity=800.0, rotation=(270, 0, 0)
+                light_type="Dome", intensity=1500.0, rotation=(270, 0, 0)
             )
+            # 조명: 카메라와 같은 쪽(-Z)에 배치, XY 방향으로 분산
+            cam_sign = -1.0 if view_dir == "-Z" else 1.0
             light1 = rep.create.light(
-                light_type="Sphere", intensity=50000.0,
-                position=(cx + part_size, cy + part_size, cz + part_size * 2), scale=0.5
+                light_type="Sphere", intensity=80000.0,
+                position=(cx + part_size, cy + part_size * 0.5, cz + cam_sign * part_size * 2),
+                scale=0.5
             )
             light2 = rep.create.light(
-                light_type="Sphere", intensity=30000.0,
-                position=(cx - part_size, cy - part_size * 0.5, cz + part_size), scale=0.3
+                light_type="Sphere", intensity=50000.0,
+                position=(cx - part_size, cy - part_size * 0.3, cz + cam_sign * part_size * 1.5),
+                scale=0.3
             )
 
-            # 카메라
             camera = rep.create.camera(position=init_cam, look_at=(cx, cy, cz))
             render_product = rep.create.render_product(camera, resolution=(1024, 1024))
 
-            # 프레임별 랜덤화
             with rep.trigger.on_frame(max_execs=IMAGES_PER_CLASS):
                 with rep.create.group([camera]):
                     rep.modify.pose(
@@ -242,15 +306,20 @@ def generate_class_dataset(class_name, class_config, class_index):
                     rep.randomizer.color(
                         colors=rep.distribution.uniform((0.4, 0.4, 0.4), (0.9, 0.9, 0.85))
                     )
+                # 조명 위치 랜덤화 (min <= max 보장)
+                lz_lo = cz + cam_sign * part_size
+                lz_hi = cz + cam_sign * part_size * 3
                 with light1:
                     rep.modify.pose(position=rep.distribution.uniform(
-                        (cx - part_size * 1.5, cy - part_size, cz - part_size * 2),
-                        (cx + part_size * 1.5, cy + part_size, cz + part_size * 2)
+                        (cx - part_size * 1.5, cy - part_size, min(lz_lo, lz_hi)),
+                        (cx + part_size * 1.5, cy + part_size, max(lz_lo, lz_hi))
                     ))
+                lz_lo2 = cz + cam_sign * part_size * 0.5
+                lz_hi2 = cz + cam_sign * part_size * 2
                 with light2:
                     rep.modify.pose(position=rep.distribution.uniform(
-                        (cx - part_size * 1.5, cy - part_size, cz - part_size * 2),
-                        (cx + part_size * 1.5, cy + part_size, cz + part_size * 2)
+                        (cx - part_size * 1.5, cy - part_size, min(lz_lo2, lz_hi2)),
+                        (cx + part_size * 1.5, cy + part_size, max(lz_lo2, lz_hi2))
                     ))
 
             # Writer (RGB만, bbox 없음)
@@ -258,16 +327,17 @@ def generate_class_dataset(class_name, class_config, class_index):
             writer.initialize(output_dir=class_output_dir, rgb=True)
             writer.attach([render_product])
 
-            # 데이터 생성
-            print(f"  데이터 생성 시작 ({IMAGES_PER_CLASS}장)...")
-            for i in range(10):
+            # 렌더링 워밍업 (첫 프레임 안정화)
+            print(f"  렌더링 워밍업 중...")
+            for _ in range(30):
                 simulation_app.update()
                 time.sleep(0.1)
 
+            # 데이터 생성
+            print(f"  데이터 생성 시작 ({IMAGES_PER_CLASS}장)...")
             rep.orchestrator.run_until_complete()
 
-            time.sleep(0.5)
-            for _ in range(10):
+            for _ in range(20):
                 simulation_app.update()
                 time.sleep(0.1)
 
