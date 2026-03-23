@@ -1,13 +1,18 @@
 # ==========================================
 # Door STP(STEP) → USD 변환 스크립트
-# Isaac Sim의 Asset Converter를 사용하여
-# CAD 파일을 USD 형식으로 변환
+# 2단계 파이프라인: STP → STL (gmsh) → USD (Isaac Sim)
+#
+# 사전 요구사항: sudo apt install gmsh
+# 실행: ~/isaac-sim/python.sh class_estimation/door/00_convert_stp_to_usd.py
 # ==========================================
 
 import os
 import sys
 import time
 import asyncio
+import subprocess
+import tempfile
+import shutil
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_DIR = os.path.dirname(SCRIPT_DIR)  # class_estimation/
@@ -32,10 +37,7 @@ reinit_logging(LOG_PATH)
 # ==========================================
 # 설정
 # ==========================================
-# STP 파일 경로
 STP_DIR = os.path.join(REPO_DIR, "cad", "door_stp")
-
-# USD 출력 경로 (기존 부품 assets와 분리)
 OUTPUT_DIR = os.path.expanduser("~/isaac-sim/assets/door")
 
 # STP 파일 → 클래스 매핑 (8클래스)
@@ -51,7 +53,7 @@ STP_CLASS_MAP = {
     "E38_door_LH_RR":   "E38_door_LH_RR.stp",
 }
 
-# 각 클래스별 카메라 관찰 방향 (데이터셋 생성 시 참조용으로 메타데이터에 기록)
+# 각 클래스별 카메라 관찰 방향 (데이터셋 생성 시 참조용)
 CAMERA_VIEW_DIRECTIONS = {
     "E25_door_LH_FRT":  "-Z",
     "E25_door_LH_RR":   "-Z",
@@ -65,26 +67,60 @@ CAMERA_VIEW_DIRECTIONS = {
 
 
 # ==========================================
-# 변환 함수
+# Phase 1: STP → STL 변환 (gmsh 사용)
+# ==========================================
+def check_gmsh():
+    """gmsh 설치 여부 확인"""
+    result = subprocess.run(["which", "gmsh"], capture_output=True, text=True)
+    if result.returncode != 0:
+        print("⚠️  gmsh가 설치되어 있지 않습니다.")
+        print("   설치 방법: sudo apt install gmsh")
+        return False
+    print(f"✓ gmsh 경로: {result.stdout.strip()}")
+    return True
+
+
+def convert_stp_to_stl(stp_path, stl_path):
+    """
+    gmsh CLI로 STP → STL 변환
+
+    Args:
+        stp_path: STP 파일 경로
+        stl_path: 출력 STL 파일 경로
+
+    Returns:
+        bool: 변환 성공 여부
+    """
+    cmd = [
+        "gmsh",
+        stp_path,
+        "-2",              # 2D 표면 메시 생성
+        "-o", stl_path,
+        "-format", "stl",
+        "-clscale", "0.5", # 메시 밀도 (작을수록 촘촘, 기본 1.0)
+    ]
+
+    result = subprocess.run(cmd, capture_output=True, text=True, timeout=120)
+
+    if result.returncode != 0:
+        print(f"    gmsh 에러: {result.stderr[-200:]}")
+        return False
+
+    return os.path.exists(stl_path) and os.path.getsize(stl_path) > 0
+
+
+# ==========================================
+# Phase 2: STL → USD 변환 (Isaac Sim)
 # ==========================================
 def progress_callback(current_step, total_steps):
     """변환 진행률 콜백"""
     if total_steps > 0:
         pct = (current_step / total_steps) * 100
-        print(f"    진행: {current_step}/{total_steps} ({pct:.0f}%)")
+        print(f"    USD 변환 진행: {current_step}/{total_steps} ({pct:.0f}%)")
 
 
-async def convert_single_file(input_path, output_path):
-    """
-    단일 STP 파일을 USD로 변환
-
-    Args:
-        input_path: STP 파일 절대 경로
-        output_path: USD 파일 출력 절대 경로
-
-    Returns:
-        bool: 변환 성공 여부
-    """
+async def convert_stl_to_usd(stl_path, usd_path):
+    """Isaac Sim Asset Converter로 STL → USD 변환"""
     converter_manager = asset_converter.get_instance()
 
     context = asset_converter.AssetConverterContext()
@@ -93,72 +129,111 @@ async def convert_single_file(input_path, output_path):
     context.ignore_camera = True
     context.ignore_light = True
     context.export_preview_surface = False
-    # CAD 파일 단위가 mm → USD 표준 단위(meter)로 변환
+    # CAD 원본 단위가 mm → STL도 mm 단위 → meter로 변환
     context.use_meter_as_world_unit = True
     context.create_world_as_default_root_prim = True
 
     task = converter_manager.create_converter_task(
-        input_path, output_path, progress_callback, context
+        stl_path, usd_path, progress_callback, context
     )
     success = await task.wait_until_finished()
 
     if not success:
         status = task.get_status()
-        print(f"    변환 실패 상태: {status}")
+        print(f"    USD 변환 실패 상태: {status}")
 
     return success
 
 
+# ==========================================
+# 전체 파이프라인: STP → STL → USD
+# ==========================================
 async def convert_all():
-    """모든 STP 파일을 USD로 변환"""
+    """모든 STP 파일을 USD로 변환 (2단계 파이프라인)"""
     print("=" * 60)
-    print("Door STP → USD 변환 시작")
+    print("Door STP → USD 변환 (2단계: STP → STL → USD)")
     print("=" * 60)
     print(f"입력 폴더: {STP_DIR}")
     print(f"출력 폴더: {OUTPUT_DIR}")
     print(f"변환 대상: {len(STP_CLASS_MAP)}개 클래스")
     print("=" * 60)
 
-    # STP 폴더 확인
+    if not check_gmsh():
+        return {}
+
     if not os.path.exists(STP_DIR):
         print(f"\n⚠️  STP 폴더를 찾을 수 없습니다: {STP_DIR}")
         return {}
 
-    # 출력 폴더 생성
     os.makedirs(OUTPUT_DIR, exist_ok=True)
+
+    # 임시 디렉토리 (STL 중간 파일 저장용)
+    tmp_dir = tempfile.mkdtemp(prefix="door_stl_")
+    print(f"임시 STL 폴더: {tmp_dir}")
 
     results = {}
     total = len(STP_CLASS_MAP)
 
     for idx, (class_name, stp_filename) in enumerate(STP_CLASS_MAP.items()):
-        input_path = os.path.join(STP_DIR, stp_filename)
-        output_path = os.path.join(OUTPUT_DIR, f"{class_name}.usd")
+        stp_path = os.path.join(STP_DIR, stp_filename)
+        stl_path = os.path.join(tmp_dir, f"{class_name}.stl")
+        usd_path = os.path.join(OUTPUT_DIR, f"{class_name}.usd")
 
         print(f"\n[{idx + 1}/{total}] {class_name}")
-        print(f"    입력: {stp_filename} ({os.path.getsize(input_path) / 1e6:.1f}MB)" if os.path.exists(input_path) else "")
-        print(f"    출력: {output_path}")
         print(f"    카메라 시점: {CAMERA_VIEW_DIRECTIONS.get(class_name, 'N/A')}")
 
-        if not os.path.exists(input_path):
-            print(f"    ⚠️  STP 파일 없음: {input_path}")
+        if not os.path.exists(stp_path):
+            print(f"    ⚠️  STP 파일 없음: {stp_path}")
             results[class_name] = False
             continue
 
+        stp_size = os.path.getsize(stp_path) / 1e6
+        print(f"    입력: {stp_filename} ({stp_size:.1f}MB)")
+
+        # Phase 1: STP → STL
+        print(f"    [Phase 1] STP → STL 변환 중 (gmsh)...")
         start_time = time.time()
         try:
-            success = await convert_single_file(input_path, output_path)
-            elapsed = time.time() - start_time
-            results[class_name] = success
-
-            if success:
-                usd_size = os.path.getsize(output_path) / 1e6 if os.path.exists(output_path) else 0
-                print(f"    ✓ 변환 완료 ({elapsed:.1f}초, {usd_size:.1f}MB)")
-            else:
-                print(f"    ✗ 변환 실패 ({elapsed:.1f}초)")
-        except Exception as e:
-            elapsed = time.time() - start_time
-            print(f"    ✗ 변환 중 에러 발생 ({elapsed:.1f}초): {e}")
+            stl_ok = convert_stp_to_stl(stp_path, stl_path)
+        except subprocess.TimeoutExpired:
+            print(f"    ✗ STP → STL 변환 타임아웃 (120초 초과)")
             results[class_name] = False
+            continue
+
+        if not stl_ok:
+            print(f"    ✗ STP → STL 변환 실패")
+            results[class_name] = False
+            continue
+
+        stl_size = os.path.getsize(stl_path) / 1e6
+        stl_elapsed = time.time() - start_time
+        print(f"    ✓ STL 생성 완료 ({stl_elapsed:.1f}초, {stl_size:.1f}MB)")
+
+        # Phase 2: STL → USD
+        print(f"    [Phase 2] STL → USD 변환 중 (Isaac Sim)...")
+        usd_start = time.time()
+        try:
+            usd_ok = await convert_stl_to_usd(stl_path, usd_path)
+        except Exception as e:
+            print(f"    ✗ STL → USD 변환 에러: {e}")
+            results[class_name] = False
+            continue
+
+        if not usd_ok:
+            results[class_name] = False
+            continue
+
+        usd_elapsed = time.time() - usd_start
+        total_elapsed = time.time() - start_time
+        usd_size = os.path.getsize(usd_path) / 1e6 if os.path.exists(usd_path) else 0
+        print(f"    ✓ USD 생성 완료 ({usd_elapsed:.1f}초, {usd_size:.1f}MB)")
+        print(f"    ✓ 전체 소요: {total_elapsed:.1f}초")
+        results[class_name] = True
+
+    # 임시 STL 폴더 정리
+    print(f"\n임시 STL 폴더 정리 중: {tmp_dir}")
+    shutil.rmtree(tmp_dir, ignore_errors=True)
+    print("✓ 임시 파일 정리 완료")
 
     return results
 
@@ -183,11 +258,12 @@ def print_summary(results):
         print(f"\n✓ 모든 파일 변환 완료!")
         print(f"  USD 파일 위치: {OUTPUT_DIR}")
         print(f"\n다음 단계: 01_generate_door_dataset.py 로 합성 데이터셋 생성")
-    else:
+    elif success_count > 0:
         failed = [name for name, s in results.items() if not s]
-        print(f"\n⚠️  실패한 클래스: {', '.join(failed)}")
-        print(f"  Isaac Sim GUI에서 수동 Import를 시도해 보세요.")
-        print(f"  (File → Import → STP 파일 선택 → File → Save As → USD)")
+        print(f"\n⚠️  일부 실패: {', '.join(failed)}")
+    else:
+        print(f"\n⚠️  모든 변환이 실패했습니다.")
+        print(f"  gmsh 설치를 확인하세요: sudo apt install gmsh")
 
     print("=" * 60)
 
@@ -199,12 +275,11 @@ async def main():
     results = await convert_all()
     print_summary(results)
 
-    # 변환 완료 후 앱 종료
     import omni.kit.app
     omni.kit.app.get_app().post_quit()
 
 
-print("\nIsaac Sim Asset Converter 실행 중...")
+print("\nIsaac Sim Asset Converter + gmsh 파이프라인 실행 중...")
 asyncio.ensure_future(main())
 
 while simulation_app.is_running():
