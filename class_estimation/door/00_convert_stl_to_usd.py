@@ -26,6 +26,7 @@ from isaacsim import SimulationApp
 simulation_app = SimulationApp({"headless": True})
 
 import omni.kit.asset_converter as asset_converter
+from pxr import Usd, UsdGeom
 
 reinit_logging(LOG_PATH)
 
@@ -64,6 +65,14 @@ CAMERA_VIEW_DIRECTIONS = {
 # ==========================================
 # STL → USD 변환
 # ==========================================
+def set_meters_per_unit(usd_path, meters_per_unit):
+    """USD 파일에 metersPerUnit 메타데이터 설정 (mm=0.001, cm=0.01, m=1.0)"""
+    stage = Usd.Stage.Open(usd_path)
+    UsdGeom.SetStageMetersPerUnit(stage, meters_per_unit)
+    stage.Save()
+    print(f"    metersPerUnit = {meters_per_unit} 설정 완료")
+
+
 def progress_callback(current_step, total_steps):
     if total_steps > 0:
         pct = (current_step / total_steps) * 100
@@ -80,8 +89,9 @@ async def convert_stl_to_usd(stl_path, usd_path):
     context.ignore_camera = True
     context.ignore_light = True
     context.export_preview_surface = False
-    # CAD 원본 단위가 mm → meter로 변환
-    context.use_meter_as_world_unit = True
+    # STL은 단위 메타데이터가 없으므로 use_meter_as_world_unit은 효과 없음
+    # 변환 후 metersPerUnit = 0.001로 후처리하여 mm 단위 명시
+    context.use_meter_as_world_unit = False
     context.create_world_as_default_root_prim = True
 
     task = converter_manager.create_converter_task(
@@ -135,13 +145,16 @@ async def convert_all():
         try:
             success = await convert_stl_to_usd(stl_path, usd_path)
             elapsed = time.time() - start_time
-            results[class_name] = success
 
             if success:
+                # STL 좌표가 mm 단위이므로 metersPerUnit = 0.001 설정
+                set_meters_per_unit(usd_path, 0.001)
                 usd_size = os.path.getsize(usd_path) / 1e6 if os.path.exists(usd_path) else 0
                 print(f"    ✓ 변환 완료 ({elapsed:.1f}초, {usd_size:.1f}MB)")
             else:
                 print(f"    ✗ 변환 실패 ({elapsed:.1f}초)")
+
+            results[class_name] = success
         except Exception as e:
             elapsed = time.time() - start_time
             print(f"    ✗ 에러 발생 ({elapsed:.1f}초): {e}")
