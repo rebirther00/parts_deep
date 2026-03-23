@@ -35,22 +35,22 @@ reinit_logging(LOG_PATH)
 # ==========================================
 ASSETS_DIR = os.path.expanduser("~/isaac-sim/assets/door")
 BASE_OUTPUT_DIR = os.path.join(SCRIPT_DIR, "datasets_cad")
-IMAGES_PER_CLASS = 10
+IMAGES_PER_CLASS = 500
 CLEAR_EXISTING_DATA = True
 BACKGROUND_MODE = "random"
 BACKGROUND_RATIOS = {"none": 0.2, "solid": 0.3, "factory": 0.5}
 
 # 8클래스: USD 파일 + 카메라 관찰 방향
-# 사용자가 Isaac Sim에서 직접 생성한 USD (m 단위, -Z 축 통일)
+# 사용자가 Isaac Sim에서 직접 생성한 USD (m 단위, +Z 방향에서 관찰)
 DOOR_CLASSES = {
-    "E25_door_LH_FRT": {"usd": "E25_door_LH_FRT.usd", "view_dir": "-Z"},
-    "E25_door_LH_RR":  {"usd": "E25_door_LH_RR.usd",  "view_dir": "-Z"},
-    "E25_door_RH":     {"usd": "E25_door_RH.usd",      "view_dir": "-Z"},
-    "E30_door_LH_FRT": {"usd": "E30_door_LH_FRT.usd", "view_dir": "-Z"},
-    "E30_door_LH_RR":  {"usd": "E30_door_LH_RR.usd",  "view_dir": "-Z"},
-    "E30_E38_door_RH": {"usd": "E30_E38_door_RH.usd", "view_dir": "-Z"},
-    "E38_door_LH_FRT": {"usd": "E38_door_LH_FRT.usd", "view_dir": "-Z"},
-    "E38_door_LH_RR":  {"usd": "E38_door_LH_RR.usd",  "view_dir": "-Z"},
+    "E25_door_LH_FRT": {"usd": "E25_door_LH_FRT.usd", "view_dir": "+Z"},
+    "E25_door_LH_RR":  {"usd": "E25_door_LH_RR.usd",  "view_dir": "+Z"},
+    "E25_door_RH":     {"usd": "E25_door_RH.usd",      "view_dir": "+Z"},
+    "E30_door_LH_FRT": {"usd": "E30_door_LH_FRT.usd", "view_dir": "+Z"},
+    "E30_door_LH_RR":  {"usd": "E30_door_LH_RR.usd",  "view_dir": "+Z"},
+    "E30_E38_door_RH": {"usd": "E30_E38_door_RH.usd", "view_dir": "+Z"},
+    "E38_door_LH_FRT": {"usd": "E38_door_LH_FRT.usd", "view_dir": "+Z"},
+    "E38_door_LH_RR":  {"usd": "E38_door_LH_RR.usd",  "view_dir": "+Z"},
 }
 
 TOTAL_FRAMES = IMAGES_PER_CLASS * len(DOOR_CLASSES)
@@ -216,33 +216,29 @@ def generate_class_dataset(class_name, class_config, class_index):
     min_cam = (part_diag / 2.0) / np.tan(np.radians(30)) / 0.8
     cam_min, cam_max = min_cam * 0.9, min_cam * 1.5
 
-    # 카메라 방향별 장면 구성
-    # -Z 카메라: Z-up 좌표계에서 카메라가 -Z(아래)에서 +Z(위)로 올려다봄
-    #   카메라 뷰: X=좌우, Y=상하, Z=전후(깊이)
-    #   "바닥"(하단 배경) = Y 최소값, XZ 평면으로 세움
-    #   "뒷벽"(후면 배경) = +Z 방향, XY 평면
+    # 장면 구성 (참조 스크립트와 동일한 패턴: 위에서 내려다보는 구도)
+    # +Z 카메라: 카메라가 위(+Z)에서 아래로 내려다봄
+    #   바닥: Z=floor_height, XY 수평면 (도어 아래)
+    #   뒷벽: 도어 뒤(-Y 방향), XZ 수직면
     lateral_x = cam_max * 0.7
     lateral_y = cam_max * 0.5
-    aabb_min_y = float(aabb["world_min"][1])
 
-    if view_dir == "-Z":
-        cam_pos_lo = (cx - lateral_x, cy - lateral_y, cz - cam_max)
-        cam_pos_hi = (cx + lateral_x, cy + lateral_y, cz - cam_min * 0.3)
-        init_cam = (cx, cy, cz - min_cam)
-        # 바닥: Y 최소값 아래, XZ 평면 (카메라 뷰의 하단)
-        floor_pos = (cx, aabb_min_y - part_size * 0.3, cz)
-        floor_rot = (90, 0, 0)
-        # 뒷벽: +Z 방향 (도어 뒤), XY 평면
-        wall_pos = (cx, cy, cz + part_size * 0.5)
-        wall_rot = (0, 0, 0)
-    else:  # "+Z"
+    if view_dir == "+Z":
         cam_pos_lo = (cx - lateral_x, cy - lateral_y, cz + cam_min * 0.3)
         cam_pos_hi = (cx + lateral_x, cy + lateral_y, cz + cam_max)
-        init_cam = (cx, cy, cz + min_cam)
-        floor_pos = (cx, aabb_min_y - part_size * 0.3, cz)
-        floor_rot = (90, 0, 0)
-        wall_pos = (cx, cy, cz - part_size * 0.5)
-        wall_rot = (0, 0, 0)
+        init_cam = (cx + min_cam * 0.3, cy + min_cam * 0.2, cz + min_cam * 0.8)
+        floor_pos = (cx, cy, floor_height - part_size * 0.1)
+        floor_rot = (0, 0, 0)
+        wall_pos = (cx, cy - part_size * 2.5, cz)
+        wall_rot = (90, 0, 0)
+    else:  # "-Z"
+        cam_pos_lo = (cx - lateral_x, cy - lateral_y, cz - cam_max)
+        cam_pos_hi = (cx + lateral_x, cy + lateral_y, cz - cam_min * 0.3)
+        init_cam = (cx + min_cam * 0.3, cy + min_cam * 0.2, cz - min_cam * 0.8)
+        floor_pos = (cx, cy, floor_height - part_size * 0.1)
+        floor_rot = (0, 0, 0)
+        wall_pos = (cx, cy + part_size * 2.5, cz)
+        wall_rot = (90, 0, 0)
 
     print(f"  카메라 거리: {cam_min:.4f} ~ {cam_max:.4f}")
     print(f"  초기 카메라: ({init_cam[0]:.4f}, {init_cam[1]:.4f}, {init_cam[2]:.4f})")
@@ -276,16 +272,14 @@ def generate_class_dataset(class_name, class_config, class_index):
             dome_light = rep.create.light(
                 light_type="Dome", intensity=1500.0, rotation=(270, 0, 0)
             )
-            # 조명: 카메라와 같은 쪽(-Z)에 배치, XY 방향으로 분산
-            cam_sign = -1.0 if view_dir == "-Z" else 1.0
             light1 = rep.create.light(
                 light_type="Sphere", intensity=80000.0,
-                position=(cx + part_size, cy + part_size * 0.5, cz + cam_sign * part_size * 2),
+                position=(cx + part_size, cy + part_size * 0.5, cz + part_size * 2),
                 scale=0.5
             )
             light2 = rep.create.light(
                 light_type="Sphere", intensity=50000.0,
-                position=(cx - part_size, cy - part_size * 0.3, cz + cam_sign * part_size * 1.5),
+                position=(cx - part_size, cy - part_size * 0.3, cz + part_size * 1.5),
                 scale=0.3
             )
 
@@ -306,20 +300,15 @@ def generate_class_dataset(class_name, class_config, class_index):
                     rep.randomizer.color(
                         colors=rep.distribution.uniform((0.4, 0.4, 0.4), (0.9, 0.9, 0.85))
                     )
-                # 조명 위치 랜덤화 (min <= max 보장)
-                lz_lo = cz + cam_sign * part_size
-                lz_hi = cz + cam_sign * part_size * 3
                 with light1:
                     rep.modify.pose(position=rep.distribution.uniform(
-                        (cx - part_size * 1.5, cy - part_size, min(lz_lo, lz_hi)),
-                        (cx + part_size * 1.5, cy + part_size, max(lz_lo, lz_hi))
+                        (cx - part_size * 1.5, cy - part_size, cz + part_size * 1.5),
+                        (cx + part_size * 1.5, cy + part_size, cz + part_size * 3)
                     ))
-                lz_lo2 = cz + cam_sign * part_size * 0.5
-                lz_hi2 = cz + cam_sign * part_size * 2
                 with light2:
                     rep.modify.pose(position=rep.distribution.uniform(
-                        (cx - part_size * 1.5, cy - part_size, min(lz_lo2, lz_hi2)),
-                        (cx + part_size * 1.5, cy + part_size, max(lz_lo2, lz_hi2))
+                        (cx - part_size * 1.5, cy - part_size, cz + part_size * 0.5),
+                        (cx + part_size * 1.5, cy + part_size, cz + part_size * 2)
                     ))
 
             # Writer (RGB만, bbox 없음)
