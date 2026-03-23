@@ -211,31 +211,31 @@ def generate_class_dataset(class_name, class_config, class_index):
             sem.CreateSemanticTypeAttr("class")
             sem.CreateSemanticDataAttr().Set(class_name)
 
-    # 카메라 거리 계산
+    # 카메라 거리 계산 (도어 전체가 항상 프레임에 잡히도록 좁은 범위)
     part_diag = np.sqrt(size[0]**2 + size[1]**2 + size[2]**2)
     min_cam = (part_diag / 2.0) / np.tan(np.radians(30)) / 0.8
-    cam_min, cam_max = min_cam * 0.9, min_cam * 1.5
+    cam_min, cam_max = min_cam * 0.95, min_cam * 1.15
 
-    # 장면 구성 (참조 스크립트와 동일한 패턴: 위에서 내려다보는 구도)
-    # +Z 카메라: 카메라가 위(+Z)에서 아래로 내려다봄
-    #   바닥: Z=floor_height, XY 수평면 (도어 아래)
-    #   뒷벽: 도어 뒤(-Y 방향), XZ 수직면
-    lateral_x = cam_max * 0.7
-    lateral_y = cam_max * 0.5
+    # 장면 구성: 정면 위주 구도 (±15° 제한)
+    # 가로 폭 미세 차이(5.4%)를 학습하려면 정면 비율이 일관되어야 함
+    # lateral 범위 = 카메라 거리 * tan(15°) ≈ 0.27
+    lateral_x = cam_max * 0.27
+    lateral_y = cam_max * 0.20
 
+    # 바닥을 물체에 밀착 (그림자 제거 → 윤곽선 깨끗하게)
     if view_dir == "+Z":
-        cam_pos_lo = (cx - lateral_x, cy - lateral_y, cz + cam_min * 0.3)
+        cam_pos_lo = (cx - lateral_x, cy - lateral_y, cz + cam_min * 0.7)
         cam_pos_hi = (cx + lateral_x, cy + lateral_y, cz + cam_max)
-        init_cam = (cx + min_cam * 0.3, cy + min_cam * 0.2, cz + min_cam * 0.8)
-        floor_pos = (cx, cy, floor_height - part_size * 0.1)
+        init_cam = (cx, cy, cz + min_cam * 0.9)
+        floor_pos = (cx, cy, floor_height)
         floor_rot = (0, 0, 0)
         wall_pos = (cx, cy - part_size * 2.5, cz)
         wall_rot = (90, 0, 0)
     else:  # "-Z"
         cam_pos_lo = (cx - lateral_x, cy - lateral_y, cz - cam_max)
-        cam_pos_hi = (cx + lateral_x, cy + lateral_y, cz - cam_min * 0.3)
-        init_cam = (cx + min_cam * 0.3, cy + min_cam * 0.2, cz - min_cam * 0.8)
-        floor_pos = (cx, cy, floor_height - part_size * 0.1)
+        cam_pos_hi = (cx + lateral_x, cy + lateral_y, cz - cam_min * 0.7)
+        init_cam = (cx, cy, cz - min_cam * 0.9)
+        floor_pos = (cx, cy, floor_height)
         floor_rot = (0, 0, 0)
         wall_pos = (cx, cy + part_size * 2.5, cz)
         wall_rot = (90, 0, 0)
@@ -270,16 +270,16 @@ def generate_class_dataset(class_name, class_config, class_index):
             )
 
             dome_light = rep.create.light(
-                light_type="Dome", intensity=1500.0, rotation=(270, 0, 0)
+                light_type="Dome", intensity=2000.0, rotation=(270, 0, 0)
             )
             light1 = rep.create.light(
-                light_type="Sphere", intensity=80000.0,
-                position=(cx + part_size, cy + part_size * 0.5, cz + part_size * 2),
+                light_type="Sphere", intensity=60000.0,
+                position=(cx, cy + part_size * 0.5, cz + part_size * 2),
                 scale=0.5
             )
             light2 = rep.create.light(
-                light_type="Sphere", intensity=50000.0,
-                position=(cx - part_size, cy - part_size * 0.3, cz + part_size * 1.5),
+                light_type="Sphere", intensity=40000.0,
+                position=(cx, cy - part_size * 0.3, cz + part_size * 1.5),
                 scale=0.3
             )
 
@@ -302,13 +302,13 @@ def generate_class_dataset(class_name, class_config, class_index):
                     )
                 with light1:
                     rep.modify.pose(position=rep.distribution.uniform(
-                        (cx - part_size * 1.5, cy - part_size, cz + part_size * 1.5),
-                        (cx + part_size * 1.5, cy + part_size, cz + part_size * 3)
+                        (cx - part_size * 0.5, cy - part_size * 0.3, cz + part_size * 1.5),
+                        (cx + part_size * 0.5, cy + part_size * 0.3, cz + part_size * 2.5)
                     ))
                 with light2:
                     rep.modify.pose(position=rep.distribution.uniform(
-                        (cx - part_size * 1.5, cy - part_size, cz + part_size * 0.5),
-                        (cx + part_size * 1.5, cy + part_size, cz + part_size * 2)
+                        (cx - part_size * 0.5, cy - part_size * 0.3, cz + part_size * 1.0),
+                        (cx + part_size * 0.5, cy + part_size * 0.3, cz + part_size * 2.0)
                     ))
 
             # Writer (RGB만, bbox 없음)

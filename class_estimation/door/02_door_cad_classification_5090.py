@@ -1,7 +1,7 @@
 """
 굴착기 도어 분류 모델 학습 스크립트 - CAD 합성 데이터 (RTX 5090 최적화)
 - Isaac Sim으로 생성한 CAD 합성 데이터셋 사용
-- ResNet50 Transfer Learning (448x448 고해상도)
+- ResNet18 Transfer Learning
 - RTX 5090 GPU에 최적화된 설정
 - 학습 완료 후 ONNX 변환 포함 (ZED Box Mini 추론용)
 """
@@ -24,7 +24,7 @@ import glob
 # ================================================================================
 # 명령줄 인자 파싱
 # ================================================================================
-parser = argparse.ArgumentParser(description='굴착기 도어 분류 모델 학습 - CAD 합성 데이터 (ResNet50 + 448px, RTX 5090)')
+parser = argparse.ArgumentParser(description='굴착기 도어 분류 모델 학습 - CAD 합성 데이터 (RTX 5090 최적화)')
 parser.add_argument('-cpu', '--cpu', action='store_true',
                     help='CPU로 강제 실행 (기본값: GPU 사용 가능 시 GPU 사용)')
 DEFAULT_DATASET_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "datasets_cad")
@@ -59,7 +59,7 @@ TEST_SIZE = 0.2
 NUM_EPOCHS = 60
 EARLY_STOPPING_PATIENCE = 10
 
-IMAGE_SIZE = 448
+IMAGE_SIZE = 224
 
 # RTX 5090 최적화 설정
 NUM_WORKERS = 8
@@ -239,18 +239,33 @@ for class_idx, class_name in enumerate(class_names):
 
 
 def adjust_batch_size_5090(data_size, force_cpu=False):
-    """RTX 5090 GPU에 최적화된 배치 사이즈 조정 (ResNet50 + 448px 기준)"""
-    # ResNet50 + 448x448: ResNet18 + 224x224 대비 ~10배 메모리 사용
+    """RTX 5090 GPU에 최적화된 배치 사이즈 조정"""
+    if data_size < 100:
+        batch_size = 32
+    elif data_size < 500:
+        batch_size = 64
+    elif data_size < 2000:
+        batch_size = 128
+    else:
+        batch_size = 256
+
     if torch.cuda.is_available() and not force_cpu:
         gpu_memory_gb = torch.cuda.get_device_properties(0).total_memory / (1024**3)
         if gpu_memory_gb >= 24:
-            batch_size = 32
+            if data_size >= 2000:
+                batch_size = min(batch_size, 512)
+            elif data_size >= 500:
+                batch_size = min(batch_size, 256)
         elif gpu_memory_gb >= 16:
-            batch_size = 16
-        else:
-            batch_size = 8
-    else:
-        batch_size = 8
+            if data_size >= 2000:
+                batch_size = min(batch_size, 256)
+            elif data_size >= 500:
+                batch_size = min(batch_size, 128)
+        elif gpu_memory_gb >= 8:
+            if data_size >= 2000:
+                batch_size = min(batch_size, 128)
+            elif data_size >= 500:
+                batch_size = min(batch_size, 64)
 
     return batch_size
 
@@ -296,26 +311,26 @@ step3_time = time.time() - step3_start_time
 print(f"\n[3단계 완료] 소요 시간: {step3_time:.2f}초")
 
 # ================================================================================
-# 4. Transfer Learning 모델 정의 (ResNet50)
+# 4. Transfer Learning 모델 정의 (ResNet18)
 # ================================================================================
 print("\n" + "=" * 80)
-print("4단계: Transfer Learning 모델 정의 (ResNet50)")
+print("4단계: Transfer Learning 모델 정의 (ResNet18)")
 print("=" * 80)
 step4_start_time = time.time()
 
 
 def create_resnet_model(num_classes, pretrained=True):
-    """ResNet50 기반 Transfer Learning 모델 생성 (미세한 형태 차이 학습에 유리)"""
-    weights = models.ResNet50_Weights.IMAGENET1K_V2 if pretrained else None
-    model = models.resnet50(weights=weights)
+    """ResNet18 기반 Transfer Learning 모델 생성"""
+    weights = models.ResNet18_Weights.IMAGENET1K_V1 if pretrained else None
+    model = models.resnet18(weights=weights)
 
     num_features = model.fc.in_features
     model.fc = nn.Sequential(
         nn.Dropout(0.5),
-        nn.Linear(num_features, 512),
+        nn.Linear(num_features, 256),
         nn.ReLU(),
         nn.Dropout(0.3),
-        nn.Linear(512, num_classes)
+        nn.Linear(256, num_classes)
     )
 
     return model
@@ -338,7 +353,7 @@ else:
 
 model = create_resnet_model(num_classes=num_classes, pretrained=True).to(device)
 
-print(f"사전학습된 ResNet50 모델 로드 완료 (ImageNet V2 가중치 사용)")
+print(f"사전학습된 ResNet18 모델 로드 완료 (ImageNet 가중치 사용)")
 print(f"출력 클래스 수: {num_classes}")
 print(f"모델 파라미터 개수: {sum(p.numel() for p in model.parameters()):,}")
 
