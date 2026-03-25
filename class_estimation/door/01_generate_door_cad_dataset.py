@@ -11,6 +11,7 @@ import time
 import json
 import glob
 import numpy as np
+import cv2
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_DIR = os.path.dirname(SCRIPT_DIR)
@@ -311,9 +312,10 @@ def generate_class_dataset(class_name, class_config, class_index):
                         (cx + part_size * 0.5, cy + part_size * 0.3, cz + part_size * 2.0)
                     ))
 
-            # Writer (RGB만, bbox 없음)
+            # Writer (RGB + Depth, bbox 없음)
             writer = rep.WriterRegistry.get("BasicWriter")
-            writer.initialize(output_dir=class_output_dir, rgb=True)
+            writer.initialize(output_dir=class_output_dir,
+                              rgb=True, distance_to_camera=True)
             writer.attach([render_product])
 
             # 렌더링 워밍업 (첫 프레임 안정화)
@@ -331,7 +333,25 @@ def generate_class_dataset(class_name, class_config, class_index):
                 time.sleep(0.1)
 
             generated = glob.glob(os.path.join(class_output_dir, "rgb_*.png"))
-            print(f"  ✓ {class_name} 완료 ({len(generated)}장)")
+            print(f"  ✓ {class_name} RGB 완료 ({len(generated)}장)")
+
+            # Depth NPY → 16-bit PNG (mm) 변환
+            npy_files = sorted(glob.glob(
+                os.path.join(class_output_dir, "distance_to_camera_*.npy")))
+            depth_count = 0
+            for npy_path in npy_files:
+                depth_m = np.load(npy_path).astype(np.float32)
+                depth_mm = np.nan_to_num(
+                    depth_m * 1000.0, nan=0.0, posinf=0.0, neginf=0.0)
+                depth_uint16 = np.clip(depth_mm, 0, 65535).astype(np.uint16)
+                idx_str = os.path.basename(npy_path).replace(
+                    "distance_to_camera_", "").replace(".npy", "")
+                depth_png = os.path.join(
+                    class_output_dir, f"depth_{idx_str}.png")
+                cv2.imwrite(depth_png, depth_uint16)
+                os.remove(npy_path)
+                depth_count += 1
+            print(f"  ✓ Depth 변환 완료 ({depth_count}장, NPY→PNG)")
 
     except Exception as e:
         print(f"  ⚠️  에러: {e}")
@@ -401,8 +421,9 @@ print("=" * 60)
 for name in DOOR_CLASSES:
     d = os.path.join(BASE_OUTPUT_DIR, name)
     if os.path.exists(d):
-        count = len(glob.glob(os.path.join(d, "rgb_*.png")))
-        print(f"  {name}: {count}장")
+        rgb_count = len(glob.glob(os.path.join(d, "rgb_*.png")))
+        depth_count = len(glob.glob(os.path.join(d, "depth_*.png")))
+        print(f"  {name}: RGB {rgb_count}장, Depth {depth_count}장")
 
 finish_logging()
 

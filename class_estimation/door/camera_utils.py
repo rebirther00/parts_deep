@@ -1,4 +1,8 @@
-"""ZED X Mini 카메라 관리 모듈 (OpenCV 폴백 지원)"""
+"""ZED X Mini 카메라 관리 모듈 (OpenCV 폴백 지원, RGBD)
+
+RGB + Depth 프레임을 동시에 캡처·저장한다.
+ZED 카메라가 없으면 OpenCV 폴백으로 RGB만 반환(Depth=None).
+"""
 
 import threading
 import time
@@ -19,7 +23,8 @@ class CameraManager:
 
     def __init__(self, fps=30):
         self.fps = fps
-        self.latest_frame = None
+        self.latest_rgb = None
+        self.latest_depth = None
         self.camera_type = "unknown"
         self.running = False
         self.recording = False
@@ -41,10 +46,13 @@ class CameraManager:
         params = sl.InitParameters()
         params.camera_resolution = sl.RESOLUTION.HD1080
         params.camera_fps = self.fps
+        params.depth_mode = sl.DEPTH_MODE.NEURAL
+        params.coordinate_units = sl.UNIT.MILLIMETER
         err = self._zed.open(params)
         if err != sl.ERROR_CODE.SUCCESS:
             raise RuntimeError(f"ZED 카메라 초기화 실패: {err}")
         self._zed_image = sl.Mat()
+        self._zed_depth = sl.Mat()
         self._zed_runtime = sl.RuntimeParameters()
         self.camera_type = "ZED X Mini"
 
@@ -71,8 +79,16 @@ class CameraManager:
             self._cap.release()
 
     def get_frame(self):
+        """RGB 프레임 반환 (하위 호환성 유지)."""
         with self._lock:
-            return self.latest_frame.copy() if self.latest_frame is not None else None
+            return self.latest_rgb.copy() if self.latest_rgb is not None else None
+
+    def get_depth(self):
+        """Depth 프레임 반환 (float32, mm). ZED 미사용 시 None."""
+        with self._lock:
+            if self.latest_depth is not None:
+                return self.latest_depth.copy()
+            return None
 
     def start_recording(self, temp_dir, interval=5, blur_threshold=100):
         self._temp_dir = Path(temp_dir)
@@ -91,14 +107,16 @@ class CameraManager:
         }
 
     def snapshot(self, temp_dir):
-        frame = self.get_frame()
-        if frame is None:
+        with self._lock:
+            rgb = self.latest_rgb.copy() if self.latest_rgb is not None else None
+            depth = self.latest_depth.copy() if self.latest_depth is not None else None
+        if rgb is None:
             return None
         self._temp_dir = Path(temp_dir)
         self._temp_dir.mkdir(parents=True, exist_ok=True)
         self._sync_counter()
-        score = compute_blur_score(frame)
-        return self._save_temp(frame, score)
+        score = compute_blur_score(rgb)
+        return self._save_temp(rgb, depth, score)
 
     def reset_counter(self):
         self._extracted_count = 0
@@ -106,47 +124,64 @@ class CameraManager:
     # -- internal --
 
     def _grab_frame(self):
+        """(rgb, depth) 튜플 반환. 실패 시 (None, None)."""
         if HAS_ZED:
             if self._zed.grab(self._zed_runtime) == sl.ERROR_CODE.SUCCESS:
                 self._zed.retrieve_image(self._zed_image, sl.VIEW.LEFT)
-                return cv2.cvtColor(
+                rgb = cv2.cvtColor(
                     self._zed_image.get_data(), cv2.COLOR_BGRA2BGR
                 )
-            return None
+                self._zed.retrieve_measure(self._zed_depth, sl.MEASURE.DEPTH)
+                depth_raw = self._zed_depth.get_data().copy()
+                depth_raw = np.nan_to_num(
+                    depth_raw, nan=0.0, posinf=0.0, neginf=0.0
+                ).astype(np.float32)
+                return rgb, depth_raw
+            return None, None
         ret, frame = self._cap.read()
-        return frame if ret else None
+        return (frame, None) if ret else (None, None)
 
     def _capture_loop(self):
         while self.running:
-            frame = self._grab_frame()
-            if frame is None:
+            rgb, depth = self._grab_frame()
+            if rgb is None:
                 time.sleep(0.01)
                 continue
 
             with self._lock:
-                self.latest_frame = frame.copy()
+                self.latest_rgb = rgb.copy()
+                self.latest_depth = depth.copy() if depth is not None else None
 
             if self.recording and self._temp_dir:
                 self._frame_count += 1
                 if self._frame_count % self._record_interval == 0:
-                    score = compute_blur_score(frame)
+                    score = compute_blur_score(rgb)
                     if score >= self._blur_threshold:
-                        self._save_temp(frame, score)
+                        self._save_temp(rgb, depth, score)
 
             time.sleep(max(0.001, 1.0 / self.fps - 0.005))
 
     def _sync_counter(self):
         """temp 폴더의 기존 파일 기반으로 카운터를 동기화한다."""
         existing = list(self._temp_dir.glob("frame_*.png"))
+        # frame_depth_ 패턴은 제외
+        existing = [f for f in existing if "depth" not in f.stem]
         if existing:
             indices = [int(f.stem.split("_")[1]) for f in existing]
             self._extracted_count = max(indices) + 1
 
-    def _save_temp(self, frame, blur_score):
-        filename = f"frame_{self._extracted_count:04d}.png"
-        cv2.imwrite(str(self._temp_dir / filename), frame)
+    def _save_temp(self, rgb, depth, blur_score):
+        idx = self._extracted_count
+        rgb_name = f"frame_{idx:04d}.png"
+        cv2.imwrite(str(self._temp_dir / rgb_name), rgb)
+
+        if depth is not None:
+            depth_name = f"frame_depth_{idx:04d}.png"
+            depth_uint16 = np.clip(depth, 0, 65535).astype(np.uint16)
+            cv2.imwrite(str(self._temp_dir / depth_name), depth_uint16)
+
         self._extracted_count += 1
-        return {"filename": filename, "blur_score": round(blur_score, 1)}
+        return {"filename": rgb_name, "blur_score": round(blur_score, 1)}
 
 
 def compute_blur_score(image):

@@ -16,12 +16,13 @@ import time
 import cv2
 import numpy as np
 import torch
-import torch.nn as nn
-from torchvision import models, transforms
 from flask import Flask, Response, jsonify, render_template
 from PIL import Image as PILImage
 
 from camera_utils import CameraManager
+from depth_utils import (
+    create_rgbd_resnet18, RGBDTransform, MAX_DEPTH_MM, IN_CHANNELS,
+)
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 ARTIFACTS_DIR = os.path.join(BASE_DIR, "artifacts")
@@ -36,37 +37,31 @@ camera: CameraManager = None  # type: ignore[assignment]
 
 
 class PyTorchInferenceEngine:
-    """PyTorch 기반 추론 엔진"""
+    """PyTorch RGBD 추론 엔진"""
 
     def __init__(self, model_path: str, class_names: list):
         self.class_names = class_names
         self.device = torch.device("cpu")
 
-        self.model = models.resnet18(weights=None)
-        self.model.fc = nn.Sequential(
-            nn.Dropout(0.5),
-            nn.Linear(self.model.fc.in_features, 256),
-            nn.ReLU(),
-            nn.Dropout(0.3),
-            nn.Linear(256, len(class_names)),
-        )
+        self.model = create_rgbd_resnet18(len(class_names), pretrained=False)
         self.model.load_state_dict(torch.load(model_path, map_location=self.device))
         self.model.to(self.device)
         self.model.eval()
 
-        # 학습과 동일한 종횡비 유지 리사이즈
-        self.transform = transforms.Compose([
-            transforms.Resize(IMAGE_SIZE),
-            transforms.CenterCrop((IMAGE_SIZE, IMAGE_SIZE)),
-            transforms.ToTensor(),
-            transforms.Normalize(mean=[0.485, 0.456, 0.406],
-                                 std=[0.229, 0.224, 0.225]),
-        ])
+        self.transform = RGBDTransform(IMAGE_SIZE, is_train=False)
 
-    def infer(self, frame: np.ndarray) -> tuple:
+    def infer(self, frame: np.ndarray, depth: np.ndarray = None) -> tuple:
         """(클래스명, 확률, 전체확률리스트) 반환"""
         pil_img = PILImage.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
-        inp = self.transform(pil_img).unsqueeze(0).to(self.device)
+
+        if depth is not None:
+            depth_norm = np.clip(
+                depth.astype(np.float32) / MAX_DEPTH_MM, 0.0, 1.0)
+        else:
+            h, w = frame.shape[:2]
+            depth_norm = np.zeros((h, w), dtype=np.float32)
+
+        inp = self.transform(pil_img, depth_norm).unsqueeze(0).to(self.device)
 
         with torch.no_grad():
             output = self.model(inp)
@@ -102,8 +97,10 @@ def inference_loop():
             time.sleep(0.1)
             continue
 
+        depth = camera.get_depth()
+
         t0 = time.time()
-        pred_class, pred_conf, all_probs = engine.infer(frame)
+        pred_class, pred_conf, all_probs = engine.infer(frame, depth)
         elapsed_ms = (time.time() - t0) * 1000
 
         with result_lock:
@@ -191,7 +188,7 @@ if __name__ == "__main__":
     print(f"클래스: {class_names}")
 
     engine = PyTorchInferenceEngine(MODEL_PATH, class_names)
-    print(f"PyTorch 엔진 준비 완료 (디바이스: {engine.device})")
+    print(f"RGBD PyTorch 엔진 준비 완료 (디바이스: {engine.device}, 입력: {IN_CHANNELS}ch)")
 
     camera = CameraManager()
     camera.start()

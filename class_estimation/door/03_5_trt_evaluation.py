@@ -18,9 +18,12 @@ import time
 
 import numpy as np
 import torch
-import torch.nn as nn
-from torchvision import models, transforms
 from PIL import Image
+import cv2
+
+from depth_utils import (
+    create_rgbd_resnet18, RGBDTransform, IN_CHANNELS, MAX_DEPTH_MM,
+)
 
 # ================================================================================
 # 명령줄 인자
@@ -113,26 +116,15 @@ print("=" * 80)
 
 device = torch.device("cpu")
 
-model = models.resnet18(weights=None)
-model.fc = nn.Sequential(
-    nn.Dropout(0.5),
-    nn.Linear(model.fc.in_features, 256),
-    nn.ReLU(),
-    nn.Dropout(0.3),
-    nn.Linear(256, num_classes),
-)
+model = create_rgbd_resnet18(num_classes, pretrained=False)
 model.load_state_dict(torch.load(MODEL_PATH, map_location=device))
 model.to(device)
 model.eval()
 
-val_transform = transforms.Compose([
-    transforms.Resize((IMAGE_SIZE, IMAGE_SIZE)),
-    transforms.ToTensor(),
-    transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
-])
+val_transform = RGBDTransform(IMAGE_SIZE, is_train=False)
 
 print(f"디바이스: {device}")
-print("모델 로드 완료")
+print("RGBD 모델 로드 완료")
 
 
 # ================================================================================
@@ -160,7 +152,17 @@ with torch.no_grad():
         gt_idx = class_names.index(gt_class)
 
         pil_img = Image.open(img_path).convert("RGB")
-        inp = val_transform(pil_img).unsqueeze(0).to(device)
+        depth_path = img_path.replace("rgb_", "depth_")
+        if os.path.exists(depth_path):
+            raw = cv2.imread(depth_path, cv2.IMREAD_UNCHANGED)
+            depth_norm = np.clip(
+                raw.astype(np.float32) / MAX_DEPTH_MM, 0.0, 1.0
+            ) if raw is not None else np.zeros(
+                (pil_img.height, pil_img.width), dtype=np.float32)
+        else:
+            depth_norm = np.zeros(
+                (pil_img.height, pil_img.width), dtype=np.float32)
+        inp = val_transform(pil_img, depth_norm).unsqueeze(0).to(device)
 
         t0 = time.time()
         output = model(inp)

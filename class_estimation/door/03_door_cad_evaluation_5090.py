@@ -1,12 +1,10 @@
 """
-굴착기 도어 분류 모델 평가 스크립트 - CAD 합성 데이터 (RTX 5090 버전)
-- 02_door_cad_classification_5090.py에서 학습한 모델 평가
+굴착기 도어 분류 모델 평가 스크립트 - CAD 합성 데이터 (RTX 5090 버전, RGBD)
+- 02_door_cad_classification_5090.py에서 학습한 RGBD 모델 평가
 - Test 셋에 대한 성능 평가 및 시각화
 """
 import torch
-import torch.nn as nn
-from torch.utils.data import Dataset, DataLoader
-from torchvision import transforms, models
+from torch.utils.data import DataLoader
 from PIL import Image, ImageDraw, ImageFont
 import numpy as np
 import random
@@ -17,6 +15,8 @@ import argparse
 import glob
 import time
 from sklearn.model_selection import train_test_split
+
+from depth_utils import create_rgbd_resnet18, RGBDTransform, RGBDDataset
 
 # ================================================================================
 # 명령줄 인자 파싱
@@ -158,50 +158,10 @@ print("=" * 80)
 step2_start_time = time.time()
 
 
-class DoorDataset(Dataset):
-    """굴착기 도어 이미지 Dataset 클래스 (평가용)"""
+eval_transform = RGBDTransform(IMAGE_SIZE, is_train=False)
 
-    def __init__(self, image_paths, class_names, transform=None):
-        self.image_paths = image_paths
-        self.class_names = class_names
-        self.transform = transform
-
-        self.labels = []
-        for path in image_paths:
-            class_folder = os.path.basename(os.path.dirname(path))
-            if class_folder in class_names:
-                self.labels.append(class_names.index(class_folder))
-            else:
-                raise ValueError(f"알 수 없는 클래스: {class_folder}")
-
-    def __len__(self):
-        return len(self.image_paths)
-
-    def __getitem__(self, idx):
-        img_path = self.image_paths[idx]
-        image = Image.open(img_path)
-
-        if image.mode != 'RGB':
-            image = image.convert('RGB')
-
-        label = torch.tensor(self.labels[idx], dtype=torch.long)
-
-        if self.transform:
-            image = self.transform(image)
-
-        return image, label
-
-
-# 학습과 동일한 종횡비 유지 리사이즈
-eval_transform = transforms.Compose([
-    transforms.Resize(IMAGE_SIZE),
-    transforms.CenterCrop((IMAGE_SIZE, IMAGE_SIZE)),
-    transforms.ToTensor(),
-    transforms.Normalize(mean=[0.485, 0.456, 0.406],
-                        std=[0.229, 0.224, 0.225])
-])
-
-test_dataset = DoorDataset(test_paths, class_names, transform=eval_transform)
+test_dataset = RGBDDataset(test_paths, transform=eval_transform,
+                           class_names=class_names)
 test_loader = DataLoader(test_dataset, batch_size=BATCH_SIZE, shuffle=False)
 
 print(f"\n테스트 배치 개수: {len(test_loader)}")
@@ -219,18 +179,8 @@ step3_start_time = time.time()
 
 
 def create_resnet_model(num_classes, pretrained=False):
-    """ResNet18 기반 모델 생성"""
-    weights = models.ResNet18_Weights.IMAGENET1K_V1 if pretrained else None
-    model = models.resnet18(weights=weights)
-    num_features = model.fc.in_features
-    model.fc = nn.Sequential(
-        nn.Dropout(0.5),
-        nn.Linear(num_features, 256),
-        nn.ReLU(),
-        nn.Dropout(0.3),
-        nn.Linear(256, num_classes)
-    )
-    return model
+    """RGBD 4채널 입력 ResNet18 모델 생성"""
+    return create_rgbd_resnet18(num_classes, pretrained=pretrained)
 
 
 if args.cpu:

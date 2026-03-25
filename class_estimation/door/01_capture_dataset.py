@@ -56,7 +56,8 @@ def init_directories():
 
 # ── 유틸리티 ────────────────────────────────────────────
 
-def _next_rgb_index(class_name: str) -> int:
+def _next_pair_index(class_name: str) -> int:
+    """rgb_XXXX.png / depth_XXXX.png 쌍의 다음 인덱스 반환"""
     existing = sorted((DATASETS_DIR / class_name).glob("rgb_*.png"))
     if not existing:
         return 0
@@ -185,15 +186,22 @@ def api_save_selected():
     if not filenames:
         return jsonify({"error": "선택된 프레임이 없습니다"}), 400
 
-    idx = _next_rgb_index(cls)
+    idx = _next_pair_index(cls)
     saved = []
     for fname in sorted(filenames):
         src = TEMP_DIR / fname
         if not src.exists():
             continue
-        dst = DATASETS_DIR / cls / f"rgb_{idx:04d}.png"
-        shutil.copy2(str(src), str(dst))
-        saved.append(dst.name)
+        dst_rgb = DATASETS_DIR / cls / f"rgb_{idx:04d}.png"
+        shutil.copy2(str(src), str(dst_rgb))
+        saved.append(dst_rgb.name)
+
+        # Depth 파일이 있으면 함께 복사
+        depth_src = TEMP_DIR / fname.replace("frame_", "frame_depth_")
+        if depth_src.exists():
+            dst_depth = DATASETS_DIR / cls / f"depth_{idx:04d}.png"
+            shutil.copy2(str(depth_src), str(dst_depth))
+
         idx += 1
 
     _update_metadata(cls)
@@ -203,6 +211,8 @@ def api_save_selected():
 @app.route("/api/clear_temp", methods=["POST"])
 def api_clear_temp():
     for f in TEMP_DIR.glob("frame_*.png"):
+        f.unlink()
+    for f in TEMP_DIR.glob("frame_depth_*.png"):
         f.unlink()
     camera.reset_counter()
     return jsonify({"status": "cleared"})

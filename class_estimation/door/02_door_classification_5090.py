@@ -1,16 +1,14 @@
 """
-굴착기 도어 분류 모델 학습 스크립트 (RTX 5090 최적화)
-- 실제 카메라(ZED X Mini)로 촬영한 도어 데이터셋 사용
-- ResNet18 Transfer Learning
+굴착기 도어 분류 모델 학습 스크립트 (RTX 5090 최적화, RGBD)
+- 실제 카메라(ZED X Mini)로 촬영한 도어 데이터셋 (RGB + Depth) 사용
+- RGBD 4채널 입력 ResNet18 Transfer Learning
 - RTX 5090 GPU에 최적화된 설정
 - 학습 완료 후 ONNX 변환 포함 (ZED Box Mini 추론용)
 """
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from torch.utils.data import Dataset, DataLoader
-from torchvision import transforms, models
-from PIL import Image
+from torch.utils.data import DataLoader
 import numpy as np
 from sklearn.model_selection import train_test_split
 import random
@@ -20,6 +18,10 @@ import argparse
 import time
 import json
 import glob
+
+from depth_utils import (
+    create_rgbd_resnet18, RGBDTransform, RGBDDataset, IN_CHANNELS,
+)
 
 # ================================================================================
 # 명령줄 인자 파싱
@@ -138,59 +140,13 @@ print("=" * 80)
 step2_start_time = time.time()
 
 
-class DoorDataset(Dataset):
-    """굴착기 도어 이미지 Dataset 클래스"""
+train_transform = RGBDTransform(IMAGE_SIZE, is_train=True)
+val_transform = RGBDTransform(IMAGE_SIZE, is_train=False)
 
-    def __init__(self, image_paths, labels, transform=None):
-        self.image_paths = image_paths
-        self.labels = labels
-        self.transform = transform
-
-    def __len__(self):
-        return len(self.image_paths)
-
-    def __getitem__(self, idx):
-        img_path = self.image_paths[idx]
-        image = Image.open(img_path)
-
-        if image.mode != 'RGB':
-            image = image.convert('RGB')
-
-        label = torch.tensor(self.labels[idx], dtype=torch.long)
-
-        if self.transform:
-            image = self.transform(image)
-
-        return image, label
-
-
-# 도어 3종은 형태 유사, 가로 폭만 차이 → 종횡비 유지가 핵심
-# Train용: 종횡비 유지 리사이즈 + 폭 왜곡 최소화 증강
-train_transform = transforms.Compose([
-    transforms.Resize(IMAGE_SIZE),
-    transforms.CenterCrop((IMAGE_SIZE, IMAGE_SIZE)),
-    # RandomHorizontalFlip 제거: LH_FRT 도어는 좌우 비대칭 (힌지/손잡이 위치)
-    transforms.RandomRotation(degrees=5),
-    transforms.ColorJitter(brightness=0.3, contrast=0.3, saturation=0.2),
-    transforms.ToTensor(),
-    transforms.Normalize(mean=[0.485, 0.456, 0.406],
-                        std=[0.229, 0.224, 0.225])
-])
-
-# Validation/Test용: 학습과 동일한 종횡비 유지 리사이즈
-val_transform = transforms.Compose([
-    transforms.Resize(IMAGE_SIZE),
-    transforms.CenterCrop((IMAGE_SIZE, IMAGE_SIZE)),
-    transforms.ToTensor(),
-    transforms.Normalize(mean=[0.485, 0.456, 0.406],
-                        std=[0.229, 0.224, 0.225])
-])
-
-print(f"이미지 전처리 설정 완료:")
-print(f"  입력 이미지 크기: {IMAGE_SIZE}x{IMAGE_SIZE} (종횡비 유지 + CenterCrop)")
-print(f"  Train: Resize(종횡비유지) + CenterCrop + Rotation(5°) + ColorJitter + Normalize")
-print(f"  Validation: Resize(종횡비유지) + CenterCrop + Normalize")
-print(f"  [개선] HorizontalFlip 제거, Rotation 15°→5°, Perspective 제거")
+print(f"RGBD 전처리 설정 완료:")
+print(f"  입력 크기: {IMAGE_SIZE}x{IMAGE_SIZE}, 채널: {IN_CHANNELS} (R,G,B,D)")
+print(f"  Train: Resize + CenterCrop + Rotation(5°) + ColorJitter(RGB) + Normalize")
+print(f"  Val: Resize + CenterCrop + Normalize")
 
 step2_time = time.time() - step2_start_time
 print(f"\n[2단계 완료] 소요 시간: {step2_time:.2f}초")
@@ -277,8 +233,8 @@ else:
     batch_size = BATCH_SIZE
     print(f"\n배치 사이즈 고정: {batch_size}")
 
-train_dataset = DoorDataset(train_paths, train_labels, transform=train_transform)
-test_dataset = DoorDataset(test_paths, test_labels, transform=val_transform)
+train_dataset = RGBDDataset(train_paths, train_labels, transform=train_transform)
+test_dataset = RGBDDataset(test_paths, test_labels, transform=val_transform)
 
 num_workers = NUM_WORKERS if torch.cuda.is_available() and not args.cpu else 0
 pin_memory = torch.cuda.is_available() and not args.cpu
@@ -320,20 +276,8 @@ step4_start_time = time.time()
 
 
 def create_resnet_model(num_classes, pretrained=True):
-    """ResNet18 기반 Transfer Learning 모델 생성"""
-    weights = models.ResNet18_Weights.IMAGENET1K_V1 if pretrained else None
-    model = models.resnet18(weights=weights)
-
-    num_features = model.fc.in_features
-    model.fc = nn.Sequential(
-        nn.Dropout(0.5),
-        nn.Linear(num_features, 256),
-        nn.ReLU(),
-        nn.Dropout(0.3),
-        nn.Linear(256, num_classes)
-    )
-
-    return model
+    """RGBD 4채널 입력 ResNet18 모델 생성"""
+    return create_rgbd_resnet18(num_classes, pretrained=pretrained)
 
 
 if args.cpu:
@@ -353,7 +297,7 @@ else:
 
 model = create_resnet_model(num_classes=num_classes, pretrained=True).to(device)
 
-print(f"사전학습된 ResNet18 모델 로드 완료 (ImageNet 가중치 사용)")
+print(f"RGBD ResNet18 모델 로드 완료 (RGB: ImageNet 가중치, D: 평균 초기화)")
 print(f"출력 클래스 수: {num_classes}")
 print(f"모델 파라미터 개수: {sum(p.numel() for p in model.parameters()):,}")
 
@@ -567,7 +511,7 @@ try:
     model_cpu = create_resnet_model(num_classes=num_classes, pretrained=False)
     model_cpu.load_state_dict(torch.load(MODEL_SAVE_PATH, map_location='cpu'))
     model_cpu.eval()
-    dummy_input = torch.randn(1, 3, IMAGE_SIZE, IMAGE_SIZE)
+    dummy_input = torch.randn(1, IN_CHANNELS, IMAGE_SIZE, IMAGE_SIZE)
 
     # dynamo=False: legacy exporter 사용 → 가중치가 단일 .onnx 파일에 내장됨
     # (기본 dynamo=True는 외부 .onnx.data 파일로 분리되어 TensorRT 호환 문제 발생)

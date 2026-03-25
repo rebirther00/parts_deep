@@ -1,15 +1,13 @@
 """
-CAD 사전학습 모델 → 실물 데이터 Fine-tuning 검증 스크립트
-- CAD 합성 데이터로 학습한 모델 가중치를 초기값으로 사용
-- 실물 이미지(현재 3클래스)로 도메인 적응
+CAD 사전학습 RGBD 모델 → 실물 데이터 Fine-tuning 검증 스크립트
+- CAD 합성 데이터로 학습한 RGBD 모델 가중치를 초기값으로 사용
+- 실물 이미지(RGB+Depth)로 도메인 적응
 - 빠른 검증 목적: 합성→실물 전이학습이 유효한지 확인
 """
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from torch.utils.data import Dataset, DataLoader
-from torchvision import transforms, models
-from PIL import Image
+from torch.utils.data import DataLoader
 import numpy as np
 from sklearn.model_selection import train_test_split
 import random
@@ -19,6 +17,10 @@ import argparse
 import time
 import json
 import glob
+
+from depth_utils import (
+    create_rgbd_resnet18, RGBDTransform, RGBDDataset, IN_CHANNELS,
+)
 
 # ================================================================================
 # 명령줄 인자
@@ -123,42 +125,11 @@ for cls in available_classes:
     print(f"  {cls}: Train {tr}장, Test {te}장")
 
 
-class DoorDataset(Dataset):
-    def __init__(self, paths, labels, transform=None):
-        self.paths = paths
-        self.labels = labels
-        self.transform = transform
+train_transform = RGBDTransform(IMAGE_SIZE, is_train=True)
+val_transform = RGBDTransform(IMAGE_SIZE, is_train=False)
 
-    def __len__(self):
-        return len(self.paths)
-
-    def __getitem__(self, idx):
-        img = Image.open(self.paths[idx])
-        if img.mode != 'RGB':
-            img = img.convert('RGB')
-        if self.transform:
-            img = self.transform(img)
-        return img, torch.tensor(self.labels[idx], dtype=torch.long)
-
-
-train_transform = transforms.Compose([
-    transforms.Resize(IMAGE_SIZE),
-    transforms.CenterCrop((IMAGE_SIZE, IMAGE_SIZE)),
-    transforms.RandomRotation(degrees=5),
-    transforms.ColorJitter(brightness=0.3, contrast=0.3, saturation=0.2),
-    transforms.ToTensor(),
-    transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
-])
-
-val_transform = transforms.Compose([
-    transforms.Resize(IMAGE_SIZE),
-    transforms.CenterCrop((IMAGE_SIZE, IMAGE_SIZE)),
-    transforms.ToTensor(),
-    transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
-])
-
-train_dataset = DoorDataset(train_paths, train_labels, train_transform)
-test_dataset = DoorDataset(test_paths, test_labels, val_transform)
+train_dataset = RGBDDataset(train_paths, train_labels, transform=train_transform)
+test_dataset = RGBDDataset(test_paths, test_labels, transform=val_transform)
 
 pin_memory = torch.cuda.is_available() and not args.cpu
 train_loader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True,
@@ -174,17 +145,8 @@ print("3단계: CAD 사전학습 모델 로드")
 print("=" * 80)
 
 def create_resnet_model(num_classes):
-    """ResNet18 모델 (CAD 학습과 동일한 구조)"""
-    model = models.resnet18(weights=None)
-    num_features = model.fc.in_features
-    model.fc = nn.Sequential(
-        nn.Dropout(0.5),
-        nn.Linear(num_features, 256),
-        nn.ReLU(),
-        nn.Dropout(0.3),
-        nn.Linear(256, num_classes)
-    )
-    return model
+    """RGBD 4채널 입력 ResNet18 모델 (CAD 학습과 동일한 구조)"""
+    return create_rgbd_resnet18(num_classes, pretrained=False)
 
 
 if args.cpu:
@@ -423,7 +385,7 @@ try:
     model_cpu = create_resnet_model(num_classes)
     model_cpu.load_state_dict(torch.load(FINETUNE_MODEL_PATH, map_location='cpu'))
     model_cpu.eval()
-    dummy = torch.randn(1, 3, IMAGE_SIZE, IMAGE_SIZE)
+    dummy = torch.randn(1, IN_CHANNELS, IMAGE_SIZE, IMAGE_SIZE)
     torch.onnx.export(model_cpu, dummy, FINETUNE_ONNX_PATH,
                       export_params=True, opset_version=13,
                       do_constant_folding=True,
