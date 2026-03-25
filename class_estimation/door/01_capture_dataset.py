@@ -23,9 +23,10 @@ DATASETS_DIR = BASE_DIR / "datasets"
 TEMP_DIR = BASE_DIR / "temp_frames"
 
 CLASSES = [
-    "E25_door_RH", "E25_door_LH_FRT", "E25_door_LH_RR",
-    "E30_door_RH", "E30_door_LH_FRT", "E30_door_LH_RR",
-    "E38_door_RH", "E38_door_LH_FRT", "E38_door_LH_RR",
+    "E25_door_LH_FRT", "E25_door_LH_RR", "E25_door_RH",
+    "E30_door_LH_FRT", "E30_door_LH_RR",
+    "E30_E38_door_RH",
+    "E38_door_LH_FRT", "E38_door_LH_RR",
 ]
 
 app = Flask(__name__)
