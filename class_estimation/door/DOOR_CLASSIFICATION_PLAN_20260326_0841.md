@@ -633,3 +633,104 @@ python class_estimation/door/04_door_realtime_inference.py
 7. **모델 고도화**: ResNet18 → EfficientNet 등 경량 모델 비교 실험
 8. **Jetson GPU 추론**: NVIDIA 공식 Jetson PyTorch wheel 설치 후 GPU 추론 전환 (86ms → ~10ms 예상)
 9. **TensorRT 재시도**: Jetson 전용 PyTorch wheel + ONNX opset 조합 테스트로 TRT 호환성 확보
+
+---
+
+## 14. RGBD 파이프라인 실행 순서 (2026-03-26 현재)
+
+### 14.1 클래스 구조 (8클래스)
+
+E30_door_RH와 E38_door_RH는 동일 부품이므로 `E30_E38_door_RH`로 통합.
+
+| # | 클래스명 | 비고 |
+|---|---------|------|
+| 0 | E25_door_LH_FRT | |
+| 1 | E25_door_LH_RR | |
+| 2 | E25_door_RH | |
+| 3 | E30_door_LH_FRT | 869×1140mm |
+| 4 | E30_door_LH_RR | |
+| 5 | E30_E38_door_RH | E30/E38 통합 |
+| 6 | E38_door_LH_FRT | 916×1140mm (E30 대비 +47mm) |
+| 7 | E38_door_LH_RR | |
+
+### 14.2 전체 실행 순서
+
+모든 스크립트는 **RGBD 4채널 입력**(RGB + Depth)을 사용한다.
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  Track A: CAD 합성 데이터                                        │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  Step 1) CAD 합성 RGBD 데이터 생성                                │
+│          ~/isaac-sim/python.sh 01_generate_door_cad_dataset.py  │
+│          → datasets_cad/ 에 rgb_*.png + depth_*.png 쌍 생성     │
+│                                                                 │
+│  Step 2) CAD 데이터로 RGBD 모델 학습                              │
+│          python 02_door_cad_classification_5090.py              │
+│          → artifacts/best_door_cad_model_5090.pth               │
+│                                                                 │
+│  Step 3) CAD 모델 → 합성 테스트셋 평가                             │
+│          python 03_door_cad_evaluation_5090.py                  │
+│                                                                 │
+├─────────────────────────────────────────────────────────────────┤
+│  Track B: 실물 데이터                                             │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  Step 4) 실물 RGBD 이미지 수집                                    │
+│          python 01_capture_dataset.py                           │
+│          → http://0.0.0.0:5000 에서 ZED X Mini로 RGB+Depth 촬영  │
+│          → datasets/ 에 rgb_*.png + depth_*.png 쌍 저장          │
+│                                                                 │
+│  Step 5) CAD 모델 → 실물 이미지 크로스 도메인 평가                   │
+│          python 03_door_cad_evaluation_5090.py \                │
+│            --dataset_dir datasets --use_all                     │
+│          → CAD만으로 실물 분류가 되는지 확인                         │
+│                                                                 │
+├─────────────────────────────────────────────────────────────────┤
+│  Step 5 결과에 따라 분기                                           │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  Step 6a) [크로스 도메인 부족 시] CAD → 실물 Fine-tuning            │
+│           python 04_door_cad_finetune_real_5090.py              │
+│           → CAD 가중치를 초기값으로, 실물 데이터로 도메인 적응        │
+│                                                                 │
+│  Step 6b) [실물 데이터 충분 시] 실물 전용 학습                       │
+│           python 02_door_classification_5090.py                 │
+│           → artifacts/best_door_model_5090.pth                  │
+│                                                                 │
+│  Step 7) 최종 모델 평가                                           │
+│          python 03_door_class_evaluation_5090.py                │
+│                                                                 │
+│  Step 8) 실시간 RGBD 추론 배포                                    │
+│          python 04_door_realtime_inference.py                   │
+│          → http://0.0.0.0:5001 에서 실시간 분류                   │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### 14.3 파일-역할 매핑
+
+| # | 파일 | 역할 | 입력 | 출력 |
+|---|------|------|------|------|
+| 0 | `depth_utils.py` | RGBD 공통 모듈 | - | (라이브러리) |
+| 0 | `camera_utils.py` | ZED X Mini RGB+Depth 캡처 | - | (라이브러리) |
+| 1 | `01_generate_door_cad_dataset.py` | Isaac Sim CAD 합성 데이터 생성 | USD 파일 | `datasets_cad/*/rgb_*.png + depth_*.png` |
+| 2 | `01_capture_dataset.py` | 실물 RGBD 이미지 수집 (Flask) | ZED X Mini | `datasets/*/rgb_*.png + depth_*.png` |
+| 3 | `02_door_cad_classification_5090.py` | CAD RGBD 학습 | `datasets_cad/` | `best_door_cad_model_5090.pth` |
+| 4 | `02_door_classification_5090.py` | 실물 RGBD 학습 | `datasets/` | `best_door_model_5090.pth` |
+| 5 | `03_door_cad_evaluation_5090.py` | CAD 모델 평가 + 크로스 도메인 | pth + 데이터셋 | 정확도, 혼동 행렬 |
+| 6 | `03_door_class_evaluation_5090.py` | 실물 모델 평가 | pth + 데이터셋 | 정확도, 혼동 행렬 |
+| 7 | `03_5_trt_evaluation.py` | 추론 파이프라인 사전 검증 | pth + 데이터셋 | 정확도, 추론 시간 |
+| 8 | `04_door_realtime_inference.py` | 실시간 RGBD 추론 서버 | pth + ZED 카메라 | 웹 UI (포트 5001) |
+| 9 | `04_door_cad_finetune_real_5090.py` | CAD→실물 Fine-tuning | CAD pth + `datasets/` | `best_door_finetune_model_5090.pth` |
+
+### 14.4 RGBD 데이터 명세
+
+| 항목 | 실물 (ZED X Mini) | 합성 (Isaac Sim) |
+|------|-------------------|------------------|
+| RGB 형식 | `rgb_XXXX.png` (8bit) | `rgb_XXXX.png` (8bit) |
+| Depth 형식 | `depth_XXXX.png` (16bit) | `depth_XXXX.png` (16bit) |
+| Depth 단위 | 밀리미터 (mm) | 밀리미터 (mm) |
+| 정규화 | 5m 클리핑 → [0, 1] | 5m 클리핑 → [0, 1] |
+| 모델 입력 | `[B, 4, 224, 224]` (R,G,B,D) | 동일 |
