@@ -205,6 +205,18 @@ def api_save_selected():
         idx += 1
 
     _update_metadata(cls)
+
+    # 제외된(선택되지 않은) 프레임과 매칭 Depth를 temp에서 삭제
+    selected_set = set(filenames)
+    for f in sorted(TEMP_DIR.glob("frame_*.png")):
+        if "depth" in f.name:
+            continue
+        if f.name not in selected_set:
+            f.unlink(missing_ok=True)
+            depth_f = TEMP_DIR / f.name.replace("frame_", "frame_depth_")
+            if depth_f.exists():
+                depth_f.unlink()
+
     return jsonify({"saved": saved, "count": len(saved), "class_name": cls})
 
 
