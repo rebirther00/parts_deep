@@ -172,7 +172,9 @@ def api_snapshot():
 
 @app.route("/api/extracted_frames")
 def api_extracted_frames():
-    frames = sorted(TEMP_DIR.glob("frame_*.png"))
+    frames = sorted(
+        f for f in TEMP_DIR.glob("frame_*.png") if "depth" not in f.name
+    )
     return jsonify([{"filename": f.name} for f in frames])
 
 
