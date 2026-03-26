@@ -107,34 +107,43 @@ def split_paths_train_test(image_paths, class_names, test_size=0.2, seed=42):
     return test_paths
 
 
-if not os.path.exists(TRAIN_INDICES_PATH):
-    raise FileNotFoundError(
-        f"학습 데이터 정보 파일을 찾을 수 없습니다: {TRAIN_INDICES_PATH}\n"
-        f"먼저 02_door_cad_classification_5090.py를 실행하세요."
-    )
+if args.dataset_dir and args.use_all:
+    # 크로스 도메인 평가: training_indices 불필요, class_names만 있으면 됨
+    if not os.path.exists(CLASS_NAMES_PATH):
+        raise FileNotFoundError(
+            f"클래스 이름 파일을 찾을 수 없습니다: {CLASS_NAMES_PATH}")
+    with open(CLASS_NAMES_PATH, 'r', encoding='utf-8') as f:
+        class_names = json.load(f)
+    num_classes = len(class_names)
 
-with open(TRAIN_INDICES_PATH, 'r', encoding='utf-8') as f:
-    train_data_info = json.load(f)
-
-class_names = train_data_info['class_names']
-num_classes = len(class_names)
-
-if args.dataset_dir:
     all_paths = scan_dataset_for_eval(args.dataset_dir, class_names)
     if len(all_paths) == 0:
         raise FileNotFoundError(f"dataset_dir에서 rgb_*.png를 찾지 못했습니다: {args.dataset_dir}")
+    test_paths = all_paths
+    print(f"\n[크로스 도메인 평가] 전체 이미지 사용 (--use_all)")
+else:
+    # 기본/부분 평가: training_indices 필요
+    if not os.path.exists(TRAIN_INDICES_PATH):
+        raise FileNotFoundError(
+            f"학습 데이터 정보 파일을 찾을 수 없습니다: {TRAIN_INDICES_PATH}\n"
+            f"먼저 02_door_cad_classification_5090.py를 실행하세요.")
+    with open(TRAIN_INDICES_PATH, 'r', encoding='utf-8') as f:
+        train_data_info = json.load(f)
+    class_names = train_data_info['class_names']
+    num_classes = len(class_names)
 
-    if args.use_all:
-        test_paths = all_paths
-        print(f"\n[크로스 도메인 평가] 전체 이미지 사용 (--use_all)")
-    else:
+    if args.dataset_dir:
+        all_paths = scan_dataset_for_eval(args.dataset_dir, class_names)
+        if len(all_paths) == 0:
+            raise FileNotFoundError(
+                f"dataset_dir에서 rgb_*.png를 찾지 못했습니다: {args.dataset_dir}")
         saved_test_paths = train_data_info.get("test_paths", [])
         test_paths = [p for p in saved_test_paths if p.startswith(args.dataset_dir)]
         if len(test_paths) == 0:
             test_paths = split_paths_train_test(all_paths, class_names,
                                                 test_size=args.test_size, seed=args.seed)
-else:
-    test_paths = train_data_info['test_paths']
+    else:
+        test_paths = train_data_info['test_paths']
 
 print(f"\n모델 파일: {MODEL_PATH}")
 print(f"테스트 데이터: {len(test_paths)}장")
