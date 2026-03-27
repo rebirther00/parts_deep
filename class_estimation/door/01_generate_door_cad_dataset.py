@@ -212,30 +212,30 @@ def generate_class_dataset(class_name, class_config, class_index):
             sem.CreateSemanticTypeAttr("class")
             sem.CreateSemanticDataAttr().Set(class_name)
 
-    # 카메라 거리 계산 (도어 전체가 항상 프레임에 잡히도록 좁은 범위)
+    # 카메라 거리 계산 (도어 전체가 항상 프레임 안에 완전히 보이도록 충분한 여유)
+    # 프레임 대비 약 50~70% 채움 → 종횡비 차이가 명확히 드러남
     part_diag = np.sqrt(size[0]**2 + size[1]**2 + size[2]**2)
-    min_cam = (part_diag / 2.0) / np.tan(np.radians(30)) / 0.8
-    cam_min, cam_max = min_cam * 0.95, min_cam * 1.15
+    min_cam = (part_diag / 2.0) / np.tan(np.radians(30)) / 0.6
+    cam_min, cam_max = min_cam * 1.2, min_cam * 1.6
 
-    # 장면 구성: 정면 위주 구도 (±15° 제한)
-    # 가로 폭 미세 차이(5.4%)를 학습하려면 정면 비율이 일관되어야 함
-    # lateral 범위 = 카메라 거리 * tan(15°) ≈ 0.27
-    lateral_x = cam_max * 0.27
-    lateral_y = cam_max * 0.20
+    # 장면 구성: 정면 위주 구도 (±8° 제한)
+    # 측면 이동을 줄여 도어가 프레임 중앙에 안정적으로 위치하도록
+    lateral_x = cam_max * 0.15
+    lateral_y = cam_max * 0.10
 
     # 바닥을 물체에 밀착 (그림자 제거 → 윤곽선 깨끗하게)
     if view_dir == "+Z":
-        cam_pos_lo = (cx - lateral_x, cy - lateral_y, cz + cam_min * 0.7)
+        cam_pos_lo = (cx - lateral_x, cy - lateral_y, cz + cam_min)
         cam_pos_hi = (cx + lateral_x, cy + lateral_y, cz + cam_max)
-        init_cam = (cx, cy, cz + min_cam * 0.9)
+        init_cam = (cx, cy, cz + cam_min * 1.2)
         floor_pos = (cx, cy, floor_height)
         floor_rot = (0, 0, 0)
         wall_pos = (cx, cy - part_size * 2.5, cz)
         wall_rot = (90, 0, 0)
     else:  # "-Z"
         cam_pos_lo = (cx - lateral_x, cy - lateral_y, cz - cam_max)
-        cam_pos_hi = (cx + lateral_x, cy + lateral_y, cz - cam_min * 0.7)
-        init_cam = (cx, cy, cz - min_cam * 0.9)
+        cam_pos_hi = (cx + lateral_x, cy + lateral_y, cz - cam_min)
+        init_cam = (cx, cy, cz - cam_min * 1.2)
         floor_pos = (cx, cy, floor_height)
         floor_rot = (0, 0, 0)
         wall_pos = (cx, cy + part_size * 2.5, cz)
