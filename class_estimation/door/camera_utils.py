@@ -46,7 +46,7 @@ class CameraManager:
         params = sl.InitParameters()
         params.camera_resolution = sl.RESOLUTION.HD1080
         params.camera_fps = self.fps
-        params.depth_mode = sl.DEPTH_MODE.NEURAL
+        params.depth_mode = sl.DEPTH_MODE.NEURAL_PLUS
         params.coordinate_units = sl.UNIT.MILLIMETER
         err = self._zed.open(params)
         if err != sl.ERROR_CODE.SUCCESS:
