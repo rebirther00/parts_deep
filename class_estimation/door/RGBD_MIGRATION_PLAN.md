@@ -175,7 +175,7 @@ def __getitem__(self, idx):
 ```
 
 **Augmentation 주의:**
-- `RandomRotation`, `CenterCrop`: RGB와 Depth에 **동일하게 적용** 필요
+- `RandomRotation`, `Letterbox Resize + Pad`: RGB와 Depth에 **동일하게 적용** 필요
 - `ColorJitter`: **RGB에만 적용**, Depth에는 적용하지 않음
 - `Normalize`: RGB는 ImageNet 정규화, Depth는 별도 (mean=0.5, std=0.25)
 

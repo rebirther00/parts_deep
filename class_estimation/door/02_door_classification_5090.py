@@ -145,8 +145,8 @@ val_transform = RGBDTransform(IMAGE_SIZE, is_train=False)
 
 print(f"RGBD 전처리 설정 완료:")
 print(f"  입력 크기: {IMAGE_SIZE}x{IMAGE_SIZE}, 채널: {IN_CHANNELS} (R,G,B,D)")
-print(f"  Train: Resize + CenterCrop + Rotation(5°) + ColorJitter(RGB) + Normalize")
-print(f"  Val: Resize + CenterCrop + Normalize")
+print(f"  Train: Letterbox Resize + Pad + Rotation(5°) + ColorJitter(RGB) + Normalize")
+print(f"  Val: Letterbox Resize + Pad + Normalize")
 
 step2_time = time.time() - step2_start_time
 print(f"\n[2단계 완료] 소요 시간: {step2_time:.2f}초")

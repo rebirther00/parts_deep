@@ -61,7 +61,7 @@
 ### 기존 파이프라인 (`02_door_cad_classification_5090.py`)
 
 - **모델**: ResNet18 (ImageNet pretrained) + FC Head (Dropout → 256 → 8 classes)
-- **전처리**: `Resize(224) + CenterCrop(224, 224)`
+- **전처리**: `Letterbox Resize(장변 224px) + 중앙 배치 패딩(224×224)` (종횡비 보존)
 - **증강**: RandomRotation(5°), ColorJitter, HorizontalFlip 제거
 - **렌더링 해상도**: 1920×1080 (16:9)
 
