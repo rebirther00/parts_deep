@@ -21,7 +21,7 @@ MAX_DEPTH_MM = 5000       # 정규화 시 클리핑 거리 (5 m)
 DEPTH_MEAN = 0.5
 DEPTH_STD = 0.25
 IN_CHANNELS = 4           # R, G, B, D
-NUM_AUX_FEATURES = 4      # 보조 피처 수
+NUM_AUX_FEATURES = 3      # 보조 피처 수 (width, height, aspect)
 
 # Isaac Sim 기본 USD 카메라 (focal=50mm, aperture=36mm, 1920×1080)
 ISAAC_SIM_INTRINSICS = {
@@ -113,20 +113,22 @@ def compute_aux_features(depth_raw_mm, intrinsics=None, fg_mask=None):
     전경 픽셀을 3D 점으로 변환, PCA로 주성분 2축의 범위를
     구하여 시점에 무관한 가로·세로 치수를 반환한다.
 
+    mean_depth_mm는 부품 종류와 무관한 촬영 거리이므로 제외.
+
     Args:
         depth_raw_mm: 원본 depth 이미지 (mm 단위, H×W)
         intrinsics: 카메라 내부 파라미터 dict
         fg_mask: SAM 등으로 생성된 이진 전경 마스크 (bool 또는 uint8)
 
     Returns:
-        [physical_width_mm, physical_height_mm, aspect_ratio, mean_depth_mm]
+        [physical_width_mm, physical_height_mm, aspect_ratio]
     """
     if intrinsics is None:
         intrinsics = ISAAC_SIM_INTRINSICS
 
     valid = depth_raw_mm > 0
     if valid.sum() < 10:
-        return [0.0, 0.0, 1.0, 0.0]
+        return [0.0, 0.0, 1.0]
 
     if fg_mask is not None:
         mask = (fg_mask > 0) & valid
@@ -134,11 +136,10 @@ def compute_aux_features(depth_raw_mm, intrinsics=None, fg_mask=None):
         mask = _segment_foreground(depth_raw_mm)
 
     if mask.sum() < 10:
-        return [0.0, 0.0, 1.0, 0.0]
+        return [0.0, 0.0, 1.0]
 
     rows, cols = np.where(mask)
     depths = depth_raw_mm[mask].astype(np.float64)
-    mean_depth = float(depths.mean())
 
     fx, fy = intrinsics["fx"], intrinsics["fy"]
     cx, cy = intrinsics["cx"], intrinsics["cy"]
@@ -153,7 +154,7 @@ def compute_aux_features(depth_raw_mm, intrinsics=None, fg_mask=None):
     try:
         _, S, Vt = np.linalg.svd(centered, full_matrices=False)
     except np.linalg.LinAlgError:
-        return [0.0, 0.0, 1.0, mean_depth]
+        return [0.0, 0.0, 1.0]
 
     proj = centered @ Vt[:2].T
     extent_0 = float(proj[:, 0].max() - proj[:, 0].min())
@@ -163,7 +164,7 @@ def compute_aux_features(depth_raw_mm, intrinsics=None, fg_mask=None):
     phys_h = min(extent_0, extent_1)
     aspect = phys_w / max(phys_h, 1e-6)
 
-    return [phys_w, phys_h, aspect, mean_depth]
+    return [phys_w, phys_h, aspect]
 
 
 # ── RGBD ResNet18 ────────────────────────────────────────
@@ -201,7 +202,7 @@ def create_rgbd_resnet18(num_classes, pretrained=True):
 class RGBDAuxResNet18(nn.Module):
     """RGBD 이미지 + 물리 치수 보조 피처를 결합하는 분류 모델.
 
-    backbone(ResNet18, 4ch→512dim) + Aux MLP(4→32dim) → 544dim → FC → num_classes
+    backbone(ResNet18, 4ch→512dim) + Aux MLP(3→32dim) → 544dim → FC → num_classes
     """
 
     def __init__(self, num_classes, num_aux=NUM_AUX_FEATURES, pretrained=True):
@@ -228,10 +229,10 @@ class RGBDAuxResNet18(nn.Module):
         )
 
         self.classifier = nn.Sequential(
-            nn.Dropout(0.5),
+            nn.Dropout(0.3),
             nn.Linear(self.backbone_features + 32, 256),
             nn.ReLU(),
-            nn.Dropout(0.3),
+            nn.Dropout(0.2),
             nn.Linear(256, num_classes),
         )
 

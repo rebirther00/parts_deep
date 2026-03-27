@@ -322,13 +322,28 @@ print(f"클래스 가중치: {dict(zip(class_names, [f'{w:.4f}' for w in class_w
 
 criterion = nn.CrossEntropyLoss(weight=class_weights)
 
-LEARNING_RATE = 0.001
-optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE)
-scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', patience=3, factor=0.5)
+# Differential LR: backbone은 낮은 LR, classifier/aux head는 높은 LR
+BACKBONE_LR = 0.0001
+HEAD_LR = 0.001
+
+backbone_params = list(model.backbone.parameters())
+head_params = list(model.aux_fc.parameters()) + list(model.classifier.parameters())
+
+optimizer = optim.Adam([
+    {"params": backbone_params, "lr": BACKBONE_LR},
+    {"params": head_params, "lr": HEAD_LR},
+])
+scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', patience=7, factor=0.5)
+
+# Warmup 설정: 처음 WARMUP_EPOCHS 동안 backbone freeze
+WARMUP_EPOCHS = 5
 
 print("\n손실 함수: Cross Entropy Loss (클래스 가중치 적용)")
-print(f"옵티마이저: Adam (lr={LEARNING_RATE})")
-print("스케줄러: ReduceLROnPlateau (patience=3, factor=0.5)")
+print(f"옵티마이저: Adam (Differential LR)")
+print(f"  - Backbone LR: {BACKBONE_LR}")
+print(f"  - Head LR: {HEAD_LR}")
+print(f"스케줄러: ReduceLROnPlateau (patience=7, factor=0.5)")
+print(f"Warmup: {WARMUP_EPOCHS} 에포크 (backbone freeze 후 unfreeze)")
 
 step5_time = time.time() - step5_start_time
 print(f"\n[5단계 완료] 소요 시간: {step5_time:.2f}초")
@@ -445,7 +460,18 @@ print(f"배치 크기: {batch_size} (RTX 5090 최적화)")
 print(f"Early Stopping Patience: {EARLY_STOPPING_PATIENCE} 에포크")
 print("\n학습 시작...\n")
 
+# Warmup: backbone freeze
+for param in model.backbone.parameters():
+    param.requires_grad = False
+print(f"[Warmup] Backbone freeze ({WARMUP_EPOCHS} 에포크 동안)")
+
 for epoch in range(NUM_EPOCHS):
+    # Warmup 종료 시 backbone unfreeze
+    if epoch == WARMUP_EPOCHS:
+        for param in model.backbone.parameters():
+            param.requires_grad = True
+        print(f"\n[Warmup 종료] Backbone unfreeze (epoch {epoch+1}부터 전체 학습)")
+
     train_loss, train_acc = train_one_epoch(model, train_loader, criterion, optimizer, device)
     val_loss, val_acc, class_accs = evaluate(model, test_loader, criterion, device, class_names)
 
@@ -471,7 +497,9 @@ for epoch in range(NUM_EPOCHS):
         print(f"  클래스별 정확도:")
         for name, acc in class_accs.items():
             print(f"    - {name}: {acc:.2f}%")
-        print(f"  Best Val Accuracy: {best_val_accuracy:.2f}% | LR: {current_lr:.6f}")
+        backbone_lr = optimizer.param_groups[0]['lr']
+        head_lr = optimizer.param_groups[1]['lr']
+        print(f"  Best Val Accuracy: {best_val_accuracy:.2f}% | LR: backbone={backbone_lr:.6f}, head={head_lr:.6f}")
         if patience_counter > 0:
             print(f"  Early Stopping: {patience_counter}/{EARLY_STOPPING_PATIENCE}")
         print("-" * 60)
