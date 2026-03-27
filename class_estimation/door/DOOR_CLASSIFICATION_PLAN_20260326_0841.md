@@ -16,7 +16,18 @@
 | 구분 | 상태 |
 |------|------|
 | 실물 Door | 각 Door별 1장씩 확보 완료 (총 9장) |
-| CAD 모델 | 추후 확보 예정 |
+| CAD 모델 | 8종 USD 모델 확보 완료 (E30/E38 RH 통합) |
+
+### 1.2 1차 분류 대상 (Step 5 크로스 도메인 평가)
+
+> **LH_FRT 3종만 우선 분류** — 나머지(RH, LH_RR)는 추후 단계적 추가
+
+| 클래스 | 실물 RGB+Depth | CAD 합성 |
+|--------|---------------|----------|
+| E25_door_LH_FRT | 158장 | 500장 |
+| E30_door_LH_FRT | 161장 | 500장 |
+| E38_door_LH_FRT | 154장 | 500장 |
+| **소계** | **473장** | **1,500장** |
 
 ---
 
@@ -668,7 +679,10 @@ E30_door_RH와 E38_door_RH는 동일 부품이므로 `E30_E38_door_RH`로 통합
 
 ### 14.2 전체 실행 순서
 
-모든 스크립트는 **RGBD 4채널 입력**(RGB + Depth)을 사용한다.
+모든 스크립트는 **RGBD 4채널 입력**(RGB + Depth) + **물리 치수 보조 피처**(4개)를 사용한다.
+- 입력 해상도: 448×448 (Letterbox, 종횡비 보존)
+- 모델: RGBDAuxResNet18 (ResNet18 backbone 512dim + Aux MLP 32dim → 544dim → FC)
+- 보조 피처: Depth 기반 물리 치수 [width_mm, height_mm, aspect_ratio, mean_depth_mm]
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
@@ -702,6 +716,12 @@ E30_door_RH와 E38_door_RH는 동일 부품이므로 `E30_E38_door_RH`로 통합
 │            --dataset_dir datasets --use_all                     │
 │          → CAD만으로 실물 분류가 되는지 확인                         │
 │                                                                 │
+│          ※ 1차 분류 대상: LH_FRT 3종만 (E25/E30/E38)              │
+│            - E25_door_LH_FRT (158장)                             │
+│            - E30_door_LH_FRT (161장)                             │
+│            - E38_door_LH_FRT (154장)                             │
+│            - RH, LH_RR은 추후 데이터 확보 후 단계적 추가           │
+│                                                                 │
 ├─────────────────────────────────────────────────────────────────┤
 │  Step 5 결과에 따라 분기                                           │
 ├─────────────────────────────────────────────────────────────────┤
@@ -728,7 +748,7 @@ E30_door_RH와 E38_door_RH는 동일 부품이므로 `E30_E38_door_RH`로 통합
 
 | # | 파일 | 역할 | 입력 | 출력 |
 |---|------|------|------|------|
-| 0 | `depth_utils.py` | RGBD 공통 모듈 | - | (라이브러리) |
+| 0 | `depth_utils.py` | RGBD 공통 모듈 + RGBDAuxResNet18 + 물리 치수 계산 | - | (라이브러리) |
 | 0 | `camera_utils.py` | ZED X Mini RGB+Depth 캡처 | - | (라이브러리) |
 | 1 | `01_generate_door_cad_dataset.py` | Isaac Sim CAD 합성 데이터 생성 | USD 파일 | `datasets_cad/*/rgb_*.png + depth_*.png` |
 | 2 | `01_capture_dataset.py` | 실물 RGBD 이미지 수집 (Flask) | ZED X Mini | `datasets/*/rgb_*.png + depth_*.png` |
@@ -748,4 +768,4 @@ E30_door_RH와 E38_door_RH는 동일 부품이므로 `E30_E38_door_RH`로 통합
 | Depth 형식 | `depth_XXXX.png` (16bit) | `depth_XXXX.png` (16bit) |
 | Depth 단위 | 밀리미터 (mm) | 밀리미터 (mm) |
 | 정규화 | 5m 클리핑 → [0, 1] | 5m 클리핑 → [0, 1] |
-| 모델 입력 | `[B, 4, 224, 224]` (R,G,B,D) | 동일 |
+| 모델 입력 | `[B, 4, 448, 448]` (R,G,B,D) + `[B, 4]` (aux) | 동일 |
