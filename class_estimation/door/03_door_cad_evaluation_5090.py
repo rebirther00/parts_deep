@@ -322,7 +322,7 @@ def create_result_grid(image_paths, labels, predictions, confidences, class_name
         img = Image.open(image_paths[idx])
         if img.mode != 'RGB':
             img = img.convert('RGB')
-        img = img.resize((img_size, img_size), Image.Resampling.LANCZOS)
+        img = img.resize((img_size, img_size), Image.LANCZOS)
         grid_image.paste(img, (x, y))
 
         draw = ImageDraw.Draw(grid_image)
@@ -381,7 +381,7 @@ def create_wrong_predictions_grid(image_paths, labels, predictions, confidences,
         img = Image.open(image_paths[data_idx])
         if img.mode != 'RGB':
             img = img.convert('RGB')
-        img = img.resize((img_size, img_size), Image.Resampling.LANCZOS)
+        img = img.resize((img_size, img_size), Image.LANCZOS)
         grid_image.paste(img, (x, y))
 
         draw = ImageDraw.Draw(grid_image)
