@@ -321,12 +321,23 @@ Step 5) 평가
         $ python 03_door_class_evaluation.py
 ```
 
-### Phase 3: CAD 기반 합성 데이터 추가 (추후)
+### Phase 3: CAD 기반 합성 데이터 (진행 중)
 
 ```
-Step 6) CAD 모델 확보 후 Isaac Sim으로 합성 데이터 생성
-Step 7) 실물 + 합성 데이터 혼합 학습
+Step 6) CAD 모델 → STL → USD 변환 완료 (8종)
+        00_convert_stl_to_usd.py → ~/isaac-sim/assets/door/*.usd
+Step 7) Isaac Sim으로 합성 RGBD 데이터 생성
+        ~/isaac-sim/python.sh 01_generate_door_cad_dataset.py
+        → datasets_cad/ 에 rgb_*.png + depth_*.png 쌍 생성 (클래스당 500장)
+Step 8) CAD 데이터로 분류 모델 학습 및 평가
+Step 9) 실물 + 합성 데이터 혼합 학습
 ```
+
+**CAD 합성 데이터 현황 (2026-03-23~27)**:
+- 8개 클래스 USD 모델 확보 완료 (E30/E38 RH는 동일 부품으로 통합)
+- 클래스당 500장, 총 4,000장 생성 완료
+- **카메라 거리 문제 발견 및 수정**: 기존 파라미터에서 도어가 프레임 밖으로 잘리는 이미지 다수 발생 → 카메라 거리 증가, lateral 오프셋 축소로 해결 (재생성 필요)
+- 분류 전략 분석 문서: `DOOR_CAD_CLASSIFICATION_PLAN_20260323_1315.md` 참조
 
 ---
 
@@ -398,7 +409,7 @@ Step 7) 실물 + 합성 데이터 혼합 학습
 | 클래스 수 | 4 (boom/arm × 25/30) | 9 (E25/E30/E38 × 3 door) |
 | Bounding Box | 자동 생성 (Replicator) | 없음 (RGB only) |
 | 배경 | Domain Randomization | 실제 촬영 환경 |
-| 이미지 해상도 | 1024×1024 | ZED X Mini 출력 (1920×1080 또는 설정값) |
+| 이미지 해상도 | 1920×1080 (CAD 합성) | ZED X Mini 출력 (1920×1080 또는 설정값) |
 | 데이터 수집 도구 | Python 스크립트 | Flask 웹 UI |
 | 이미지 파일명 | `rgb_NNNN.png` | `rgb_NNNN.png` (동일) |
 | 메타데이터 | `metadata.json` | `metadata.json` (동일, 필드 확장) |
@@ -625,7 +636,9 @@ python class_estimation/door/04_door_realtime_inference.py
 
 ### 13.3 데이터 확장
 
-5. **CAD 기반 합성 데이터**: CAD 모델 확보 후 Isaac Sim으로 추가 합성 데이터 생성
+5. **CAD 기반 합성 데이터**: ~~CAD 모델 확보 후 Isaac Sim으로 추가 합성 데이터 생성~~ → **완료** (8종 USD 모델 확보, 클래스당 500장 생성 파이프라인 구축)
+   - 카메라 거리 파라미터 수정 완료 (도어 전체가 프레임에 보이도록)
+   - 분류 전략 분석: `DOOR_CAD_CLASSIFICATION_PLAN_20260323_1315.md` 참조
 6. **데이터 증강 강화**: RandomPerspective 비율 증가, 밝기/대비/채도 변화 확대, 노이즈 추가
 
 ### 13.4 모델 및 배포 최적화
@@ -665,6 +678,8 @@ E30_door_RH와 E38_door_RH는 동일 부품이므로 `E30_E38_door_RH`로 통합
 │  Step 1) CAD 합성 RGBD 데이터 생성                                │
 │          ~/isaac-sim/python.sh 01_generate_door_cad_dataset.py  │
 │          → datasets_cad/ 에 rgb_*.png + depth_*.png 쌍 생성     │
+│          ※ 카메라 거리 수정 완료 (2026-03-23):                     │
+│            도어 전체가 프레임에 보이도록 fill 60%, ±8° 구도         │
 │                                                                 │
 │  Step 2) CAD 데이터로 RGBD 모델 학습                              │
 │          python 02_door_cad_classification_5090.py              │
