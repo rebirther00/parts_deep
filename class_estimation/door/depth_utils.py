@@ -176,8 +176,9 @@ class RGBDTransform:
     """RGB PIL Image + Depth ndarray를 동기화 변환하여 [4, H, W] 텐서로 반환.
 
     Letterbox 방식: 장변 기준 Resize + 패딩으로 종횡비를 보존한다.
-    - 공간 변환(Resize, Pad, Rotation)은 RGB·Depth에 동일 적용
-    - 색상 변환(Brightness, Contrast, Saturation)은 RGB에만 적용
+    - 공간 변환(Resize, Pad, Flip, Rotation, Scale)은 RGB·Depth에 동일 적용
+    - 색상 변환(Brightness, Contrast, Saturation, Hue)은 RGB에만 적용
+    - Gaussian Noise는 RGB에만 적용
     - Depth는 별도 정규화: (x - 0.5) / 0.25
     """
 
@@ -218,16 +219,48 @@ class RGBDTransform:
 
         # 3) 학습 시 Augmentation
         if self.is_train:
-            angle = random.uniform(-5, 5)
+            # 수평 반전 (50% 확률)
+            if random.random() < 0.5:
+                rgb_pil = TF.hflip(rgb_pil)
+                depth_np = np.flip(depth_np, axis=1).copy()
+
+            # 회전 (±15°)
+            angle = random.uniform(-15, 15)
             rgb_pil = TF.rotate(rgb_pil, angle)
             center = (self.size / 2, self.size / 2)
             M = cv2.getRotationMatrix2D(center, angle, 1.0)
             depth_np = cv2.warpAffine(depth_np, M, (self.size, self.size),
                                       flags=cv2.INTER_NEAREST, borderValue=0)
 
-            rgb_pil = TF.adjust_brightness(rgb_pil, random.uniform(0.7, 1.3))
-            rgb_pil = TF.adjust_contrast(rgb_pil, random.uniform(0.7, 1.3))
-            rgb_pil = TF.adjust_saturation(rgb_pil, random.uniform(0.8, 1.2))
+            # 스케일 변환 (90~110%, 카메라 거리 변화 시뮬레이션)
+            if random.random() < 0.5:
+                s = random.uniform(0.9, 1.1)
+                Ms = cv2.getRotationMatrix2D(center, 0, s)
+                rgb_np = np.array(rgb_pil)
+                rgb_np = cv2.warpAffine(rgb_np, Ms, (self.size, self.size),
+                                        flags=cv2.INTER_LINEAR, borderValue=0)
+                rgb_pil = Image.fromarray(rgb_np)
+                depth_np = cv2.warpAffine(depth_np, Ms, (self.size, self.size),
+                                          flags=cv2.INTER_NEAREST,
+                                          borderValue=0)
+
+            # 색상 변환 (RGB에만 적용)
+            rgb_pil = TF.adjust_brightness(rgb_pil, random.uniform(0.6, 1.4))
+            rgb_pil = TF.adjust_contrast(rgb_pil, random.uniform(0.6, 1.4))
+            rgb_pil = TF.adjust_saturation(rgb_pil, random.uniform(0.7, 1.3))
+            rgb_pil = TF.adjust_hue(rgb_pil, random.uniform(-0.05, 0.05))
+
+            # 가우시안 노이즈 (RGB에만, 30% 확률)
+            if random.random() < 0.3:
+                rgb_np = np.array(rgb_pil).astype(np.float32)
+                noise = np.random.normal(0, random.uniform(3, 10),
+                                         rgb_np.shape).astype(np.float32)
+                rgb_np = np.clip(rgb_np + noise, 0, 255).astype(np.uint8)
+                rgb_pil = Image.fromarray(rgb_np)
+
+            # 가우시안 블러 (RGB에만, 20% 확률, 촬영 포커스 변화)
+            if random.random() < 0.2:
+                rgb_pil = TF.gaussian_blur(rgb_pil, kernel_size=3)
 
         # 4) To tensor + normalize
         rgb_t = TF.to_tensor(rgb_pil)
