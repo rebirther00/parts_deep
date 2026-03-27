@@ -60,63 +60,10 @@ def save_depth_png(depth_meters, path):
 
 # ── 보조 피처 (물리 치수) ─────────────────────────────────
 
-def _segment_foreground(depth_raw_mm):
-    """depth 이미지에서 전경(부품) 영역을 분리.
-
-    Otsu 이진화 → 형태학적 정리 → 최대 연결 영역 추출.
-    Otsu가 실패하면 가장 가까운 60% 깊이값 기반으로 분리한다.
-    """
-    valid = depth_raw_mm > 0
-    if valid.sum() < 100:
-        return valid
-
-    d_valid = depth_raw_mm[valid]
-    d_min, d_max = float(d_valid.min()), float(d_valid.max())
-
-    if d_max - d_min < 1.0:
-        return valid
-
-    d8 = np.zeros_like(depth_raw_mm, dtype=np.uint8)
-    d8[valid] = np.clip(
-        ((depth_raw_mm[valid] - d_min) / (d_max - d_min) * 255), 0, 255
-    ).astype(np.uint8)
-
-    otsu_t, _ = cv2.threshold(d8[valid].ravel(), 0, 255,
-                               cv2.THRESH_BINARY + cv2.THRESH_OTSU)
-    depth_thresh = d_min + (d_max - d_min) * otsu_t / 255.0
-    fg = valid & (depth_raw_mm <= depth_thresh)
-
-    fg_ratio = fg.sum() / valid.sum()
-    if fg_ratio < 0.15 or fg_ratio > 0.85:
-        pct60 = np.percentile(d_valid, 60)
-        fg = valid & (depth_raw_mm <= pct60)
-
-    kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (7, 7))
-    fg_u8 = fg.astype(np.uint8) * 255
-    fg_u8 = cv2.morphologyEx(fg_u8, cv2.MORPH_CLOSE, kernel)
-    fg_u8 = cv2.morphologyEx(fg_u8, cv2.MORPH_OPEN, kernel)
-
-    n_labels, labels, stats, _ = cv2.connectedComponentsWithStats(
-        fg_u8, connectivity=8)
-    if n_labels <= 1:
-        return fg_u8 > 0
-    areas = stats[1:, cv2.CC_STAT_AREA]
-    largest = 1 + int(np.argmax(areas))
-    return labels == largest
-
-
-def compute_aux_features(depth_raw_mm, intrinsics=None, fg_mask=None):
+def compute_aux_features(depth_raw_mm, intrinsics=None):
     """원본 depth(mm)에서 부품의 물리 치수(mm)를 계산.
 
-    SAM 마스크(fg_mask)가 주어지면 그대로 사용하고,
-    없으면 depth 기반 Otsu 전경 분리로 폴백한다.
-    전경 픽셀을 3D 점으로 변환, PCA로 주성분 2축의 범위를
-    구하여 시점에 무관한 가로·세로 치수를 반환한다.
-
-    Args:
-        depth_raw_mm: 원본 depth 이미지 (mm 단위, H×W)
-        intrinsics: 카메라 내부 파라미터 dict
-        fg_mask: SAM 등으로 생성된 이진 전경 마스크 (bool 또는 uint8)
+    전경 검출 → 바운딩박스 → 카메라 intrinsics로 실제 mm 환산.
 
     Returns:
         [physical_width_mm, physical_height_mm, aspect_ratio, mean_depth_mm]
@@ -128,39 +75,20 @@ def compute_aux_features(depth_raw_mm, intrinsics=None, fg_mask=None):
     if valid.sum() < 10:
         return [0.0, 0.0, 1.0, 0.0]
 
-    if fg_mask is not None:
-        mask = (fg_mask > 0) & valid
-    else:
-        mask = _segment_foreground(depth_raw_mm)
+    min_depth = depth_raw_mm[valid].min()
+    fg_mask = valid & (depth_raw_mm < min_depth * 1.3)
 
-    if mask.sum() < 10:
+    if fg_mask.sum() < 10:
         return [0.0, 0.0, 1.0, 0.0]
 
-    rows, cols = np.where(mask)
-    depths = depth_raw_mm[mask].astype(np.float64)
-    mean_depth = float(depths.mean())
+    rows, cols = np.where(fg_mask)
+    bbox_w = float(cols.max() - cols.min())
+    bbox_h = float(rows.max() - rows.min())
+    mean_depth = float(depth_raw_mm[fg_mask].mean())
 
     fx, fy = intrinsics["fx"], intrinsics["fy"]
-    cx, cy = intrinsics["cx"], intrinsics["cy"]
-
-    X = (cols.astype(np.float64) - cx) * depths / fx
-    Y = (rows.astype(np.float64) - cy) * depths / fy
-    Z = depths
-
-    pts = np.stack([X, Y, Z], axis=1)
-    centered = pts - pts.mean(axis=0)
-
-    try:
-        _, S, Vt = np.linalg.svd(centered, full_matrices=False)
-    except np.linalg.LinAlgError:
-        return [0.0, 0.0, 1.0, mean_depth]
-
-    proj = centered @ Vt[:2].T
-    extent_0 = float(proj[:, 0].max() - proj[:, 0].min())
-    extent_1 = float(proj[:, 1].max() - proj[:, 1].min())
-
-    phys_w = max(extent_0, extent_1)
-    phys_h = min(extent_0, extent_1)
+    phys_w = bbox_w * mean_depth / fx
+    phys_h = bbox_h * mean_depth / fy
     aspect = phys_w / max(phys_h, 1e-6)
 
     return [phys_w, phys_h, aspect, mean_depth]
@@ -387,14 +315,9 @@ class RGBDDataset(Dataset):
     def _depth_path(rgb_path):
         return rgb_path.replace("rgb_", "depth_")
 
-    @staticmethod
-    def _mask_path(rgb_path):
-        return rgb_path.replace("rgb_", "mask_")
-
     def __getitem__(self, idx):
         rgb_path = self.image_paths[idx]
         depth_path = self._depth_path(rgb_path)
-        mask_path = self._mask_path(rgb_path)
 
         rgb = Image.open(rgb_path).convert("RGB")
 
@@ -411,17 +334,10 @@ class RGBDDataset(Dataset):
             depth_norm = np.zeros(
                 (rgb.height, rgb.width), dtype=np.float32)
 
-        fg_mask = None
-        if os.path.exists(mask_path):
-            m = cv2.imread(mask_path, cv2.IMREAD_GRAYSCALE)
-            if m is not None:
-                fg_mask = m
-
         aux = compute_aux_features(
             depth_raw_mm if depth_raw_mm is not None
             else np.zeros((rgb.height, rgb.width), dtype=np.float32),
             self.intrinsics,
-            fg_mask=fg_mask,
         )
         aux_tensor = torch.tensor(aux, dtype=torch.float32)
 

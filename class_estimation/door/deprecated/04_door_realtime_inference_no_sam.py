@@ -49,10 +49,6 @@ parser.add_argument(
     "--list_models", action="store_true",
     help="사용 가능한 모델 목록 출력 후 종료",
 )
-parser.add_argument(
-    "--no_sam", action="store_true",
-    help="MobileSAM 비활성화 (depth 기반 전경 분리로 폴백)",
-)
 args = parser.parse_args()
 
 
@@ -103,65 +99,23 @@ app = Flask(__name__)
 camera: CameraManager = None  # type: ignore[assignment]
 
 
-MOBILE_SAM_PATH = os.path.join(BASE_DIR, "sam_models", "mobile_sam.pt")
-
-
-def _load_mobile_sam(device="cpu"):
-    """MobileSAM 모델과 predictor를 로드한다."""
-    from mobile_sam import sam_model_registry, SamPredictor
-
-    model = sam_model_registry["vit_t"](checkpoint=MOBILE_SAM_PATH)
-    model.to(device)
-    model.eval()
-    return SamPredictor(model)
-
-
 class PyTorchInferenceEngine:
-    """PyTorch RGBD + 보조 피처 추론 엔진 (MobileSAM 통합)"""
+    """PyTorch RGBD + 보조 피처 추론 엔진"""
 
-    def __init__(self, model_path: str, class_names: list,
-                 use_sam: bool = True):
+    def __init__(self, model_path: str, class_names: list):
         self.class_names = class_names
         self.device = torch.device("cpu")
 
         self.model = RGBDAuxResNet18(len(class_names), pretrained=False)
-        self.model.load_state_dict(
-            torch.load(model_path, map_location=self.device))
+        self.model.load_state_dict(torch.load(model_path, map_location=self.device))
         self.model.to(self.device)
         self.model.eval()
 
         self.transform = RGBDTransform(IMAGE_SIZE, is_train=False)
 
-        self.sam_predictor = None
-        if use_sam and os.path.exists(MOBILE_SAM_PATH):
-            try:
-                self.sam_predictor = _load_mobile_sam(str(self.device))
-                print(f"MobileSAM 로드 완료 ({self.device})")
-            except Exception as e:
-                print(f"MobileSAM 로드 실패, depth 폴백: {e}")
-
-    def _generate_sam_mask(self, frame_rgb: np.ndarray) -> np.ndarray | None:
-        """MobileSAM으로 전경 마스크를 생성한다."""
-        if self.sam_predictor is None:
-            return None
-
-        self.sam_predictor.set_image(frame_rgb)
-        h, w = frame_rgb.shape[:2]
-        center = np.array([[w // 2, h // 2]], dtype=np.float32)
-        label = np.array([1], dtype=np.int32)
-
-        masks, scores, _ = self.sam_predictor.predict(
-            point_coords=center,
-            point_labels=label,
-            multimask_output=True,
-        )
-        best_idx = max(range(len(masks)), key=lambda i: masks[i].sum())
-        return masks[best_idx].astype(np.uint8) * 255
-
     def infer(self, frame: np.ndarray, depth: np.ndarray = None) -> tuple:
         """(클래스명, 확률, 전체확률리스트) 반환"""
-        frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        pil_img = PILImage.fromarray(frame_rgb)
+        pil_img = PILImage.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
 
         depth_raw_mm = None
         if depth is not None:
@@ -173,13 +127,10 @@ class PyTorchInferenceEngine:
 
         inp = self.transform(pil_img, depth_norm).unsqueeze(0).to(self.device)
 
-        fg_mask = self._generate_sam_mask(frame_rgb)
-
         aux = compute_aux_features(
             depth_raw_mm if depth_raw_mm is not None
             else np.zeros(frame.shape[:2], dtype=np.float32),
             ISAAC_SIM_INTRINSICS,
-            fg_mask=fg_mask,
         )
         aux_t = torch.tensor([aux], dtype=torch.float32).to(self.device)
 
@@ -310,12 +261,8 @@ if __name__ == "__main__":
         class_names = json.load(f)
     print(f"클래스: {class_names}")
 
-    engine = PyTorchInferenceEngine(
-        MODEL_PATH, class_names, use_sam=not args.no_sam)
-    sam_status = "MobileSAM" if engine.sam_predictor else "depth 폴백"
-    print(f"RGBD PyTorch 엔진 준비 완료 "
-          f"(디바이스: {engine.device}, 입력: {IN_CHANNELS}ch, "
-          f"전경분리: {sam_status})")
+    engine = PyTorchInferenceEngine(MODEL_PATH, class_names)
+    print(f"RGBD PyTorch 엔진 준비 완료 (디바이스: {engine.device}, 입력: {IN_CHANNELS}ch)")
 
     camera = CameraManager()
     camera.start()

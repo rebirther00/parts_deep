@@ -105,18 +105,11 @@ def _segment_foreground(depth_raw_mm):
     return labels == largest
 
 
-def compute_aux_features(depth_raw_mm, intrinsics=None, fg_mask=None):
+def compute_aux_features(depth_raw_mm, intrinsics=None):
     """원본 depth(mm)에서 부품의 물리 치수(mm)를 계산.
 
-    SAM 마스크(fg_mask)가 주어지면 그대로 사용하고,
-    없으면 depth 기반 Otsu 전경 분리로 폴백한다.
-    전경 픽셀을 3D 점으로 변환, PCA로 주성분 2축의 범위를
-    구하여 시점에 무관한 가로·세로 치수를 반환한다.
-
-    Args:
-        depth_raw_mm: 원본 depth 이미지 (mm 단위, H×W)
-        intrinsics: 카메라 내부 파라미터 dict
-        fg_mask: SAM 등으로 생성된 이진 전경 마스크 (bool 또는 uint8)
+    전경 분리(Otsu + 형태학) 후 3D 점으로 변환, PCA로 주성분
+    2축의 범위를 구하여 시점에 무관한 가로·세로 치수를 반환한다.
 
     Returns:
         [physical_width_mm, physical_height_mm, aspect_ratio, mean_depth_mm]
@@ -128,16 +121,13 @@ def compute_aux_features(depth_raw_mm, intrinsics=None, fg_mask=None):
     if valid.sum() < 10:
         return [0.0, 0.0, 1.0, 0.0]
 
-    if fg_mask is not None:
-        mask = (fg_mask > 0) & valid
-    else:
-        mask = _segment_foreground(depth_raw_mm)
+    fg_mask = _segment_foreground(depth_raw_mm)
 
-    if mask.sum() < 10:
+    if fg_mask.sum() < 10:
         return [0.0, 0.0, 1.0, 0.0]
 
-    rows, cols = np.where(mask)
-    depths = depth_raw_mm[mask].astype(np.float64)
+    rows, cols = np.where(fg_mask)
+    depths = depth_raw_mm[fg_mask].astype(np.float64)
     mean_depth = float(depths.mean())
 
     fx, fy = intrinsics["fx"], intrinsics["fy"]
@@ -387,14 +377,9 @@ class RGBDDataset(Dataset):
     def _depth_path(rgb_path):
         return rgb_path.replace("rgb_", "depth_")
 
-    @staticmethod
-    def _mask_path(rgb_path):
-        return rgb_path.replace("rgb_", "mask_")
-
     def __getitem__(self, idx):
         rgb_path = self.image_paths[idx]
         depth_path = self._depth_path(rgb_path)
-        mask_path = self._mask_path(rgb_path)
 
         rgb = Image.open(rgb_path).convert("RGB")
 
@@ -411,17 +396,10 @@ class RGBDDataset(Dataset):
             depth_norm = np.zeros(
                 (rgb.height, rgb.width), dtype=np.float32)
 
-        fg_mask = None
-        if os.path.exists(mask_path):
-            m = cv2.imread(mask_path, cv2.IMREAD_GRAYSCALE)
-            if m is not None:
-                fg_mask = m
-
         aux = compute_aux_features(
             depth_raw_mm if depth_raw_mm is not None
             else np.zeros((rgb.height, rgb.width), dtype=np.float32),
             self.intrinsics,
-            fg_mask=fg_mask,
         )
         aux_tensor = torch.tensor(aux, dtype=torch.float32)
 
