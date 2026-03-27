@@ -82,7 +82,8 @@ def create_rgbd_resnet18(num_classes, pretrained=True):
 class RGBDTransform:
     """RGB PIL Image + Depth ndarray를 동기화 변환하여 [4, H, W] 텐서로 반환.
 
-    - 공간 변환(Resize, CenterCrop, Rotation)은 RGB·Depth에 동일 적용
+    Letterbox 방식: 장변 기준 Resize + 패딩으로 종횡비를 보존한다.
+    - 공간 변환(Resize, Pad, Rotation)은 RGB·Depth에 동일 적용
     - 색상 변환(Brightness, Contrast, Saturation)은 RGB에만 적용
     - Depth는 별도 정규화: (x - 0.5) / 0.25
     """
@@ -101,22 +102,26 @@ class RGBDTransform:
         """
         w, h = rgb_pil.size
 
-        # 1) Resize — shorter edge → self.size
-        if w <= h:
-            new_w, new_h = self.size, int(h * self.size / w)
-        else:
-            new_w, new_h = int(w * self.size / h), self.size
+        # 1) Letterbox Resize — 장변 기준으로 축소하여 종횡비 보존
+        scale = self.size / max(w, h)
+        new_w, new_h = int(w * scale), int(h * scale)
 
         rgb_pil = rgb_pil.resize((new_w, new_h), Image.BILINEAR)
         depth_np = cv2.resize(depth_np, (new_w, new_h),
                               interpolation=cv2.INTER_NEAREST)
 
-        # 2) CenterCrop
-        left = (new_w - self.size) // 2
-        top = (new_h - self.size) // 2
-        rgb_pil = rgb_pil.crop((left, top,
-                                left + self.size, top + self.size))
-        depth_np = depth_np[top:top + self.size, left:left + self.size]
+        # 2) 중앙 배치 패딩 — 검정(0) 패딩으로 종횡비 보존
+        pad_left = (self.size - new_w) // 2
+        pad_top = (self.size - new_h) // 2
+
+        rgb_canvas = Image.new("RGB", (self.size, self.size), (0, 0, 0))
+        rgb_canvas.paste(rgb_pil, (pad_left, pad_top))
+        rgb_pil = rgb_canvas
+
+        depth_canvas = np.zeros((self.size, self.size), dtype=np.float32)
+        depth_canvas[pad_top:pad_top + new_h,
+                     pad_left:pad_left + new_w] = depth_np
+        depth_np = depth_canvas
 
         # 3) 학습 시 Augmentation
         if self.is_train:
