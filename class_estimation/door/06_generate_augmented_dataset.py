@@ -26,12 +26,12 @@ PRESETS = {
         "blur_kernel": (3, 7),
     },
     "moderate": {
-        "brightness": (0.3, 2.0),
-        "contrast": (0.3, 2.0),
-        "saturation": (0.0, 2.5),
-        "hue_shift": 60,
-        "noise_sigma": (20, 40),
-        "blur_kernel": (5, 11),
+        "brightness": (0.5, 1.8),
+        "contrast": (0.5, 1.8),
+        "saturation": (0.2, 2.0),
+        "hue_shift": 40,
+        "noise_sigma": (15, 30),
+        "blur_kernel": (3, 9),
     },
     "extreme": {
         "brightness": (0.2, 3.0),
@@ -83,7 +83,22 @@ def augment_rgb(img: Image.Image, preset: dict, rng: random.Random) -> Image.Ima
     return img
 
 
-def process_class(src_dir, dst_dir, preset, seed):
+def apply_mask_blend(original: Image.Image, augmented: Image.Image,
+                     mask_path: str) -> Image.Image:
+    """전경(mask=255)은 증강 이미지, 배경은 원본 이미지로 합성"""
+    if not os.path.exists(mask_path):
+        return augmented
+    mask = cv2.imread(mask_path, cv2.IMREAD_GRAYSCALE)
+    if mask is None:
+        return augmented
+    mask_f = (mask.astype(np.float32) / 255.0)[:, :, np.newaxis]
+    orig_arr = np.array(original).astype(np.float32)
+    aug_arr = np.array(augmented).astype(np.float32)
+    blended = orig_arr * (1.0 - mask_f) + aug_arr * mask_f
+    return Image.fromarray(np.clip(blended, 0, 255).astype(np.uint8))
+
+
+def process_class(src_dir, dst_dir, preset, seed, mask_only=False):
     """한 클래스 폴더의 이미지들을 증강 처리"""
     os.makedirs(dst_dir, exist_ok=True)
     rgb_files = sorted(glob.glob(os.path.join(src_dir, "rgb_*.png")))
@@ -95,9 +110,13 @@ def process_class(src_dir, dst_dir, preset, seed):
         per_image_seed = seed + hash(basename) % (2**31)
         rng = random.Random(per_image_seed)
 
-        # RGB: 극단적 증강
         img = Image.open(rgb_path).convert("RGB")
         aug = augment_rgb(img, preset, rng)
+
+        if mask_only:
+            mask_path = os.path.join(src_dir, f"mask_{stem}.png")
+            aug = apply_mask_blend(img, aug, mask_path)
+
         aug.save(os.path.join(dst_dir, basename))
 
         # Depth: 원본 그대로 복사
@@ -128,6 +147,8 @@ def main():
                         help="증강 강도 (기본: extreme)")
     parser.add_argument("--seed", type=int, default=42,
                         help="재현성을 위한 랜덤 시드 (기본: 42)")
+    parser.add_argument("--mask_only", action="store_true",
+                        help="마스크 영역(전경)만 증강, 배경은 원본 유지")
     args = parser.parse_args()
 
     script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -139,6 +160,7 @@ def main():
 
     preset = PRESETS[args.level]
     print(f"증강 레벨: {args.level}")
+    print(f"마스크 전용 증강: {args.mask_only}")
     print(f"입력: {src_root}")
     print(f"출력: {dst_root}")
     print(f"시드: {args.seed}")
@@ -159,7 +181,7 @@ def main():
     for cls_name in class_dirs:
         src_cls = os.path.join(src_root, cls_name)
         dst_cls = os.path.join(dst_root, cls_name)
-        n = process_class(src_cls, dst_cls, preset, args.seed)
+        n = process_class(src_cls, dst_cls, preset, args.seed, args.mask_only)
         total += n
         print(f"  {cls_name}: {n}장 증강 완료")
 
