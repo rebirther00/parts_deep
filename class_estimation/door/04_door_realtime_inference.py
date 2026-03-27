@@ -21,7 +21,8 @@ from PIL import Image as PILImage
 
 from camera_utils import CameraManager
 from depth_utils import (
-    create_rgbd_resnet18, RGBDTransform, MAX_DEPTH_MM, IN_CHANNELS,
+    RGBDAuxResNet18, RGBDTransform, MAX_DEPTH_MM, IN_CHANNELS,
+    compute_aux_features, ISAAC_SIM_INTRINSICS,
 )
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -29,7 +30,7 @@ ARTIFACTS_DIR = os.path.join(BASE_DIR, "artifacts")
 MODEL_PATH = os.path.join(ARTIFACTS_DIR, "best_door_model_5090.pth")
 CLASS_NAMES_PATH = os.path.join(ARTIFACTS_DIR, "class_names_door_5090.json")
 
-IMAGE_SIZE = 224
+IMAGE_SIZE = 448
 INFERENCE_INTERVAL = 0.5
 
 app = Flask(__name__)
@@ -37,13 +38,13 @@ camera: CameraManager = None  # type: ignore[assignment]
 
 
 class PyTorchInferenceEngine:
-    """PyTorch RGBD 추론 엔진"""
+    """PyTorch RGBD + 보조 피처 추론 엔진"""
 
     def __init__(self, model_path: str, class_names: list):
         self.class_names = class_names
         self.device = torch.device("cpu")
 
-        self.model = create_rgbd_resnet18(len(class_names), pretrained=False)
+        self.model = RGBDAuxResNet18(len(class_names), pretrained=False)
         self.model.load_state_dict(torch.load(model_path, map_location=self.device))
         self.model.to(self.device)
         self.model.eval()
@@ -54,17 +55,25 @@ class PyTorchInferenceEngine:
         """(클래스명, 확률, 전체확률리스트) 반환"""
         pil_img = PILImage.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
 
+        depth_raw_mm = None
         if depth is not None:
-            depth_norm = np.clip(
-                depth.astype(np.float32) / MAX_DEPTH_MM, 0.0, 1.0)
+            depth_raw_mm = depth.astype(np.float32)
+            depth_norm = np.clip(depth_raw_mm / MAX_DEPTH_MM, 0.0, 1.0)
         else:
             h, w = frame.shape[:2]
             depth_norm = np.zeros((h, w), dtype=np.float32)
 
         inp = self.transform(pil_img, depth_norm).unsqueeze(0).to(self.device)
 
+        aux = compute_aux_features(
+            depth_raw_mm if depth_raw_mm is not None
+            else np.zeros(frame.shape[:2], dtype=np.float32),
+            ISAAC_SIM_INTRINSICS,
+        )
+        aux_t = torch.tensor([aux], dtype=torch.float32).to(self.device)
+
         with torch.no_grad():
-            output = self.model(inp)
+            output = self.model(inp, aux_t)
 
         probs = torch.softmax(output, dim=1)[0].cpu().numpy()
         pred_idx = int(np.argmax(probs))

@@ -20,7 +20,8 @@ import json
 import glob
 
 from depth_utils import (
-    create_rgbd_resnet18, RGBDTransform, RGBDDataset, IN_CHANNELS,
+    RGBDAuxResNet18, RGBDTransform, RGBDDataset, IN_CHANNELS,
+    NUM_AUX_FEATURES, ISAAC_SIM_INTRINSICS,
 )
 
 # ================================================================================
@@ -61,7 +62,7 @@ TEST_SIZE = 0.2
 NUM_EPOCHS = 60
 EARLY_STOPPING_PATIENCE = 10
 
-IMAGE_SIZE = 224
+IMAGE_SIZE = 448
 
 # RTX 5090 최적화 설정
 NUM_WORKERS = 8
@@ -148,6 +149,7 @@ print(f"RGBD 전처리 설정 완료:")
 print(f"  입력 크기: {IMAGE_SIZE}x{IMAGE_SIZE}, 채널: {IN_CHANNELS} (R,G,B,D)")
 print(f"  Train: Letterbox Resize + Pad + Rotation(5°) + ColorJitter(RGB) + Normalize")
 print(f"  Val: Letterbox Resize + Pad + Normalize")
+print(f"  보조 피처: {NUM_AUX_FEATURES}개 (물리 치수 mm)")
 
 step2_time = time.time() - step2_start_time
 print(f"\n[2단계 완료] 소요 시간: {step2_time:.2f}초")
@@ -196,33 +198,30 @@ for class_idx, class_name in enumerate(class_names):
 
 
 def adjust_batch_size_5090(data_size, force_cpu=False):
-    """RTX 5090 GPU에 최적화된 배치 사이즈 조정"""
+    """RTX 5090 GPU에 최적화된 배치 사이즈 조정 (448x448 기준)"""
     if data_size < 100:
-        batch_size = 32
+        batch_size = 16
     elif data_size < 500:
-        batch_size = 64
+        batch_size = 32
     elif data_size < 2000:
-        batch_size = 128
+        batch_size = 64
     else:
-        batch_size = 256
+        batch_size = 64
 
     if torch.cuda.is_available() and not force_cpu:
         gpu_memory_gb = torch.cuda.get_device_properties(0).total_memory / (1024**3)
         if gpu_memory_gb >= 24:
             if data_size >= 2000:
-                batch_size = min(batch_size, 512)
-            elif data_size >= 500:
-                batch_size = min(batch_size, 256)
-        elif gpu_memory_gb >= 16:
-            if data_size >= 2000:
-                batch_size = min(batch_size, 256)
-            elif data_size >= 500:
-                batch_size = min(batch_size, 128)
-        elif gpu_memory_gb >= 8:
-            if data_size >= 2000:
                 batch_size = min(batch_size, 128)
             elif data_size >= 500:
                 batch_size = min(batch_size, 64)
+        elif gpu_memory_gb >= 16:
+            if data_size >= 2000:
+                batch_size = min(batch_size, 64)
+            elif data_size >= 500:
+                batch_size = min(batch_size, 32)
+        elif gpu_memory_gb >= 8:
+            batch_size = min(batch_size, 16)
 
     return batch_size
 
@@ -277,8 +276,8 @@ step4_start_time = time.time()
 
 
 def create_resnet_model(num_classes, pretrained=True):
-    """RGBD 4채널 입력 ResNet18 모델 생성"""
-    return create_rgbd_resnet18(num_classes, pretrained=pretrained)
+    """RGBD 4채널 + 보조 피처 입력 ResNet18 모델 생성"""
+    return RGBDAuxResNet18(num_classes, pretrained=pretrained)
 
 
 if args.cpu:
@@ -298,7 +297,7 @@ else:
 
 model = create_resnet_model(num_classes=num_classes, pretrained=True).to(device)
 
-print(f"RGBD ResNet18 모델 로드 완료 (RGB: ImageNet 가중치, D: 평균 초기화)")
+print(f"RGBDAuxResNet18 모델 로드 완료 (RGB: ImageNet 가중치, D: 평균 초기화, Aux: {NUM_AUX_FEATURES}피처)")
 print(f"출력 클래스 수: {num_classes}")
 print(f"모델 파라미터 개수: {sum(p.numel() for p in model.parameters()):,}")
 
@@ -350,12 +349,13 @@ def train_one_epoch(model, dataloader, criterion, optimizer, device):
     correct = 0
     total = 0
 
-    for images, labels in dataloader:
+    for images, aux, labels in dataloader:
         images = images.to(device, non_blocking=True)
+        aux = aux.to(device, non_blocking=True)
         labels = labels.to(device, non_blocking=True)
 
         optimizer.zero_grad()
-        outputs = model(images)
+        outputs = model(images, aux)
         loss = criterion(outputs, labels)
 
         loss.backward()
@@ -385,11 +385,12 @@ def evaluate(model, dataloader, criterion, device, class_names,
     all_preds = []
 
     with torch.no_grad():
-        for images, labels in dataloader:
+        for images, aux, labels in dataloader:
             images = images.to(device, non_blocking=True)
+            aux = aux.to(device, non_blocking=True)
             labels = labels.to(device, non_blocking=True)
 
-            outputs = model(images)
+            outputs = model(images, aux)
             loss = criterion(outputs, labels)
 
             running_loss += loss.item() * images.size(0)
@@ -541,21 +542,21 @@ try:
     model_cpu = create_resnet_model(num_classes=num_classes, pretrained=False)
     model_cpu.load_state_dict(torch.load(MODEL_SAVE_PATH, map_location='cpu'))
     model_cpu.eval()
-    dummy_input = torch.randn(1, IN_CHANNELS, IMAGE_SIZE, IMAGE_SIZE)
+    dummy_images = torch.randn(1, IN_CHANNELS, IMAGE_SIZE, IMAGE_SIZE)
+    dummy_aux = torch.randn(1, NUM_AUX_FEATURES)
 
-    # dynamo=False: legacy exporter 사용 → 가중치가 단일 .onnx 파일에 내장됨
-    # (기본 dynamo=True는 외부 .onnx.data 파일로 분리되어 TensorRT 호환 문제 발생)
     torch.onnx.export(
         model_cpu,
-        dummy_input,
+        (dummy_images, dummy_aux),
         ONNX_SAVE_PATH,
         export_params=True,
         opset_version=13,
         do_constant_folding=True,
-        input_names=['input'],
+        input_names=['images', 'aux_features'],
         output_names=['output'],
         dynamic_axes={
-            'input': {0: 'batch_size'},
+            'images': {0: 'batch_size'},
+            'aux_features': {0: 'batch_size'},
             'output': {0: 'batch_size'}
         },
         dynamo=False

@@ -16,7 +16,7 @@ import glob
 import time
 from sklearn.model_selection import train_test_split
 
-from depth_utils import create_rgbd_resnet18, RGBDTransform, RGBDDataset
+from depth_utils import RGBDAuxResNet18, RGBDTransform, RGBDDataset, NUM_AUX_FEATURES
 
 # ================================================================================
 # 명령줄 인자 파싱
@@ -55,7 +55,7 @@ os.makedirs(ARTIFACTS_DIR, exist_ok=True)
 MODEL_PATH = os.path.join(ARTIFACTS_DIR, "best_door_cad_model_5090.pth")
 TRAIN_INDICES_PATH = os.path.join(ARTIFACTS_DIR, "training_indices_door_cad_5090.json")
 CLASS_NAMES_PATH = os.path.join(ARTIFACTS_DIR, "class_names_door_cad_5090.json")
-IMAGE_SIZE = 224
+IMAGE_SIZE = 448
 BATCH_SIZE = 32
 OUTPUT_IMAGE_PATH = os.path.join(ARTIFACTS_DIR, "evaluation_results_door_cad_5090.png")
 OUTPUT_WRONG_IMAGE_PATH = os.path.join(ARTIFACTS_DIR, "evaluation_wrong_predictions_door_cad_5090.png")
@@ -188,8 +188,8 @@ step3_start_time = time.time()
 
 
 def create_resnet_model(num_classes, pretrained=False):
-    """RGBD 4채널 입력 ResNet18 모델 생성"""
-    return create_rgbd_resnet18(num_classes, pretrained=pretrained)
+    """RGBD 4채널 + 보조 피처 입력 ResNet18 모델 생성"""
+    return RGBDAuxResNet18(num_classes, pretrained=pretrained)
 
 
 if args.cpu:
@@ -234,11 +234,12 @@ print("-" * 80)
 
 with torch.no_grad():
     sample_idx = 0
-    for batch_idx, (images, labels) in enumerate(test_loader):
+    for batch_idx, (images, aux, labels) in enumerate(test_loader):
         images = images.to(device)
+        aux = aux.to(device)
         labels = labels.to(device)
 
-        outputs = model(images)
+        outputs = model(images, aux)
         _, predictions = torch.max(outputs, 1)
 
         for i in range(len(labels)):

@@ -22,7 +22,8 @@ from PIL import Image
 import cv2
 
 from depth_utils import (
-    create_rgbd_resnet18, RGBDTransform, IN_CHANNELS, MAX_DEPTH_MM,
+    RGBDAuxResNet18, RGBDTransform, IN_CHANNELS, MAX_DEPTH_MM,
+    compute_aux_features, ISAAC_SIM_INTRINSICS,
 )
 
 # ================================================================================
@@ -54,7 +55,7 @@ CLASS_NAMES_PATH = os.path.join(ARTIFACTS_DIR, "class_names_door_5090.json")
 TRAIN_INDICES_PATH = os.path.join(ARTIFACTS_DIR, "training_indices_door_5090.json")
 DATASETS_DIR = os.path.join(PROJECT_DIR, "datasets")
 RESULTS_JSON_PATH = os.path.join(ARTIFACTS_DIR, "inference_evaluation_results.json")
-IMAGE_SIZE = 224
+IMAGE_SIZE = 448
 
 total_start_time = time.time()
 
@@ -116,7 +117,7 @@ print("=" * 80)
 
 device = torch.device("cpu")
 
-model = create_rgbd_resnet18(num_classes, pretrained=False)
+model = RGBDAuxResNet18(num_classes, pretrained=False)
 model.load_state_dict(torch.load(MODEL_PATH, map_location=device))
 model.to(device)
 model.eval()
@@ -153,19 +154,29 @@ with torch.no_grad():
 
         pil_img = Image.open(img_path).convert("RGB")
         depth_path = img_path.replace("rgb_", "depth_")
+        depth_raw_mm = None
         if os.path.exists(depth_path):
             raw = cv2.imread(depth_path, cv2.IMREAD_UNCHANGED)
-            depth_norm = np.clip(
-                raw.astype(np.float32) / MAX_DEPTH_MM, 0.0, 1.0
-            ) if raw is not None else np.zeros(
-                (pil_img.height, pil_img.width), dtype=np.float32)
+            if raw is not None:
+                depth_raw_mm = raw.astype(np.float32)
+                depth_norm = np.clip(depth_raw_mm / MAX_DEPTH_MM, 0.0, 1.0)
+            else:
+                depth_norm = np.zeros(
+                    (pil_img.height, pil_img.width), dtype=np.float32)
         else:
             depth_norm = np.zeros(
                 (pil_img.height, pil_img.width), dtype=np.float32)
+
         inp = val_transform(pil_img, depth_norm).unsqueeze(0).to(device)
+        aux = compute_aux_features(
+            depth_raw_mm if depth_raw_mm is not None
+            else np.zeros((pil_img.height, pil_img.width), dtype=np.float32),
+            ISAAC_SIM_INTRINSICS,
+        )
+        aux_t = torch.tensor([aux], dtype=torch.float32).to(device)
 
         t0 = time.time()
-        output = model(inp)
+        output = model(inp, aux_t)
         elapsed_ms = (time.time() - t0) * 1000
         inference_times.append(elapsed_ms)
 
