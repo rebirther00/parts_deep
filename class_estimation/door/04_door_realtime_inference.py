@@ -5,9 +5,12 @@ ZED X Mini 카메라 + PyTorch 모델을 사용하여
 
 실행:
     python 04_door_realtime_inference.py
+    python 04_door_realtime_inference.py --model artifacts/best_door_cad_model_5090.pth
     브라우저에서 http://0.0.0.0:5001 접속
 """
 
+import argparse
+import glob as glob_mod
 import json
 import os
 import threading
@@ -27,8 +30,67 @@ from depth_utils import (
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 ARTIFACTS_DIR = os.path.join(BASE_DIR, "artifacts")
-MODEL_PATH = os.path.join(ARTIFACTS_DIR, "best_door_model_5090.pth")
-CLASS_NAMES_PATH = os.path.join(ARTIFACTS_DIR, "class_names_door_5090.json")
+
+# ── 명령줄 인자 ───────────────────────────────────────────
+parser = argparse.ArgumentParser(
+    description="굴착기 Door 실시간 분류 추론 서버",
+    formatter_class=argparse.RawTextHelpFormatter,
+)
+parser.add_argument(
+    "--model", type=str,
+    default=os.path.join(ARTIFACTS_DIR, "best_door_model_5090.pth"),
+    help="모델 파일 경로 (기본: artifacts/best_door_model_5090.pth)",
+)
+parser.add_argument(
+    "--class_names", type=str, default=None,
+    help="클래스명 JSON 파일 경로 (미지정 시 모델명에서 자동 추론)",
+)
+parser.add_argument(
+    "--list_models", action="store_true",
+    help="사용 가능한 모델 목록 출력 후 종료",
+)
+args = parser.parse_args()
+
+
+def _infer_class_names_path(model_path):
+    """모델 파일명에서 대응하는 class_names JSON 경로를 추론한다.
+
+    best_door_cad_model_5090.pth → class_names_door_cad_5090.json
+    """
+    fname = os.path.basename(model_path)
+    cn_fname = fname.replace("best_", "class_names_").replace("_model", "")
+    cn_fname = os.path.splitext(cn_fname)[0] + ".json"
+    return os.path.join(os.path.dirname(model_path), cn_fname)
+
+
+def _list_available_models():
+    models = sorted(glob_mod.glob(os.path.join(ARTIFACTS_DIR, "*.pth")))
+    if not models:
+        print("사용 가능한 모델이 없습니다.")
+        return
+    print(f"사용 가능한 모델 ({len(models)}개):")
+    for m in models:
+        cn = _infer_class_names_path(m)
+        cn_status = "✅" if os.path.exists(cn) else "⚠️  클래스명 파일 없음"
+        print(f"  {os.path.basename(m)}  [{cn_status}]")
+
+
+if args.list_models:
+    _list_available_models()
+    raise SystemExit(0)
+
+MODEL_PATH = args.model
+CLASS_NAMES_PATH = args.class_names or _infer_class_names_path(MODEL_PATH)
+
+if not os.path.exists(MODEL_PATH):
+    print(f"❌ 모델 파일을 찾을 수 없습니다: {MODEL_PATH}")
+    _list_available_models()
+    raise SystemExit(1)
+
+if not os.path.exists(CLASS_NAMES_PATH):
+    print(f"❌ 클래스명 파일을 찾을 수 없습니다: {CLASS_NAMES_PATH}")
+    print(f"   --class_names 옵션으로 직접 지정해주세요.")
+    raise SystemExit(1)
 
 IMAGE_SIZE = 448
 INFERENCE_INTERVAL = 0.5
@@ -192,6 +254,9 @@ def api_camera_info():
 # ── 엔트리포인트 ────────────────────────────────────────
 
 if __name__ == "__main__":
+    print(f"모델: {os.path.basename(MODEL_PATH)}")
+    print(f"클래스명: {os.path.basename(CLASS_NAMES_PATH)}")
+
     with open(CLASS_NAMES_PATH, encoding="utf-8") as f:
         class_names = json.load(f)
     print(f"클래스: {class_names}")
