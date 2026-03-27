@@ -33,6 +33,8 @@ parser.add_argument('-cpu', '--cpu', action='store_true',
 DEFAULT_DATASET_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "datasets")
 parser.add_argument('--dataset_dir', type=str, default=DEFAULT_DATASET_DIR,
                     help='데이터셋 경로 (기본: door/datasets)')
+parser.add_argument('--full_train', action='store_true',
+                    help='전체 데이터를 학습에 사용 (배포용, Train/Test 분할 없음)')
 args = parser.parse_args()
 
 # ================================================================================
@@ -161,39 +163,61 @@ print("3단계: Train/Test 데이터 분할")
 print("=" * 80)
 step3_start_time = time.time()
 
-indices = list(range(len(image_paths)))
-train_indices, test_indices = train_test_split(
-    indices,
-    test_size=TEST_SIZE,
-    random_state=RANDOM_SEED,
-    stratify=labels
-)
+FULL_TRAIN = args.full_train
 
-train_paths = [image_paths[i] for i in train_indices]
-train_labels = [labels[i] for i in train_indices]
-test_paths = [image_paths[i] for i in test_indices]
-test_labels = [labels[i] for i in test_indices]
+if FULL_TRAIN:
+    print("\n⚡ 전체 학습 모드 (--full_train): 모든 데이터를 학습에 사용합니다.")
+    train_paths = list(image_paths)
+    train_labels = list(labels)
+    test_paths = []
+    test_labels = []
 
-train_data_info = {
-    "train_indices": train_indices,
-    "test_indices": test_indices,
-    "train_paths": train_paths,
-    "test_paths": test_paths,
-    "class_names": class_names,
-    "random_seed": RANDOM_SEED
-}
+    train_data_info = {
+        "mode": "full_train",
+        "train_paths": train_paths,
+        "class_names": class_names,
+        "random_seed": RANDOM_SEED,
+    }
+else:
+    indices = list(range(len(image_paths)))
+    train_indices, test_indices = train_test_split(
+        indices,
+        test_size=TEST_SIZE,
+        random_state=RANDOM_SEED,
+        stratify=labels
+    )
+
+    train_paths = [image_paths[i] for i in train_indices]
+    train_labels = [labels[i] for i in train_indices]
+    test_paths = [image_paths[i] for i in test_indices]
+    test_labels = [labels[i] for i in test_indices]
+
+    train_data_info = {
+        "mode": "split",
+        "train_indices": train_indices,
+        "test_indices": test_indices,
+        "train_paths": train_paths,
+        "test_paths": test_paths,
+        "class_names": class_names,
+        "random_seed": RANDOM_SEED,
+    }
+
 with open(TRAIN_INDICES_PATH, 'w', encoding='utf-8') as f:
     json.dump(train_data_info, f, ensure_ascii=False, indent=2)
 print(f"학습 데이터 정보 저장: {TRAIN_INDICES_PATH}")
 
 print(f"\nTrain 데이터: {len(train_paths)}장")
-print(f"Test 데이터: {len(test_paths)}장")
+if not FULL_TRAIN:
+    print(f"Test 데이터: {len(test_paths)}장")
 
 print("\n클래스별 분포:")
 for class_idx, class_name in enumerate(class_names):
     train_count = sum(1 for l in train_labels if l == class_idx)
-    test_count = sum(1 for l in test_labels if l == class_idx)
-    print(f"  {class_name}: Train {train_count}장, Test {test_count}장")
+    if FULL_TRAIN:
+        print(f"  {class_name}: {train_count}장 (전체)")
+    else:
+        test_count = sum(1 for l in test_labels if l == class_idx)
+        print(f"  {class_name}: Train {train_count}장, Test {test_count}장")
 
 
 def adjust_batch_size_5090(data_size, force_cpu=False):
@@ -233,7 +257,6 @@ else:
     print(f"\n배치 사이즈 고정: {batch_size}")
 
 train_dataset = RGBDDataset(train_paths, train_labels, transform=train_transform)
-test_dataset = RGBDDataset(test_paths, test_labels, transform=val_transform)
 
 num_workers = NUM_WORKERS if torch.cuda.is_available() and not args.cpu else 0
 pin_memory = torch.cuda.is_available() and not args.cpu
@@ -247,18 +270,23 @@ train_loader = DataLoader(
     prefetch_factor=PREFETCH_FACTOR if num_workers > 0 else None,
     persistent_workers=True if num_workers > 0 else False
 )
-test_loader = DataLoader(
-    test_dataset,
-    batch_size=batch_size,
-    shuffle=False,
-    num_workers=num_workers,
-    pin_memory=pin_memory,
-    prefetch_factor=PREFETCH_FACTOR if num_workers > 0 else None,
-    persistent_workers=True if num_workers > 0 else False
-)
+
+test_loader = None
+if not FULL_TRAIN:
+    test_dataset = RGBDDataset(test_paths, test_labels, transform=val_transform)
+    test_loader = DataLoader(
+        test_dataset,
+        batch_size=batch_size,
+        shuffle=False,
+        num_workers=num_workers,
+        pin_memory=pin_memory,
+        prefetch_factor=PREFETCH_FACTOR if num_workers > 0 else None,
+        persistent_workers=True if num_workers > 0 else False
+    )
 
 print(f"Train Batch 개수: {len(train_loader)}")
-print(f"Test Batch 개수: {len(test_loader)}")
+if test_loader:
+    print(f"Test Batch 개수: {len(test_loader)}")
 print(f"DataLoader 설정: num_workers={num_workers}, pin_memory={pin_memory}, "
       f"prefetch_factor={PREFETCH_FACTOR if num_workers > 0 else 'N/A'}")
 
@@ -426,29 +454,44 @@ print("7단계: 모델 학습 시작")
 print("=" * 80)
 step7_start_time = time.time()
 
+best_train_loss = float('inf')
 best_val_accuracy = 0.0
 best_val_loss = float('inf')
 patience_counter = 0
 
 print(f"총 에포크: {NUM_EPOCHS}")
 print(f"배치 크기: {batch_size} (RTX 5090 최적화)")
-print(f"Early Stopping Patience: {EARLY_STOPPING_PATIENCE} 에포크")
+if FULL_TRAIN:
+    print(f"모드: 전체 학습 (Train Loss 기반 Early Stopping)")
+else:
+    print(f"Early Stopping Patience: {EARLY_STOPPING_PATIENCE} 에포크")
 print("\n학습 시작...\n")
 
 for epoch in range(NUM_EPOCHS):
     train_loss, train_acc = train_one_epoch(model, train_loader, criterion, optimizer, device)
-    val_loss, val_acc, class_accs = evaluate(model, test_loader, criterion, device, class_names)
 
-    scheduler.step(val_loss)
-    current_lr = optimizer.param_groups[0]['lr']
+    if FULL_TRAIN:
+        scheduler.step(train_loss)
+        current_lr = optimizer.param_groups[0]['lr']
 
-    if val_acc > best_val_accuracy:
-        best_val_accuracy = val_acc
-        best_val_loss = val_loss
-        patience_counter = 0
-        torch.save(model.state_dict(), MODEL_SAVE_PATH)
+        if train_loss < best_train_loss:
+            best_train_loss = train_loss
+            patience_counter = 0
+            torch.save(model.state_dict(), MODEL_SAVE_PATH)
+        else:
+            patience_counter += 1
     else:
-        patience_counter += 1
+        val_loss, val_acc, class_accs = evaluate(model, test_loader, criterion, device, class_names)
+        scheduler.step(val_loss)
+        current_lr = optimizer.param_groups[0]['lr']
+
+        if val_acc > best_val_accuracy:
+            best_val_accuracy = val_acc
+            best_val_loss = val_loss
+            patience_counter = 0
+            torch.save(model.state_dict(), MODEL_SAVE_PATH)
+        else:
+            patience_counter += 1
 
     if torch.cuda.is_available() and not args.cpu:
         if (epoch + 1) % 10 == 0:
@@ -457,11 +500,14 @@ for epoch in range(NUM_EPOCHS):
     if (epoch + 1) % 5 == 0 or epoch == 0:
         print(f"Epoch [{epoch+1}/{NUM_EPOCHS}]")
         print(f"  Train Loss: {train_loss:.4f} | Train Accuracy: {train_acc:.2f}%")
-        print(f"  Val Loss:   {val_loss:.4f} | Val Accuracy:   {val_acc:.2f}%")
-        print(f"  클래스별 정확도:")
-        for name, acc in class_accs.items():
-            print(f"    - {name}: {acc:.2f}%")
-        print(f"  Best Val Accuracy: {best_val_accuracy:.2f}% | LR: {current_lr:.6f}")
+        if FULL_TRAIN:
+            print(f"  Best Train Loss: {best_train_loss:.4f} | LR: {current_lr:.6f}")
+        else:
+            print(f"  Val Loss:   {val_loss:.4f} | Val Accuracy:   {val_acc:.2f}%")
+            print(f"  클래스별 정확도:")
+            for name, acc in class_accs.items():
+                print(f"    - {name}: {acc:.2f}%")
+            print(f"  Best Val Accuracy: {best_val_accuracy:.2f}% | LR: {current_lr:.6f}")
         if patience_counter > 0:
             print(f"  Early Stopping: {patience_counter}/{EARLY_STOPPING_PATIENCE}")
         print("-" * 60)
@@ -471,7 +517,10 @@ for epoch in range(NUM_EPOCHS):
         break
 
 print("\n학습 완료!")
-print(f"최고 Validation Accuracy: {best_val_accuracy:.2f}%")
+if FULL_TRAIN:
+    print(f"최저 Train Loss: {best_train_loss:.4f}")
+else:
+    print(f"최고 Validation Accuracy: {best_val_accuracy:.2f}%")
 print(f"모델 저장 위치: {MODEL_SAVE_PATH}")
 
 step7_time = time.time() - step7_start_time
@@ -485,17 +534,31 @@ print("8단계: 최종 평가")
 print("=" * 80)
 step8_start_time = time.time()
 
-model.load_state_dict(torch.load(MODEL_SAVE_PATH, map_location=device))
-model.eval()
+if FULL_TRAIN:
+    print("\n⚡ 전체 학습 모드: 별도 테스트 셋이 없으므로 학습 데이터에 대한 최종 정확도를 확인합니다.")
+    model.load_state_dict(torch.load(MODEL_SAVE_PATH, map_location=device))
+    model.eval()
 
-final_loss, final_acc, final_class_accs = evaluate(model, test_loader, criterion, device, class_names)
+    final_loss, final_acc, final_class_accs = evaluate(model, train_loader, criterion, device, class_names)
 
-print(f"\n최종 테스트 결과:")
-print(f"  Loss: {final_loss:.4f}")
-print(f"  Accuracy: {final_acc:.2f}%")
-print(f"\n클래스별 정확도:")
-for name, acc in final_class_accs.items():
-    print(f"  - {name}: {acc:.2f}%")
+    print(f"\n최종 학습 데이터 결과 (참고용):")
+    print(f"  Loss: {final_loss:.4f}")
+    print(f"  Accuracy: {final_acc:.2f}%")
+    print(f"\n클래스별 정확도:")
+    for name, acc in final_class_accs.items():
+        print(f"  - {name}: {acc:.2f}%")
+else:
+    model.load_state_dict(torch.load(MODEL_SAVE_PATH, map_location=device))
+    model.eval()
+
+    final_loss, final_acc, final_class_accs = evaluate(model, test_loader, criterion, device, class_names)
+
+    print(f"\n최종 테스트 결과:")
+    print(f"  Loss: {final_loss:.4f}")
+    print(f"  Accuracy: {final_acc:.2f}%")
+    print(f"\n클래스별 정확도:")
+    for name, acc in final_class_accs.items():
+        print(f"  - {name}: {acc:.2f}%")
 
 step8_time = time.time() - step8_start_time
 print(f"\n[8단계 완료] 소요 시간: {step8_time:.2f}초")
@@ -558,6 +621,7 @@ print("\n" + "=" * 80)
 print("모든 작업 완료!")
 print("=" * 80)
 print(f"\n[전체 실행 시간 요약]")
+print(f"  모드: {'전체 학습 (--full_train)' if FULL_TRAIN else '분할 학습 (80/20)'}")
 print(f"  디바이스: {device}")
 print(f"  배치 사이즈: {batch_size} (RTX 5090 최적화)")
 print(f"  워커 수: {num_workers}")
