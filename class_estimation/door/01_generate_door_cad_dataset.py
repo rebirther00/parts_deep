@@ -285,7 +285,7 @@ def generate_class_dataset(class_name, class_config, class_index):
             )
 
             camera = rep.create.camera(position=init_cam, look_at=(cx, cy, cz))
-            render_product = rep.create.render_product(camera, resolution=(1024, 1024))
+            render_product = rep.create.render_product(camera, resolution=(1920, 1080))
 
             with rep.trigger.on_frame(max_execs=IMAGES_PER_CLASS):
                 with rep.create.group([camera]):
