@@ -25,7 +25,7 @@ from PIL import Image as PILImage
 from camera_utils import CameraManager
 from depth_utils import (
     RGBDAuxResNet18, RGBDTransform, MAX_DEPTH_MM, IN_CHANNELS,
-    compute_aux_features, ISAAC_SIM_INTRINSICS,
+    compute_aux_features, DEFAULT_INTRINSICS,
 )
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -178,7 +178,7 @@ class PyTorchInferenceEngine:
         aux = compute_aux_features(
             depth_raw_mm if depth_raw_mm is not None
             else np.zeros(frame.shape[:2], dtype=np.float32),
-            ISAAC_SIM_INTRINSICS,
+            DEFAULT_INTRINSICS,
             fg_mask=fg_mask,
         )
         aux_t = torch.tensor([aux], dtype=torch.float32).to(self.device)

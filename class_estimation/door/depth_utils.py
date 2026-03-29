@@ -23,6 +23,17 @@ DEPTH_STD = 0.25
 IN_CHANNELS = 4           # R, G, B, D
 NUM_AUX_FEATURES = 3      # 보조 피처 수 (width, height, aspect)
 
+# ZED X Mini 4mm 렌즈 (HFOV=80°, 1920×1080)
+# fx = 960 / tan(40°) ≈ 1144
+ZED_X_MINI_4MM_INTRINSICS = {
+    "fx": 1144.0,
+    "fy": 1144.0,
+    "cx": 960.0,
+    "cy": 540.0,
+    "width": 1920,
+    "height": 1080,
+}
+
 # Isaac Sim 기본 USD 카메라 (focal=50mm, aperture=36mm, 1920×1080)
 ISAAC_SIM_INTRINSICS = {
     "fx": 2666.67,
@@ -32,6 +43,8 @@ ISAAC_SIM_INTRINSICS = {
     "width": 1920,
     "height": 1080,
 }
+
+DEFAULT_INTRINSICS = ZED_X_MINI_4MM_INTRINSICS
 
 
 # ── Depth 로드 / 저장 ────────────────────────────────────
@@ -124,7 +137,7 @@ def compute_aux_features(depth_raw_mm, intrinsics=None, fg_mask=None):
         [physical_width_mm, physical_height_mm, aspect_ratio]
     """
     if intrinsics is None:
-        intrinsics = ISAAC_SIM_INTRINSICS
+        intrinsics = DEFAULT_INTRINSICS
 
     valid = depth_raw_mm > 0
     if valid.sum() < 10:
@@ -367,7 +380,7 @@ class RGBDDataset(Dataset):
                  class_names=None, intrinsics=None):
         self.image_paths = image_paths
         self.transform = transform
-        self.intrinsics = intrinsics or ISAAC_SIM_INTRINSICS
+        self.intrinsics = intrinsics or DEFAULT_INTRINSICS
 
         if labels is not None:
             self.labels = list(labels)

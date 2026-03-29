@@ -21,7 +21,7 @@ import glob
 
 from depth_utils import (
     RGBDAuxResNet18, RGBDTransform, RGBDDataset, IN_CHANNELS,
-    NUM_AUX_FEATURES, ISAAC_SIM_INTRINSICS,
+    NUM_AUX_FEATURES, DEFAULT_INTRINSICS,
 )
 
 # ================================================================================
