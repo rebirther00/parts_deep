@@ -14,7 +14,7 @@ import json
 import argparse
 import glob
 import time
-from sklearn.model_selection import train_test_split
+
 
 from depth_utils import RGBDAuxResNet18, RGBDTransform, RGBDDataset, NUM_AUX_FEATURES
 
@@ -30,10 +30,6 @@ parser.add_argument('--dataset_dir', type=str, default=None,
                     help='평가에 사용할 데이터셋 경로. 미지정 시 학습 시 저장된 test_paths 사용')
 parser.add_argument('--use_all', action='store_true',
                     help='dataset_dir의 전체 이미지를 평가에 사용 (크로스 도메인 평가용)')
-parser.add_argument('--test_size', type=float, default=0.2,
-                    help='dataset_dir 스캔 시 test 비율 (기본 0.2, --use_all 시 무시)')
-parser.add_argument('--seed', type=int, default=42,
-                    help='dataset_dir 스캔 시 랜덤 시드 (기본 42)')
 args = parser.parse_args()
 
 # ================================================================================
@@ -85,23 +81,6 @@ def scan_dataset_for_eval(dataset_dir, class_names):
     return all_paths
 
 
-def split_paths_train_test(image_paths, class_names, test_size=0.2, seed=42):
-    """이미지 경로 목록을 클래스 비율 유지(stratify)로 train/test split"""
-    labels = []
-    for p in image_paths:
-        cls = os.path.basename(os.path.dirname(p))
-        labels.append(class_names.index(cls))
-
-    indices = list(range(len(image_paths)))
-    _, test_idx = train_test_split(
-        indices,
-        test_size=test_size,
-        random_state=seed,
-        stratify=labels
-    )
-    test_paths = [image_paths[i] for i in test_idx]
-    return test_paths
-
 
 if not os.path.exists(TRAIN_INDICES_PATH):
     raise FileNotFoundError(
@@ -116,16 +95,34 @@ class_names = train_data_info['class_names']
 num_classes = len(class_names)
 
 if args.dataset_dir:
-    all_paths = scan_dataset_for_eval(args.dataset_dir, class_names)
-    if len(all_paths) == 0:
-        raise FileNotFoundError(f"dataset_dir에서 rgb_*.png를 찾지 못했습니다: {args.dataset_dir}")
+    dataset_dir = os.path.abspath(args.dataset_dir)
 
     if args.use_all:
+        all_paths = scan_dataset_for_eval(dataset_dir, class_names)
+        if len(all_paths) == 0:
+            raise FileNotFoundError(f"dataset_dir에서 rgb_*.png를 찾지 못했습니다: {dataset_dir}")
         test_paths = all_paths
         print(f"\n[크로스 도메인 평가] 전체 이미지 사용 (--use_all)")
     else:
-        test_paths = split_paths_train_test(all_paths, class_names,
-                                            test_size=args.test_size, seed=args.seed)
+        # 학습 시 저장된 test_paths의 파일명을 dataset_dir 경로로 치환
+        orig_test_paths = train_data_info['test_paths']
+        test_paths = []
+        missing = 0
+        for p in orig_test_paths:
+            # .../datasets/E25_door_LH_FRT/rgb_0099.png → 클래스/파일명 추출
+            cls_name = os.path.basename(os.path.dirname(p))
+            filename = os.path.basename(p)
+            new_path = os.path.join(dataset_dir, cls_name, filename)
+            if os.path.exists(new_path):
+                test_paths.append(new_path)
+            else:
+                missing += 1
+        if missing > 0:
+            print(f"\n⚠️ {missing}장이 {dataset_dir}에 존재하지 않아 제외됨")
+        if len(test_paths) == 0:
+            raise FileNotFoundError(
+                f"학습 test split에 대응하는 이미지가 {dataset_dir}에 없습니다")
+        print(f"\n[증강 데이터 평가] 학습 test split 기준 경로 치환 ({len(test_paths)}장)")
 else:
     test_paths = train_data_info['test_paths']
 
