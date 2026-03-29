@@ -60,7 +60,7 @@ TRAIN_INDICES_PATH = os.path.join(ARTIFACTS_DIR, "training_indices_door_5090.jso
 
 BATCH_SIZE = None   # None: 자동 조정
 RANDOM_SEED = 42
-TEST_SIZE = 0.2
+TEST_SIZE = 0.3
 NUM_EPOCHS = 60
 EARLY_STOPPING_PATIENCE = 10
 

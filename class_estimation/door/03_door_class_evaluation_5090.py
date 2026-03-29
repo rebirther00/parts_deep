@@ -59,6 +59,7 @@ IMAGE_SIZE = 448
 BATCH_SIZE = 32
 OUTPUT_IMAGE_PATH = os.path.join(ARTIFACTS_DIR, "evaluation_results_door_5090.png")
 OUTPUT_WRONG_IMAGE_PATH = os.path.join(ARTIFACTS_DIR, "evaluation_wrong_predictions_door_5090.png")
+OUTPUT_CM_IMAGE_PATH = os.path.join(ARTIFACTS_DIR, "confusion_matrix_door_5090.png")
 RESULTS_JSON_PATH = os.path.join(ARTIFACTS_DIR, "evaluation_results_door_5090.json")
 
 total_start_time = time.time()
@@ -429,6 +430,72 @@ print("-" * (20 + 12 * num_classes))
 for i, name in enumerate(class_names):
     row = "".join([f"{confusion_matrix[i][j]:>12d}" for j in range(num_classes)])
     print(f"실제 {name[:14]:>14s} |{row}")
+
+# 혼동 행렬 히트맵 이미지 생성
+def create_confusion_matrix_heatmap(cm, class_names, save_path):
+    """혼동 행렬을 히트맵 이미지로 저장"""
+    n = len(class_names)
+    cm_arr = np.array(cm, dtype=np.float32)
+
+    row_sums = cm_arr.sum(axis=1, keepdims=True)
+    cm_pct = np.where(row_sums > 0, cm_arr / row_sums * 100, 0)
+
+    cell_size = 80
+    label_margin = 180
+    title_height = 50
+    colorbar_width = 60
+    w = label_margin + n * cell_size + colorbar_width + 20
+    h = title_height + label_margin + n * cell_size + 10
+
+    img = Image.new('RGB', (w, h), 'white')
+    draw = ImageDraw.Draw(img)
+    font = load_font()
+
+    draw.text((w // 2 - 60, 10), "Confusion Matrix", fill='black', font=font)
+
+    ox, oy = label_margin, title_height + label_margin // 2
+
+    for i in range(n):
+        for j in range(n):
+            x0 = ox + j * cell_size
+            y0 = oy + i * cell_size
+            x1 = x0 + cell_size
+            y1 = y0 + cell_size
+
+            pct = cm_pct[i][j]
+            if i == j:
+                intensity = int(min(pct / 100, 1.0) * 200)
+                color = (220 - intensity, 255 - intensity // 4, 220 - intensity)
+            else:
+                intensity = int(min(pct / 50, 1.0) * 200)
+                color = (255 - intensity // 4, 220 - intensity, 220 - intensity)
+
+            draw.rectangle([x0, y0, x1, y1], fill=color, outline=(180, 180, 180))
+
+            count = cm[i][j]
+            text = f"{count}\n({pct:.0f}%)" if count > 0 else "0"
+            txt_color = (0, 0, 0) if pct < 80 else (255, 255, 255)
+            lines = text.split('\n')
+            for li, line in enumerate(lines):
+                tw = font.getlength(line) if hasattr(font, 'getlength') else len(line) * 7
+                tx = x0 + (cell_size - tw) / 2
+                ty = y0 + cell_size // 2 - 12 + li * 14
+                draw.text((tx, ty), line, fill=txt_color, font=font)
+
+    for i, name in enumerate(class_names):
+        short = name.replace("_door_", "_").replace("E30_E38", "E3x")
+        ty = oy + i * cell_size + cell_size // 2 - 6
+        draw.text((5, ty), short, fill='black', font=font)
+        tx = ox + i * cell_size + cell_size // 2 - len(short) * 3
+        draw.text((tx, oy - 18), short, fill='black', font=font)
+
+    draw.text((ox + n * cell_size // 2 - 10, oy - 35), "예측 (Predicted)", fill='black', font=font)
+
+    img.save(save_path, 'PNG', quality=95)
+    print(f"\n혼동 행렬 히트맵 저장: {save_path}")
+
+print("\n혼동 행렬 히트맵 생성 중...")
+create_confusion_matrix_heatmap(confusion_matrix, class_names, OUTPUT_CM_IMAGE_PATH)
 
 # 오류 분석
 errors = total - correct
