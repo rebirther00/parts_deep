@@ -489,7 +489,7 @@ def create_confusion_matrix_heatmap(cm, class_names, save_path):
         tx = ox + i * cell_size + cell_size // 2 - len(short) * 3
         draw.text((tx, oy - 18), short, fill='black', font=font)
 
-    draw.text((ox + n * cell_size // 2 - 10, oy - 35), "예측 (Predicted)", fill='black', font=font)
+    draw.text((ox + n * cell_size // 2 - 20, oy - 35), "Predicted", fill='black', font=font)
 
     img.save(save_path, 'PNG', quality=95)
     print(f"\n혼동 행렬 히트맵 저장: {save_path}")
