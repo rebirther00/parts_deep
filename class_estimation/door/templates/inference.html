@@ -24,7 +24,7 @@
         .card { background: #1e293b; border-radius: 8px; padding: 16px; }
         .card h3 { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.5px; color: #94a3b8; margin-bottom: 12px; }
 
-        .result-class { font-size: 1.8rem; font-weight: 700; color: #22c55e; margin-bottom: 4px; }
+        .result-class { font-size: 1.3rem; font-weight: 700; color: #22c55e; margin-bottom: 4px; word-break: break-all; }
         .result-conf { font-size: 1.1rem; color: #94a3b8; }
 
         .prob-bar { margin-bottom: 10px; }
@@ -83,24 +83,19 @@
             </div>
             <div class="stat-row">
                 <span>엔진</span>
-                <span class="stat-value">TensorRT FP16</span>
+                <span class="stat-value" id="engineInfo">PyTorch</span>
             </div>
         </div>
     </div>
 </div>
 
 <script>
-const CLASS_COLORS = {
-    "E25_door_LH_FRT": "fill-e25",
-    "E30_door_LH_FRT": "fill-e30",
-    "E38_door_LH_FRT": "fill-e38",
-};
-
-const CLASS_LABELS = {
-    "E25_door_LH_FRT": "E25",
-    "E30_door_LH_FRT": "E30",
-    "E38_door_LH_FRT": "E38",
-};
+function getBarColor(className) {
+    if (className.startsWith("E25")) return "fill-e25";
+    if (className.startsWith("E30") && !className.startsWith("E30_E38")) return "fill-e30";
+    if (className.startsWith("E38") || className.startsWith("E30_E38")) return "fill-e38";
+    return "fill-e25";
+}
 
 async function loadCameraInfo() {
     try {
@@ -109,6 +104,7 @@ async function loadCameraInfo() {
         const badge = document.getElementById("cameraBadge");
         badge.textContent = data.camera_type;
         if (data.connected) badge.classList.add("connected");
+        if (data.engine) document.getElementById("engineInfo").textContent = data.engine;
     } catch {}
 }
 
@@ -117,7 +113,7 @@ async function pollResult() {
         const res = await fetch("/api/inference_result");
         const r = await res.json();
 
-        document.getElementById("resultClass").textContent = CLASS_LABELS[r.class] || r.class;
+        document.getElementById("resultClass").textContent = r.class;
         document.getElementById("resultClass").style.color =
             r.confidence > 70 ? "#22c55e" : "#f59e0b";
         document.getElementById("resultConf").textContent =
@@ -129,8 +125,8 @@ async function pollResult() {
             let html = "";
             for (const p of r.all_probs) {
                 const pct = (p.prob * 100).toFixed(1);
-                const label = CLASS_LABELS[p.class] || p.class;
-                const fill = CLASS_COLORS[p.class] || "fill-e25";
+                const label = p.class;
+                const fill = getBarColor(p.class);
                 html +=
                     '<div class="prob-bar">' +
                     '<div class="label"><span>' + label + '</span><span>' + pct + '%</span></div>' +

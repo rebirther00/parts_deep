@@ -122,15 +122,30 @@ class PyTorchInferenceEngine:
     def __init__(self, model_path: str, class_names: list,
                  use_sam: bool = True):
         self.class_names = class_names
-        self.device = torch.device("cpu")
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.use_fp16 = (self.device.type == "cuda")
 
         self.model = RGBDAuxResNet18(len(class_names), pretrained=False)
         self.model.load_state_dict(
             torch.load(model_path, map_location=self.device))
         self.model.to(self.device)
+        if self.use_fp16:
+            self.model.half()
         self.model.eval()
 
         self.transform = RGBDTransform(IMAGE_SIZE, is_train=False)
+
+        # CUDA 워밍업 (첫 추론 지연 방지)
+        if self.device.type == "cuda":
+            dummy_img = torch.randn(1, IN_CHANNELS, IMAGE_SIZE, IMAGE_SIZE,
+                                    device=self.device)
+            dummy_aux = torch.randn(1, 3, device=self.device)
+            if self.use_fp16:
+                dummy_img, dummy_aux = dummy_img.half(), dummy_aux.half()
+            with torch.no_grad():
+                self.model(dummy_img, dummy_aux)
+            torch.cuda.synchronize()
+            print("CUDA 워밍업 완료")
 
         self.sam_predictor = None
         if use_sam and os.path.exists(MOBILE_SAM_PATH):
@@ -160,6 +175,8 @@ class PyTorchInferenceEngine:
 
     def infer(self, frame: np.ndarray, depth: np.ndarray = None) -> tuple:
         """(클래스명, 확률, 전체확률리스트) 반환"""
+        t_start = time.time()
+
         frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         pil_img = PILImage.fromarray(frame_rgb)
 
@@ -172,8 +189,12 @@ class PyTorchInferenceEngine:
             depth_norm = np.zeros((h, w), dtype=np.float32)
 
         inp = self.transform(pil_img, depth_norm).unsqueeze(0).to(self.device)
+        if self.use_fp16:
+            inp = inp.half()
+        t_preprocess = time.time()
 
         fg_mask = self._generate_sam_mask(frame_rgb)
+        t_sam = time.time()
 
         aux = compute_aux_features(
             depth_raw_mm if depth_raw_mm is not None
@@ -182,18 +203,41 @@ class PyTorchInferenceEngine:
             fg_mask=fg_mask,
         )
         aux_t = torch.tensor([aux], dtype=torch.float32).to(self.device)
+        if self.use_fp16:
+            aux_t = aux_t.half()
 
         with torch.no_grad():
             output = self.model(inp, aux_t)
+        if self.device.type == "cuda":
+            torch.cuda.synchronize()
+        t_model = time.time()
 
-        probs = torch.softmax(output, dim=1)[0].cpu().numpy()
+        probs = torch.softmax(output.float(), dim=1)[0].cpu().numpy()
         pred_idx = int(np.argmax(probs))
+
+        self._log_timing(t_start, t_preprocess, t_sam, t_model)
+
         return (
             self.class_names[pred_idx],
             float(probs[pred_idx]),
             [{"class": self.class_names[i], "prob": float(probs[i])}
              for i in range(len(self.class_names))],
         )
+
+    _log_count = 0
+
+    def _log_timing(self, t_start, t_preprocess, t_sam, t_model):
+        """10회마다 단계별 소요 시간을 로그로 출력한다."""
+        self._log_count += 1
+        if self._log_count % 10 != 1:
+            return
+        pre_ms = (t_preprocess - t_start) * 1000
+        sam_ms = (t_sam - t_preprocess) * 1000
+        model_ms = (t_model - t_sam) * 1000
+        total_ms = (t_model - t_start) * 1000
+        print(f"[추론 #{self._log_count}] "
+              f"전처리: {pre_ms:.0f}ms | SAM: {sam_ms:.0f}ms | "
+              f"모델: {model_ms:.0f}ms | 합계: {total_ms:.0f}ms")
 
 
 # ── 추론 상태 ───────────────────────────────────────────
@@ -294,9 +338,12 @@ def api_inference_result():
 
 @app.route("/api/camera_info")
 def api_camera_info():
+    device_str = str(engine.device) if engine else "N/A"
+    fp16 = engine.use_fp16 if engine else False
     return jsonify({
         "camera_type": camera.camera_type,
         "connected": camera.running,
+        "engine": f"PyTorch {'FP16' if fp16 else 'FP32'} ({device_str})",
     })
 
 
