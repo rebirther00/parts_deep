@@ -24,9 +24,9 @@ def preprocess_depth(depth_mm: np.ndarray) -> np.ndarray:
     valid = depth_mm > 0
     if valid.sum() < 100:
         return depth_mm
-    depth_u16 = np.clip(depth_mm, 0, 65535).astype(np.uint16)
-    filtered = cv2.bilateralFilter(depth_u16, d=5, sigmaColor=50, sigmaSpace=50)
-    result = filtered.astype(np.float32)
+    depth_f32 = np.clip(depth_mm, 0, 65535).astype(np.float32)
+    filtered = cv2.bilateralFilter(depth_f32, d=5, sigmaColor=50, sigmaSpace=50)
+    result = filtered
     result[~valid] = 0
     return result
 
