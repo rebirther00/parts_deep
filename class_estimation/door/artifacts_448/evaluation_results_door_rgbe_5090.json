@@ -1,0 +1,18 @@
+{
+  "accuracy": 96.0212201591512,
+  "total_samples": 377,
+  "correct_samples": 362,
+  "class_accuracies": {
+    "E25_door_LH_FRT": 93.61702127659575,
+    "E25_door_LH_RR": 93.61702127659575,
+    "E25_door_RH": 97.87234042553192,
+    "E30_E38_door_RH": 97.82608695652173,
+    "E30_door_LH_FRT": 95.83333333333333,
+    "E30_door_LH_RR": 100.0,
+    "E38_door_LH_FRT": 93.47826086956522,
+    "E38_door_LH_RR": 95.83333333333333
+  },
+  "avg_precision": 96.23171248236717,
+  "avg_recall": 96.00967468393463,
+  "avg_f1": 96.05190309653074
+}

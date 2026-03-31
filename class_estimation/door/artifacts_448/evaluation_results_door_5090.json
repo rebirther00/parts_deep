@@ -1,0 +1,18 @@
+{
+  "accuracy": 100.0,
+  "total_samples": 377,
+  "correct_samples": 377,
+  "class_accuracies": {
+    "E25_door_LH_FRT": 100.0,
+    "E25_door_LH_RR": 100.0,
+    "E25_door_RH": 100.0,
+    "E30_E38_door_RH": 100.0,
+    "E30_door_LH_FRT": 100.0,
+    "E30_door_LH_RR": 100.0,
+    "E38_door_LH_FRT": 100.0,
+    "E38_door_LH_RR": 100.0
+  },
+  "avg_precision": 100.0,
+  "avg_recall": 100.0,
+  "avg_f1": 100.0
+}

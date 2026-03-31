@@ -1,0 +1,14 @@
+{
+  "accuracy": 72.22222222222223,
+  "total_samples": 90,
+  "available_classes": [
+    "E25_door_LH_FRT",
+    "E30_door_LH_FRT",
+    "E38_door_LH_FRT"
+  ],
+  "class_accuracies": {
+    "E25_door_LH_FRT": 77.77777777777777,
+    "E30_door_LH_FRT": 51.515151515151516,
+    "E38_door_LH_FRT": 90.0
+  }
+}
