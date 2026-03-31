@@ -21,7 +21,17 @@ from depth_utils import RGBDAuxResNet18, RGBDTransform, RGBDDataset, NUM_AUX_FEA
 # ================================================================================
 # 명령줄 인자 파싱
 # ================================================================================
-parser = argparse.ArgumentParser(description='굴착기 도어 분류 모델 평가 (RTX 5090)')
+PROJECT_DIR = os.path.dirname(os.path.abspath(__file__))
+ARTIFACTS_DIR = os.path.join(PROJECT_DIR, "artifacts")
+os.makedirs(ARTIFACTS_DIR, exist_ok=True)
+
+parser = argparse.ArgumentParser(
+    description='굴착기 도어 분류 모델 평가 (RTX 5090)',
+    formatter_class=argparse.RawTextHelpFormatter,
+)
+parser.add_argument('--model', type=str,
+                    default=os.path.join(ARTIFACTS_DIR, "best_door_model_5090.pth"),
+                    help='모델 파일 경로 (기본: artifacts/best_door_model_5090.pth)')
 parser.add_argument('-cpu', '--cpu', action='store_true',
                     help='CPU로 강제 실행')
 parser.add_argument('--num_samples', type=int, default=None,
@@ -30,33 +40,68 @@ parser.add_argument('--dataset_dir', type=str, default=None,
                     help='평가에 사용할 데이터셋 경로. 미지정 시 학습 시 저장된 test_paths 사용')
 parser.add_argument('--use_all', action='store_true',
                     help='dataset_dir의 전체 이미지를 평가에 사용 (크로스 도메인 평가용)')
+parser.add_argument('--list_models', action='store_true',
+                    help='사용 가능한 모델 목록 출력 후 종료')
 args = parser.parse_args()
+
+
+def _derive_path(model_path, prefix, ext):
+    """모델 파일명에서 관련 파일 경로를 추론한다.
+
+    best_door_texture_aug_model_5090.pth
+    → {prefix}_door_texture_aug_5090.{ext}
+    """
+    fname = os.path.basename(model_path)
+    derived = fname.replace("best_", f"{prefix}_").replace("_model", "")
+    derived = os.path.splitext(derived)[0] + f".{ext}"
+    return os.path.join(os.path.dirname(model_path), derived)
+
+
+def _list_available_models():
+    models = sorted(glob.glob(os.path.join(ARTIFACTS_DIR, "*.pth")))
+    if not models:
+        print("사용 가능한 모델이 없습니다.")
+        return
+    print(f"사용 가능한 모델 ({len(models)}개):")
+    for m in models:
+        cn = _derive_path(m, "class_names", "json")
+        ti = _derive_path(m, "training_indices", "json")
+        cn_ok = "✅" if os.path.exists(cn) else "⚠️  없음"
+        ti_ok = "✅" if os.path.exists(ti) else "⚠️  없음"
+        print(f"  {os.path.basename(m)}  [클래스: {cn_ok}, 인덱스: {ti_ok}]")
+
+
+if args.list_models:
+    _list_available_models()
+    raise SystemExit(0)
+
+# ================================================================================
+# 모델 기반 경로 설정
+# ================================================================================
+MODEL_PATH = args.model
+CLASS_NAMES_PATH = _derive_path(MODEL_PATH, "class_names", "json")
+TRAIN_INDICES_PATH = _derive_path(MODEL_PATH, "training_indices", "json")
+
+IMAGE_SIZE = 448
+BATCH_SIZE = 32
+OUTPUT_IMAGE_PATH = _derive_path(MODEL_PATH, "evaluation_results", "png")
+OUTPUT_WRONG_IMAGE_PATH = _derive_path(MODEL_PATH, "evaluation_wrong_predictions", "png")
+OUTPUT_CM_IMAGE_PATH = _derive_path(MODEL_PATH, "confusion_matrix", "png")
+RESULTS_JSON_PATH = _derive_path(MODEL_PATH, "evaluation_results", "json")
+
+if not os.path.exists(MODEL_PATH):
+    print(f"❌ 모델 파일을 찾을 수 없습니다: {MODEL_PATH}")
+    _list_available_models()
+    raise SystemExit(1)
 
 # ================================================================================
 # 로깅 설정
 # ================================================================================
-PROJECT_DIR = os.path.dirname(os.path.abspath(__file__))
 REPO_DIR = os.path.dirname(os.path.dirname(PROJECT_DIR))
 sys.path.insert(0, REPO_DIR)
 from utils.logger import setup_logging, finish_logging
 
 LOG_PATH = setup_logging("03_door_evaluation_5090")
-
-# ================================================================================
-# 설정 변수
-# ================================================================================
-ARTIFACTS_DIR = os.path.join(PROJECT_DIR, "artifacts")
-os.makedirs(ARTIFACTS_DIR, exist_ok=True)
-
-MODEL_PATH = os.path.join(ARTIFACTS_DIR, "best_door_model_5090.pth")
-TRAIN_INDICES_PATH = os.path.join(ARTIFACTS_DIR, "training_indices_door_5090.json")
-CLASS_NAMES_PATH = os.path.join(ARTIFACTS_DIR, "class_names_door_5090.json")
-IMAGE_SIZE = 448
-BATCH_SIZE = 32
-OUTPUT_IMAGE_PATH = os.path.join(ARTIFACTS_DIR, "evaluation_results_door_5090.png")
-OUTPUT_WRONG_IMAGE_PATH = os.path.join(ARTIFACTS_DIR, "evaluation_wrong_predictions_door_5090.png")
-OUTPUT_CM_IMAGE_PATH = os.path.join(ARTIFACTS_DIR, "confusion_matrix_door_5090.png")
-RESULTS_JSON_PATH = os.path.join(ARTIFACTS_DIR, "evaluation_results_door_5090.json")
 
 total_start_time = time.time()
 
@@ -179,10 +224,6 @@ if args.cpu:
 else:
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print(f"디바이스: {device}")
-
-if not os.path.exists(MODEL_PATH):
-    raise FileNotFoundError(f"모델 파일을 찾을 수 없습니다: {MODEL_PATH}\n"
-                           f"먼저 02_door_classification_5090.py를 실행하세요.")
 
 model = create_resnet_model(num_classes=num_classes, pretrained=False).to(device)
 model.load_state_dict(torch.load(MODEL_PATH, map_location=device))
