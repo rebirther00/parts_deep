@@ -42,6 +42,8 @@ parser.add_argument('--use_all', action='store_true',
                     help='dataset_dir의 전체 이미지를 평가에 사용 (크로스 도메인 평가용)')
 parser.add_argument('--list_models', action='store_true',
                     help='사용 가능한 모델 목록 출력 후 종료')
+parser.add_argument('--image_size', type=int, default=448,
+                    help='입력 이미지 크기 (기본: 448, 경량화: 224)')
 args = parser.parse_args()
 
 
@@ -82,7 +84,7 @@ MODEL_PATH = args.model
 CLASS_NAMES_PATH = _derive_path(MODEL_PATH, "class_names", "json")
 TRAIN_INDICES_PATH = _derive_path(MODEL_PATH, "training_indices", "json")
 
-IMAGE_SIZE = 448
+IMAGE_SIZE = args.image_size
 BATCH_SIZE = 32
 OUTPUT_IMAGE_PATH = _derive_path(MODEL_PATH, "evaluation_results", "png")
 OUTPUT_WRONG_IMAGE_PATH = _derive_path(MODEL_PATH, "evaluation_wrong_predictions", "png")

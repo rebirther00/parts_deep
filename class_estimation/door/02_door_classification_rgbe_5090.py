@@ -32,6 +32,8 @@ parser.add_argument('--dataset_dir', type=str, default=DEFAULT_DATASET_DIR,
                     help='데이터셋 경로 (기본: door/datasets)')
 parser.add_argument('--full_train', action='store_true',
                     help='전체 데이터를 학습에 사용 (배포용, Train/Test 분할 없음)')
+parser.add_argument('--image_size', type=int, default=448,
+                    help='입력 이미지 크기 (기본: 448, 경량화: 224)')
 args = parser.parse_args()
 
 # ================================================================================
@@ -61,7 +63,7 @@ TEST_SIZE = 0.3
 NUM_EPOCHS = 60
 EARLY_STOPPING_PATIENCE = 10
 
-IMAGE_SIZE = 448
+IMAGE_SIZE = args.image_size
 
 # RTX 5090 최적화 설정
 NUM_WORKERS = 8
@@ -217,45 +219,42 @@ for class_idx, class_name in enumerate(class_names):
         print(f"  {class_name}: Train {train_count}장, Test {test_count}장")
 
 
-def adjust_batch_size_5090(data_size, force_cpu=False):
-    """RTX 5090 GPU에 최적화된 배치 사이즈 조정 (448x448 기준)"""
+def adjust_batch_size_5090(data_size, force_cpu=False, image_size=448):
+    """RTX 5090 GPU에 최적화된 배치 사이즈 조정 (image_size 반영)"""
     if data_size < 100:
-        batch_size = 16
+        base_batch = 16
     elif data_size < 500:
-        batch_size = 32
+        base_batch = 32
     elif data_size < 2000:
-        batch_size = 64
+        base_batch = 64
     else:
-        batch_size = 64
+        base_batch = 64
+
+    scale = (448 / image_size) ** 2
+    batch_size = int(base_batch * scale)
+
+    batch_size = min(batch_size, 128)
 
     if torch.cuda.is_available() and not force_cpu:
         gpu_memory_gb = torch.cuda.get_device_properties(0).total_memory / (1024**3)
-        if gpu_memory_gb >= 24:
-            if data_size >= 2000:
-                batch_size = min(batch_size, 128)
-            elif data_size >= 500:
-                batch_size = min(batch_size, 64)
-        elif gpu_memory_gb >= 16:
-            if data_size >= 2000:
-                batch_size = min(batch_size, 64)
-            elif data_size >= 500:
-                batch_size = min(batch_size, 32)
-        elif gpu_memory_gb >= 8:
+        if gpu_memory_gb < 8:
             batch_size = min(batch_size, 16)
+        elif gpu_memory_gb < 16:
+            batch_size = min(batch_size, 32)
 
     return batch_size
 
 
 if BATCH_SIZE is None:
-    batch_size = adjust_batch_size_5090(len(train_paths), force_cpu=args.cpu)
-    print(f"\n배치 사이즈 자동 설정 (RTX 5090 최적화): {batch_size}")
+    batch_size = adjust_batch_size_5090(len(train_paths), force_cpu=args.cpu, image_size=IMAGE_SIZE)
+    print(f"\n배치 사이즈 자동 설정 (RTX 5090 최적화, {IMAGE_SIZE}x{IMAGE_SIZE}): {batch_size}")
 else:
     batch_size = BATCH_SIZE
     print(f"\n배치 사이즈 고정: {batch_size}")
 
 train_dataset = RGBEDataset(train_paths, train_labels, transform=train_transform)
 
-num_workers = NUM_WORKERS if torch.cuda.is_available() and not args.cpu else 0
+num_workers = 4 if torch.cuda.is_available() and not args.cpu else 0
 pin_memory = torch.cuda.is_available() and not args.cpu
 
 train_loader = DataLoader(
@@ -264,8 +263,6 @@ train_loader = DataLoader(
     shuffle=True,
     num_workers=num_workers,
     pin_memory=pin_memory,
-    prefetch_factor=PREFETCH_FACTOR if num_workers > 0 else None,
-    persistent_workers=True if num_workers > 0 else False
 )
 
 test_loader = None
@@ -277,15 +274,12 @@ if not FULL_TRAIN:
         shuffle=False,
         num_workers=num_workers,
         pin_memory=pin_memory,
-        prefetch_factor=PREFETCH_FACTOR if num_workers > 0 else None,
-        persistent_workers=True if num_workers > 0 else False
     )
 
 print(f"Train Batch 개수: {len(train_loader)}")
 if test_loader:
     print(f"Test Batch 개수: {len(test_loader)}")
-print(f"DataLoader 설정: num_workers={num_workers}, pin_memory={pin_memory}, "
-      f"prefetch_factor={PREFETCH_FACTOR if num_workers > 0 else 'N/A'}")
+print(f"DataLoader 설정: num_workers={num_workers}, pin_memory={pin_memory}")
 
 step3_time = time.time() - step3_start_time
 print(f"\n[3단계 완료] 소요 시간: {step3_time:.2f}초")

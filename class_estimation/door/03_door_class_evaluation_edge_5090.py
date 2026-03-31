@@ -30,6 +30,8 @@ parser.add_argument('--dataset_dir', type=str, default=None,
                     help='평가에 사용할 데이터셋 경로. 미지정 시 학습 시 저장된 test_paths 사용')
 parser.add_argument('--use_all', action='store_true',
                     help='dataset_dir의 전체 이미지를 평가에 사용 (크로스 도메인 평가용)')
+parser.add_argument('--image_size', type=int, default=448,
+                    help='입력 이미지 크기 (기본: 448, 경량화: 224)')
 args = parser.parse_args()
 
 # ================================================================================
@@ -51,7 +53,7 @@ os.makedirs(ARTIFACTS_DIR, exist_ok=True)
 MODEL_PATH = os.path.join(ARTIFACTS_DIR, "best_door_edge_model_5090.pth")
 TRAIN_INDICES_PATH = os.path.join(ARTIFACTS_DIR, "training_indices_door_edge_5090.json")
 CLASS_NAMES_PATH = os.path.join(ARTIFACTS_DIR, "class_names_door_edge_5090.json")
-IMAGE_SIZE = 448
+IMAGE_SIZE = args.image_size
 BATCH_SIZE = 32
 OUTPUT_IMAGE_PATH = os.path.join(ARTIFACTS_DIR, "evaluation_results_door_edge_5090.png")
 OUTPUT_WRONG_IMAGE_PATH = os.path.join(ARTIFACTS_DIR, "evaluation_wrong_predictions_door_edge_5090.png")
