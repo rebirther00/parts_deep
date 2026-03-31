@@ -97,7 +97,7 @@ if not os.path.exists(CLASS_NAMES_PATH):
     raise SystemExit(1)
 
 IMAGE_SIZE = 448
-INFERENCE_INTERVAL = 0.5
+INFERENCE_INTERVAL = 0.0
 
 app = Flask(__name__)
 camera: CameraManager = None  # type: ignore[assignment]
@@ -123,7 +123,7 @@ class PyTorchInferenceEngine:
                  use_sam: bool = True):
         self.class_names = class_names
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        self.use_fp16 = (self.device.type == "cuda")
+        self.use_fp16 = False
 
         self.model = RGBDAuxResNet18(len(class_names), pretrained=False)
         self.model.load_state_dict(
@@ -133,10 +133,17 @@ class PyTorchInferenceEngine:
             self.model.half()
         self.model.eval()
 
+        # Jetson Orin TF32 + cuDNN 최적화
+        if self.device.type == "cuda":
+            torch.set_float32_matmul_precision('high')
+            torch.backends.cudnn.benchmark = True
+            print("TF32 + cuDNN benchmark 활성화")
+
         self.transform = RGBDTransform(IMAGE_SIZE, is_train=False)
 
-        # CUDA 워밍업 (첫 추론 지연 방지)
+        # CUDA 워밍업 (cuDNN 최적 커널 탐색 포함)
         if self.device.type == "cuda":
+            print("CUDA 워밍업 중...")
             dummy_img = torch.randn(1, IN_CHANNELS, IMAGE_SIZE, IMAGE_SIZE,
                                     device=self.device)
             dummy_aux = torch.randn(1, 3, device=self.device)
