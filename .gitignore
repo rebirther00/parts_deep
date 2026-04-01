@@ -25,6 +25,10 @@ artifacts/
 !class_estimation/datasets/.gitkeep
 !pos_estimation/dataset_pos/.gitkeep
 
+# CAD 3D 모델 및 생성 데이터셋
+*.usd
+datasets_cad/
+
 # 임시 프레임
 temp_frames/
 
