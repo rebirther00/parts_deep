@@ -126,7 +126,11 @@ if args.dataset_dir:
                 f"학습 test split에 대응하는 이미지가 {dataset_dir}에 없습니다")
         print(f"\n[증강 데이터 평가] 학습 test split 기준 경로 치환 ({len(test_paths)}장)")
 else:
-    test_paths = train_data_info['test_paths']
+    datasets_dir = os.path.join(PROJECT_DIR, "datasets")
+    def _remap(p):
+        cls_name = os.path.basename(os.path.dirname(p))
+        return os.path.join(datasets_dir, cls_name, os.path.basename(p))
+    test_paths = [_remap(p) for p in train_data_info['test_paths']]
 
 print(f"\n모델 파일: {MODEL_PATH}")
 print(f"테스트 데이터: {len(test_paths)}장")
