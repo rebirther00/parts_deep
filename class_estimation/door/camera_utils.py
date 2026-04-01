@@ -54,7 +54,8 @@ class CameraManager:
         self._zed_image = sl.Mat()
         self._zed_depth = sl.Mat()
         self._zed_runtime = sl.RuntimeParameters()
-        self.camera_type = "ZED X Mini"
+        model = self._zed.get_camera_information().camera_model
+        self.camera_type = f"ZED {str(model).split('.')[-1]}"
 
     def _init_opencv(self):
         self._cap = cv2.VideoCapture(0)
