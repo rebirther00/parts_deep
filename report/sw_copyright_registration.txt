@@ -1,0 +1,164 @@
+================================================================================
+SW 저작권 등록 신청서
+================================================================================
+
+1. 프로그램 명칭
+--------------------------------------------------------------------------------
+굴착기 도어 부품 RGBD 영상 기반 분류 파이프라인 소프트웨어
+(영문: Excavator Door Parts RGBD Image-based Classification Pipeline Software)
+
+
+2. 적용 분야
+--------------------------------------------------------------------------------
+· 굴착기 제조 공정: 생산 라인에서 굴착기 도어 부품(E25/E30/E38 모델의 좌측 전면·
+  좌측 후면·우측 도어, 총 8종)을 자동 분류하여 공정 투입 오류를 방지하고 생산성을 
+  향상시킴
+· 산업용 부품 인식: RGB-D 카메라(ZED X Mini)로 촬영한 컬러 영상과 깊이 영상을 
+  결합한 4채널(RGBD) 딥러닝 기반 부품 자동 분류
+· 엣지 AI 추론: NVIDIA Jetson Orin 등 산업용 엣지 장비에서의 실시간 부품 분류 추론
+
+
+3. 본 프로그램 특징
+--------------------------------------------------------------------------------
+(1) RGBD 4채널 입력 딥러닝 모델
+    RGB 3채널에 Depth 1채널을 결합한 4채널 입력 구조로, 외관(색상·질감)과 
+    형상(깊이·크기) 정보를 동시에 활용하여 육안으로 구별이 어려운 유사 부품 간 
+    분류 정확도를 향상시킴
+
+(2) 물리 치수 보조 피처 융합
+    Depth 데이터로부터 전경 영역을 분리(MobileSAM 또는 Otsu 이진화 폴백)한 뒤 
+    PCA 기반 3D 점군 분석을 통해 부품의 실제 가로·세로 치수(mm)와 종횡비를 산출하고, 
+    이를 이미지 피처와 결합하는 멀티모달 분류 아키텍처를 적용
+
+(3) End-to-End 파이프라인
+    데이터 수집(웹 UI 기반 캡처) → 모델 학습(Transfer Learning) → 정량 평가
+    (혼동 행렬, Precision/Recall/F1) → 실시간 추론(웹 스트리밍)까지 4단계 
+    완전 자동화 파이프라인
+
+(4) GPU 최적화 및 엣지 배포
+    RTX 5090 GPU 환경에서의 고속 학습(자동 배치 크기 조정, non_blocking 전송, 
+    cuDNN benchmark)과 ONNX 변환을 통한 엣지 장비 배포를 지원
+
+(5) ZED X Mini RGB-D 카메라 네이티브 지원
+    ZED SDK(pyzed)를 통한 Neural Depth 모드 깊이 추정을 활용하며, ZED 미설치 
+    환경에서는 OpenCV 웹캠으로 자동 폴백
+
+
+4. 주요 기능
+--------------------------------------------------------------------------------
+[1단계: 데이터 수집 — 01_capture_dataset.py]
+  · Flask 웹 서버 기반 RGBD 데이터셋 캡처 시스템
+  · MJPEG 실시간 스트리밍을 통한 카메라 모니터링
+  · 비디오 녹화 + N프레임 간격 자동 추출
+  · Laplacian Variance 블러 필터링 (흐릿한 이미지 자동 제거)
+  · 이미지 선별 큐레이션 UI (그리드 표시, 체크/해제)
+  · 클래스별 RGB+Depth 쌍 동기 저장
+  · 데이터셋 현황 조회 API
+
+[2단계: 모델 학습 — 02_door_classification_5090.py]
+  · RGBD 4채널 + 물리 치수 보조 피처 입력 ResNet18 Transfer Learning
+  · ImageNet 사전학습 가중치 활용, Depth 채널 평균 초기화
+  · 클래스 불균형 가중치 적용 CrossEntropyLoss
+  · Adam 옵티마이저 + ReduceLROnPlateau 스케줄러
+  · Early Stopping (patience=10)
+  · RTX 5090 GPU 자동 최적화 (배치 크기·워커 수 자동 조정)
+  · 학습 완료 후 ONNX 자동 변환 (ZED Box Mini 추론용)
+
+[3단계: 모델 평가 — 03_door_class_evaluation_5090.py]
+  · 테스트 데이터에 대한 전체 및 클래스별 정확도 산출
+  · Precision, Recall, F1-Score (Macro 평균) 산출
+  · 혼동 행렬 히트맵 이미지 생성
+  · 정답/오답 예측 그리드 시각화
+  · 크로스 도메인 평가 지원 (CAD→실물 전이 검증)
+  · 다중 모델 비교 지원 (--list_models)
+
+[4단계: 실시간 추론 — 04_door_realtime_inference.py]
+  · Flask 웹 서버 기반 실시간 분류 추론
+  · ZED X Mini 카메라 실시간 영상에 추론 결과 오버레이 스트리밍
+  · MobileSAM 전경 분리 통합 (depth 기반 Otsu 폴백)
+  · 추론 시간 모니터링 (단계별 소요 시간 로그)
+  · 클래스별 확률 분포 API 제공
+
+[공통 모듈 — camera_utils.py]
+  · ZED X Mini 카메라 스레드 기반 비동기 캡처
+  · RGB + Depth 동기 획득
+  · OpenCV 웹캠 폴백 지원
+  · Laplacian Variance 블러 점수 산출
+
+[공통 모듈 — depth_utils.py]
+  · RGBDAuxResNet18 모델 아키텍처 정의 (백본 512dim + Aux 32dim → 분류기)
+  · RGBD 동기 전처리 (Letterbox Resize, 공간·색상 증강)
+  · Depth 기반 전경 분리 (Otsu + 형태학적 처리) 및 PCA 물리 치수 계산
+  · RGBDDataset 클래스 (RGB+Depth 쌍 로딩, 라벨 자동 결정)
+
+
+5. 사용 방법
+--------------------------------------------------------------------------------
+[사전 요구사항]
+  · Python 3.8 이상
+  · PyTorch, torchvision, OpenCV, Flask, NumPy, scikit-learn, Pillow
+  · (선택) ZED SDK (pyzed) — ZED X Mini 카메라 사용 시
+  · (선택) MobileSAM — 실시간 추론 시 전경 분리 정밀도 향상
+
+[단계별 실행]
+
+  # 1단계: 데이터 수집
+  # 웹 브라우저에서 http://0.0.0.0:5000 접속하여 촬영·선별·저장
+  python 01_capture_dataset.py
+
+  # 2단계: 모델 학습 (GPU 자동 감지, 배치 크기 자동 조정)
+  python 02_door_classification_5090.py
+  python 02_door_classification_5090.py --full_train         # 전체 데이터 학습 (배포용)
+  python 02_door_classification_5090.py --image_size 224     # 경량 모델 학습
+  python 02_door_classification_5090.py -cpu                 # CPU 강제 실행
+
+  # 3단계: 모델 평가 (테스트 데이터에 대한 정량 평가 수행)
+  python 03_door_class_evaluation_5090.py
+  python 03_door_class_evaluation_5090.py --list_models      # 사용 가능 모델 조회
+  python 03_door_class_evaluation_5090.py --dataset_dir /path --use_all  # 크로스 도메인 평가
+
+  # 4단계: 실시간 추론
+  # 웹 브라우저에서 http://0.0.0.0:5001 접속하여 결과 확인
+  python 04_door_realtime_inference.py
+  python 04_door_realtime_inference.py --model artifacts/best_door_cad_model_5090.pth
+  python 04_door_realtime_inference.py --no_sam               # MobileSAM 비활성화
+
+
+6. 복제물 제출 형태
+--------------------------------------------------------------------------------
+  · 제출 형태: 소스코드 전체 (Python)
+  · 프로그래밍 언어: Python 3
+  · 주요 프레임워크: PyTorch, Flask, OpenCV, torchvision
+  · 파일 수: 6개 (메인 스크립트 4개 + 공통 유틸리티 모듈 2개)
+  · 총 코드 라인 수: 약 2,550행
+
+
+7. 복제물 파일
+--------------------------------------------------------------------------------
+  번호  파일명                               설명                                       라인 수
+  ────  ─────────────────────────────────────  ─────────────────────────────────────────  ──────
+   1    01_capture_dataset.py                 데이터셋 캡처 서버                          252행
+                                              (Flask 웹 UI, MJPEG 스트리밍,
+                                               블러 필터링, 클래스별 저장)
+
+   2    02_door_classification_5090.py        RGBD ResNet18 모델 학습                     638행
+                                              (Transfer Learning, ONNX 변환,
+                                               GPU 최적화)
+
+   3    03_door_class_evaluation_5090.py      모델 평가                                   629행
+                                              (정확도, Precision/Recall/F1,
+                                               혼동 행렬 시각화)
+
+   4    04_door_realtime_inference.py         실시간 추론 서버                             387행
+                                              (카메라 영상 + 모델 추론 +
+                                               MobileSAM 통합)
+
+   5    camera_utils.py                       카메라 관리 모듈                             192행
+                                              (ZED X Mini RGBD 캡처,
+                                               OpenCV 폴백)
+
+   6    depth_utils.py                        RGBD 공통 유틸리티                           451행
+                                              (모델 아키텍처, 전처리, Dataset,
+                                               물리 치수 계산)
+
+================================================================================
