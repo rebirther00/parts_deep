@@ -5,6 +5,7 @@
 - Confusion matrix PNG 생성 (matplotlib)
 """
 import torch
+import torch.nn as nn
 from torch.utils.data import DataLoader
 import numpy as np
 import os
@@ -20,6 +21,7 @@ from sklearn.metrics import (
     accuracy_score, precision_recall_fscore_support,
     confusion_matrix as sk_confusion_matrix, classification_report,
 )
+from torchvision import models
 
 PROJECT_DIR = os.path.dirname(os.path.abspath(__file__))
 REPO_DIR = os.path.dirname(os.path.dirname(PROJECT_DIR))
@@ -29,28 +31,72 @@ from depth_utils import (
     RGBDAuxResNet18, RGBDTransform, RGBDDataset, IN_CHANNELS, NUM_AUX_FEATURES,
 )
 from rgbe_utils import RGBETransform, RGBEDataset
-from edge_utils import EdgeAuxResNet18, EdgeTransform, EdgeDataset
+from edge_utils import EdgeAuxResNet18, EdgeTransform, EdgeDataset, EDGE_IN_CHANNELS
+
+
+class NoAuxResNet18(nn.Module):
+    """Aux MLP 없이 이미지만 사용하는 분류 모델 (ablation용)"""
+
+    def __init__(self, num_classes, in_channels=IN_CHANNELS, pretrained=False):
+        super().__init__()
+        weights = models.ResNet18_Weights.IMAGENET1K_V1 if pretrained else None
+        backbone = models.resnet18(weights=weights)
+        if in_channels != 3:
+            old_conv = backbone.conv1
+            new_conv = nn.Conv2d(in_channels, 64,
+                                 kernel_size=7, stride=2, padding=3, bias=False)
+            with torch.no_grad():
+                new_conv.weight[:, :3] = old_conv.weight
+                for c in range(3, in_channels):
+                    new_conv.weight[:, c:c+1] = old_conv.weight.mean(
+                        dim=1, keepdim=True)
+            backbone.conv1 = new_conv
+        self.backbone_features = backbone.fc.in_features
+        backbone.fc = nn.Identity()
+        self.backbone = backbone
+        self.classifier = nn.Sequential(
+            nn.Dropout(0.3),
+            nn.Linear(self.backbone_features, 256),
+            nn.ReLU(),
+            nn.Dropout(0.2),
+            nn.Linear(256, num_classes),
+        )
+
+    def forward(self, images, aux_features):
+        img_feat = self.backbone(images)
+        return self.classifier(img_feat)
+
 
 MODEL_CONFIGS = {
     "rgbd": {
         "dataset_cls": RGBDDataset,
         "transform_fn": lambda sz: RGBDTransform(sz, is_train=False),
         "model_fn": lambda nc: RGBDAuxResNet18(nc, pretrained=False),
+        "in_channels": IN_CHANNELS,
     },
     "texture_aug": {
         "dataset_cls": RGBDDataset,
         "transform_fn": lambda sz: RGBDTransform(sz, is_train=False),
         "model_fn": lambda nc: RGBDAuxResNet18(nc, pretrained=False),
+        "in_channels": IN_CHANNELS,
     },
     "edge": {
         "dataset_cls": EdgeDataset,
         "transform_fn": lambda sz: EdgeTransform(sz, is_train=False),
         "model_fn": lambda nc: EdgeAuxResNet18(nc, pretrained=False),
+        "in_channels": EDGE_IN_CHANNELS,
     },
     "rgbe": {
         "dataset_cls": RGBEDataset,
         "transform_fn": lambda sz: RGBETransform(sz, is_train=False),
         "model_fn": lambda nc: RGBDAuxResNet18(nc, pretrained=False),
+        "in_channels": IN_CHANNELS,
+    },
+    "rgbe_texture_aug": {
+        "dataset_cls": RGBEDataset,
+        "transform_fn": lambda sz: RGBETransform(sz, is_train=False),
+        "model_fn": lambda nc: RGBDAuxResNet18(nc, pretrained=False),
+        "in_channels": IN_CHANNELS,
     },
 }
 
@@ -61,6 +107,8 @@ parser.add_argument('--model_type', type=str, required=True,
                     choices=list(MODEL_CONFIGS.keys()))
 parser.add_argument('--seed', type=int, required=True)
 parser.add_argument('--image_size', type=int, default=448)
+parser.add_argument('--no_aux', action='store_true',
+                    help='Aux MLP 제거 ablation 실험')
 parser.add_argument('-cpu', '--cpu', action='store_true')
 args = parser.parse_args()
 
@@ -168,7 +216,8 @@ def plot_confusion_matrix(cm, class_names, title, save_path):
 
 def main():
     cfg = MODEL_CONFIGS[args.model_type]
-    run_name = f"{args.model_type}_{args.image_size}_seed{args.seed}"
+    suffix = "_noaux" if args.no_aux else ""
+    run_name = f"{args.model_type}{suffix}_{args.image_size}_seed{args.seed}"
     run_dir = os.path.join(PROJECT_DIR, "artifacts", run_name)
 
     eval_path = os.path.join(run_dir, "eval_results.json")
@@ -203,7 +252,12 @@ def main():
     device = torch.device('cpu') if args.cpu else \
         torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-    model = cfg["model_fn"](num_classes).to(device)
+    if args.no_aux:
+        in_ch = cfg.get("in_channels", IN_CHANNELS)
+        model = NoAuxResNet18(num_classes, in_channels=in_ch,
+                              pretrained=False).to(device)
+    else:
+        model = cfg["model_fn"](num_classes).to(device)
     model.load_state_dict(torch.load(model_path, map_location=device))
     print(f"  모델 로드 완료 ({device})")
 

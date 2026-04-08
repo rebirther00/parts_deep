@@ -1,6 +1,6 @@
 """
 논문용 통합 학습 스크립트
-- 4종 모델(rgbd, texture_aug, edge, rgbe) 통합 지원
+- 6종 모델(rgbd, texture_aug, edge, rgbe, rgbe_texture_aug, + no_aux 변형) 지원
 - Train/Val/Test 70/15/15 stratified split
 - Val accuracy 기반 early stopping (data leakage 제거)
 - Epoch별 메트릭 JSON 로깅
@@ -24,6 +24,8 @@ PROJECT_DIR = os.path.dirname(os.path.abspath(__file__))
 REPO_DIR = os.path.dirname(os.path.dirname(PROJECT_DIR))
 sys.path.insert(0, REPO_DIR)
 
+from torchvision import models
+
 from depth_utils import (
     RGBDAuxResNet18, RGBDTransform, RGBDDataset, IN_CHANNELS,
     NUM_AUX_FEATURES,
@@ -33,6 +35,48 @@ from edge_utils import EdgeAuxResNet18, EdgeTransform, EdgeDataset, EDGE_IN_CHAN
 
 from PIL import ImageFilter
 from depth_utils import RGBDTransform as _BaseRGBDTransform
+
+
+# ── Aux 없는 모델 (ablation용) ──────────────────────────
+class NoAuxResNet18(nn.Module):
+    """Aux MLP 없이 이미지만 사용하는 분류 모델 (ablation용)
+
+    RGBDAuxResNet18과 동일한 backbone이지만 aux branch를 완전 제거.
+    forward()는 aux_features를 인자로 받되 무시하여 API 호환성 유지.
+    """
+
+    def __init__(self, num_classes, in_channels=IN_CHANNELS, pretrained=True):
+        super().__init__()
+
+        weights = models.ResNet18_Weights.IMAGENET1K_V1 if pretrained else None
+        backbone = models.resnet18(weights=weights)
+
+        if in_channels != 3:
+            old_conv = backbone.conv1
+            new_conv = nn.Conv2d(in_channels, 64,
+                                 kernel_size=7, stride=2, padding=3, bias=False)
+            with torch.no_grad():
+                new_conv.weight[:, :3] = old_conv.weight
+                for c in range(3, in_channels):
+                    new_conv.weight[:, c:c+1] = old_conv.weight.mean(
+                        dim=1, keepdim=True)
+            backbone.conv1 = new_conv
+
+        self.backbone_features = backbone.fc.in_features
+        backbone.fc = nn.Identity()
+        self.backbone = backbone
+
+        self.classifier = nn.Sequential(
+            nn.Dropout(0.3),
+            nn.Linear(self.backbone_features, 256),
+            nn.ReLU(),
+            nn.Dropout(0.2),
+            nn.Linear(256, num_classes),
+        )
+
+    def forward(self, images, aux_features):
+        img_feat = self.backbone(images)
+        return self.classifier(img_feat)
 
 
 class TextureInvariantRGBDTransform:
@@ -51,6 +95,25 @@ class TextureInvariantRGBDTransform:
             sigma = random.uniform(0.5, 2.0)
             rgb_pil = rgb_pil.filter(ImageFilter.GaussianBlur(radius=sigma))
         return self.base(rgb_pil, depth_np)
+
+
+class TextureInvariantRGBETransform:
+    """RGBE + texture 불변 증강 (학습 전용)
+
+    RGB에 RandomGrayscale(p=0.5) + GaussianBlur(p=0.3)를 적용한 후
+    RGBETransform에 전달. Edge는 변환된 RGB에서 계산됨.
+    """
+
+    def __init__(self, image_size):
+        self.base = RGBETransform(image_size, is_train=True)
+
+    def __call__(self, rgb_pil):
+        if random.random() < 0.5:
+            rgb_pil = rgb_pil.convert('L').convert('RGB')
+        if random.random() < 0.3:
+            sigma = random.uniform(0.5, 2.0)
+            rgb_pil = rgb_pil.filter(ImageFilter.GaussianBlur(radius=sigma))
+        return self.base(rgb_pil)
 
 
 # ── 모델 타입별 설정 ────────────────────────────────────
@@ -87,6 +150,14 @@ MODEL_CONFIGS = {
         "model_load_fn": lambda nc: RGBDAuxResNet18(nc, pretrained=False),
         "in_channels": IN_CHANNELS,
     },
+    "rgbe_texture_aug": {
+        "dataset_cls": RGBEDataset,
+        "train_transform_fn": lambda sz: TextureInvariantRGBETransform(sz),
+        "val_transform_fn": lambda sz: RGBETransform(sz, is_train=False),
+        "model_fn": lambda nc: RGBDAuxResNet18(nc, pretrained=True),
+        "model_load_fn": lambda nc: RGBDAuxResNet18(nc, pretrained=False),
+        "in_channels": IN_CHANNELS,
+    },
 }
 
 # ── CLI ──────────────────────────────────────────────────
@@ -97,6 +168,8 @@ parser.add_argument('--seed', type=int, required=True)
 parser.add_argument('--image_size', type=int, default=448)
 parser.add_argument('--epochs', type=int, default=60)
 parser.add_argument('--patience', type=int, default=10)
+parser.add_argument('--no_aux', action='store_true',
+                    help='Aux MLP 제거 ablation 실험')
 parser.add_argument('-cpu', '--cpu', action='store_true')
 args = parser.parse_args()
 
@@ -201,7 +274,8 @@ def evaluate(model, loader, criterion, device):
 
 def main():
     cfg = MODEL_CONFIGS[args.model_type]
-    run_name = f"{args.model_type}_{args.image_size}_seed{args.seed}"
+    suffix = "_noaux" if args.no_aux else ""
+    run_name = f"{args.model_type}{suffix}_{args.image_size}_seed{args.seed}"
     run_dir = os.path.join(PROJECT_DIR, "artifacts", run_name)
     os.makedirs(run_dir, exist_ok=True)
 
@@ -275,7 +349,12 @@ def main():
     # 모델
     device = torch.device('cpu') if args.cpu else \
         torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    model = cfg["model_fn"](num_classes).to(device)
+    if args.no_aux:
+        in_ch = cfg.get("in_channels", IN_CHANNELS)
+        model = NoAuxResNet18(num_classes, in_channels=in_ch,
+                              pretrained=True).to(device)
+    else:
+        model = cfg["model_fn"](num_classes).to(device)
     print(f"  디바이스: {device}, 파라미터: {sum(p.numel() for p in model.parameters()):,}")
 
     # 손실 함수 (역빈도 클래스 가중치)
