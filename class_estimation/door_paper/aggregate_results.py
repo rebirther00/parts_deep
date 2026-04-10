@@ -2,12 +2,14 @@
 논문용 결과 집계 스크립트
 - 모든 seed/model/resolution 결과 수집
 - mean +- std 계산, paired t-test, 시각화 생성
+- --no_aux: Aux MLP 제거 실험 결과 별도 집계
 """
 import json
 import os
 import sys
 import glob
 import itertools
+import argparse
 
 import numpy as np
 
@@ -18,12 +20,25 @@ from scipy import stats
 
 PROJECT_DIR = os.path.dirname(os.path.abspath(__file__))
 
-MODEL_TYPES = ["rgbd", "texture_aug", "edge", "rgbe"]
+agg_parser = argparse.ArgumentParser(description='논문용 결과 집계')
+agg_parser.add_argument('--no_aux', action='store_true',
+                        help='Aux MLP 제거 실험 결과 집계')
+agg_args = agg_parser.parse_args()
+
+NO_AUX_MODE = agg_args.no_aux
+NOAUX_SUFFIX = "_noaux" if NO_AUX_MODE else ""
+SUMMARY_SUBDIR = "summary_noaux" if NO_AUX_MODE else "summary"
+
+MODELS_WITH_AUX = ["rgbd", "texture_aug", "edge", "rgbe"]
+MODELS_NO_AUX = ["rgbd", "texture_aug", "edge", "rgbe"]
+MODEL_TYPES = MODELS_NO_AUX if NO_AUX_MODE else MODELS_WITH_AUX
+
 MODEL_LABELS = {
     "rgbd": "Baseline RGBD",
     "texture_aug": "Texture Aug RGBD",
     "edge": "Edge-only",
     "rgbe": "RGBE Hybrid",
+    "rgbe_texture_aug": "RGBE + TexAug",
 }
 DATASET_VARIANTS = ["original", "datasets_aug", "datasets_aug2"]
 DATASET_LABELS = {
@@ -35,6 +50,10 @@ SEEDS = [42, 123, 456, 789, 1024]
 RESOLUTIONS = [448, 224]
 
 
+def make_run_name(model_type, res, seed):
+    return f"{model_type}{NOAUX_SUFFIX}_{res}_seed{seed}"
+
+
 def collect_results():
     """모든 결과 JSON 수집"""
     results = {}
@@ -42,12 +61,12 @@ def collect_results():
     for model_type in MODEL_TYPES:
         for res in RESOLUTIONS:
             for seed in SEEDS:
-                run_name = f"{model_type}_{res}_seed{seed}"
-                eval_path = os.path.join(artifacts_dir, run_name,
+                rn = make_run_name(model_type, res, seed)
+                eval_path = os.path.join(artifacts_dir, rn,
                                          "eval_results.json")
                 if os.path.exists(eval_path):
                     with open(eval_path, 'r') as f:
-                        results[run_name] = json.load(f)
+                        results[rn] = json.load(f)
     return results
 
 
@@ -60,9 +79,9 @@ def compute_stats(results):
                 key = f"{model_type}_{res}_{variant}"
                 accs, f1s = [], []
                 for seed in SEEDS:
-                    run_name = f"{model_type}_{res}_seed{seed}"
-                    if run_name in results and variant in results[run_name]:
-                        r = results[run_name][variant]
+                    rn = make_run_name(model_type, res, seed)
+                    if rn in results and variant in results[rn]:
+                        r = results[rn][variant]
                         accs.append(r["accuracy"])
                         f1s.append(r["macro_f1"])
                 if accs:
@@ -107,9 +126,9 @@ def paired_tests(results):
             for model_type in MODEL_TYPES:
                 vals = []
                 for seed in SEEDS:
-                    run_name = f"{model_type}_{res}_seed{seed}"
-                    if run_name in results and variant in results[run_name]:
-                        vals.append(results[run_name][variant]["macro_f1"])
+                    rn = make_run_name(model_type, res, seed)
+                    if rn in results and variant in results[rn]:
+                        vals.append(results[rn][variant]["macro_f1"])
                 if vals:
                     model_f1s[model_type] = vals
 
@@ -135,18 +154,18 @@ def paired_tests(results):
 
 
 def plot_learning_curves(res=448):
-    """학습 곡선 (Val Accuracy vs Epoch) - 4 모델 오버레이"""
+    """학습 곡선 (Val Accuracy vs Epoch) - 모델 오버레이"""
     artifacts_dir = os.path.join(PROJECT_DIR, "artifacts")
     fig, ax = plt.subplots(figsize=(10, 6))
     colors = {'rgbd': '#1f77b4', 'texture_aug': '#ff7f0e',
-              'edge': '#2ca02c', 'rgbe': '#d62728'}
+              'edge': '#2ca02c', 'rgbe': '#d62728',
+              'rgbe_texture_aug': '#9467bd'}
 
     for model_type in MODEL_TYPES:
         all_val_accs = []
         for seed in SEEDS:
-            log_path = os.path.join(
-                artifacts_dir, f"{model_type}_{res}_seed{seed}",
-                "train_log.json")
+            rn = make_run_name(model_type, res, seed)
+            log_path = os.path.join(artifacts_dir, rn, "train_log.json")
             if not os.path.exists(log_path):
                 continue
             with open(log_path) as f:
@@ -154,7 +173,8 @@ def plot_learning_curves(res=448):
             val_accs = [e["val_acc"] for e in log["epochs"]]
             all_val_accs.append(val_accs)
             ax.plot(range(1, len(val_accs) + 1), val_accs,
-                    color=colors[model_type], alpha=0.15, linewidth=0.8)
+                    color=colors.get(model_type, '#888888'),
+                    alpha=0.15, linewidth=0.8)
 
         if all_val_accs:
             max_len = max(len(v) for v in all_val_accs)
@@ -163,17 +183,19 @@ def plot_learning_curves(res=448):
                 padded[i, :len(v)] = v
             mean_curve = np.nanmean(padded, axis=0)
             ax.plot(range(1, max_len + 1), mean_curve,
-                    color=colors[model_type], linewidth=2.5,
+                    color=colors.get(model_type, '#888888'), linewidth=2.5,
                     label=MODEL_LABELS[model_type])
 
+    mode_label = "(w/o Aux)" if NO_AUX_MODE else ""
     ax.set_xlabel('Epoch', fontsize=12)
     ax.set_ylabel('Validation Accuracy (%)', fontsize=12)
-    ax.set_title(f'Learning Curves ({res}x{res})', fontsize=13)
+    ax.set_title(f'Learning Curves ({res}x{res}) {mode_label}', fontsize=13)
     ax.legend(fontsize=10)
     ax.grid(True, alpha=0.3)
 
-    save_path = os.path.join(artifacts_dir, "summary",
-                             f"learning_curves_{res}.png")
+    summary_dir = os.path.join(artifacts_dir, SUMMARY_SUBDIR)
+    os.makedirs(summary_dir, exist_ok=True)
+    save_path = os.path.join(summary_dir, f"learning_curves_{res}.png")
     fig.savefig(save_path, dpi=150, bbox_inches='tight')
     plt.close(fig)
     print(f"학습 곡선 저장: {save_path}")
@@ -181,7 +203,7 @@ def plot_learning_curves(res=448):
 
 def plot_robustness_bars(summary, res=448):
     """강건성 비교 막대 그래프"""
-    fig, axes = plt.subplots(1, 2, figsize=(14, 6))
+    fig, axes = plt.subplots(1, 2, figsize=(max(14, len(MODEL_TYPES)*3.5), 6))
 
     for ax_idx, metric in enumerate(["acc", "f1"]):
         ax = axes[ax_idx]
@@ -199,13 +221,14 @@ def plot_robustness_bars(summary, res=448):
                 else:
                     means.append(0)
                     stds.append(0)
-            bars = ax.bar(x + d_idx * width, means, width,
-                         yerr=stds, capsize=3,
-                         label=DATASET_LABELS[variant], alpha=0.85)
+            ax.bar(x + d_idx * width, means, width,
+                   yerr=stds, capsize=3,
+                   label=DATASET_LABELS[variant], alpha=0.85)
 
+        mode_label = "(w/o Aux)" if NO_AUX_MODE else ""
         ax.set_xlabel('Model', fontsize=11)
         ax.set_ylabel(f'{metric_label} (%)', fontsize=11)
-        ax.set_title(f'{metric_label} Comparison ({res}x{res})', fontsize=12)
+        ax.set_title(f'{metric_label} ({res}x{res}) {mode_label}', fontsize=12)
         ax.set_xticks(x + width)
         ax.set_xticklabels([MODEL_LABELS[m] for m in MODEL_TYPES],
                           rotation=15, ha='right', fontsize=9)
@@ -214,8 +237,9 @@ def plot_robustness_bars(summary, res=448):
         ax.set_ylim(50, 105)
 
     plt.tight_layout()
-    save_path = os.path.join(PROJECT_DIR, "artifacts", "summary",
-                             f"robustness_comparison_{res}.png")
+    summary_dir = os.path.join(PROJECT_DIR, "artifacts", SUMMARY_SUBDIR)
+    os.makedirs(summary_dir, exist_ok=True)
+    save_path = os.path.join(summary_dir, f"robustness_comparison_{res}.png")
     fig.savefig(save_path, dpi=150, bbox_inches='tight')
     plt.close(fig)
     print(f"강건성 비교 차트 저장: {save_path}")
@@ -223,7 +247,7 @@ def plot_robustness_bars(summary, res=448):
 
 def plot_resolution_comparison(summary):
     """448 vs 224 비교 차트"""
-    fig, ax = plt.subplots(figsize=(12, 6))
+    fig, ax = plt.subplots(figsize=(max(12, len(MODEL_TYPES)*3), 6))
     x = np.arange(len(MODEL_TYPES))
     width = 0.15
 
@@ -242,9 +266,10 @@ def plot_resolution_comparison(summary):
         ax.bar(x + combo_idx * width, means, width,
                yerr=stds, capsize=2, label=label, alpha=0.8)
 
+    mode_label = "(w/o Aux)" if NO_AUX_MODE else ""
     ax.set_xlabel('Model', fontsize=11)
     ax.set_ylabel('Accuracy (%)', fontsize=11)
-    ax.set_title('Resolution Comparison (448 vs 224)', fontsize=13)
+    ax.set_title(f'Resolution Comparison (448 vs 224) {mode_label}', fontsize=13)
     total_w = len(dataset_res_combos) * width
     ax.set_xticks(x + total_w / 2 - width / 2)
     ax.set_xticklabels([MODEL_LABELS[m] for m in MODEL_TYPES],
@@ -254,8 +279,9 @@ def plot_resolution_comparison(summary):
     ax.set_ylim(50, 105)
 
     plt.tight_layout()
-    save_path = os.path.join(PROJECT_DIR, "artifacts", "summary",
-                             "resolution_comparison.png")
+    summary_dir = os.path.join(PROJECT_DIR, "artifacts", SUMMARY_SUBDIR)
+    os.makedirs(summary_dir, exist_ok=True)
+    save_path = os.path.join(summary_dir, "resolution_comparison.png")
     fig.savefig(save_path, dpi=150, bbox_inches='tight')
     plt.close(fig)
     print(f"해상도 비교 차트 저장: {save_path}")
@@ -263,7 +289,8 @@ def plot_resolution_comparison(summary):
 
 def generate_markdown_summary(summary, tests):
     """결과 요약 markdown 생성"""
-    lines = ["# 실험 결과 요약\n"]
+    mode = "w/o Aux" if NO_AUX_MODE else "w/ Aux"
+    lines = [f"# 실험 결과 요약 ({mode})\n"]
 
     for res in RESOLUTIONS:
         lines.append(f"\n## {res}x{res} 해상도\n")
@@ -330,11 +357,12 @@ def generate_markdown_summary(summary, tests):
 
 
 def main():
+    mode_label = "(w/o Aux)" if NO_AUX_MODE else "(w/ Aux)"
     print("=" * 70)
-    print("결과 집계 시작")
+    print(f"결과 집계 시작 {mode_label}")
     print("=" * 70)
 
-    summary_dir = os.path.join(PROJECT_DIR, "artifacts", "summary")
+    summary_dir = os.path.join(PROJECT_DIR, "artifacts", SUMMARY_SUBDIR)
     os.makedirs(summary_dir, exist_ok=True)
 
     results = collect_results()
