@@ -1,0 +1,1519 @@
+# [연구 목표 및 내용] - 1차년도
+
+**프로젝트명**: 굴착기 제조 공정 생산성 향상을 위한 AI 기반 부품 인식 및 위치 추정 시스템  
+**수행기관**: 한국건설기계연구원  
+**작성일**: 2026년 3월 28일  
+**보고 구분**: 1차년도 연차보고서
+
+---
+
+## 목차
+
+1. [굴착기 제조 공정 생산성 향상을 위한 공정 프로세스 기술 조사](#1-굴착기-제조-공정-생산성-향상을-위한-공정-프로세스-기술-조사)
+2. [부품 인식 및 위치 추정 데이터 항목 정의 및 AI 모델 구축을 위한 기술조사](#2-부품-인식-및-위치-추정-데이터-항목-정의-및-ai-모델-구축을-위한-기술조사)
+3. [학습 데이터 수집을 위한 하드웨어 장치 선정](#3-학습-데이터-수집을-위한-하드웨어-장치-선정)
+4. [학습 데이터 수집을 위한 서버 및 DBMS 환경 구축](#4-학습-데이터-수집을-위한-서버-및-dbms-환경-구축)
+5. [부품 인식 AI 학습용 기초 데이터셋 구축](#5-부품-인식-ai-학습용-기초-데이터셋-구축)
+6. [부록: 산출물 목록](#6-부록-산출물-목록)
+7. [1차년도 잔여기간 향후 계획](#7-1차년도-잔여기간-향후-계획)
+
+---
+
+## 1. 굴착기 제조 공정 생산성 향상을 위한 공정 프로세스 기술 조사
+
+### 1.1 굴착기 제조 공정의 현장 환경 및 흐름 조사
+
+> ※ 본 항목은 현장 조사 기반으로 작성 필요
+
+<!-- TODO: 현장 조사 결과 내용 기입 -->
+<!-- 예시 결과: -->
+<!-- - 도어 조립 공정의 흐름도 (자재 입고 → 검수 → 조립 라인 배치 → 설치) -->
+<!-- - 현재 부품 식별 방식: 작업자 육안 확인 + 부품 번호 대조 (오류율 약 N%) -->
+<!-- - AI 기반 자동 인식 시스템 도입 시 기대 효과: 검수 시간 단축, 오장착 방지 -->
+
+```
+[예시 결과 형식]
+
+┌─────────┐    ┌─────────┐    ┌─────────────┐    ┌─────────────┐
+│ 자재 입고 │───►│ 부품 검수 │───►│ 조립 라인    │───►│ 최종 검사    │
+│          │    │ (육안)   │    │ 배치·설치    │    │             │
+└─────────┘    └─────────┘    └─────────────┘    └─────────────┘
+                    │                                    │
+                    ▼                                    ▼
+            AI 카메라 인식으로              부품 일치 여부
+            부품 종류 자동 판별             최종 확인
+```
+
+### 1.2 주요 부품의 제작 공정 프로세스 기술 분석
+
+> ※ 본 항목은 현장 조사 기반으로 작성 필요
+
+<!-- TODO: 공정 프로세스 분석 내용 기입 -->
+<!-- 예시: 도어 부품의 제작 공정 (프레스 → 용접 → 도장 → 조립) 단계별 기술 분석 -->
+
+---
+
+## 2. 부품 인식 및 위치 추정 데이터 항목 정의 및 AI 모델 구축을 위한 기술조사
+
+### 2.1 공정 흐름 기반의 부품 인식 및 위치 추정을 위한 데이터 항목 정의
+
+#### 2.1.1 연구 배경 및 목적
+
+굴착기 제조 공정에서 부품의 자동 인식 및 위치 추정은 생산성 향상의 핵심 기술이다. 이를 위해서는 카메라·센서로부터 획득되는 영상 데이터와 AI 모델이 요구하는 입·출력 데이터의 형식, 구조, 단위 등을 명확히 정의하는 것이 선행되어야 한다.
+
+본 1차년도 연구에서는 **RGBD 4채널 (RGB + Depth)** 기반의 데이터 항목을 정의하였다. Depth 채널을 추가함으로써 부품의 외관 정보뿐만 아니라 3차원 형상 정보를 동시에 활용할 수 있게 되어, 형상이 유사한 부품 간의 분류 정확도를 향상시킬 수 있다.
+
+```mermaid
+graph TD
+    A[카메라 센서<br/>ZED X Mini] --> B[RGB 이미지<br/>1920×1080, 8-bit]
+    A --> C[Depth 이미지<br/>1920×1080, 16-bit mm]
+    B --> D[RGBD 4채널 텐서<br/>B,4,448,448]
+    C --> D
+    D --> E[부품 분류 AI 모델<br/>RGBDAuxResNet18]
+    F[SAM 마스크 + 3D PCA<br/>물리 치수 보조 피처] --> E
+    C --> F
+    E --> G[분류 결과<br/>8클래스 확률 + 예측]
+```
+
+> **그림 2-0.** 전체 데이터 흐름 개요
+
+#### 2.1.2 대상 부품 및 클래스 체계
+
+1차년도에서는 굴착기 도어(Door) 부품을 대상으로 데이터 항목을 정의하였다. 굴착기 3개 모델(E25, E30, E38)의 도어 3종(door_RH, door_LH_FRT, door_LH_RR)을 조합하여 총 **8개 클래스**를 구성하였다. E30과 E38의 door_RH는 동일 부품이므로 `E30_E38_door_RH`로 통합하였다.
+
+| 번호 | 클래스 식별자 | 굴착기 모델 | 부품 유형 | 크기(mm) | 비고 |
+|------|-------------|-----------|----------|---------|------|
+| 0 | E25_door_LH_FRT | E25 | 좌측 전방 도어 | 828×1140 | |
+| 1 | E25_door_LH_RR | E25 | 좌측 후방 도어 | 1141×1140 | |
+| 2 | E25_door_RH | E25 | 우측 도어 | 990×1140 | |
+| 3 | E30_E38_door_RH | E30/E38 | 우측 도어 | 1191×1140 | E30/E38 동일 부품 통합 |
+| 4 | E30_door_LH_FRT | E30 | 좌측 전방 도어 | 869×1140 | E25 대비 +41mm |
+| 5 | E30_door_LH_RR | E30 | 좌측 후방 도어 | 1262×1140 | |
+| 6 | E38_door_LH_FRT | E38 | 좌측 전방 도어 | 916×1140 | E30 대비 +47mm |
+| 7 | E38_door_LH_RR | E38 | 좌측 후방 도어 | 1456×1140 | |
+
+> **표 2-1.** 굴착기 도어 부품 8클래스 체계
+
+<!-- 📷 [그림 삽입 필요] 8종 도어 CAD 렌더링 비교 이미지 (4×2 그리드) -->
+<!-- 파일: datasets_cad/각 클래스의 대표 rgb_0000.png 8장을 그리드로 합성 -->
+
+```mermaid
+graph LR
+    subgraph E25
+        A1[LH_FRT<br/>828mm]
+        A2[LH_RR<br/>1141mm]
+        A3[RH<br/>990mm]
+    end
+    subgraph E30
+        B1[LH_FRT<br/>869mm]
+        B2[LH_RR<br/>1262mm]
+    end
+    subgraph E38
+        C1[LH_FRT<br/>916mm]
+        C2[LH_RR<br/>1456mm]
+    end
+    subgraph 통합
+        D1[E30_E38_RH<br/>1191mm]
+    end
+```
+
+> **그림 2-1.** 도어 8클래스 구조 (굴착기 모델별 × 부품 유형별)
+
+#### 2.1.3 부품 분류용 데이터 항목 정의
+
+부품 분류 모델의 입·출력에 사용되는 데이터 항목을 다음과 같이 정의하였다.
+
+**[입력 데이터 항목]**
+
+| 데이터 항목 | 형식 | 크기 | 단위 | 설명 |
+|------------|------|------|------|------|
+| RGB 이미지 | 8-bit PNG | 1920×1080 | 픽셀 | ZED X Mini 카메라 촬영 컬러 이미지 |
+| Depth 이미지 | 16-bit PNG | 1920×1080 | 밀리미터(mm) | Neural Depth 모드 깊이 맵 |
+| RGBD 4채널 텐서 | Float32 Tensor | [B, 4, 448, 448] | 정규화 | 모델 입력용 RGB+Depth 결합 텐서 |
+| 물리 치수 보조 피처 | Float32 Tensor | [B, 3] | mm/무차원 | SAM 마스크 + 3D PCA 기반 [width, height, aspect] |
+
+> **표 2-2.** 부품 분류 입력 데이터 항목
+
+**[출력 데이터 항목]**
+
+| 데이터 항목 | 형식 | 단위 | 설명 |
+|------------|------|------|------|
+| 클래스 레이블 | Integer (0~7) | - | 8개 클래스 중 하나 |
+| 분류 확률 | Float32 [8] | 0.0~1.0 | Softmax 확률 분포 |
+| 예측 클래스명 | String | - | 클래스 식별자 문자열 |
+
+> **표 2-3.** 부품 분류 출력 데이터 항목
+
+#### 2.1.4 위치 추정용 데이터 항목 정의
+
+부품의 3차원 위치 및 자세를 추정하기 위한 6DoF(6 Degrees of Freedom) 포즈 데이터 항목을 정의하였다.
+
+| 데이터 항목 | 형식 | 단위 | 좌표계 | 설명 |
+|------------|------|------|--------|------|
+| 3D 위치 (Translation) | [x, y, z] | 미터(m) | 카메라 기준 | 카메라-부품 간 상대 위치 |
+| 3D 자세 (Rotation) | [qx, qy, qz, qw] | 쿼터니언 | 카메라 기준 | 부품의 3D 회전 자세 |
+| 2D 바운딩 박스 | [x_min, y_min, x_max, y_max] | 픽셀 | 이미지 좌표 | 부품 영역 좌표 |
+| 카메라 내부 파라미터 | K 행렬 [3×3] | 픽셀 | - | fx, fy, cx, cy |
+| 가림 비율 | Float | 0.0~1.0 | - | 0.0=완전 보임, 1.0=완전 가림 |
+
+> **표 2-4.** 위치 추정 데이터 항목
+
+**[좌표계 규약]**
+
+본 시스템은 카메라 광학(optical) 좌표계를 기준으로 한다.
+- X축: 오른쪽 (+)
+- Y축: 아래쪽 (+)
+- Z축: 전방 (+, 카메라가 바라보는 방향)
+
+#### 2.1.5 메타데이터 관리 체계
+
+데이터셋의 체계적 관리를 위해 2단계 계층적 JSON 메타데이터 구조를 설계하였다.
+
+**[전체 데이터셋 메타데이터 (dataset_info.json)]**
+
+```json
+{
+  "dataset_name": "Excavator Door Classification Dataset",
+  "num_classes": 8,
+  "classes": {
+    "E25_door_LH_FRT": "E25_door_LH_FRT",
+    "E30_door_LH_FRT": "E30_door_LH_FRT",
+    "E38_door_LH_FRT": "E38_door_LH_FRT"
+  },
+  "data_source": "real_camera",
+  "camera": "ZED X Mini",
+  "depth_enabled": true,
+  "created_at": "2026-03-27"
+}
+```
+
+**[클래스별 메타데이터 (metadata.json)]**
+
+```json
+{
+  "class_name": "E25_door_LH_FRT",
+  "display_name": "E25 Door LH Front",
+  "data_source": "real_camera",
+  "camera": "ZED X Mini",
+  "resolution": [1920, 1080],
+  "num_images": 158,
+  "capture_method": "video_frame_extraction",
+  "frame_extraction_interval": 5,
+  "quality_filter": true
+}
+```
+
+#### 2.1.6 데이터셋 디렉토리 구조
+
+데이터셋은 분류용과 6DoF 포즈용의 두 가지 유형으로 구분하여 관리하며, 각각의 목적에 맞는 어노테이션 형식을 설계하였다.
+
+```
+class_estimation/door/
+├── datasets/                          # 실물 촬영 RGBD 데이터
+│   ├── dataset_info.json              # 전체 메타데이터
+│   ├── E25_door_LH_FRT/
+│   │   ├── metadata.json              # 클래스 메타데이터
+│   │   ├── rgb_0000.png               # RGB 이미지 (8-bit)
+│   │   ├── depth_0000.png             # Depth 이미지 (16-bit, mm)
+│   │   ├── mask_0000.png              # SAM2 전경 마스크
+│   │   └── ...
+│   ├── E30_door_LH_FRT/
+│   └── ...  (8클래스)
+│
+├── datasets_cad/                      # CAD 합성 RGBD 데이터
+│   ├── dataset_info.json
+│   ├── E25_door_LH_FRT/  (500장)
+│   └── ...  (8클래스 × 500장 = 4,000장)
+│
+├── sam_models/                        # SAM 세그멘테이션 모델
+│   ├── mobile_sam.pt                  # MobileSAM (39MB)
+│   └── sam2.1_hiera_small.pt          # SAM2.1 Small (176MB)
+│
+└── artifacts/                         # 학습 산출물
+    ├── best_door_model_5090.pth       # PyTorch 모델 가중치
+    ├── best_door_model_5090.onnx      # ONNX 변환 모델
+    ├── class_names_door_5090.json     # 클래스 이름 목록
+    └── evaluation_results_door_5090.* # 평가 결과
+```
+
+> **그림 2-2.** 데이터셋 디렉토리 구조
+
+---
+
+### 2.2 AI 모델 구축을 위한 하이퍼파라미터 및 학습 데이터 전처리 기법 조사
+
+#### 2.2.1 모델 아키텍처 선정
+
+부품 분류를 위한 기반 모델로 **ResNet18**을 선정하였다. ResNet18은 18개 레이어로 구성된 잔차 학습(Residual Learning) 기반의 합성곱 신경망으로, 약 1,100만 개의 파라미터를 가진 경량 모델이다. ImageNet 데이터셋(1,000개 클래스, 128만 장)으로 사전학습된 가중치를 활용한 **전이학습(Transfer Learning)** 방식을 채택하여, 소규모 데이터셋(수백 장 수준)에서도 안정적인 학습 수렴과 높은 분류 정확도를 확보하였다.
+
+**[RGBD 4채널 입력 확장]**
+
+기존 ResNet18은 RGB 3채널 입력을 전제로 설계되어 있으므로, RGBD 4채널 입력을 지원하기 위해 첫 번째 합성곱 레이어(conv1)를 수정하였다. 3채널 → 4채널로 확장된 새로운 Conv2d 레이어를 생성하고, 기존 ImageNet 사전학습 가중치의 RGB 3채널분은 그대로 복사하며, 추가된 Depth 채널(4번째)은 기존 RGB 3채널 가중치의 **평균값**으로 초기화하였다.
+
+```mermaid
+graph TB
+    subgraph 입력
+        I1["RGBD 이미지<br/>[B, 4, 448, 448]"]
+        I2["물리 치수<br/>[B, 3]"]
+    end
+    
+    subgraph "ResNet18 Backbone"
+        C1["Conv2d(4→64, 7×7)<br/>+ BN + ReLU + MaxPool"]
+        R1["Layer1: BasicBlock×2<br/>(64→64)"]
+        R2["Layer2: BasicBlock×2<br/>(64→128)"]
+        R3["Layer3: BasicBlock×2<br/>(128→256)"]
+        R4["Layer4: BasicBlock×2<br/>(256→512)"]
+        AP["AdaptiveAvgPool2d<br/>→ [B, 512]"]
+    end
+    
+    subgraph "Aux MLP"
+        AUX["Linear(3→32)<br/>+ ReLU<br/>→ [B, 32]"]
+    end
+    
+    subgraph "분류기"
+        CAT["Concatenate<br/>[512 + 32 = 544]"]
+        FC["Dropout(0.3)<br/>FC(544→256) + ReLU<br/>Dropout(0.2)<br/>FC(256→8)"]
+        OUT["출력 로짓<br/>[B, 8]"]
+    end
+    
+    I1 --> C1 --> R1 --> R2 --> R3 --> R4 --> AP
+    I2 --> AUX
+    AP --> CAT
+    AUX --> CAT
+    CAT --> FC --> OUT
+```
+
+> **그림 2-3.** RGBDAuxResNet18 모델 아키텍처 (CNN 특징 512d + 물리 치수 보조 피처 32d = 544d)
+
+#### 2.2.2 하이퍼파라미터 설정
+
+모델 학습에 사용된 하이퍼파라미터는 사전 실험을 통해 최적값을 탐색하여 결정하였다.
+
+| 하이퍼파라미터 | 설정값 | 선정 근거 |
+|--------------|--------|---------|
+| 옵티마이저 | Adam (lr=0.001) | 전체 파라미터 단일 학습률 적용 |
+| 학습률 스케줄러 | ReduceLROnPlateau | 검증 손실 정체 시 자동 학습률 감소 (patience=3, factor=0.5) |
+| 배치 크기 | 64 | RTX 5090 GPU(32GB VRAM) 메모리 기준 최적화, 자동 조정 지원 |
+| 최대 에포크 | 60 | 과적합 방지를 위한 충분한 학습 기회 부여 |
+| Early Stopping | patience=10 | 검증 정확도 10 에포크 연속 미개선 시 조기 종료 |
+| 손실 함수 | CrossEntropyLoss | 다중 클래스 분류의 표준 손실 함수, 클래스 가중치 적용 |
+| 클래스 가중치 | 역빈도 기반 | 클래스 불균형 보정 (이미지 수 적은 클래스에 높은 가중치) |
+| 데이터 분할 | Train 70% / Test 30% | Stratified Split으로 클래스 비율 유지 (Train 879장, Test 377장) |
+| 반복 실험 | 5-seed (42, 123, 456, 789, 1024) | 통계적 신뢰성 확보를 위한 독립 반복 실험 (mean ± std 산출) |
+| Dropout | 0.3 / 0.2 | FC 레이어 과적합 방지 |
+
+> **표 2-5.** 모델 학습 하이퍼파라미터 설정
+
+**[학습 결과 (실물 8종 분류, 5-seed 반복 실험)]**
+
+통계적 신뢰성 확보를 위해 서로 다른 5개의 랜덤 시드(42, 123, 456, 789, 1024)로 동일 실험을 반복하여 평균(mean) ± 표준편차(std)를 산출하였다.
+
+| 지표 | 값 |
+|------|-----|
+| 학습 데이터 | 1,256장 (8클래스, Train 879장 / Test 377장) |
+| 반복 실험 | 5회 (seed: 42, 123, 456, 789, 1024) |
+| 테스트 정확도 (mean ± std) | **99.52 ± 0.81%** |
+| Macro F1 (mean ± std) | **99.52 ± 0.81%** |
+| Macro Precision (mean ± std) | **99.55 ± 0.75%** |
+| Macro Recall (mean ± std) | **99.52 ± 0.81%** |
+
+> **표 2-6.** 실물 데이터 8종 분류 학습 결과 (5-seed 평균)
+
+| 클래스 | Precision (%) | Recall (%) | F1-Score (%) |
+|--------|:---:|:---:|:---:|
+| E25_door_LH_FRT | 100.00 ± 0.00 | 99.57 ± 0.85 | 99.78 ± 0.43 |
+| E25_door_LH_RR | 100.00 ± 0.00 | 99.57 ± 0.85 | 99.78 ± 0.43 |
+| E25_door_RH | 98.80 ± 2.40 | 100.00 ± 0.00 | 99.38 ± 1.24 |
+| E30_E38_door_RH | 100.00 ± 0.00 | 98.70 ± 2.61 | 99.33 ± 1.35 |
+| E30_door_LH_FRT | 99.18 ± 1.00 | 100.00 ± 0.00 | 99.59 ± 0.50 |
+| E30_door_LH_RR | 100.00 ± 0.00 | 98.33 ± 3.33 | 99.13 ± 1.74 |
+| E38_door_LH_FRT | 100.00 ± 0.00 | 100.00 ± 0.00 | 100.00 ± 0.00 |
+| E38_door_LH_RR | 98.42 ± 2.29 | 100.00 ± 0.00 | 99.19 ± 1.18 |
+
+> **표 2-7.** 클래스별 분류 성능 상세 (8종, mean ± std, 5 seeds)
+
+<!-- 📷 [그림 삽입 필요] 학습 곡선 그래프 (Loss/Accuracy vs Epoch) -->
+<!-- 파일: artifacts/training_curve_door_5090.png -->
+<!-- 내용: 좌측 y축 train_loss (하강), 우측 y축 val_accuracy (상승), x축 epoch -->
+
+<!-- 📷 [그림 삽입 필요] 혼동 행렬(Confusion Matrix) 이미지 -->
+<!-- 파일: artifacts/evaluation_results_door_5090.png -->
+<!-- 내용: 8×8 혼동 행렬, 대각선이 모두 100%인 완벽 분류 -->
+
+#### 2.2.3 학습 데이터 전처리 기법
+
+수집된 원시 이미지 데이터를 모델에 입력하기 위한 전처리 파이프라인을 설계·구현하였다. 굴착기 부품(도어 등)은 좌·우 방향 및 형상의 **종횡비(aspect ratio)가 분류의 핵심 특징**이므로, 기존의 CenterCrop 방식 대신 **Letterbox 방식**을 채택하였다. Letterbox 방식은 장변을 기준으로 이미지를 축소한 뒤, 단변 방향에 검정(0) 패딩을 추가하여 정사각형을 완성하므로, 원본 이미지의 종횡비가 완전히 보존된다.
+
+**[입력 해상도 448×448 선정 근거]**
+
+초기에는 ImageNet 표준인 224×224 해상도를 사용하였으나, 유사 형상 부품(E25/E30/E38 도어) 간 크기 차이가 40~50mm에 불과한 점이 문제가 되었다. 1920×1080 원본에서 224×224로 축소 시 약 8.6배 다운샘플링되어, 50mm 물리 차이가 약 6픽셀 미만으로 줄어들어 모델이 클래스를 구분하지 못하는 현상이 발생하였다. 이에 해상도를 **448×448**로 2배 증가시켜 유효 픽셀 차이를 약 12픽셀 이상으로 확보하였다.
+
+```mermaid
+graph LR
+    subgraph "RGB 전처리"
+        R1["원본 RGB<br/>1920×1080, 8-bit"] --> R2["Letterbox Resize<br/>장변 448px"]
+        R2 --> R3["중앙 배치 패딩<br/>448×448"]
+        R3 --> R4["[학습] 공간 증강<br/>HFlip/Rot/Scale"]
+        R4 --> R5["[학습] 색상 증강<br/>B/C/S/H/Noise/Blur"]
+        R5 --> R6["ImageNet 정규화<br/>mean/std"]
+    end
+    
+    subgraph "Depth 전처리"
+        D1["원본 Depth<br/>1920×1080, 16-bit mm"] --> D2["Letterbox Resize<br/>INTER_NEAREST"]
+        D2 --> D3["중앙 배치 패딩<br/>448×448"]
+        D3 --> D4["[학습] 동기화 공간 증강<br/>동일 파라미터 적용"]
+        D4 --> D5["5m 클리핑 → [0,1]<br/>(x-0.5)/0.25"]
+    end
+    
+    R6 --> CAT["torch.cat<br/>[B, 4, 448, 448]"]
+    D5 --> CAT
+```
+
+> **그림 2-4.** RGBD 전처리 파이프라인 (RGB·Depth 동기화 공간 변환, RGB 전용 색상 증강)
+
+| 전처리 단계 | 적용 대상 | 방법 | 파라미터 | 비고 |
+|------------|----------|------|---------|------|
+| Letterbox Resize | RGB, Depth | 장변 기준 비례 축소 | 448px | 종횡비 완전 보존 |
+| 중앙 배치 패딩 | RGB, Depth | 검정(0) 패딩으로 448×448 완성 | 448×448 | 동기화 적용 |
+| ImageNet 정규화 | RGB | Channel-wise 표준화 | mean/std | ImageNet 통계값 |
+| Depth 클리핑 | Depth | 최대 거리 제한 | 5,000mm (5m) | 원거리 노이즈 제거 |
+| Depth 스케일링 | Depth | 선형 스케일링 | ÷5000 → [0, 1] | 값 범위 통일 |
+| Depth 정규화 | Depth | Z-score 표준화 | (x-0.5)/0.25 | 분포 중심화 |
+| 수평 반전 | RGB, Depth | 좌우 반전 (50% 확률) | - | 좌우 시점 다양성 확보 |
+| 회전 | RGB, Depth | ±5° | 100% | 회전 불변성 확보 |
+| 스케일 변환 | RGB, Depth | 0.9~1.1배 (50% 확률) | - | 카메라 거리 변화 시뮬레이션 |
+| 색상 증강 | RGB만 | Brightness/Contrast/Saturation/Hue | 100% | 조명 변화 대응 |
+| 가우시안 노이즈 | RGB만 | σ: 3~10 (30% 확률) | - | 센서 노이즈 대응 |
+| 가우시안 블러 | RGB만 | kernel=3 (20% 확률) | - | 촬영 포커스 변화 대응 |
+| 블러 필터링 | RGB | Laplacian Variance | threshold=100 | 흐릿한 이미지 제거 |
+
+> **표 2-8.** 전처리 기법 상세
+
+#### 2.2.4 SAM + 3D PCA 기반 물리 치수 보조 피처 (Auxiliary Features)
+
+굴착기 도어 부품은 E25/E30/E38 모델 간 40~50mm의 미세한 크기 차이만 존재하여, 이미지 픽셀 정보만으로는 분류가 어렵다. 이를 해결하기 위해 **SAM(Segment Anything Model)** 기반 전경 분리와 **3D PCA(Principal Component Analysis)** 를 활용하여 **시점에 무관한 물리적 치수를 수치 피처로 직접 계산**하고, CNN 특징과 결합하는 방식을 도입하였다.
+
+```mermaid
+graph TD
+    A["RGB 이미지"] --> B["SAM 마스크 생성<br/>(학습: SAM2, 추론: MobileSAM)"]
+    B --> C["전경 픽셀 추출"]
+    D["Depth 이미지"] --> E["3D 점 변환<br/>핀홀 카메라 모델<br/>X=(px-cx)·d/fx<br/>Y=(py-cy)·d/fy<br/>Z=d"]
+    C --> E
+    E --> F["SVD/PCA<br/>주성분 2축 추출"]
+    F --> G["물리 치수 계산<br/>width_mm, height_mm"]
+    G --> H["aspect_ratio<br/>= max/min"]
+    H --> I["보조 피처 [B, 3]<br/>→ Aux MLP"]
+```
+
+> **그림 2-5.** SAM + 3D PCA 기반 물리 치수 보조 피처 계산 과정
+
+| 보조 피처 | 계산 방법 | 단위 | 의미 |
+|----------|----------|------|------|
+| physical_width_mm | 3D PCA PC1/PC2 중 큰 축 범위 | mm | 부품 긴 변 |
+| physical_height_mm | 3D PCA PC1/PC2 중 작은 축 범위 | mm | 부품 짧은 변 |
+| aspect_ratio | width / height | 무차원 | 종횡비 |
+
+> **표 2-8b.** SAM + 3D PCA 기반 물리 치수 보조 피처 (NUM_AUX_FEATURES = 3)
+
+**[SAM 적용 전후 AR 일관성 비교]**
+
+| | SAM 마스크 AR std | Depth-only AR std | 개선 배율 |
+|---|---|---|---|
+| CAD 데이터 | 0.019~0.035 | 0.112~0.145 | 4~7배 |
+| 실제 데이터 | 0.043~0.268 | 0.301~0.510 | 2~10배 |
+
+> **표 2-8c.** SAM 적용 전후 AR 일관성 비교
+
+---
+
+### 2.3 데이터 증강 기법 및 모델 경량화 기술 조사
+
+#### 2.3.1 데이터 증강 기법
+
+실물 데이터셋(1,256장)의 한계를 극복하기 위해, 온라인(학습 시 실시간)과 오프라인(데이터 생성 시) 두 가지 방식의 데이터 증강 기법을 적용하였다.
+
+**[온라인 증강 기법 (학습 시 실시간 적용)]**
+
+| 증강 기법 | 적용 대상 | 파라미터 | 확률 | 목적 | RGBD 동기화 |
+|----------|----------|---------|------|------|-----------|
+| HorizontalFlip | RGB + Depth | 좌우 반전 | 50% | 좌우 시점 다양성 | 동일 반전 적용 |
+| RandomRotation | RGB + Depth | ±5° | 100% | 회전 불변성 확보 | 동일 각도 적용 |
+| RandomScale | RGB + Depth | 0.9~1.1배 | 50% | 카메라 거리 변화 대응 | 동일 스케일 적용 |
+| AdjustBrightness | RGB만 | factor: 0.6~1.4 | 100% | 밝기 변화 대응 | Depth 미적용 |
+| AdjustContrast | RGB만 | factor: 0.6~1.4 | 100% | 대비 변화 대응 | Depth 미적용 |
+| AdjustSaturation | RGB만 | factor: 0.7~1.3 | 100% | 채도 변화 대응 | Depth 미적용 |
+| AdjustHue | RGB만 | ±0.05 | 100% | 색조 변화 대응 | Depth 미적용 |
+| GaussianNoise | RGB만 | σ: 3~10 | 30% | 센서 노이즈 대응 | Depth 미적용 |
+| GaussianBlur | RGB만 | kernel: 3 | 20% | 촬영 포커스 변화 대응 | Depth 미적용 |
+
+> **표 2-9.** 온라인 데이터 증강 기법
+
+> **참고**: Depth 채널은 물리적 거리값이므로 색상·노이즈·블러 증강을 적용하면 실제 거리 정보가 왜곡된다. 따라서 이들 증강은 RGB 3채널에만 적용한다. 공간 변환 시 Depth에는 `INTER_NEAREST` 보간법을 사용하여 거리값의 보간에 의한 왜곡을 방지한다.
+
+**[오프라인 증강 기법 (합성 데이터 생성 시 적용)]**
+
+Isaac Sim의 Omni Replicator를 활용한 도메인 랜덤화(Domain Randomization)를 통해, 데이터 생성 단계에서 대규모 오프라인 증강을 수행하였다.
+
+| 랜덤화 항목 | 랜덤화 범위 | 비율/분포 | 목적 |
+|------------|-----------|----------|------|
+| 배경 | 없음 / 단색 / 팩토리 배경 | 20% / 30% / 50% | 배경 의존성 제거 |
+| 카메라 수평 각도 | ±45° | 균등 분포 | 다양한 수평 시점 |
+| 카메라 수직 각도 | 15° ~ 75° | 균등 분포 | 다양한 수직 시점 |
+| 카메라 거리 | 부품 대각선 기반 | fill 60%, ±8° | 적절한 프레이밍 |
+| 조명 방향 | Dome Light 회전 | 연속 분포 | 다양한 그림자 패턴 |
+
+> **표 2-10.** 도메인 랜덤화 항목
+
+#### 2.3.2 모델 경량화 기술 조사
+
+학습된 모델을 엣지 장비(NVIDIA Jetson Orin)에 배포하기 위한 경량화 기술을 조사·적용하였다.
+
+| 기술 | 적용 여부 | 상세 | 효과 |
+|------|----------|------|------|
+| Transfer Learning | ✅ 적용 | ImageNet 사전학습 가중치 활용 | 학습 시간 단축, 소규모 데이터 대응 |
+| ResNet18 경량 모델 | ✅ 적용 | 11M 파라미터 (ResNet50의 44%) | 추론 속도 향상 |
+| ONNX 변환 | ✅ 적용 | opset 18, 43.13MB | 크로스 플랫폼 호환성 |
+| TensorRT 변환 | ⚠️ 시도 | 출력 불일치 문제 발생 | 향후 재시도 예정 |
+| 양자화 (INT8/FP16) | 🔲 미적용 | 1차년도 후반 적용 예정 | 추론 속도 2~4배 향상 예상 |
+
+> **표 2-11.** 모델 경량화 기술 적용 현황
+
+**[TensorRT 변환 시도 및 호환성 분석]**
+
+ONNX 모델을 TensorRT 엔진으로 변환하여 GPU 가속 추론을 시도하였으나, **출력 불일치 문제**가 발생하였다.
+
+| 검증 항목 | PyTorch | TensorRT | 비고 |
+|----------|---------|----------|------|
+| 입력 데이터 차이 | - | **0** (동일) | 입력은 정확히 일치 |
+| 출력 값 차이 (최대) | - | **11.55** | 완전히 다른 출력 |
+| 분류 정확도 | 98.53% | 32.35% | 66%p 하락 |
+
+> **표 2-12.** PyTorch vs TensorRT 출력 비교
+
+**[추론 속도 최적화 로드맵]**
+
+| 순위 | 최적화 방법 | 예상 추론 시간 | 난이도 | 현황 |
+|------|-----------|-------------|--------|------|
+| 1 | Jetson GPU 추론 (PyTorch) | ~10ms/장 | 낮음 | Jetson PyTorch wheel 설치 후 1줄 수정 |
+| 2 | FP16 반정밀도 양자화 | ~6ms/장 | 낮음 | GPU 추론과 함께 `model.half()` 적용 |
+| 3 | ONNX Runtime (CPU) | ~40ms/장 | 중간 | ONNX 변환 완료, 추론 코드 수정 필요 |
+| 4 | TensorRT (GPU) | ~3ms/장 | 높음 | 출력 불일치 문제 해결 필요 |
+| 5 | INT8 양자화 | ~2ms/장 | 높음 | 캘리브레이션 데이터셋 및 정확도 검증 필요 |
+
+> **표 2-13.** 추론 속도 최적화 로드맵
+
+---
+
+## 3. 학습 데이터 수집을 위한 하드웨어 장치 선정
+
+### 3.1 부품 인식을 위한 카메라 및 센서 종류 분석
+
+#### 3.1.1 분석 목적
+
+굴착기 부품 인식 시스템에 적합한 센서를 선정하기 위해, 산업용 영상 센서를 유형별로 분류하고 각각의 특성, 장·단점, 적용 환경을 분석하였다.
+
+#### 3.1.2 센서 유형별 분석
+
+```mermaid
+graph TD
+    A["산업용 영상 센서"] --> B["RGB 카메라"]
+    A --> C["RGB-D 카메라"]
+    A --> D["LiDAR 센서"]
+    
+    C --> C1["스테레오 비전<br/>ZED, RealSense D4xx"]
+    C --> C2["ToF<br/>Azure Kinect, L515"]
+    C --> C3["구조광<br/>SR300, Orbbec"]
+    
+    C1 --> E["✅ 선정<br/>ZED X Mini"]
+    
+    style E fill:#2d5,stroke:#333,color:#fff
+```
+
+> **그림 3-0.** 센서 유형 분류 및 선정 결과
+
+**[(1) RGB 카메라]**
+
+| 항목 | 내용 |
+|------|------|
+| 장점 | 고해상도(4K 이상), 높은 FPS(120+), 저가 |
+| 단점 | Depth 정보 미제공, 3D 위치 추정 불가 |
+| 대표 제품 | FLIR Blackfly, Basler ace, Lucid Vision Triton |
+
+> **표 3-1.** RGB 카메라 특성
+
+**[(2) RGB-D 카메라 — 스테레오 비전 방식]**
+
+| 항목 | 내용 |
+|------|------|
+| 측정 원리 | 좌/우 카메라 시차(disparity) → 삼각 측량 |
+| 장점 | 원거리 측정 가능(15m+), 야외 사용 가능, AI 기반 깊이 보정 가능 |
+| 단점 | 텍스처 없는 표면에서 정확도 저하 |
+| 대표 제품 | **Stereolabs ZED 시리즈**, Intel RealSense D400 시리즈 |
+
+> **표 3-2.** 스테레오 비전 방식 특성
+
+**[(2) RGB-D 카메라 — ToF 방식]**
+
+| 항목 | 내용 |
+|------|------|
+| 측정 원리 | IR 광 비행 시간 측정 |
+| 장점 | 텍스처 무관, 균일한 깊이맵 |
+| 단점 | 태양광 간섭에 취약, 해상도 상대적으로 낮음 |
+| 대표 제품 | Microsoft Azure Kinect, Intel RealSense L515 |
+
+> **표 3-3.** ToF 방식 특성
+
+**[(3) LiDAR 센서]**
+
+레이저 기반의 정밀 거리 측정이 가능하나, 단가가 높고 RGB 정보를 별도 카메라와 융합해야 하는 제약이 있다.
+
+### 3.2 주요 제품 스펙 비교를 통한 최적 장비 선정
+
+#### 3.2.1 RGB-D 카메라 제품 비교
+
+| 비교 항목 | ZED X Mini | Intel RealSense D455 | Microsoft Azure Kinect |
+|----------|-----------|---------------------|----------------------|
+| **깊이 측정 방식** | 스테레오 비전 | 스테레오 비전 + IR | ToF + RGB |
+| **RGB 해상도** | **1920×1200** | 1280×800 | 3840×2160 |
+| **Depth 해상도** | **1920×1200** | 1280×720 | 640×576 |
+| **Depth 범위** | **0.1 ~ 15m** | 0.6 ~ 6m | 0.25 ~ 5.46m |
+| **FPS** | 30 / 60 | 30 / 90 | 30 |
+| **인터페이스** | **GMSL2** | USB-C 3.1 | USB-C 3.0 |
+| **AI 깊이 추정** | **Neural Depth 지원** | 미지원 | 미지원 |
+| **방진방수** | **IP66** | 없음 | 없음 |
+| **Jetson 호환** | **네이티브 지원** | 별도 드라이버 필요 | 미지원 |
+
+> **표 3-5.** RGB-D 카메라 3종 스펙 비교
+
+<!-- 📷 [그림 삽입 필요] 카메라 3종 제품 이미지 비교 -->
+
+#### 3.2.2 선정 결과: Stereolabs ZED X Mini
+
+| 순위 | 선정 근거 | 상세 설명 |
+|------|---------|----------|
+| 1 | GMSL2 인터페이스 | NVIDIA Jetson 플랫폼과 네이티브 연동, USB 대역폭 제한 없음 |
+| 2 | Neural Depth 모드 | AI 기반 깊이 추정으로 텍스처 없는 금속면 한계 극복 |
+| 3 | IP66 방진방수 | 제조 현장 환경(분진, 오일, 습기)에서 장기 운영 가능 |
+| 4 | 높은 동시 해상도 | RGB·Depth 모두 1920×1200 |
+| 5 | Python SDK (pyzed) | 빠른 프로토타이핑 및 Flask 웹 서버 연동 |
+
+> **표 3-6.** ZED X Mini 선정 근거
+
+#### 3.2.3 컴퓨팅 장비 선정
+
+| 용도 | 장비 | 주요 사양 | 역할 |
+|------|------|---------|------|
+| 학습 서버 | GPU 워크스테이션 | NVIDIA RTX 5090 (32GB VRAM), CUDA 12.4 | 대규모 데이터셋 고속 학습 |
+| 추론 장비 | NVIDIA Jetson Orin + ZED Box Mini | Jetson Orin (ARM), ZED X Mini 카메라 내장 | 현장 실시간 추론 (86ms/장) |
+| 시뮬레이션 서버 | GPU 워크스테이션 | NVIDIA GPU, Isaac Sim 구동 | CAD 합성 데이터 생성 |
+
+> **표 3-7.** 컴퓨팅 장비 선정
+
+```mermaid
+graph LR
+    subgraph "학습 서버"
+        TS["RTX 5090 GPU<br/>CUDA 12.4<br/>Ubuntu 22.04<br/>· 모델 학습<br/>· 평가/분석<br/>· ONNX 변환"]
+    end
+    
+    subgraph "추론 장비"
+        IE["Jetson Orin<br/>+ ZED Box Mini<br/>+ ZED X Mini<br/>· 실시간 추론<br/>· 데이터 수집<br/>· 웹 서버 (5001)"]
+    end
+    
+    subgraph "시뮬레이션 서버"
+        SS["Isaac Sim<br/>· CAD→USD 변환<br/>· 합성 데이터<br/>  생성 (4000장)"]
+    end
+    
+    TS -- ".pth 모델 전송" --> IE
+    SS -- "datasets_cad/" --> TS
+    TS -- "SSH 원격 관리" --> SS
+```
+
+> **그림 3-1.** 하드웨어 시스템 구성도
+
+---
+
+## 4. 학습 데이터 수집을 위한 서버 및 DBMS 환경 구축
+
+### 4.1 카메라/센서 연동을 위한 신호처리 소프트웨어 설계
+
+#### 4.1.1 설계 목적
+
+ZED X Mini 카메라로부터 RGB+Depth 영상 신호를 실시간으로 수집·처리·저장하기 위한 소프트웨어 시스템을 설계·구현하였다. 제조 현장에서 비전문 작업자도 웹 브라우저를 통해 데이터를 수집할 수 있도록 Flask 기반 웹 인터페이스를 제공한다.
+
+#### 4.1.2 시스템 아키텍처
+
+```mermaid
+graph TB
+    subgraph "카메라 하드웨어 레이어"
+        ZED["ZED X Mini<br/>(GMSL2)"]
+        SDK["ZED SDK<br/>Neural Depth, mm 단위"]
+        ZED --> SDK
+    end
+    
+    subgraph "신호처리 레이어"
+        CM["CameraManager<br/>(비동기 스레드 캡처)"]
+        QF["품질 필터링<br/>Laplacian Variance ≥ 100"]
+        SAVE["RGB+Depth 쌍 동기 저장<br/>8-bit + 16-bit PNG"]
+        SDK --> CM --> QF --> SAVE
+    end
+    
+    subgraph "웹 서비스 레이어 (Flask, Port 5000)"
+        MJPEG["MJPEG<br/>실시간 스트리밍"]
+        REC["녹화/<br/>스냅샷 API"]
+        SEL["이미지<br/>선별 UI"]
+        DASH["데이터셋<br/>현황 대시보드"]
+    end
+    
+    CM --> MJPEG
+    CM --> REC
+    QF --> SEL
+    SAVE --> DASH
+```
+
+> **그림 4-1.** 데이터 수집 시스템 3계층 아키텍처
+
+<!-- 📷 [그림 삽입 필요] 데이터 수집 웹 UI 스크린샷 -->
+<!-- http://localhost:5000 접속 화면 캡처: MJPEG 스트리밍 + 클래스 선택 + 녹화 버튼 -->
+
+#### 4.1.3 핵심 모듈 상세
+
+**[CameraManager 모듈]**
+
+| 기능 | 메서드 | 설명 |
+|------|--------|------|
+| 초기화 | `__init__()` | ZED SDK 초기화 (HD1080, 30fps, Neural Depth), OpenCV 폴백 |
+| 프레임 캡처 | `_capture_loop()` | 백그라운드 스레드에서 RGB+Depth 동기화 캡처 |
+| 프레임 획득 | `get_frame()` / `get_depth()` | 최신 RGB/Depth 프레임 반환 (thread-safe) |
+| 녹화 시작 | `start_recording()` | N 프레임 간격 자동 추출, 블러 필터링 적용 |
+| 녹화 종료 | `stop_recording()` | 추출 결과 통계 반환 |
+| 수동 캡처 | `snapshot()` | 현재 프레임 1장 즉시 저장 |
+
+> **표 4-1.** CameraManager 주요 기능
+
+**[신호처리 흐름]**
+
+```mermaid
+graph TD
+    A["ZED SDK grab()"] --> B["retrieve_image(VIEW.LEFT)<br/>BGRA→BGR 변환"]
+    A --> C["retrieve_measure(MEASURE.DEPTH)<br/>NaN/Inf→0 치환<br/>float32→uint16"]
+    B --> D{"녹화 모드?"}
+    C --> D
+    D -- "Yes" --> E{"N프레임마다<br/>블러 검사"}
+    E -- "Laplacian ≥ 100" --> F["저장<br/>rgb_NNNN.png (8-bit)<br/>depth_NNNN.png (16-bit)"]
+    E -- "Laplacian < 100" --> G["폐기 (흐릿)"]
+    D -- "No" --> H["스트리밍 전용"]
+```
+
+> **그림 4-2.** 신호처리 흐름도
+
+#### 4.1.4 웹 제어 인터페이스 (RESTful API)
+
+| 엔드포인트 | 메서드 | 설명 |
+|-----------|--------|------|
+| `/` | GET | 메인 UI 페이지 |
+| `/video_feed` | GET | MJPEG 실시간 스트리밍 |
+| `/api/start_recording` | POST | 녹화 시작 (class_name, interval) |
+| `/api/stop_recording` | POST | 녹화 정지 및 추출 결과 반환 |
+| `/api/snapshot` | POST | 수동 1장 캡처 |
+| `/api/save_selected` | POST | 선별 이미지 저장 |
+| `/api/dataset_status` | GET | 클래스별 이미지 수집 현황 |
+
+> **표 4-3.** RESTful API 설계
+
+#### 4.1.5 OpenCV 폴백 지원
+
+ZED SDK가 설치되지 않은 개발 환경에서도 OpenCV 웹캠 기반 폴백(fallback)을 구현하였다. 폴백 모드에서는 RGB 프레임만 제공되며 Depth는 None을 반환한다.
+
+---
+
+### 4.2 수집된 신호 데이터의 효율적 저장/관리를 위한 DBMS 스키마 설계
+
+#### 4.2.1 설계 배경 및 목적
+
+대용량 이미지 바이너리 파일은 파일시스템에 저장하고, 메타데이터·학습 이력·평가 결과는 관계형 데이터베이스(RDBMS)로 관리하는 **하이브리드 저장 구조**를 설계하였다.
+
+#### 4.2.2 설계 원칙
+
+| 원칙 | 설명 |
+|------|------|
+| 하이브리드 저장 | 이미지는 파일시스템, 메타데이터는 RDBMS |
+| 이력 관리 | 촬영 세션 → 이미지 → 학습 → 평가의 전체 생애주기 추적 |
+| 확장성 | 새로운 부품 클래스, 센서, 모델 추가 시 스키마 변경 최소화 |
+| 데이터 무결성 | 외래 키 제약 및 CHECK 제약 |
+
+> **표 4-4.** DBMS 스키마 설계 원칙
+
+#### 4.2.3 ER 다이어그램
+
+```mermaid
+erDiagram
+    datasets ||--o{ classes : contains
+    datasets ||--o{ capture_sessions : has
+    datasets ||--o{ training_sessions : trains
+    classes ||--o{ images : has
+    capture_sessions ||--o{ images : produces
+    training_sessions ||--o{ training_metrics : logs
+    training_sessions ||--o{ evaluation_results : evaluates
+    training_sessions ||--o{ augmentation_configs : uses
+    models ||--o{ training_sessions : trains
+    models ||--o{ evaluation_results : evaluated_by
+    
+    datasets {
+        int id PK
+        string name
+        string type "real/synthetic/mixed"
+        int num_classes
+        int total_images
+        string base_path
+    }
+    
+    classes {
+        int id PK
+        int dataset_id FK
+        string name
+        string model_name
+        string part_type
+        int image_count
+    }
+    
+    images {
+        int id PK
+        int class_id FK
+        int session_id FK
+        string rgb_path
+        string depth_path
+        float blur_score
+        string data_source
+        boolean is_valid
+        string split
+    }
+    
+    models {
+        int id PK
+        string name
+        string architecture
+        int in_channels
+        string weights_path
+        string onnx_path
+    }
+    
+    training_sessions {
+        int id PK
+        int dataset_id FK
+        int model_id FK
+        string optimizer
+        float learning_rate
+        float best_accuracy
+        float total_time_sec
+    }
+    
+    training_metrics {
+        int id PK
+        int session_id FK
+        int epoch
+        float train_loss
+        float val_loss
+        float val_accuracy
+    }
+    
+    evaluation_results {
+        int id PK
+        int session_id FK
+        int model_id FK
+        float accuracy
+        float precision_macro
+        float recall_macro
+        float f1_macro
+        string eval_type
+    }
+```
+
+> **그림 4-3.** 데이터베이스 ER 다이어그램 (9개 테이블)
+
+#### 4.2.4 테이블 구성 상세
+
+**[핵심 데이터 테이블 (3개)]**
+
+| 테이블 | 역할 | 주요 컬럼 | 레코드 규모 |
+|--------|------|---------|-----------|
+| `datasets` | 데이터셋 단위 관리 | name, type, num_classes, base_path | ~10건 |
+| `classes` | 클래스 정보 관리 | name, model_name, part_type, cad_available | ~30건 |
+| `images` | 개별 이미지 메타데이터 | rgb_path, depth_path, blur_score, data_source, split | ~10,000건 |
+
+> **표 4-5.** 핵심 데이터 테이블
+
+**[이력 관리 테이블 (4개)]**
+
+| 테이블 | 역할 | 레코드 규모 |
+|--------|------|-----------|
+| `capture_sessions` | 촬영 세션 이력 | ~50건 |
+| `training_sessions` | 학습 세션 이력 | ~30건 |
+| `training_metrics` | 에포크별 학습 지표 | ~2,000건 |
+| `evaluation_results` | 평가 결과 | ~50건 |
+
+> **표 4-6.** 이력 관리 테이블
+
+#### 4.2.5 마이그레이션 로드맵
+
+| 단계 | 내용 | 대상 DBMS | 시기 |
+|------|------|---------|------|
+| 1단계 | SQLite 기반 메타데이터 DB 구축 | SQLite 3 | 1차년도 잔여기간 |
+| 2단계 | Flask 웹 서버에 DB 연동 | SQLite 3 | 1차년도 잔여기간 |
+| 3단계 | 학습·평가 스크립트에 DB 로깅 통합 | SQLite 3 | 후속 연구 |
+| 4단계 | PostgreSQL 전환 | PostgreSQL 15+ | 후속 연구 |
+
+> **표 4-9.** DBMS 마이그레이션 로드맵
+
+> **참고**: 상세 DDL(전체 9개 테이블), ER 다이어그램, 인덱스 설계, 활용 쿼리 예시, 마이그레이션 스크립트 구조는 별도 문서 **`DBMS_SCHEMA_DESIGN.md`** 에 기술하였다.
+
+---
+
+## 5. 부품 인식 AI 학습용 기초 데이터셋 구축
+
+### 5.1 실물 RGBD 데이터 수집 환경 구축
+
+#### 5.1.1 구축 배경
+
+굴착기 도어 부품 분류 AI 모델 학습을 위해 실물 부품의 다양한 시점·조명 조건에서의 RGBD 이미지를 체계적으로 수집하는 환경을 구축하였다. 각 클래스당 1개의 실물 부품만 확보 가능한 제약 조건 하에서, 한 부품에 대해 다양한 촬영 조건(각도, 거리, 조명)으로 충분한 양의 학습 데이터를 확보하는 것을 목표로 하였다.
+
+#### 5.1.2 수집 환경 구성
+
+| 항목 | 설정 |
+|------|------|
+| 카메라 | ZED X Mini (GMSL2) |
+| Depth 모드 | Neural Depth (AI 기반, mm 단위) |
+| 해상도 | 1920×1080 (HD1080), 30fps |
+| 수집 소프트웨어 | Flask 기반 웹 UI (`01_capture_dataset.py`, 포트 5000) |
+| 촬영 방식 | 작업자 수동 핸드헬드 촬영 (다양한 각도·거리) |
+| 품질 필터링 | Laplacian Variance 기반 블러 검출 (threshold=100) |
+| 프레임 추출 간격 | 비디오 녹화 중 N프레임마다 자동 추출 |
+
+> **표 5-1.** 실물 데이터 수집 환경
+
+#### 5.1.3 데이터 수집 흐름
+
+```mermaid
+graph TD
+    A["ZED X Mini<br/>핸드헬드 촬영"] --> B["Flask 웹 UI<br/>(01_capture_dataset.py)"]
+    B --> C{"녹화 모드"}
+    C -- "비디오 녹화" --> D["N프레임마다<br/>자동 추출"]
+    C -- "수동 스냅샷" --> E["1장 즉시 저장"]
+    D --> F{"블러 검사<br/>Laplacian ≥ 100"}
+    E --> F
+    F -- "통과" --> G["RGB 저장<br/>rgb_NNNN.png<br/>(8-bit)"]
+    F -- "통과" --> H["Depth 저장<br/>depth_NNNN.png<br/>(16-bit, mm)"]
+    F -- "불합격" --> I["폐기"]
+    G --> J["datasets/<br/>클래스별 폴더"]
+    H --> J
+```
+
+> **그림 5-1.** 실물 RGBD 데이터 수집 흐름
+
+<!-- 📷 [그림 삽입 필요] 데이터 수집 웹 UI 스크린샷 -->
+<!-- http://localhost:5000 접속 화면: MJPEG 스트리밍 + 클래스 선택 + 녹화 버튼 -->
+
+#### 5.1.4 수집 현황
+
+| 클래스 | 이미지 수 | 해상도 | 비고 |
+|--------|-----------|--------|------|
+| E25_door_LH_FRT | 158장 | 1920×1080 | 촬영 완료 |
+| E25_door_LH_RR | 155장 | 1920×1080 | 촬영 완료 |
+| E25_door_RH | 155장 | 1920×1080 | 촬영 완료 |
+| E30_door_LH_FRT | 161장 | 1920×1080 | 촬영 완료 |
+| E30_door_LH_RR | 159장 | 1920×1080 | 촬영 완료 |
+| E30_E38_door_RH | 154장 | 1920×1080 | 촬영 완료 |
+| E38_door_LH_FRT | 154장 | 1920×1080 | 촬영 완료 |
+| E38_door_LH_RR | 160장 | 1920×1080 | 촬영 완료 |
+| **총합** | **1,256장** | | **8클래스 전체 촬영 완료** |
+
+> **표 5-2.** 실물 데이터 수집 현황
+
+각 이미지는 RGB 8-bit PNG와 Depth 16-bit PNG 쌍으로 저장되며, 파일명은 `rgb_NNNN.png` / `depth_NNNN.png` 형식으로 자동 생성된다.
+
+<!-- 📷 [그림 삽입 필요] 실물 촬영 데이터 샘플 이미지 (8종 RGB+Depth 쌍 비교, 4×4 그리드) -->
+<!-- 각 클래스의 대표 rgb_0000.png + depth_0000.png를 가로 2열로 배치 -->
+
+---
+
+### 5.2 데이터 전처리 및 품질 관리
+
+#### 5.2.1 SAM2 전경 마스크 생성
+
+수집된 실물 이미지에 대해 **SAM2(Segment Anything Model 2)** 를 활용하여 전경(부품) 영역의 이진 마스크를 자동 생성하였다. 전경 마스크는 다음 두 가지 용도로 활용된다.
+
+1. **물리 치수 보조 피처 계산**: 마스크로 전경 픽셀을 추출 → 3D 점 변환 → PCA로 물리 크기(mm) 계산
+2. **오프라인 증강**: `--mask_only` 옵션 사용 시 전경 영역만 선택적으로 증강
+
+| 항목 | 설정 |
+|------|------|
+| SAM 모델 | SAM2.1 Hiera Small (`sam2.1_hiera_small.pt`, 176MB) |
+| 생성 도구 | `05_generate_masks.py --dataset real` |
+| 출력 형식 | 8-bit 이진 마스크 (`mask_NNNN.png`, 전경=255, 배경=0) |
+| 생성량 | 1,256장 (전체 실물 데이터) |
+
+> **표 5-3.** SAM2 전경 마스크 생성 설정
+
+```mermaid
+graph LR
+    A["rgb_NNNN.png"] --> B["SAM2.1<br/>Hiera Small"]
+    B --> C["전경 마스크<br/>mask_NNNN.png"]
+    C --> D["Aux 피처 계산<br/>(3D PCA)"]
+    C --> E["오프라인 증강<br/>(mask_only)"]
+```
+
+> **그림 5-2.** SAM2 마스크 활용 경로
+
+#### 5.2.2 이미지-마스크-깊이 3종 쌍 구성
+
+전처리 완료 후 각 클래스 폴더에는 다음 3종의 파일이 동일 인덱스로 쌍을 이루어 저장된다.
+
+| 파일 | 형식 | 해상도 | 용도 |
+|------|------|--------|------|
+| `rgb_NNNN.png` | 8-bit RGB | 1920×1080 | 외관 정보 (CNN 3채널 입력) |
+| `depth_NNNN.png` | 16-bit Grayscale | 1920×1080 | 깊이 정보 (CNN 4번째 채널 + 3D PCA) |
+| `mask_NNNN.png` | 8-bit Binary | 1920×1080 | 전경 분리 (Aux 피처 + 증강 영역 지정) |
+
+> **표 5-4.** 이미지 3종 쌍 구성
+
+#### 5.2.3 데이터셋 디렉토리 구조
+
+```
+class_estimation/door/
+├── datasets/                          # 실물 촬영 RGBD 데이터
+│   ├── dataset_info.json              # 전체 메타데이터
+│   ├── E25_door_LH_FRT/
+│   │   ├── metadata.json              # 클래스 메타데이터
+│   │   ├── rgb_0000.png               # RGB 이미지 (8-bit)
+│   │   ├── depth_0000.png             # Depth 이미지 (16-bit, mm)
+│   │   ├── mask_0000.png              # SAM2 전경 마스크
+│   │   └── ...
+│   ├── E30_door_LH_FRT/
+│   └── ...  (8클래스, 총 1,256장)
+│
+├── datasets_aug/                      # 오프라인 증강 (전경 전용 moderate)
+│   └── ...  (mask_only, 1,256장)
+│
+├── datasets_aug2/                     # 오프라인 증강 (전체 이미지 moderate)
+│   └── ...  (전체, 1,256장)
+│
+├── sam_models/                        # SAM 세그멘테이션 모델
+│   ├── mobile_sam.pt                  # MobileSAM (39MB, 실시간 추론용)
+│   └── sam2.1_hiera_small.pt          # SAM2.1 Small (176MB, 오프라인 마스크)
+│
+└── artifacts/                         # 학습 산출물
+    ├── best_door_model_5090.pth       # PyTorch 모델 가중치
+    ├── best_door_model_5090.onnx      # ONNX 변환 모델
+    ├── class_names_door_5090.json     # 클래스 이름 목록
+    └── evaluation_results_door_5090.* # 평가 결과
+```
+
+> **그림 5-3.** 데이터셋 디렉토리 구조
+
+---
+
+### 5.3 데이터 증강(Data Augmentation) 기법 적용을 통한 학습용 데이터 다양성 확보
+
+#### 5.3.1 증강 전략 개요
+
+실물 데이터셋(1,256장)의 다양성 한계를 극복하기 위해, **온라인(학습 시 실시간)** 과 **오프라인(데이터 사전 생성)** 두 가지 방식의 데이터 증강 기법을 적용하였다.
+
+```mermaid
+graph TB
+    subgraph "온라인 증강 (학습 시 실시간)"
+        O1["원본 이미지<br/>datasets/ 1,256장"] --> O2["공간 변환<br/>HFlip/Rotation/Scale<br/>(RGB+Depth 동기화)"]
+        O2 --> O3["색상·노이즈 증강<br/>B/C/S/H/Noise/Blur<br/>(RGB만)"]
+        O3 --> O4["매 에포크 다른 변환<br/>→ 실질적 N배 확대"]
+    end
+    
+    subgraph "오프라인 증강 (데이터 사전 생성)"
+        F1["원본 이미지<br/>datasets/ 1,256장"] --> F2["06_generate_augmented_dataset.py<br/>Preset: mild/moderate/extreme"]
+        F2 --> F3{"--mask_only?"}
+        F3 -- "Yes" --> F4["datasets_aug/<br/>전경만 증강"]
+        F3 -- "No" --> F5["datasets_aug2/<br/>전체 이미지 증강"]
+    end
+```
+
+> **그림 5-4.** 2단계 데이터 증강 전략 (온라인 + 오프라인)
+
+| 증강 방식 | 적용 시점 | 대상 | 도구 | 특징 |
+|-----------|----------|------|------|------|
+| 온라인 | 학습 시 매 에포크 | RGBD 4채널 | `RGBDTransform` (depth_utils.py) | 매번 다른 변환, 실질적 데이터 확대 |
+| 오프라인 | 데이터 사전 생성 | RGB만 (Depth/Mask 원본 유지) | `06_generate_augmented_dataset.py` | 일반화 실험, 강도/범위 제어 가능 |
+
+> **표 5-5.** 증강 방식 비교
+
+#### 5.3.2 온라인 증강 (학습 시 실시간 적용)
+
+학습 시 매 에포크마다 `RGBDTransform` 클래스(depth_utils.py)를 통해 실시간으로 데이터 증강을 수행한다. 공간 변환(Flip, Rotation, Scale)은 RGB·Depth에 동기화 적용하고, 색상·노이즈·블러 변환은 RGB에만 적용한다. 상세 파라미터는 **표 2-8** 및 **표 2-9**를 참조한다.
+
+#### 5.3.3 오프라인 증강 도구 (`06_generate_augmented_dataset.py`)
+
+모델의 일반화 능력을 검증하기 위해, 원본 실물 데이터의 **RGB 이미지에만 사전 증강을 적용**하여 별도 데이터셋을 생성하는 오프라인 증강 도구를 구현하였다. Depth와 Mask는 원본 그대로 복사하여 물리적 정보의 일관성을 유지한다.
+
+**[증강 파이프라인]**
+
+```mermaid
+graph LR
+    A["원본 RGB"] --> B["Brightness<br/>밝기 조절"]
+    B --> C["Contrast<br/>대비 조절"]
+    C --> D["Saturation<br/>채도 조절"]
+    D --> E["Hue Shift<br/>HSV 공간 색상 회전"]
+    E --> F["Gaussian Noise<br/>센서 노이즈"]
+    F --> G["Gaussian Blur<br/>포커스 변형"]
+    G --> H{"mask_only?"}
+    H -- "Yes" --> I["SAM 마스크 블렌딩<br/>전경=증강, 배경=원본"]
+    H -- "No" --> J["증강 이미지 저장"]
+    I --> J
+```
+
+> **그림 5-5.** 오프라인 RGB 증강 파이프라인
+
+**[증강 강도 프리셋]**
+
+| 프리셋 | Brightness | Contrast | Saturation | Hue Shift | Noise σ | Blur kernel | 용도 |
+|--------|:---------:|:--------:|:----------:|:---------:|:-------:|:-----------:|------|
+| mild | 0.5~1.5 | 0.5~1.5 | 0.3~1.7 | ±30° | 10~25 | 3~7 | 약한 변형 |
+| **moderate** | 0.5~1.8 | 0.5~1.8 | 0.2~2.0 | ±40° | 15~30 | 3~9 | 중간 변형 |
+| **extreme** | 0.2~3.0 | 0.2~3.0 | 0.0~3.0 | ±90° | 30~60 | 7~15 | 텍스처 파괴 |
+
+> **표 5-6.** 오프라인 증강 강도 프리셋 (3단계)
+
+**[mask_only 옵션]**
+
+`--mask_only` 플래그를 사용하면, SAM 마스크 영역(전경)에만 증강을 적용하고 **배경은 원본 그대로 유지**한다. 이를 통해 배경 변화의 영향과 전경 텍스처 변화의 영향을 분리하여 분석할 수 있다.
+
+```mermaid
+graph LR
+    subgraph "전체 이미지 증강"
+        A1["원본 RGB"] --> B1["전체 증강"]
+        B1 --> C1["증강된 전체 이미지"]
+    end
+    
+    subgraph "mask_only 증강"
+        A2["원본 RGB"] --> B2["전체 증강"]
+        B2 --> D2["SAM 마스크로<br/>블렌딩"]
+        A2 --> D2
+        D2 --> C2["전경=증강<br/>배경=원본"]
+    end
+```
+
+> **그림 5-6.** mask_only 옵션 동작 방식
+
+**[사용 예시]**
+
+```bash
+# Extreme 증강 (전체 이미지) → datasets_aug/
+python 06_generate_augmented_dataset.py --level extreme --dst datasets_aug
+
+# Moderate 증강 (전경만) → datasets_aug/
+python 06_generate_augmented_dataset.py --level moderate --mask_only --dst datasets_aug
+
+# Moderate 증강 (전체 이미지) → datasets_aug2/
+python 06_generate_augmented_dataset.py --level moderate --dst datasets_aug2
+```
+
+**[생성된 증강 데이터셋]**
+
+| 데이터셋 | 증강 범위 | 증강 강도 | 이미지 수 | Depth/Mask |
+|----------|----------|----------|----------|------------|
+| datasets (원본) | 없음 | 없음 | 1,256장 | - |
+| datasets_aug | 전경만 (mask_only) | moderate | 1,256장 | 원본 그대로 복사 |
+| datasets_aug2 | 전체 이미지 | moderate | 1,256장 | 원본 그대로 복사 |
+
+> **표 5-7.** 오프라인 증강 데이터셋 구성
+
+#### 5.3.4 학습 결과 및 평가
+
+**[학습 설정]**
+
+| 항목 | 값 |
+|------|-----|
+| 데이터 분할 | Train 70% (879장) / Test 30% (377장), Stratified Split |
+| 반복 실험 | 5-seed (42, 123, 456, 789, 1024) |
+| 모델 | RGBDAuxResNet18 (RGBD 4ch + Aux MLP) |
+| 입력 크기 | 448×448 |
+| 배치 사이즈 | 64 (RTX 5090 자동 최적화) |
+| 옵티마이저 | Adam (lr=0.001), ReduceLROnPlateau |
+| Early Stopping | patience=10 |
+
+> **표 5-8.** 학습 설정 요약
+
+> **참고**: 통계적 신뢰성 확보를 위해 서로 다른 5개의 랜덤 시드로 동일 실험을 반복하여 평균(mean) ± 표준편차(std)를 산출하였다. 각 시드마다 데이터 분할(Train/Test)과 모델 초기화가 독립적으로 수행된다.
+
+**[학습 과정 (대표 실행, seed 42)]**
+
+| 에폭 | Train Loss | Train Acc | Val Loss | Val Acc | 비고 |
+|:----:|:----------:|:---------:|:--------:|:-------:|------|
+| 1 | 13.0139 | 14.11% | 8.3699 | 22.55% | 학습 초기 |
+| 5 | 1.8580 | 51.08% | 0.7566 | 64.19% | 빠른 수렴 시작 |
+| 10 | 0.5631 | 80.43% | 0.7209 | 73.47% | Best 83.82% |
+| 15 | 0.2088 | 93.52% | 0.4960 | 85.41% | Best 96.82% |
+| 25 | 0.0563 | 98.29% | 0.0049 | **100.00%** | **최고 성능 달성** |
+| 35 | 0.0243 | 98.98% | 0.0028 | 100.00% | Early Stopping (10/10) |
+
+> **표 5-9.** 학습 과정 요약 (대표 실행, 주요 에폭)
+
+**[실물 8종 분류 최종 성능 (5-seed 반복 실험)]**
+
+| 지표 | 값 | 비고 |
+|------|-----|------|
+| 학습 데이터 | 879장 (8클래스) | Train 70% |
+| 테스트 데이터 | 377장 (8클래스) | Test 30% |
+| 반복 실험 | 5회 (seed: 42, 123, 456, 789, 1024) | 독립 반복 |
+| 테스트 정확도 (mean ± std) | **99.52 ± 0.81%** | 5개 seed 중 3개에서 100% 달성 |
+| Macro F1 (mean ± std) | **99.52 ± 0.81%** | |
+| Macro Precision (mean ± std) | **99.55 ± 0.75%** | |
+| Macro Recall (mean ± std) | **99.52 ± 0.81%** | |
+
+> **표 5-10.** 실물 8종 분류 최종 성능 (5-seed 평균)
+
+**[Seed별 상세 정확도]**
+
+| Seed | 테스트 정확도 | Macro F1 | 비고 |
+|:----:|:---:|:---:|------|
+| 42 | 100.00% | 100.00% | |
+| 123 | 100.00% | 100.00% | |
+| 456 | 98.14% | 98.14% | 최저 |
+| 789 | 99.47% | 99.47% | |
+| 1024 | 100.00% | 100.00% | |
+
+> **표 5-10b.** Seed별 테스트 정확도
+
+**[클래스별 성능 (mean ± std, 5 seeds)]**
+
+| 클래스 | Precision (%) | Recall (%) | F1-Score (%) |
+|--------|:---:|:---:|:---:|
+| E25_door_LH_FRT | 100.00 ± 0.00 | 99.57 ± 0.85 | 99.78 ± 0.43 |
+| E25_door_LH_RR | 100.00 ± 0.00 | 99.57 ± 0.85 | 99.78 ± 0.43 |
+| E25_door_RH | 98.80 ± 2.40 | 100.00 ± 0.00 | 99.38 ± 1.24 |
+| E30_E38_door_RH | 100.00 ± 0.00 | 98.70 ± 2.61 | 99.33 ± 1.35 |
+| E30_door_LH_FRT | 99.18 ± 1.00 | 100.00 ± 0.00 | 99.59 ± 0.50 |
+| E30_door_LH_RR | 100.00 ± 0.00 | 98.33 ± 3.33 | 99.13 ± 1.74 |
+| E38_door_LH_FRT | 100.00 ± 0.00 | 100.00 ± 0.00 | 100.00 ± 0.00 |
+| E38_door_LH_RR | 98.42 ± 2.29 | 100.00 ± 0.00 | 99.19 ± 1.18 |
+
+> **표 5-11.** 클래스별 테스트 성능 (mean ± std, 5 seeds)
+
+**[실시간 추론 파이프라인 검증]**
+
+| 지표 | 값 | 비고 |
+|------|-----|------|
+| 오프라인 평가 정확도 (mean ± std) | **99.52 ± 0.81%** | PyTorch GPU (RTX 5090), 5-seed |
+| CPU 추론 시간 | **86 ms/장** | Jetson Orin 환경 |
+| GPU 추론 시간 (예상) | **~10 ms/장** | Jetson GPU 전환 시 |
+
+> **표 5-12.** 실시간 추론 파이프라인 검증
+
+#### 5.3.5 모델 일반화 실험 (Moderate 증강 — 전경 전용 vs 전체 이미지)
+
+모델이 부품의 **형상적 특징(shape)**을 학습했는지, 아니면 특정 개체의 **표면 패턴(RGB texture)**을 암기했는지 검증하기 위한 실험을 수행하였다. 오프라인 증강 도구(`06_generate_augmented_dataset.py`)를 활용하여 RGB 텍스처를 의도적으로 변형한 데이터셋으로 원본 학습 모델(70:30)을 평가하였다.
+
+**[Moderate 증강 파라미터]**
+
+| 증강 항목 | 파라미터 | 목적 |
+|----------|---------|------|
+| Brightness | factor 0.5~1.8 | 조명 변화 시뮬레이션 |
+| Contrast | factor 0.5~1.8 | 대비 변화 시뮬레이션 |
+| Saturation | factor 0.2~2.0 | 채도 변화 시뮬레이션 |
+| Hue | ±40° | 색조 변화 시뮬레이션 |
+| Gaussian Noise | sigma 15~30 | 센서 노이즈 시뮬레이션 |
+| Gaussian Blur | kernel 3~9 | 포커스 변화 시뮬레이션 |
+
+> **표 5-13.** Moderate 증강 파라미터
+
+Depth와 Mask는 원본을 그대로 유지하며, RGB 이미지만 증강하였다. 증강 범위를 **전경만(mask_only)** vs **전체 이미지**로 분리하여, 모델의 배경 의존도를 함께 검증하였다.
+
+- **datasets_aug**: SAM 마스크 기반으로 전경(부품)만 증강, 배경은 원본 유지
+- **datasets_aug2**: 이미지 전체에 동일 증강 적용
+
+**[평가 방법론]**
+
+데이터 누출(data leakage) 방지를 위해, 학습 시 사용된 **Test 분할(377장)**에 해당하는 이미지만 증강 데이터셋에서 추출하여 평가하였다. 즉, 학습에 사용된 Train 분할의 증강 버전은 평가에서 제외하여 공정한 비교를 보장한다. **통계적 신뢰성 확보를 위해 5개의 랜덤 시드(42, 123, 456, 789, 1024)로 동일 실험을 반복**하여 평균(mean) ± 표준편차(std)를 산출하였다.
+
+**[증강 범위별 전체 정확도 비교 (mean ± std, 5 seeds)]**
+
+| 실험 조건 | 증강 범위 | 평가 이미지 수 | Accuracy (%) | Macro F1 (%) |
+|----------|----------|:-----------:|:---:|:---:|
+| Test 분할 (datasets) | 없음 | 377장 | **99.52 ± 0.81** | 99.52 ± 0.81 |
+| datasets_aug (Test 분할) | 전경만 (mask_only) | 377장 | **90.13 ± 2.15** | 90.10 ± 2.20 |
+| datasets_aug2 (Test 분할) | 전체 이미지 | 377장 | **91.88 ± 3.40** | 91.88 ± 3.49 |
+
+> **표 5-14.** 증강 범위별 정확도 비교 (mean ± std, 5 seeds, Test 분할 기준)
+
+**[Seed별 상세 정확도]**
+
+| Seed | 원본 (Test) | 증강1 (전경만) | 증강2 (전체) |
+|:----:|:---:|:---:|:---:|
+| 42 | 100.00% | 87.53% | 91.51% |
+| 123 | 100.00% | 93.10% | 94.43% |
+| 456 | 98.14% | 91.25% | 94.43% |
+| 789 | 99.47% | 89.92% | 92.84% |
+| 1024 | 100.00% | 88.86% | 86.21% |
+
+> **표 5-14b.** Seed별 정확도 상세
+
+**[클래스별 F1-Score 비교 (mean ± std, 5 seeds)]**
+
+| 클래스 | 원본 (Test) F1 (%) | 증강1 (전경만) F1 (%) | 증강2 (전체) F1 (%) |
+|--------|:---:|:---:|:---:|
+| E25_door_LH_FRT | 99.78 ± 0.43 | 88.78 ± 3.65 | 91.34 ± 2.64 |
+| E25_door_LH_RR | 99.78 ± 0.43 | 91.95 ± 1.37 | 91.63 ± 4.49 |
+| E25_door_RH | 99.38 ± 1.24 | 91.43 ± 3.22 | 94.73 ± 2.61 |
+| E30_E38_door_RH | 99.33 ± 1.35 | 90.72 ± 2.63 | 90.57 ± 4.42 |
+| E30_door_LH_FRT | 99.59 ± 0.50 | 81.37 ± 6.63 | 87.14 ± 4.63 |
+| E30_door_LH_RR | 99.13 ± 1.74 | 92.63 ± 2.77 | 90.52 ± 1.53 |
+| E38_door_LH_FRT | 100.00 ± 0.00 | 90.36 ± 5.47 | 92.87 ± 6.94 |
+| E38_door_LH_RR | 99.19 ± 1.18 | 93.54 ± 2.17 | 96.25 ± 1.32 |
+
+> **표 5-15.** 클래스별 F1-Score 비교 (mean ± std, 5 seeds)
+
+**[클래스별 Precision / Recall / F1-Score (mean ± std, 5 seeds)]**
+
+*datasets_aug (전경만 증강, Test 분할 377장):*
+
+| 클래스 | Precision (%) | Recall (%) | F1-Score (%) |
+|--------|:---:|:---:|:---:|
+| E25_door_LH_FRT | 83.71 ± 7.96 | 95.32 ± 3.40 | 88.78 ± 3.65 |
+| E25_door_LH_RR | 96.90 ± 3.14 | 87.66 ± 3.41 | 91.95 ± 1.37 |
+| E25_door_RH | 89.42 ± 2.38 | 93.62 ± 4.85 | 91.43 ± 3.22 |
+| E30_E38_door_RH | 89.94 ± 3.32 | 91.74 ± 4.84 | 90.72 ± 2.63 |
+| E30_door_LH_FRT | 83.97 ± 8.36 | 80.83 ± 12.25 | 81.37 ± 6.63 |
+| E30_door_LH_RR | 91.35 ± 4.12 | 94.16 ± 4.04 | 92.63 ± 2.77 |
+| E38_door_LH_FRT | 98.03 ± 1.02 | 84.35 ± 9.47 | 90.36 ± 5.47 |
+| E38_door_LH_RR | 93.99 ± 4.16 | 93.33 ± 3.82 | 93.54 ± 2.17 |
+| **평균 (Macro)** | **90.91 ± 1.70** | **90.13 ± 2.16** | **90.10 ± 2.20** |
+
+> **표 5-16.** datasets_aug 성능 지표 (mean ± std, 5 seeds)
+
+*datasets_aug2 (전체 이미지 증강, Test 분할 377장):*
+
+| 클래스 | Precision (%) | Recall (%) | F1-Score (%) |
+|--------|:---:|:---:|:---:|
+| E25_door_LH_FRT | 88.72 ± 7.48 | 94.89 ± 4.38 | 91.34 ± 2.64 |
+| E25_door_LH_RR | 98.60 ± 1.86 | 85.96 ± 7.68 | 91.63 ± 4.49 |
+| E25_door_RH | 94.75 ± 4.69 | 94.89 ± 2.89 | 94.73 ± 2.61 |
+| E30_E38_door_RH | 85.10 ± 8.10 | 97.39 ± 2.13 | 90.57 ± 4.42 |
+| E30_door_LH_FRT | 88.00 ± 5.54 | 87.09 ± 8.88 | 87.14 ± 4.63 |
+| E30_door_LH_RR | 89.88 ± 3.16 | 91.25 ± 1.56 | 90.52 ± 1.53 |
+| E38_door_LH_FRT | 99.52 ± 0.95 | 87.83 ± 11.64 | 92.87 ± 6.94 |
+| E38_door_LH_RR | 96.80 ± 3.31 | 95.83 ± 1.86 | 96.25 ± 1.32 |
+| **평균 (Macro)** | **92.67 ± 2.66** | **91.89 ± 3.42** | **91.88 ± 3.49** |
+
+> **표 5-17.** datasets_aug2 성능 지표 (mean ± std, 5 seeds)
+
+**[주요 취약 클래스 분석 (5-seed 기준)]**
+
+증강 조건에서 F1-Score가 상대적으로 낮은 클래스 패턴:
+
+| 취약 클래스 | 증강1 F1 (%) | 증강2 F1 (%) | 원인 분석 |
+|------------|:---:|:---:|----------|
+| E30_door_LH_FRT | 81.37 ± 6.63 | 87.14 ± 4.63 | E38_door_LH_FRT와 47mm 차이, 텍스처 변형 시 구분 어려움 |
+| E25_door_LH_FRT | 88.78 ± 3.65 | 91.34 ± 2.64 | LH_FRT 계열 간 혼동 |
+| E30_E38_door_RH | 90.72 ± 2.63 | 90.57 ± 4.42 | E25_door_RH와 형상 유사 |
+| E38_door_LH_FRT | 90.36 ± 5.47 | 92.87 ± 6.94 | E30_door_LH_FRT와 혼동, std가 큰 불안정성 |
+
+> **표 5-18.** 주요 취약 클래스 분석 (mean ± std, 5 seeds)
+
+<!-- 📷 [그림 삽입 필요] 혼동 행렬 히트맵 비교 (datasets_aug vs datasets_aug2) -->
+<!-- 파일: artifacts/confusion_matrix_door_5090.png -->
+
+**[일반화 실험 종합 분석]**
+
+```mermaid
+graph LR
+    A["Test 분할<br/>99.52 ± 0.81%<br/>(377장, 5 seeds)"] --> B["전경만 증강<br/>90.13 ± 2.15%<br/>(377장, 5 seeds)"]
+    A --> C["전체 증강<br/>91.88 ± 3.40%<br/>(377장, 5 seeds)"]
+    
+    B -. "전체 증강이<br/>~1.8%p 높음" .-> C
+```
+
+> **그림 5-7.** 증강 범위별 정확도 비교 (mean ± std, 5 seeds, Test 분할 기준)
+
+1. **Test 분할 대비 약 8~10%p 하락**: 온라인 증강만으로 학습한 모델이 오프라인 증강 수준의 색상 변형에 취약함을 확인. 원본 99.52%에서 증강1 90.13%, 증강2 91.88%로 하락하여, 모델이 **RGB 텍스처 패턴에 일부 의존**하고 있음을 시사
+2. **배경 의존도 낮음**: 전경만 증강(90.13%)과 전체 증강(91.88%)의 차이가 약 1.8%p로 미미하여, 모델이 배경 패턴에 크게 의존하지 않음을 확인
+3. **취약 클래스**: E30_door_LH_FRT이 증강 조건에서 F1 81.37 ± 6.63%(전경 증강)으로 가장 낮은 성능을 보임. E30과 E38의 LH_FRT 도어 간 형상 유사성이 높아 텍스처 정보가 변형되면 구별이 어려워지는 것으로 분석됨
+4. **Seed간 변동성**: 증강 데이터에서 seed간 표준편차가 2~3%로 나타나, 단일 seed만으로 평가할 경우 성능을 과소 또는 과대 추정할 수 있음을 확인 (seed 1024의 전체 증강 86.21% vs seed 123의 94.43%)
+5. **통계적 신뢰성**: 5-seed 반복 실험을 통해 단일 실험의 확률적 변동을 배제하고 재현 가능한 성능 지표를 확보
+
+#### 5.3.6 2단계 계층적 분류 전략 실험 및 폐기
+
+8개 클래스를 한 번에 분류하는 대신, 3개 모양 그룹으로 먼저 분류(Step 1) 후 기종 세분류(Step 2)를 시도하였으나, Step 2의 정확도가 매우 낮아 **폐기**하였다.
+
+| 단계 | 정확도 | 비고 |
+|------|--------|------|
+| Step 1 (모양 분류) | **100.0%** | 형상 차이 뚜렷 |
+| Step 2 LH_FRT (기종 분류) | **33.3%** | 랜덤 수준, 실패 |
+| Cascade 최종 | **67.2%** | 실용 불가 |
+
+> **표 5-19.** 2단계 계층적 분류 실험 결과
+
+**교훈**: 유사 형상 부품의 크기 차이는 CNN 픽셀이 아닌 **Depth 기반 물리 치수 보조 피처**로 구별하는 것이 유효함을 확인.
+
+#### 5.3.7 MobileSAM 통합 실시간 추론
+
+실시간 추론 서버(`04_door_realtime_inference.py`)에 MobileSAM을 통합하여, 추론 시에도 SAM 기반 전경 분리 + 3D PCA 물리 치수 계산을 수행한다.
+
+| 항목 | 설정 |
+|------|------|
+| SAM 모델 | MobileSAM (40.7MB) |
+| SAM 추론 시간 | GPU ~10ms |
+| SAM 비활성화 | `--no_sam` 옵션 |
+| 폴백 | SAM 실패 시 Depth Otsu 이진화 자동 적용 |
+
+> **표 5-20.** MobileSAM 통합 실시간 추론 설정
+
+<!-- 📷 [그림 삽입 필요] 실시간 추론 웹 UI 스크린샷 -->
+<!-- http://localhost:5001 접속 화면: 카메라 영상 + 분류 결과 오버레이 + SAM 마스크 시각화 -->
+
+#### 5.3.8 실행 파이프라인 종합
+
+```mermaid
+graph TB
+    subgraph "Step 0: SAM 마스크 생성"
+        S0["05_generate_masks.py<br/>--dataset real"]
+    end
+    
+    subgraph "데이터 수집"
+        B1["01_capture_dataset.py<br/>ZED X Mini<br/>→ datasets/ (1,256장)"]
+    end
+    
+    subgraph "학습"
+        B2["02_door_classification_5090.py<br/>온라인 증강 (RGBDTransform)<br/>→ best_door_model_5090.pth"]
+    end
+    
+    subgraph "오프라인 증강 (일반화 실험)"
+        G1["06_generate_augmented_dataset.py"]
+        G1 -- "--mask_only --level moderate" --> G2["datasets_aug/<br/>(전경 전용)"]
+        G1 -- "--level moderate" --> G3["datasets_aug2/<br/>(전체 이미지)"]
+    end
+    
+    subgraph "평가"
+        E1["03_door_class_evaluation_5090.py<br/>테스트 세트 평가"]
+        E2["일반화 실험 평가<br/>--dataset_dir<br/>(Test 분할 기준)"]
+    end
+    
+    subgraph "배포"
+        D1["04_door_realtime_inference.py<br/>Flask 서버 (5001)<br/>MobileSAM 통합"]
+    end
+    
+    S0 --> B1
+    B1 --> B2
+    B2 --> E1
+    B1 --> G1
+    G2 --> E2
+    G3 --> E2
+    B2 --> D1
+```
+
+> **그림 5-8.** 실물 데이터 기반 실행 파이프라인
+
+---
+
+## 6. 부록: 산출물 목록
+
+### A. 코드 산출물
+
+| 번호 | 파일 | 역할 | 비고 |
+|------|------|------|------|
+| 0 | `depth_utils.py` | RGBD 공통 유틸리티 (전처리, 모델, SAM+PCA 물리 치수, Dataset) | 모든 스크립트에서 공유 |
+| 0 | `camera_utils.py` | ZED X Mini RGB+Depth 캡처 모듈 | OpenCV 폴백 지원 |
+| 1 | `00_convert_stl_to_usd.py` | CAD STL → USD 변환 자동화 | Isaac Sim Asset Converter |
+| 2 | `01_generate_door_cad_dataset.py` | Isaac Sim CAD 합성 RGBD 데이터 생성 | 클래스당 500장 |
+| 0b | `05_generate_masks.py` | SAM2 기반 전경 마스크 일괄 생성 | `--dataset cad/real/all` |
+| 3 | `01_capture_dataset.py` | Flask 웹 UI 기반 실물 RGBD 데이터 수집 | 포트 5000 |
+| 4 | `02_door_cad_classification_5090.py` | CAD 합성 데이터 RGBD 모델 학습 | RTX 5090 |
+| 5 | `02_door_classification_5090.py` | 실물 데이터 RGBD 모델 학습 | RTX 5090 |
+| 6 | `03_door_cad_evaluation_5090.py` | CAD 모델 평가 + 크로스 도메인 평가 | `--use_all` 옵션 |
+| 7 | `03_door_class_evaluation_5090.py` | 실물 모델 평가 | 혼동 행렬, F1 |
+| 8 | `06_generate_augmented_dataset.py` | RGB 증강 데이터셋 생성 (일반화 실험) | `--mask_only` 옵션 |
+| 9 | `04_door_realtime_inference.py` | 실시간 RGBD 추론 서버 | MobileSAM 통합, 포트 5001 |
+| 10 | `99_dimension_measurement.py` | MobileSAM + ZED 실시간 치수 측정 | 포트 5002 |
+
+> **표 A-1.** 코드 산출물 목록
+
+### B. 모델 산출물
+
+| 파일 | 크기 | 설명 |
+|------|------|------|
+| `best_door_model_5090.pth` | 44MB | 실물 8종 학습 모델 (100% 정확도) |
+| `best_door_model_5090.onnx` | 43MB | ONNX 변환 모델 (opset 18) |
+| `best_door_cad_model_5090.pth` | 44MB | CAD 8종 학습 모델 (99.88%) |
+| `sam_models/mobile_sam.pt` | 39MB | MobileSAM 실시간 세그멘테이션 |
+| `sam_models/sam2.1_hiera_small.pt` | 176MB | SAM2.1 오프라인 마스크 생성 |
+| `class_names_door_5090.json` | 1KB | 클래스 이름 목록 |
+| `evaluation_results_door_5090.json` | 3KB | 평가 결과 JSON |
+
+> **표 B-1.** 모델 산출물 목록
+
+### C. 데이터셋 산출물
+
+| 데이터셋 | 경로 | 이미지 수 | 형식 |
+|---------|------|----------|------|
+| 실물 RGBD (8종) | `datasets/` | 1,256장 | RGB(8-bit) + Depth(16-bit) PNG |
+| CAD 합성 RGBD (8종) | `datasets_cad/` | 4,000장 | RGB(8-bit) + Depth(16-bit) PNG |
+| SAM 전경 마스크 | `datasets/*/mask_*.png` | 5,256장 | 8-bit 이진 마스크 |
+| **RGBD 총합** | | **5,256장** | |
+
+> **표 C-1.** 데이터셋 산출물
+
+### D. 문서 산출물
+
+| 문서 | 경로 | 설명 |
+|------|------|------|
+| DBMS 스키마 설계 | `report/DBMS_SCHEMA_DESIGN.md` | 9개 테이블 DDL, ER 다이어그램 |
+| 데이터셋 명세서 | `DATASET_SPECIFICATION.md` | Isaac Sim 데이터셋 형식 정의 |
+| 분류 가이드 | `CLASS_ESTIMATION_GUIDE.md` | 분류 파이프라인 사용 매뉴얼 |
+
+> **표 D-1.** 문서 산출물
+
+---
+
+## 7. 1차년도 잔여기간 향후 계획
+
+### 7.1 모델 일반화 성능 검증
+
+| 우선순위 | 항목 | 설명 | 예상 난이도 |
+|---------|------|------|-----------|
+| 1 | 동일 종류 다른 개체 검증 | 같은 클래스의 **다른 실물 부품**에 대한 추론 정확도 검증 (현재 각 클래스당 1개 개체에서 촬영) | 중 |
+| 2 | 촬영 환경 변동 검증 | 조명, 배경, 카메라 거리/각도가 크게 다른 환경에서의 강건성 테스트 | 중 |
+| 3 | 시간 경과 후 재검증 | 부품 표면 상태 변화(산화, 오염 등)에 따른 정확도 변화 모니터링 | 낮 |
+
+### 7.2 모델 성능 개선
+
+| 우선순위 | 항목 | 설명 | 예상 난이도 |
+|---------|------|------|-----------|
+| 1 | E30/E38 LH_FRT 구분 강화 | 47mm(5.4%) 미세 차이 → 표면 디테일 활용 방안 연구 | 높 |
+| 2 | 데이터 증강 고도화 | CutMix, MixUp, Style Transfer 등 고급 증강 기법 적용 | 중 |
+| 3 | 크로스 도메인 적응 | CAD-Real 도메인 격차 해소 (DANN, MMD Loss 등) | 높 |
+| 4 | Depth 채널 활용도 향상 | 일반화 실험에서 확인된 RGB 의존도(65%)를 줄이고 Depth/Shape 활용 증대 | 중 |
+
+### 7.3 배포 및 운영
+
+| 우선순위 | 항목 | 설명 | 예상 난이도 |
+|---------|------|------|-----------|
+| 1 | Jetson GPU 추론 전환 | CPU 86ms → GPU ~10ms 개선 | 낮 |
+| 2 | FP16 양자화 적용 | `model.half()` 적용 (~6ms) | 낮 |
+| 3 | TensorRT 변환 문제 해결 | ONNX → TensorRT 출력 불일치 해결 | 높 |
+| 4 | DBMS 마이그레이션 1단계 | 파일시스템 → SQLite 전환 | 중 |
+
+### 7.4 데이터셋 확장
+
+| 우선순위 | 항목 | 설명 | 예상 난이도 |
+|---------|------|------|-----------|
+| 1 | 다중 개체 데이터 수집 | 각 클래스별 2~3개 이상의 서로 다른 실물 부품 촬영 | 중 |
+| 2 | 혼합 학습 데이터셋 | CAD + Real 데이터를 효과적으로 결합하는 학습 전략 개발 | 높 |
+
+### 7.5 위치 추정 모듈 개발
+
+| 우선순위 | 항목 | 설명 | 예상 난이도 |
+|---------|------|------|-----------|
+| 1 | 6DoF 포즈 추정 모델 학습 | Depth 기반 포즈 추정 모델 v4 학습 및 평가 | 높 |
+| 2 | 분류-위치 통합 파이프라인 | 분류 결과 기반 부품 3D 위치/자세 추정 연동 | 높 |
+
+> **참고**: 위치 추정 모듈은 `pos_estimation/` 디렉토리에서 별도 개발 중이며, Isaac Sim 기반 4클래스(arm_link_25/30, boom_link_25/30) 6DoF 포즈 데이터셋(8,000장)을 구축하여 Depth 기반 포즈 추정 모델(v1~v4)의 실험을 진행하고 있다. 상세 내용은 향후 보고서에서 다룰 예정이다.
+
+---
+
+**문서 작성일**: 2026년 3월 28일  
+**최종 수정일**: 2026년 4월 13일  
+**수정 사항**: 시험 방법 및 결과를 5-seed 반복 실험 결과로 업데이트 (단일 seed → 5-seed mean ± std)
