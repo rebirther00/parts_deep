@@ -564,7 +564,7 @@ Edge-only 모델은 원본 Test에서 98.83%의 정확도로 순수 형상 정�
 
 [6] K. L. Hermann, T. Chen, and S. Kornblith, "The origins and prevalence of texture bias in convolutional neural networks," in Advances in Neural Information Processing Systems (NeurIPS), vol. 33, 2020.
 
-[7] S. Soltan, A. Oleinikov, M. F. Demirci, and A. Shintemirov, "Deep Learning-Based Object Classification and Position Estimation Pipeline for Potential Use in Robotized Pick-and-Place Operations," Robotics, vol. 9, no. 3, 63, 2020.
+[7] S. Soltan, A. Oleinikov, M. F. Demirci, and A. Shintemirov, "Deep learning-based object classification and position estimation pipeline for potential use in robotized pick-and-place operations," Robotics, vol. 9, no. 3, p. 63, 2020.
 
 [8] L. Bo, X. Ren, and D. Fox, "Depth kernel descriptors for object recognition," in Proc. IEEE/RSJ Int. Conf. Intelligent Robots and Systems (IROS), 2011.
 
