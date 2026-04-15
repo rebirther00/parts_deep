@@ -1,6 +1,6 @@
 """Grad-CAM 시각화 분석 스크립트
 
-4종 모델(RGBD, Texture Aug, Edge-only, RGBE)의 attention 영역을
+4종 모델(RGB, RGBD, Edge-only, RGBE)의 attention 영역을
 Grad-CAM으로 시각화하여 논문 Fig. 6, 7을 생성한다.
 """
 
@@ -22,6 +22,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'door'))
 from depth_utils import RGBDTransform, DEPTH_MEAN, DEPTH_STD, MAX_DEPTH_MM
 from edge_utils import EdgeTransform
 from rgbe_utils import RGBETransform
+from rgb_utils import RGBTransform
 
 IN_CHANNELS = 4
 
@@ -121,7 +122,7 @@ class GradCAM:
 
 def load_model(model_type, device):
     """모델 로드 및 GradCAM 객체 생성."""
-    in_ch = 3 if model_type == "edge" else 4
+    in_ch = 3 if model_type in ("edge", "rgb") else 4
     model = NoAuxResNet18(num_classes=8, in_channels=in_ch, pretrained=False)
 
     run_name = f"{model_type}_noaux_{IMAGE_SIZE}_seed{SEED}"
@@ -137,7 +138,11 @@ def preprocess_image(rgb_path, model_type):
     """이미지를 모델별 전처리하여 텐서 반환."""
     rgb_pil = Image.open(rgb_path).convert("RGB")
 
-    if model_type in ("rgbd", "texture_aug"):
+    if model_type == "rgb":
+        transform = RGBTransform(IMAGE_SIZE, is_train=False)
+        return transform(rgb_pil)
+
+    elif model_type == "rgbd":
         depth_path = rgb_path.replace("rgb_", "depth_")
         if os.path.exists(depth_path):
             depth_raw = cv2.imread(depth_path, cv2.IMREAD_UNCHANGED)
@@ -202,8 +207,8 @@ def select_test_images(class_names, target_classes):
 def generate_fig6(device):
     """3 클래스 x (원본RGB + 4모델 heatmap) = 3x5 그리드."""
     target_classes = ["E25_door_LH_FRT", "E30_E38_door_RH", "E38_door_LH_RR"]
-    model_types = ["rgbd", "texture_aug", "edge", "rgbe"]
-    model_labels = ["Baseline\nRGBD", "Texture Aug\nRGBD",
+    model_types = ["rgb", "rgbd", "edge", "rgbe"]
+    model_labels = ["Baseline\nRGB", "RGBD",
                     "Edge-only", "RGBE\nHybrid"]
 
     with open(os.path.join(ARTIFACTS_DIR,

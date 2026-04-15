@@ -13,7 +13,7 @@ import json
 
 PROJECT_DIR = os.path.dirname(os.path.abspath(__file__))
 
-ALL_MODEL_TYPES = ["rgbd", "texture_aug", "edge", "rgbe", "rgbe_texture_aug"]
+ALL_MODEL_TYPES = ["rgb", "rgbd", "texture_aug", "edge", "rgbe", "rgbe_texture_aug"]
 SEEDS = [42, 123, 456, 789, 1024]
 RESOLUTIONS = [448, 224]
 
@@ -36,8 +36,8 @@ parser.add_argument('-cpu', '--cpu', action='store_true')
 args = parser.parse_args()
 
 if args.models is None:
-    args.models = ["rgbd", "edge", "rgbe", "rgbe_texture_aug"] if args.no_aux \
-        else ["rgbd", "texture_aug", "edge", "rgbe"]
+    args.models = ["rgb", "rgbd", "edge", "rgbe"] if args.no_aux \
+        else ["rgb", "rgbd", "texture_aug", "edge", "rgbe"]
 
 
 def run_cmd(cmd, desc):

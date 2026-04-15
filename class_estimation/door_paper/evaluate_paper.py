@@ -30,6 +30,7 @@ sys.path.insert(0, REPO_DIR)
 from depth_utils import (
     RGBDAuxResNet18, RGBDTransform, RGBDDataset, IN_CHANNELS, NUM_AUX_FEATURES,
 )
+from rgb_utils import RGBTransform, RGBDataset, RGB_IN_CHANNELS
 from rgbe_utils import RGBETransform, RGBEDataset
 from edge_utils import EdgeAuxResNet18, EdgeTransform, EdgeDataset, EDGE_IN_CHANNELS
 
@@ -68,6 +69,13 @@ class NoAuxResNet18(nn.Module):
 
 
 MODEL_CONFIGS = {
+    "rgb": {
+        "dataset_cls": RGBDataset,
+        "transform_fn": lambda sz: RGBTransform(sz, is_train=False),
+        "model_fn": lambda nc: NoAuxResNet18(nc, in_channels=RGB_IN_CHANNELS,
+                                              pretrained=False),
+        "in_channels": RGB_IN_CHANNELS,
+    },
     "rgbd": {
         "dataset_cls": RGBDDataset,
         "transform_fn": lambda sz: RGBDTransform(sz, is_train=False),

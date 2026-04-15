@@ -16,7 +16,7 @@ import glob
 import time
 
 
-from depth_utils import RGBDAuxResNet18, NUM_AUX_FEATURES
+from depth_utils import RGBDAuxResNet18, NUM_AUX_FEATURES, CAMERA_INTRINSICS
 from rgbe_utils import RGBETransform, RGBEDataset
 
 # ================================================================================
@@ -45,6 +45,9 @@ parser.add_argument('--list_models', action='store_true',
                     help='사용 가능한 모델 목록 출력 후 종료')
 parser.add_argument('--image_size', type=int, default=448,
                     help='입력 이미지 크기 (기본: 448, 경량화: 224)')
+parser.add_argument('--camera', type=str, default=None,
+                    choices=list(CAMERA_INTRINSICS.keys()),
+                    help='평가 데이터 촬영 카메라 (보조 피처 intrinsics 지정)')
 args = parser.parse_args()
 
 
@@ -87,6 +90,7 @@ TRAIN_INDICES_PATH = _derive_path(MODEL_PATH, "training_indices", "json")
 
 IMAGE_SIZE = args.image_size
 BATCH_SIZE = 32
+EVAL_INTRINSICS = CAMERA_INTRINSICS[args.camera] if args.camera else None
 OUTPUT_IMAGE_PATH = _derive_path(MODEL_PATH, "evaluation_results", "png")
 OUTPUT_WRONG_IMAGE_PATH = _derive_path(MODEL_PATH, "evaluation_wrong_predictions", "png")
 OUTPUT_CM_IMAGE_PATH = _derive_path(MODEL_PATH, "confusion_matrix", "png")
@@ -203,7 +207,8 @@ step2_start_time = time.time()
 eval_transform = RGBETransform(IMAGE_SIZE, is_train=False)
 
 test_dataset = RGBEDataset(test_paths, transform=eval_transform,
-                           class_names=class_names)
+                           class_names=class_names,
+                           intrinsics=EVAL_INTRINSICS)
 test_loader = DataLoader(test_dataset, batch_size=BATCH_SIZE, shuffle=False)
 
 print(f"\n테스트 배치 개수: {len(test_loader)}")

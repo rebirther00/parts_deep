@@ -16,7 +16,8 @@ import glob
 import time
 
 
-from depth_utils import RGBDAuxResNet18, RGBDTransform, RGBDDataset, NUM_AUX_FEATURES
+from depth_utils import (RGBDAuxResNet18, RGBDTransform, RGBDDataset,
+                         NUM_AUX_FEATURES, CAMERA_INTRINSICS)
 
 # ================================================================================
 # 명령줄 인자 파싱
@@ -44,6 +45,11 @@ parser.add_argument('--list_models', action='store_true',
                     help='사용 가능한 모델 목록 출력 후 종료')
 parser.add_argument('--image_size', type=int, default=448,
                     help='입력 이미지 크기 (기본: 448, 경량화: 224)')
+parser.add_argument('--camera', type=str, default=None,
+                    choices=list(CAMERA_INTRINSICS.keys()),
+                    help='평가 데이터 촬영 카메라 (보조 피처 intrinsics 지정)\n'
+                         f'선택: {", ".join(CAMERA_INTRINSICS.keys())}\n'
+                         '미지정 시 기본값(zed_x_mini) 사용')
 args = parser.parse_args()
 
 
@@ -86,6 +92,7 @@ TRAIN_INDICES_PATH = _derive_path(MODEL_PATH, "training_indices", "json")
 
 IMAGE_SIZE = args.image_size
 BATCH_SIZE = 32
+EVAL_INTRINSICS = CAMERA_INTRINSICS[args.camera] if args.camera else None
 OUTPUT_IMAGE_PATH = _derive_path(MODEL_PATH, "evaluation_results", "png")
 OUTPUT_WRONG_IMAGE_PATH = _derive_path(MODEL_PATH, "evaluation_wrong_predictions", "png")
 OUTPUT_CM_IMAGE_PATH = _derive_path(MODEL_PATH, "confusion_matrix", "png")
@@ -181,6 +188,10 @@ print(f"\n모델 파일: {MODEL_PATH}")
 print(f"테스트 데이터: {len(test_paths)}장")
 print(f"클래스 수: {num_classes}개")
 print(f"클래스 이름: {class_names}")
+if EVAL_INTRINSICS:
+    print(f"카메라 intrinsics: {args.camera} (fx={EVAL_INTRINSICS['fx']:.0f})")
+else:
+    print(f"카메라 intrinsics: 기본값 (zed_x_mini, fx=1144)")
 
 step1_time = time.time() - step1_start_time
 print(f"\n[1단계 완료] 소요 시간: {step1_time:.2f}초")
@@ -202,7 +213,8 @@ step2_start_time = time.time()
 eval_transform = RGBDTransform(IMAGE_SIZE, is_train=False)
 
 test_dataset = RGBDDataset(test_paths, transform=eval_transform,
-                           class_names=class_names)
+                           class_names=class_names,
+                           intrinsics=EVAL_INTRINSICS)
 test_loader = DataLoader(test_dataset, batch_size=BATCH_SIZE, shuffle=False)
 
 print(f"\n테스트 배치 개수: {len(test_loader)}")

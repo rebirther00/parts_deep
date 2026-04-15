@@ -30,6 +30,7 @@ from depth_utils import (
     RGBDAuxResNet18, RGBDTransform, RGBDDataset, IN_CHANNELS,
     NUM_AUX_FEATURES,
 )
+from rgb_utils import RGBTransform, RGBDataset, RGB_IN_CHANNELS
 from rgbe_utils import RGBETransform, RGBEDataset, RGBE_IN_CHANNELS
 from edge_utils import EdgeAuxResNet18, EdgeTransform, EdgeDataset, EDGE_IN_CHANNELS
 
@@ -118,6 +119,16 @@ class TextureInvariantRGBETransform:
 
 # ── 모델 타입별 설정 ────────────────────────────────────
 MODEL_CONFIGS = {
+    "rgb": {
+        "dataset_cls": RGBDataset,
+        "train_transform_fn": lambda sz: RGBTransform(sz, is_train=True),
+        "val_transform_fn": lambda sz: RGBTransform(sz, is_train=False),
+        "model_fn": lambda nc: NoAuxResNet18(nc, in_channels=RGB_IN_CHANNELS,
+                                              pretrained=True),
+        "model_load_fn": lambda nc: NoAuxResNet18(nc, in_channels=RGB_IN_CHANNELS,
+                                                   pretrained=False),
+        "in_channels": RGB_IN_CHANNELS,
+    },
     "rgbd": {
         "dataset_cls": RGBDDataset,
         "train_transform_fn": lambda sz: RGBDTransform(sz, is_train=True),

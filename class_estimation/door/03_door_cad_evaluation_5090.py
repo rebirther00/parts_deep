@@ -16,7 +16,8 @@ import glob
 import time
 from sklearn.model_selection import train_test_split
 
-from depth_utils import RGBDAuxResNet18, RGBDTransform, RGBDDataset, NUM_AUX_FEATURES
+from depth_utils import (RGBDAuxResNet18, RGBDTransform, RGBDDataset,
+                         NUM_AUX_FEATURES, CAMERA_INTRINSICS)
 
 # ================================================================================
 # 명령줄 인자 파싱
@@ -34,6 +35,9 @@ parser.add_argument('--test_size', type=float, default=0.2,
                     help='dataset_dir 스캔 시 test 비율 (기본 0.2, --use_all 시 무시)')
 parser.add_argument('--seed', type=int, default=42,
                     help='dataset_dir 스캔 시 랜덤 시드 (기본 42)')
+parser.add_argument('--camera', type=str, default=None,
+                    choices=list(CAMERA_INTRINSICS.keys()),
+                    help='평가 데이터 촬영 카메라 (보조 피처 intrinsics 지정)')
 args = parser.parse_args()
 
 # ================================================================================
@@ -57,6 +61,7 @@ TRAIN_INDICES_PATH = os.path.join(ARTIFACTS_DIR, "training_indices_door_cad_5090
 CLASS_NAMES_PATH = os.path.join(ARTIFACTS_DIR, "class_names_door_cad_5090.json")
 IMAGE_SIZE = 448
 BATCH_SIZE = 32
+EVAL_INTRINSICS = CAMERA_INTRINSICS[args.camera] if args.camera else None
 OUTPUT_IMAGE_PATH = os.path.join(ARTIFACTS_DIR, "evaluation_results_door_cad_5090.png")
 OUTPUT_WRONG_IMAGE_PATH = os.path.join(ARTIFACTS_DIR, "evaluation_wrong_predictions_door_cad_5090.png")
 RESULTS_JSON_PATH = os.path.join(ARTIFACTS_DIR, "evaluation_results_door_cad_5090.json")
@@ -170,7 +175,8 @@ step2_start_time = time.time()
 eval_transform = RGBDTransform(IMAGE_SIZE, is_train=False)
 
 test_dataset = RGBDDataset(test_paths, transform=eval_transform,
-                           class_names=class_names)
+                           class_names=class_names,
+                           intrinsics=EVAL_INTRINSICS)
 test_loader = DataLoader(test_dataset, batch_size=BATCH_SIZE, shuffle=False)
 
 print(f"\n테스트 배치 개수: {len(test_loader)}")

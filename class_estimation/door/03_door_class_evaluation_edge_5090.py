@@ -16,6 +16,7 @@ import glob
 import time
 
 
+from depth_utils import CAMERA_INTRINSICS
 from edge_utils import EdgeAuxResNet18, EdgeTransform, EdgeDataset, NUM_AUX_FEATURES
 
 # ================================================================================
@@ -32,6 +33,9 @@ parser.add_argument('--use_all', action='store_true',
                     help='dataset_dir의 전체 이미지를 평가에 사용 (크로스 도메인 평가용)')
 parser.add_argument('--image_size', type=int, default=448,
                     help='입력 이미지 크기 (기본: 448, 경량화: 224)')
+parser.add_argument('--camera', type=str, default=None,
+                    choices=list(CAMERA_INTRINSICS.keys()),
+                    help='평가 데이터 촬영 카메라 (보조 피처 intrinsics 지정)')
 args = parser.parse_args()
 
 # ================================================================================
@@ -55,6 +59,7 @@ TRAIN_INDICES_PATH = os.path.join(ARTIFACTS_DIR, "training_indices_door_edge_509
 CLASS_NAMES_PATH = os.path.join(ARTIFACTS_DIR, "class_names_door_edge_5090.json")
 IMAGE_SIZE = args.image_size
 BATCH_SIZE = 32
+EVAL_INTRINSICS = CAMERA_INTRINSICS[args.camera] if args.camera else None
 OUTPUT_IMAGE_PATH = os.path.join(ARTIFACTS_DIR, "evaluation_results_door_edge_5090.png")
 OUTPUT_WRONG_IMAGE_PATH = os.path.join(ARTIFACTS_DIR, "evaluation_wrong_predictions_door_edge_5090.png")
 OUTPUT_CM_IMAGE_PATH = os.path.join(ARTIFACTS_DIR, "confusion_matrix_door_edge_5090.png")
@@ -157,7 +162,8 @@ step2_start_time = time.time()
 eval_transform = EdgeTransform(IMAGE_SIZE, is_train=False)
 
 test_dataset = EdgeDataset(test_paths, transform=eval_transform,
-                           class_names=class_names)
+                           class_names=class_names,
+                           intrinsics=EVAL_INTRINSICS)
 test_loader = DataLoader(test_dataset, batch_size=BATCH_SIZE, shuffle=False)
 
 print(f"\n테스트 배치 개수: {len(test_loader)}")

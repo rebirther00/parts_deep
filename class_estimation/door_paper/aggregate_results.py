@@ -29,12 +29,13 @@ NO_AUX_MODE = agg_args.no_aux
 NOAUX_SUFFIX = "_noaux" if NO_AUX_MODE else ""
 SUMMARY_SUBDIR = "summary_noaux" if NO_AUX_MODE else "summary"
 
-MODELS_WITH_AUX = ["rgbd", "texture_aug", "edge", "rgbe"]
-MODELS_NO_AUX = ["rgbd", "texture_aug", "edge", "rgbe"]
+MODELS_WITH_AUX = ["rgb", "rgbd", "texture_aug", "edge", "rgbe"]
+MODELS_NO_AUX = ["rgb", "rgbd", "edge", "rgbe"]
 MODEL_TYPES = MODELS_NO_AUX if NO_AUX_MODE else MODELS_WITH_AUX
 
 MODEL_LABELS = {
-    "rgbd": "Baseline RGBD",
+    "rgb": "Baseline RGB",
+    "rgbd": "RGBD",
     "texture_aug": "Texture Aug RGBD",
     "edge": "Edge-only",
     "rgbe": "RGBE Hybrid",
@@ -157,7 +158,7 @@ def plot_learning_curves(res=448):
     """학습 곡선 (Val Accuracy vs Epoch) - 모델 오버레이"""
     artifacts_dir = os.path.join(PROJECT_DIR, "artifacts")
     fig, ax = plt.subplots(figsize=(10, 6))
-    colors = {'rgbd': '#1f77b4', 'texture_aug': '#ff7f0e',
+    colors = {'rgb': '#7f7f7f', 'rgbd': '#1f77b4', 'texture_aug': '#ff7f0e',
               'edge': '#2ca02c', 'rgbe': '#d62728',
               'rgbe_texture_aug': '#9467bd'}
 

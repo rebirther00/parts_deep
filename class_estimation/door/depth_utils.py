@@ -34,6 +34,17 @@ ZED_X_MINI_4MM_INTRINSICS = {
     "height": 1080,
 }
 
+# ZED 2i 4mm 렌즈 (HFOV=72°, 1920×1080)
+# fx = 960 / tan(36°) ≈ 1321
+ZED_2I_4MM_INTRINSICS = {
+    "fx": 1321.0,
+    "fy": 1321.0,
+    "cx": 960.0,
+    "cy": 540.0,
+    "width": 1920,
+    "height": 1080,
+}
+
 # Isaac Sim 기본 USD 카메라 (focal=50mm, aperture=36mm, 1920×1080)
 ISAAC_SIM_INTRINSICS = {
     "fx": 2666.67,
@@ -42,6 +53,12 @@ ISAAC_SIM_INTRINSICS = {
     "cy": 540.0,
     "width": 1920,
     "height": 1080,
+}
+
+CAMERA_INTRINSICS = {
+    "zed_x_mini": ZED_X_MINI_4MM_INTRINSICS,
+    "zed_2i": ZED_2I_4MM_INTRINSICS,
+    "isaac_sim": ISAAC_SIM_INTRINSICS,
 }
 
 DEFAULT_INTRINSICS = ZED_X_MINI_4MM_INTRINSICS
