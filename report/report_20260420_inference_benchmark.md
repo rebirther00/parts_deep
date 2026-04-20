@@ -2,7 +2,7 @@
 
 **과제명**: 건설장비 부품인식 및 위치추정 기술 개발
 **연구 기간**: 1차년도
-**작성일**: 2026년 4월 6일
+**작성일**: 2026년 4월 20일
 **작성자**: 한국건설기계연구원 스마트건설장비연구실
 
 ---
@@ -139,7 +139,7 @@ RGBD를 그대로 채택하더라도 다음 최적화 적용 시 격차를 크�
 | 항목 | 경로 |
 |------|------|
 | 벤치마크 스크립트 | `class_estimation/door_paper/benchmark_inference.py` |
-| 본 보고서        | `report/report_20260406_inference_benchmark.md` |
+| 본 보고서        | `report/report_20260420_inference_benchmark.md` |
 
 ### 스크립트 주요 옵션
 
