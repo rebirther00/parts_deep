@@ -96,6 +96,72 @@ CAD 분석으로 확정된 클래스 구조 (`attribute_models/class_spec.json`)
 
 재현 순서: `10 → 11(원본·aug·aug2 각각) → 12 → 13`.
 
+### 터미널 명령어
+
+모든 명령은 `class_estimation/door/`에서 프로젝트 venv로 실행:
+
+```bash
+cd ~/parts_deep/class_estimation/door
+source ~/parts_deep/venv/parts_deep/bin/activate   # 또는 아래처럼 직접 지정
+# PY=~/parts_deep/venv/parts_deep/bin/python
+```
+
+**① CAD 템플릿/스펙 생성** — 신규 STL 추가·리비전 변경 시에만:
+
+```bash
+python 10_generate_cad_templates.py
+# 입력: ../../cad/door_stl/*.stl
+# 출력: attribute_models/cad_templates.npz, class_spec.json
+#       (기존 aspect_center 캘리브레이션 값은 보존됨)
+```
+
+**② 학습 라벨 자동 생성** — 학습 데이터 추가/변경 시:
+
+```bash
+python 11_generate_vent_labels.py                                        # 원본
+python 11_generate_vent_labels.py --base datasets_aug  --out vent_labels/datasets_aug
+python 11_generate_vent_labels.py --base datasets_aug2 --out vent_labels/datasets_aug2
+# 출력: vent_labels/<셋>/<클래스>/aligned_*.png, dmask_*.png, vent_label.png, meta.json
+# 소요: 셋당 약 10분
+```
+
+**③ U-Net 학습** — 라벨 재생성 후:
+
+```bash
+python 12_train_vent_unet.py \
+    --roots vent_labels/datasets vent_labels/datasets_aug vent_labels/datasets_aug2
+# 출력: attribute_models/vent_unet2.pth (RTX 5090 기준 약 15분)
+# 옵션: --epochs 15, --min_iou 0.8, --out <경로>
+```
+
+**④ 평가** — N프레임 부트스트랩 최종 정확도:
+
+```bash
+python 13_evaluate_attribute_pipeline.py                          # datasets
+python 13_evaluate_attribute_pipeline.py --base datasets_aug2    # 극단 증강셋
+python 13_evaluate_attribute_pipeline.py --base datasets_factory # 현장
+# 현장은 마스크가 없으면 MobileSAM으로 자동 생성 (factory_masks/에 캐시)
+# 옵션: --n_frames 10, --n_boot 2000, --model attribute_models/vent_unet2.pth
+```
+
+**⑤ 추론 (파이썬 API)** — 프레임 스트림에서 도어 1개 판정:
+
+```python
+import cv2
+from attribute_utils import frame_scores, decide, load_vent_unet, load_templates
+
+net = load_vent_unet()          # attribute_models/vent_unet2.pth
+templates = load_templates()
+
+frames = []
+for rgb, depth_mm, mask in stream:     # 도어당 10프레임 권장 (mask: MobileSAM 등)
+    frames.append(frame_scores(rgb, depth_mm, mask, net, templates))
+
+pred_class, group, scores = decide(frames)
+# ZED 2i 등 다른 카메라: frame_scores(..., intrinsics={'fx':..,'fy':..,'cx':..,'cy':..})
+# 스케일 오차는 종횡비 설계로 상쇄되므로 근사 intrinsics로도 동작
+```
+
 ## 5. 현장 촬영 프로토콜 (정확도 전제 조건)
 
 1. **도어 전체가 프레임 안에** 들어오게 촬영 (잘리면 종횡비 측정 불가).
