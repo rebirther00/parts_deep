@@ -1,0 +1,8 @@
+{
+  "class_name": "E30_E38_door_RH",
+  "display_name": "E30 E38 door RH",
+  "data_source": "real_camera",
+  "camera": "ZED ZED 2i",
+  "num_images": 66,
+  "updated_at": "2026-07-07 00:00:00"
+}

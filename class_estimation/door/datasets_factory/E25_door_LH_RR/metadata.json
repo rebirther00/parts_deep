@@ -1,0 +1,8 @@
+{
+  "class_name": "E25_door_LH_RR",
+  "display_name": "E25 door LH RR",
+  "data_source": "real_camera",
+  "camera": "ZED ZED 2i",
+  "num_images": 12,
+  "updated_at": "2026-07-06 00:00:00"
+}

@@ -1,0 +1,17 @@
+{
+  "dataset_name": "Excavator Door Classification Dataset",
+  "num_classes": 8,
+  "classes": {
+    "E25_door_LH_FRT": "E25_door_LH_FRT",
+    "E25_door_LH_RR": "E25_door_LH_RR",
+    "E25_door_RH": "E25_door_RH",
+    "E30_door_LH_FRT": "E30_door_LH_FRT",
+    "E30_door_LH_RR": "E30_door_LH_RR",
+    "E30_E38_door_RH": "E30_E38_door_RH",
+    "E38_door_LH_FRT": "E38_door_LH_FRT",
+    "E38_door_LH_RR": "E38_door_LH_RR"
+  },
+  "data_source": "real_camera",
+  "camera": "OpenCV (Fallback)",
+  "created_at": "2026-04-01 15:03:54"
+}
