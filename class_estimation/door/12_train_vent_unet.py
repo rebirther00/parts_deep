@@ -45,14 +45,25 @@ torch.manual_seed(SEED)
 
 
 def build_items():
-    # val: 원본 디렉토리에서 클래스별 20% (시드 고정 셔플)
-    val_idx = {}
+    # val 분할: 원본 디렉토리의 split.json 재사용 (없으면 클래스별 20%
+    # 결정적 생성 후 저장). 주의: 내장 hash()는 실행마다 달라지므로
+    # zlib.crc32 사용.
+    import zlib
+    split_path = f'{ROOTS[0]}/split.json'
     meta0 = json.load(open(f'{ROOTS[0]}/meta.json'))
-    for cls, rows in meta0.items():
-        idxs = sorted(r['idx'] for r in rows)
-        rng = random.Random(SEED + hash(cls) % 1000)
-        rng.shuffle(idxs)
-        val_idx[cls] = set(idxs[:max(1, len(idxs) // 5)])
+    if os.path.exists(split_path):
+        val_idx = {cls: set(v['val']) for cls, v in
+                   json.load(open(split_path)).items()}
+    else:
+        val_idx = {}
+        for cls, rows in meta0.items():
+            idxs = sorted(r['idx'] for r in rows)
+            rng = random.Random(SEED + zlib.crc32(cls.encode()) % 1000)
+            rng.shuffle(idxs)
+            val_idx[cls] = set(idxs[:max(1, len(idxs) // 5)])
+        json.dump({c: {'val': sorted(v)} for c, v in val_idx.items()},
+                  open(split_path, 'w'), indent=1)
+        print(f'val 분할 생성/저장: {split_path}')
     items = []
     for ri, root in enumerate(ROOTS):
         meta = json.load(open(f'{root}/meta.json'))

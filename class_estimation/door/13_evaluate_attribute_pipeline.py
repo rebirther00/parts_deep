@@ -27,12 +27,33 @@ SAM_CKPT = os.path.join(DOOR_DIR, 'sam_models', 'mobile_sam.pt')
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--base', default='datasets')
+parser.add_argument('--split', choices=['val', 'all'], default=None,
+                    help='val: U-Net 학습에 안 쓴 프레임만 평가 (누수 방지). '
+                         '기본값: datasets/aug 계열은 val, 그 외(현장)는 all')
 parser.add_argument('--n_frames', type=int, default=10)
 parser.add_argument('--n_boot', type=int, default=2000)
 parser.add_argument('--model', default='attribute_models/vent_unet2.pth')
 args = parser.parse_args()
 BASE = os.path.join(DOOR_DIR, args.base)
 MASK_CACHE = os.path.join(DOOR_DIR, 'factory_masks')
+
+# 학습 데이터 출신 셋(datasets, datasets_aug*)은 기본 val-only —
+# 학습에 사용된 프레임을 평가에 넣으면 낙관적 수치가 나온다.
+if args.split is None:
+    args.split = 'val' if args.base.startswith('datasets') \
+        and 'factory' not in args.base else 'all'
+VAL_IDX = None
+if args.split == 'val':
+    import json
+    sp = os.path.join(DOOR_DIR, 'vent_labels', 'datasets', 'split.json')
+    if not os.path.exists(sp):
+        raise SystemExit(f'split.json이 없습니다: {sp} '
+                         '(11→12 실행 후 생성됨, 또는 --split all 사용)')
+    VAL_IDX = {cls: set(v['val'])
+               for cls, v in json.load(open(sp)).items()}
+    print(f'평가 분할: val (학습 미사용 프레임만, {sp})')
+else:
+    print('평가 분할: all')
 
 
 def ensure_mask(cls, idx, rgb_path):
@@ -70,6 +91,8 @@ if __name__ == '__main__':
         fr = []
         for rp in sorted(glob.glob(f'{cls_dir}/rgb_*.png')):
             idx = os.path.basename(rp)[4:8]
+            if VAL_IDX is not None and idx not in VAL_IDX.get(cls, set()):
+                continue
             rgb = cv2.imread(rp)
             depth = cv2.imread(f'{cls_dir}/depth_{idx}.png',
                                cv2.IMREAD_UNCHANGED)

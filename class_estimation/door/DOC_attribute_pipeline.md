@@ -93,6 +93,20 @@ CAD 분석으로 확정된 클래스 구조 (`attribute_models/class_spec.json`)
 | `11_generate_vent_labels.py` | 학습 라벨 자동 생성 (CAD 정합) |
 | `12_train_vent_unet.py` | U-Net 학습 |
 | `13_evaluate_attribute_pipeline.py` | 평가 (datasets/aug/factory, N프레임 부트스트랩) |
+| `vent_labels/<셋>/` | 11번 산출물 (이미지는 gitignore — meta/split.json만 추적) |
+
+### 데이터 분할 (train/val)과 평가 규칙
+
+- 12번 학습 시 원본 라벨셋에서 클래스별 20%를 **val**로 떼어
+  `vent_labels/datasets/split.json`에 저장한다 (기존 파일이 있으면 재사용 —
+  현재 체크포인트 `vent_unet2.pth`가 학습된 실제 분할이 커밋되어 있음).
+  val은 에폭별 체크포인트 선택에 사용. 별도 test셋은 두지 않는 대신
+  **datasets_aug/aug2(val 인덱스)와 현장 데이터가 외부 테스트 역할**을 한다.
+  증강 라벨셋에서도 같은 val 인덱스는 학습에서 제외된다 (누수 방지).
+- 13번 평가는 `--base datasets`/`datasets_aug*`일 때 기본으로 **val 프레임만**
+  평가한다 (`--split all`로 전체 평가 가능하나 학습 프레임이 섞여 낙관적).
+  `datasets_factory`는 학습에 쓰인 적이 없으므로 전체 평가.
+- §3의 결과 표가 이 규칙으로 산출된 수치다 (datasets/aug/aug2 = val only).
 
 재현 순서: `10 → 11(원본·aug·aug2 각각) → 12 → 13`.
 
