@@ -1,0 +1,92 @@
+{
+  "version": "2026-07-07",
+  "common_side_mm": 1140,
+  "decision": {
+    "eps": 0.01,
+    "sigma": 0.05,
+    "n_frames": 10,
+    "note": "score(c)=(템플릿IoU+eps)*exp(-|log(aspect/aspect_center)|/sigma)"
+  },
+  "classes": {
+    "E25_door_LH_FRT": {
+      "group": "FRT",
+      "bbox_mm": [
+        1140,
+        828
+      ],
+      "aspect_cad": 1.3768,
+      "aspect_center": 1.4028,
+      "slot_count_cad": 0
+    },
+    "E25_door_LH_RR": {
+      "group": "RR",
+      "bbox_mm": [
+        1141,
+        1140
+      ],
+      "aspect_cad": 1.0009,
+      "aspect_center": 1.0671,
+      "slot_count_cad": 236
+    },
+    "E25_door_RH": {
+      "group": "RH",
+      "bbox_mm": [
+        1140,
+        990
+      ],
+      "aspect_cad": 1.1515,
+      "aspect_center": 1.1664,
+      "slot_count_cad": 40
+    },
+    "E30_E38_door_RH": {
+      "group": "RH",
+      "bbox_mm": [
+        1191,
+        1140
+      ],
+      "aspect_cad": 1.0447,
+      "aspect_center": 1.059,
+      "slot_count_cad": 50
+    },
+    "E30_door_LH_FRT": {
+      "group": "FRT",
+      "bbox_mm": [
+        1140,
+        869
+      ],
+      "aspect_cad": 1.3119,
+      "aspect_center": 1.3218,
+      "slot_count_cad": 0
+    },
+    "E30_door_LH_RR": {
+      "group": "RR",
+      "bbox_mm": [
+        1262,
+        1140
+      ],
+      "aspect_cad": 1.107,
+      "aspect_center": 1.1086,
+      "slot_count_cad": 240
+    },
+    "E38_door_LH_FRT": {
+      "group": "FRT",
+      "bbox_mm": [
+        1140,
+        916
+      ],
+      "aspect_cad": 1.2445,
+      "aspect_center": 1.2712,
+      "slot_count_cad": 0
+    },
+    "E38_door_LH_RR": {
+      "group": "RR",
+      "bbox_mm": [
+        1456,
+        1140
+      ],
+      "aspect_cad": 1.2772,
+      "aspect_center": 1.2939,
+      "slot_count_cad": 299
+    }
+  }
+}
