@@ -27,7 +27,7 @@ from attribute_utils import VentUNet
 
 DOOR_DIR = os.path.dirname(os.path.abspath(__file__))
 CROP = 256
-SEED = 42
+SPLIT_SEED = 42  # 분할 전용 시드 (split.json 재사용 시 무관)
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--root', default='vent_labels/datasets',
@@ -35,13 +35,17 @@ parser.add_argument('--root', default='vent_labels/datasets',
                          '학습에 넣지 말 것)')
 parser.add_argument('--out', default='attribute_models/vent_unet.pth')
 parser.add_argument('--epochs', type=int, default=15)
+parser.add_argument('--seed', type=int, default=42,
+                    help='가중치 초기화·증강 난수 시드. 데이터 분할은 '
+                         'split.json에 고정되어 시드와 무관')
 parser.add_argument('--min_iou', type=float, default=0.8,
                     help='정합 IoU 미달 라벨 제외 임계')
 args = parser.parse_args()
 ROOT = os.path.join(DOOR_DIR, args.root)
 CKPT = os.path.join(DOOR_DIR, args.out)
-random.seed(SEED)
-torch.manual_seed(SEED)
+SEED = SPLIT_SEED
+random.seed(args.seed)
+torch.manual_seed(args.seed)
 
 
 def load_or_make_split(root, meta):
