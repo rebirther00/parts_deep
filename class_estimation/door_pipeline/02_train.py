@@ -175,7 +175,9 @@ MODEL_CONFIGS = {
 parser = argparse.ArgumentParser(description='논문용 통합 학습')
 parser.add_argument('--model_type', type=str, required=True,
                     choices=list(MODEL_CONFIGS.keys()))
-parser.add_argument('--seed', type=int, required=True)
+parser.add_argument('--seed', type=int, default=None,
+                    help='미지정 시 랜덤 시드 자동 생성 '
+                         '(run 이름·split_info.json에 기록되어 재현 가능)')
 parser.add_argument('--image_size', type=int, default=448)
 parser.add_argument('--epochs', type=int, default=60)
 parser.add_argument('--patience', type=int, default=10)
@@ -183,6 +185,9 @@ parser.add_argument('--no_aux', action='store_true',
                     help='Aux MLP 제거 ablation 실험')
 parser.add_argument('-cpu', '--cpu', action='store_true')
 args = parser.parse_args()
+if args.seed is None:
+    args.seed = random.randint(0, 99999)
+    print(f"시드 미지정 → 랜덤 시드 사용: {args.seed}")
 
 
 def set_seed(seed):
