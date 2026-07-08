@@ -129,8 +129,8 @@ if __name__ == '__main__':
             if rgb is None or depth is None or mask is None:
                 continue
             try:
-                fr.append(frame_scores(rgb, depth, refine_mask(mask),
-                                       net, templates))
+                fr.append({'sc': frame_scores(rgb, depth, refine_mask(mask),
+                                              net, templates), 'path': rp})
             except Exception:
                 pass
         if fr:
@@ -146,7 +146,7 @@ if __name__ == '__main__':
         okg = okc = 0
         gi = CLASSES.index(cls)
         for _ in range(args.n_boot):
-            sel = [fr[i] for i in rng.choice(
+            sel = [fr[i]['sc'] for i in rng.choice(
                 len(fr), size=min(args.n_frames, len(fr)), replace=False)]
             pred, grp, _ = decide(sel)
             conf[gi, CLASSES.index(pred)] += 1
@@ -196,8 +196,62 @@ if __name__ == '__main__':
                  f'N={args.n_frames}')
     fig.colorbar(im, fraction=0.046)
     fig.tight_layout()
-    png_path = os.path.join(out_dir, f'{tag}.png')
-    fig.savefig(png_path, dpi=120)
+    cm_path = os.path.join(out_dir, f'{tag}_confusion_matrix.png')
+    fig.savefig(cm_path, dpi=120)
+    plt.close(fig)
+
+    # ── 프레임별(N=1) 판정 그리드: 전체 + 오분류 (레거시 04 방식) ──
+    def annotate(path, gt, pred):
+        img = cv2.imread(path)
+        th = cv2.resize(img, (320, 180))
+        ok = (pred == gt)
+        color = (0, 180, 0) if ok else (0, 0, 255)
+        cv2.rectangle(th, (0, 0), (319, 179), color, 3)
+        cv2.putText(th, f'GT {gt.replace("_door", "")}', (6, 18),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 255, 255), 1)
+        cv2.putText(th, f'-> {pred.replace("_door", "")}', (6, 38),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.45, color, 1)
+        return th
+
+    def save_grid(tiles, path, cols=8):
+        if not tiles:
+            return False
+        rows = (len(tiles) + cols - 1) // cols
+        canvas = np.zeros((rows * 180, cols * 320, 3), np.uint8)
+        for i, t in enumerate(tiles):
+            r, c = divmod(i, cols)
+            canvas[r * 180:(r + 1) * 180, c * 320:(c + 1) * 320] = t
+        cv2.imwrite(path, canvas)
+        return True
+
+    all_tiles, wrong_tiles, per_frame = [], [], []
+    for cls, fr in frames.items():
+        for f in fr:
+            pred, _, _ = decide([f['sc']])
+            per_frame.append({'path': os.path.relpath(f['path'], DOOR_DIR),
+                              'gt': cls, 'pred': pred,
+                              'correct': pred == cls})
+            tile = annotate(f['path'], cls, pred)
+            all_tiles.append(tile)
+            if pred != cls:
+                wrong_tiles.append(tile)
+    results['per_frame_acc'] = round(
+        100 * sum(p['correct'] for p in per_frame) / max(1, len(per_frame)),
+        2)
+    results['per_frame'] = per_frame
+    json.dump(results, open(json_path, 'w', encoding='utf-8'),
+              ensure_ascii=False, indent=2)
+    res_path = os.path.join(out_dir, f'{tag}_results.png')
+    save_grid(all_tiles, res_path)
+    wrong_path = os.path.join(out_dir, f'{tag}_wrong.png')
+    has_wrong = save_grid(wrong_tiles, wrong_path)
+
     print(f'\n결과 저장: {json_path}')
-    print(f'혼동행렬 저장: {png_path}')
+    print(f'혼동행렬 저장: {cm_path}')
+    print(f'프레임별 결과 그리드: {res_path} '
+          f'(프레임 단위 정확도 {results["per_frame_acc"]}%)')
+    if has_wrong:
+        print(f'오분류 그리드: {wrong_path} ({len(wrong_tiles)}개)')
+    else:
+        print('오분류 없음 — wrong 그리드 생략')
     finish_logging()
