@@ -14,6 +14,7 @@
 import argparse
 import glob
 import json
+import time
 import os
 import random
 
@@ -35,8 +36,9 @@ parser.add_argument('--root', default='vent_labels/datasets',
                          '학습에 넣지 말 것)')
 parser.add_argument('--out', default='attribute_models/vent_unet.pth')
 parser.add_argument('--epochs', type=int, default=15)
-parser.add_argument('--seed', type=int, default=42,
-                    help='가중치 초기화·증강 난수 시드. 데이터 분할은 '
+parser.add_argument('--seed', type=int, default=None,
+                    help='가중치 초기화·증강 난수 시드. 미지정 시 랜덤 생성 '
+                         '(vent_unet_train_info.json에 기록). 데이터 분할은 '
                          'split.json에 고정되어 시드와 무관')
 parser.add_argument('--min_iou', type=float, default=0.8,
                     help='정합 IoU 미달 라벨 제외 임계')
@@ -44,6 +46,9 @@ args = parser.parse_args()
 ROOT = os.path.join(DOOR_DIR, args.root)
 CKPT = os.path.join(DOOR_DIR, args.out)
 SEED = SPLIT_SEED
+if args.seed is None:
+    args.seed = random.randint(0, 99999)
+    print(f'시드 미지정 → 랜덤 시드 사용: {args.seed}')
 random.seed(args.seed)
 torch.manual_seed(args.seed)
 
@@ -205,4 +210,13 @@ if __name__ == '__main__':
         if iou > best:
             best = iou
             torch.save(net.state_dict(), CKPT)
+    info = {
+        'seed': args.seed, 'split_seed': SPLIT_SEED, 'root': args.root,
+        'epochs': args.epochs, 'min_iou': args.min_iou,
+        'best_val_iou': round(best, 4),
+        'trained_at': time.strftime('%Y-%m-%d %H:%M:%S'),
+    }
+    info_path = CKPT.replace('.pth', '_train_info.json')
+    json.dump(info, open(info_path, 'w'), indent=1)
     print(f'best val IoU={best:.4f} -> {CKPT}')
+    print(f'학습 정보 기록: {info_path}')
