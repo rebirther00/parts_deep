@@ -56,6 +56,9 @@ python 11_generate_vent_labels.py --base datasets_aug2 --out vent_labels/dataset
 
 # U-Net 학습 (train/val/test 70/15/15; aug는 학습 금지 — 강건성 평가 전용)
 python 12_train_vent_unet.py
+# → attribute_models/runs/vent_unet_seed<시드>/{model.pth, train_info.json}
+#   + 배포 포인터 attribute_models/vent_unet.pth 자동 갱신 (--no_promote로 억제)
+#   시드 미지정 시 랜덤 (train_info.json에 기록)
 
 # 평가 (datasets는 test 분할, aug/현장은 전체)
 python 13_evaluate_attribute_pipeline.py
@@ -74,7 +77,9 @@ pred_class, group, scores = decide(frames)
 ## 산출물/데이터 위치
 
 - `artifacts/` — CNN 모델 (rgbe_noaux_448_seed42 이식됨; *.pth는 git 미추적)
-- `attribute_models/` — 속성 파이프라인 (class_spec.json, cad_templates.npz, vent_unet.pth)
+- `attribute_models/` — 속성 파이프라인 스펙·모델
+  - `runs/vent_unet_seed<시드>/` — 학습 run별 보관 (레거시 artifacts 방식)
+  - `vent_unet.pth` — 배포 포인터 (attribute_utils·13번 기본 참조, 최신 run 복사본)
 - `vent_labels/` — 자동 생성 라벨 (이미지 미추적, meta/split.json만 추적)
 - `datasets*`, `sam_models` — `../door/` 심볼릭 링크
 - `factory_masks/` — 현장 MobileSAM 마스크 캐시 (재생성 가능)

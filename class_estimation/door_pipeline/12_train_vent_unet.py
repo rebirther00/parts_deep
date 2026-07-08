@@ -34,23 +34,29 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--root', default='vent_labels/datasets',
                     help='라벨 디렉토리 (datasets_aug 계열은 평가 전용 — '
                          '학습에 넣지 말 것)')
-parser.add_argument('--out', default='attribute_models/vent_unet.pth')
 parser.add_argument('--epochs', type=int, default=15)
 parser.add_argument('--seed', type=int, default=None,
-                    help='가중치 초기화·증강 난수 시드. 미지정 시 랜덤 생성 '
-                         '(vent_unet_train_info.json에 기록). 데이터 분할은 '
-                         'split.json에 고정되어 시드와 무관')
+                    help='가중치 초기화·증강 난수 시드. 미지정 시 랜덤 생성. '
+                         '데이터 분할은 split.json에 고정되어 시드와 무관')
 parser.add_argument('--min_iou', type=float, default=0.8,
                     help='정합 IoU 미달 라벨 제외 임계')
+parser.add_argument('--no_promote', action='store_true',
+                    help='배포 포인터(attribute_models/vent_unet.pth) 갱신 안 함')
 args = parser.parse_args()
 ROOT = os.path.join(DOOR_DIR, args.root)
-CKPT = os.path.join(DOOR_DIR, args.out)
 SEED = SPLIT_SEED
 if args.seed is None:
     args.seed = random.randint(0, 99999)
     print(f'시드 미지정 → 랜덤 시드 사용: {args.seed}')
 random.seed(args.seed)
 torch.manual_seed(args.seed)
+
+# 레거시와 동일하게 run별 폴더로 관리, 배포 경로는 별도 포인터
+RUN_NAME = f'vent_unet_seed{args.seed}'
+RUN_DIR = os.path.join(DOOR_DIR, 'attribute_models', 'runs', RUN_NAME)
+CKPT = os.path.join(RUN_DIR, 'model.pth')
+CANONICAL = os.path.join(DOOR_DIR, 'attribute_models', 'vent_unet.pth')
+os.makedirs(RUN_DIR, exist_ok=True)
 
 
 def load_or_make_split(root, meta):
@@ -211,12 +217,21 @@ if __name__ == '__main__':
             best = iou
             torch.save(net.state_dict(), CKPT)
     info = {
+        'run_name': RUN_NAME,
         'seed': args.seed, 'split_seed': SPLIT_SEED, 'root': args.root,
         'epochs': args.epochs, 'min_iou': args.min_iou,
         'best_val_iou': round(best, 4),
         'trained_at': time.strftime('%Y-%m-%d %H:%M:%S'),
     }
-    info_path = CKPT.replace('.pth', '_train_info.json')
-    json.dump(info, open(info_path, 'w'), indent=1)
+    json.dump(info, open(os.path.join(RUN_DIR, 'train_info.json'), 'w'),
+              indent=1)
     print(f'best val IoU={best:.4f} -> {CKPT}')
-    print(f'학습 정보 기록: {info_path}')
+    if args.no_promote:
+        print(f'배포 포인터 미갱신 (수동 갱신: cp {CKPT} {CANONICAL})')
+    else:
+        import shutil
+        shutil.copy2(CKPT, CANONICAL)
+        json.dump(info, open(CANONICAL.replace('.pth',
+                                               '_train_info.json'), 'w'),
+                  indent=1)
+        print(f'배포 포인터 갱신: {CANONICAL} <- {RUN_NAME}')
