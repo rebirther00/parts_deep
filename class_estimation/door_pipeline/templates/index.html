@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Door Dataset Builder</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v={{ cache_bust }}">
+</head>
+<body>
+
+<header class="header">
+    <h1>Door Dataset Builder</h1>
+    <span class="camera-badge" id="cameraBadge">카메라 연결 중...</span>
+</header>
+
+<div class="container">
+
+    <!-- 사이드바: 클래스 선택 + 대시보드 -->
+    <aside class="sidebar">
+        <div class="panel">
+            <h3>클래스 선택</h3>
+            <div class="class-list">
+                {% for model in ['E25', 'E30', 'E38'] %}
+                <div class="model-group">
+                    <div class="model-label">{{ model }}</div>
+                    {% for cls in classes %}
+                    {% if cls.startswith(model) %}
+                    <button class="class-btn" data-class="{{ cls }}" onclick="selectClass('{{ cls }}')">
+                        {{ cls[4:] }}
+                        <span class="count">0</span>
+                    </button>
+                    {% endif %}
+                    {% endfor %}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        <div class="panel">
+            <h3>데이터셋 현황</h3>
+            <div id="dashboard"></div>
+        </div>
+    </aside>
+
+    <!-- 메인 콘텐츠 -->
+    <main class="main-content">
+        <!-- 카메라 미리보기 -->
+        <div class="panel camera-panel">
+            <div class="stream-container">
+                <img id="videoStream" src="{{ url_for('video_feed') }}" alt="Camera Stream">
+                <div class="recording-indicator" id="recordIndicator">REC</div>
+            </div>
+            <div class="controls">
+                <button class="btn-record" id="btnRecord" onclick="toggleRecording()">녹화 시작</button>
+                <button class="btn-snapshot" onclick="takeSnapshot()">스냅샷</button>
+                <div class="control-group">
+                    <label>프레임 간격
+                        <input type="number" id="frameInterval" value="5" min="1" max="30">
+                    </label>
+                    <label>블러 임계값
+                        <input type="number" id="blurThreshold" value="30" min="10" max="500">
+                    </label>
+                </div>
+            </div>
+            <div class="status-bar" id="statusBar">대기 중 &mdash; 클래스를 선택하세요</div>
+        </div>
+
+        <!-- 추출 프레임 -->
+        <div class="panel frames-panel">
+            <div class="frames-header">
+                <h3>추출된 프레임 <span id="selectionInfo"></span></h3>
+                <div class="frames-actions">
+                    <button class="btn-outline" onclick="selectAllFrames()">전체 선택</button>
+                    <button class="btn-outline" onclick="deselectAllFrames()">전체 해제</button>
+                    <button class="btn-primary" onclick="saveSelected()">선택 저장</button>
+                    <button class="btn-danger" onclick="clearTemp()">전체 삭제</button>
+                </div>
+            </div>
+            <div class="frames-grid" id="framesGrid">
+                <div class="empty-state">추출된 프레임이 없습니다.<br>녹화 또는 스냅샷으로 프레임을 획득하세요.</div>
+            </div>
+        </div>
+    </main>
+
+</div>
+
+<script src="{{ url_for('static', filename='js/app.js') }}?v={{ cache_bust }}"></script>
+</body>
+</html>

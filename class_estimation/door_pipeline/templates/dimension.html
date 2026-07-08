@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>부품 치수 측정 — 실시간</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #0f172a; color: #e2e8f0; min-height: 100vh; }
+
+        .header { background: #1e293b; padding: 10px 24px; display: flex; align-items: center; justify-content: space-between; }
+        .header h1 { font-size: 1.1rem; font-weight: 600; }
+        .header-right { display: flex; gap: 10px; align-items: center; }
+        .badge { font-size: 0.78rem; padding: 4px 14px; border-radius: 12px; background: #475569; }
+        .badge.connected { background: #16a34a; }
+        .btn-reset { padding: 4px 14px; border-radius: 12px; background: #dc2626; color: #fff; border: none; font-size: 0.78rem; cursor: pointer; }
+        .btn-reset:hover { background: #ef4444; }
+
+        .container { max-width: 1200px; margin: 0 auto; padding: 16px; display: flex; gap: 16px; }
+
+        .video-section { flex: 1; }
+        .stream-box { background: #000; border-radius: 8px; overflow: hidden; }
+        .stream-box img { width: 100%; display: block; }
+
+        .sidebar { width: 340px; display: flex; flex-direction: column; gap: 12px; }
+
+        .card { background: #1e293b; border-radius: 8px; padding: 16px; }
+        .card h3 { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.5px; color: #94a3b8; margin-bottom: 12px; }
+
+        .dim-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+        .dim-item { text-align: center; }
+        .dim-label { font-size: 0.72rem; color: #64748b; }
+        .dim-value { font-size: 1.5rem; font-weight: 700; }
+        .dim-unit { font-size: 0.7rem; color: #94a3b8; }
+        .color-rect { color: #22d3ee; }
+        .color-pca { color: #a78bfa; }
+        .color-avg { color: #34d399; }
+
+        .method-tag { display: inline-block; font-size: 0.68rem; padding: 2px 8px; border-radius: 4px; margin-bottom: 8px; }
+        .tag-rect { background: #164e63; color: #22d3ee; }
+        .tag-pca { background: #3b0764; color: #a78bfa; }
+        .tag-avg { background: #064e3b; color: #34d399; }
+
+        .stat-row { display: flex; justify-content: space-between; padding: 5px 0; font-size: 0.82rem; border-bottom: 1px solid #334155; }
+        .stat-row:last-child { border: none; }
+        .stat-value { font-weight: 600; color: #f8fafc; }
+
+        table.history { width: 100%; font-size: 0.75rem; border-collapse: collapse; }
+        table.history th { color: #64748b; text-align: right; padding: 3px 6px; font-weight: 500; }
+        table.history td { text-align: right; padding: 3px 6px; }
+        table.history tr:nth-child(even) { background: #1a2332; }
+        .scroll-box { max-height: 220px; overflow-y: auto; }
+        .scroll-box::-webkit-scrollbar { width: 4px; }
+        .scroll-box::-webkit-scrollbar-thumb { background: #475569; border-radius: 2px; }
+
+        @media (max-width: 768px) {
+            .container { flex-direction: column; }
+            .sidebar { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <h1>부품 치수 측정 — 실시간</h1>
+    <div class="header-right">
+        <span id="sampleCount" style="font-size:0.78rem; color:#94a3b8;">N=0</span>
+        <button class="btn-reset" onclick="resetHistory()">초기화</button>
+        <span class="badge" id="cameraBadge">연결 중...</span>
+    </div>
+</div>
+
+<div class="container">
+    <div class="video-section">
+        <div class="stream-box">
+            <img id="videoStream" src="/video_feed" alt="Camera Stream">
+        </div>
+    </div>
+
+    <div class="sidebar">
+        <!-- minAreaRect 현재값 -->
+        <div class="card">
+            <h3><span class="method-tag tag-rect">minAreaRect</span> 현재 측정</h3>
+            <div class="dim-grid">
+                <div class="dim-item">
+                    <div class="dim-label">Width</div>
+                    <div class="dim-value color-rect" id="rectW">—</div>
+                    <div class="dim-unit">mm</div>
+                </div>
+                <div class="dim-item">
+                    <div class="dim-label">Height</div>
+                    <div class="dim-value color-rect" id="rectH">—</div>
+                    <div class="dim-unit">mm</div>
+                </div>
+                <div class="dim-item">
+                    <div class="dim-label">AR</div>
+                    <div class="dim-value color-rect" id="rectAR">—</div>
+                    <div class="dim-unit">W/H</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PCA 현재값 -->
+        <div class="card">
+            <h3><span class="method-tag tag-pca">PCA</span> 현재 측정</h3>
+            <div class="dim-grid">
+                <div class="dim-item">
+                    <div class="dim-label">Width</div>
+                    <div class="dim-value color-pca" id="pcaW">—</div>
+                    <div class="dim-unit">mm</div>
+                </div>
+                <div class="dim-item">
+                    <div class="dim-label">Height</div>
+                    <div class="dim-value color-pca" id="pcaH">—</div>
+                    <div class="dim-unit">mm</div>
+                </div>
+                <div class="dim-item">
+                    <div class="dim-label">AR</div>
+                    <div class="dim-value color-pca" id="pcaAR">—</div>
+                    <div class="dim-unit">W/H</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 이동 평균 -->
+        <div class="card">
+            <h3><span class="method-tag tag-avg">이동 평균</span></h3>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+                <div>
+                    <div style="font-size:0.72rem; color:#64748b; margin-bottom:4px;">minAreaRect 평균</div>
+                    <div style="font-size:0.9rem; color:#34d399;" id="rectAvg">—</div>
+                </div>
+                <div>
+                    <div style="font-size:0.72rem; color:#64748b; margin-bottom:4px;">PCA 평균</div>
+                    <div style="font-size:0.9rem; color:#34d399;" id="pcaAvg">—</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 통계 -->
+        <div class="card">
+            <h3>통계 (minAreaRect)</h3>
+            <div class="stat-row"><span>W 표준편차</span><span class="stat-value" id="wStd">—</span></div>
+            <div class="stat-row"><span>H 표준편차</span><span class="stat-value" id="hStd">—</span></div>
+            <div class="stat-row"><span>AR 표준편차</span><span class="stat-value" id="arStd">—</span></div>
+            <div class="stat-row"><span>W 범위</span><span class="stat-value" id="wRange">—</span></div>
+            <div class="stat-row"><span>H 범위</span><span class="stat-value" id="hRange">—</span></div>
+            <div class="stat-row"><span>측정 시간</span><span class="stat-value" id="elapsed">—</span></div>
+        </div>
+
+        <!-- 이력 -->
+        <div class="card">
+            <h3>측정 이력</h3>
+            <div class="scroll-box">
+                <table class="history">
+                    <thead><tr><th>#</th><th>W(mm)</th><th>H(mm)</th><th>AR</th><th>방법</th></tr></thead>
+                    <tbody id="historyBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let historyCount = 0;
+const MAX_HISTORY = 100;
+
+function fmtDim(v) { return v > 0 ? v.toFixed(0) : "—"; }
+function fmtAR(v) { return v > 0 ? v.toFixed(3) : "—"; }
+
+async function loadCameraInfo() {
+    try {
+        const res = await fetch("/api/camera_info");
+        const d = await res.json();
+        const badge = document.getElementById("cameraBadge");
+        badge.textContent = d.camera_type;
+        if (d.connected) badge.classList.add("connected");
+    } catch {}
+}
+
+async function resetHistory() {
+    try {
+        await fetch("/api/reset", { method: "POST" });
+        document.getElementById("historyBody").innerHTML = "";
+        historyCount = 0;
+    } catch {}
+}
+
+async function poll() {
+    try {
+        const res = await fetch("/api/measurement");
+        const r = await res.json();
+
+        const rect = r.rect || {};
+        const pca = r.pca || {};
+        const rectAvg = r.rect_avg || {};
+        const pcaAvg = r.pca_avg || {};
+        const stats = r.rect_stats || {};
+
+        document.getElementById("rectW").textContent = fmtDim(rect.width_mm);
+        document.getElementById("rectH").textContent = fmtDim(rect.height_mm);
+        document.getElementById("rectAR").textContent = fmtAR(rect.ar);
+
+        document.getElementById("pcaW").textContent = fmtDim(pca.width_mm);
+        document.getElementById("pcaH").textContent = fmtDim(pca.height_mm);
+        document.getElementById("pcaAR").textContent = fmtAR(pca.ar);
+
+        document.getElementById("rectAvg").textContent =
+            rectAvg.width_mm > 0
+                ? `W:${rectAvg.width_mm.toFixed(0)} H:${rectAvg.height_mm.toFixed(0)} AR:${rectAvg.ar.toFixed(3)}`
+                : "—";
+        document.getElementById("pcaAvg").textContent =
+            pcaAvg.width_mm > 0
+                ? `W:${pcaAvg.width_mm.toFixed(0)} H:${pcaAvg.height_mm.toFixed(0)} AR:${pcaAvg.ar.toFixed(3)}`
+                : "—";
+
+        document.getElementById("wStd").textContent = stats.w_std > 0 ? `±${stats.w_std.toFixed(1)}` : "—";
+        document.getElementById("hStd").textContent = stats.h_std > 0 ? `±${stats.h_std.toFixed(1)}` : "—";
+        document.getElementById("arStd").textContent = stats.ar_std > 0 ? `±${stats.ar_std.toFixed(4)}` : "—";
+        document.getElementById("wRange").textContent =
+            stats.w_min > 0 ? `${stats.w_min.toFixed(0)}~${stats.w_max.toFixed(0)}` : "—";
+        document.getElementById("hRange").textContent =
+            stats.h_min > 0 ? `${stats.h_min.toFixed(0)}~${stats.h_max.toFixed(0)}` : "—";
+        document.getElementById("elapsed").textContent =
+            r.elapsed_ms > 0 ? `${r.elapsed_ms.toFixed(0)} ms` : "—";
+        document.getElementById("sampleCount").textContent = `N=${r.sample_count || 0}`;
+
+        if (rect.width_mm > 0) {
+            addHistory(rect, "Rect");
+        }
+        if (pca.width_mm > 0) {
+            addHistory(pca, "PCA");
+        }
+    } catch {}
+}
+
+function addHistory(data, method) {
+    const tbody = document.getElementById("historyBody");
+    if (tbody.rows.length >= MAX_HISTORY * 2) {
+        tbody.deleteRow(tbody.rows.length - 1);
+        tbody.deleteRow(tbody.rows.length - 1);
+    }
+    historyCount++;
+    const row = tbody.insertRow(0);
+    const color = method === "Rect" ? "#22d3ee" : "#a78bfa";
+    row.innerHTML =
+        `<td>${historyCount}</td>` +
+        `<td>${data.width_mm.toFixed(0)}</td>` +
+        `<td>${data.height_mm.toFixed(0)}</td>` +
+        `<td>${data.ar.toFixed(3)}</td>` +
+        `<td style="color:${color}">${method}</td>`;
+}
+
+loadCameraInfo();
+setInterval(poll, 1000);
+poll();
+</script>
+
+</body>
+</html>
