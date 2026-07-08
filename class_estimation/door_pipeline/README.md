@@ -29,8 +29,10 @@ python 01_capture_dataset.py
 python 02_train.py --model_type rgbe --no_aux --image_size 448 --seed 42
 # → artifacts/rgbe_noaux_448_seed42/{model.pth, split_info.json, train_log.json}
 
-# ③ 평가 — test셋 + datasets_aug + datasets_aug2
+# ③ 평가 — 기본 test셋만 (--eval_sets로 강건성 확인 추가 가능)
 python 03_evaluate.py --model_type rgbe --no_aux --image_size 448 --seed 42
+python 03_evaluate.py --model_type rgbe --no_aux --image_size 448 --seed 42 \
+    --eval_sets aug aug2        # 강건성 확인 (기존 결과에 병합 저장)
 # → artifacts/rgbe_noaux_448_seed42/eval_results.json
 
 # ④ 현장 데이터 평가

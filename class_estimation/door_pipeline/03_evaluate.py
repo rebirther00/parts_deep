@@ -109,14 +109,21 @@ MODEL_CONFIGS = {
 }
 
 DATASET_VARIANTS = ["original", "datasets_aug", "datasets_aug2"]
+_SET_MAP = {"test": "original", "aug": "datasets_aug", "aug2": "datasets_aug2"}
 
 parser = argparse.ArgumentParser(description='논문용 통합 평가')
 parser.add_argument('--model_type', type=str, required=True,
                     choices=list(MODEL_CONFIGS.keys()))
 parser.add_argument('--seed', type=int, required=True)
 parser.add_argument('--image_size', type=int, default=448)
+parser.add_argument('--eval_sets', nargs='+', default=['test'],
+                    choices=list(_SET_MAP.keys()),
+                    help='평가 대상 (기본: test만). 강건성 확인 시 '
+                         '--eval_sets test aug aug2')
 parser.add_argument('--no_aux', action='store_true',
                     help='Aux MLP 제거 ablation 실험')
+parser.add_argument('--force', action='store_true',
+                    help='기존 결과가 있어도 재평가')
 parser.add_argument('-cpu', '--cpu', action='store_true')
 args = parser.parse_args()
 
@@ -229,9 +236,17 @@ def main():
     run_dir = os.path.join(PROJECT_DIR, "artifacts", run_name)
 
     eval_path = os.path.join(run_dir, "eval_results.json")
+    existing = {}
     if os.path.exists(eval_path):
-        print(f"[건너뜀] 이미 평가 완료: {run_name}")
-        return
+        with open(eval_path, encoding='utf-8') as f:
+            existing = json.load(f)
+    selected = [_SET_MAP[s] for s in args.eval_sets]
+    if not args.force:
+        selected = [v for v in selected if v not in existing]
+        if not selected:
+            print(f"[건너뜀] 요청한 세트 모두 평가 완료: {run_name} "
+                  f"(--force로 재평가 가능)")
+            return
 
     model_path = os.path.join(run_dir, "model.pth")
     split_path = os.path.join(run_dir, "split_info.json")
@@ -272,7 +287,7 @@ def main():
     transform = cfg["transform_fn"](args.image_size)
     all_results = {}
 
-    for variant in DATASET_VARIANTS:
+    for variant in [v for v in DATASET_VARIANTS if v in selected]:
         if variant == "original":
             paths = test_paths
             ds_label = "Test Original"
@@ -301,19 +316,22 @@ def main():
             f"{args.model_type.upper()} {args.image_size} seed{args.seed}\n{ds_label}",
             cm_path)
 
-    # 하락폭 계산
-    if "original" in all_results:
-        orig_acc = all_results["original"]["accuracy"]
-        orig_f1 = all_results["original"]["macro_f1"]
-        for variant in ["datasets_aug", "datasets_aug2"]:
-            if variant in all_results:
-                all_results[variant]["delta_acc"] = round(
-                    all_results[variant]["accuracy"] - orig_acc, 2)
-                all_results[variant]["delta_f1"] = round(
-                    all_results[variant]["macro_f1"] - orig_f1, 2)
+    # 부분 평가 시 기존 결과 보존 (병합 저장)
+    merged = dict(existing)
+    merged.update(all_results)
 
+    # 하락폭 계산 (병합 결과 기준)
+    if "original" in merged:
+        orig_acc = merged["original"]["accuracy"]
+        orig_f1 = merged["original"]["macro_f1"]
+        for variant in ["datasets_aug", "datasets_aug2"]:
+            if variant in merged:
+                merged[variant]["delta_acc"] = round(
+                    merged[variant]["accuracy"] - orig_acc, 2)
+                merged[variant]["delta_f1"] = round(
+                    merged[variant]["macro_f1"] - orig_f1, 2)
     with open(eval_path, 'w', encoding='utf-8') as f:
-        json.dump(all_results, f, ensure_ascii=False, indent=2)
+        json.dump(merged, f, ensure_ascii=False, indent=2)
 
     elapsed = time.time() - start_time
     print(f"\n평가 완료: {run_name} ({elapsed:.1f}초)")
