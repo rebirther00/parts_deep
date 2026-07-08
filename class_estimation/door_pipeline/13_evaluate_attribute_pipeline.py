@@ -13,9 +13,15 @@ N프레임 부트스트랩(그룹 다수결 + 종횡비 중앙값)으로 평가�
 """
 import argparse
 import glob
+import json
 import os
+import sys
+import time
 
 import cv2
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
 import numpy as np
 
 from attribute_utils import (
@@ -23,6 +29,8 @@ from attribute_utils import (
 from dimension_utils import _load_mobile_sam, refine_mask
 
 DOOR_DIR = os.path.dirname(os.path.abspath(__file__))
+REPO_DIR = os.path.dirname(os.path.dirname(DOOR_DIR))
+sys.path.insert(0, REPO_DIR)
 SAM_CKPT = os.path.join(DOOR_DIR, 'sam_models', 'mobile_sam.pt')
 
 parser = argparse.ArgumentParser()
@@ -95,6 +103,13 @@ def ensure_mask(cls, idx, rgb_path):
 
 
 if __name__ == '__main__':
+    from utils.logger import setup_logging, finish_logging
+    _mtag = os.path.basename(os.path.dirname(
+        os.path.join(DOOR_DIR, args.model)))
+    setup_logging(f'eval_attr_{os.path.basename(args.base)}_{_mtag}',
+                  log_dir=os.path.join(DOOR_DIR, 'logs'))
+    print(f'평가 모델: {args.model} | base={args.base} split={args.split} '
+          f'N={args.n_frames} boot={args.n_boot}')
     net = load_vent_unet(os.path.join(DOOR_DIR, args.model))
     templates = load_templates()
     frames = {}
@@ -125,18 +140,64 @@ if __name__ == '__main__':
     rng = np.random.default_rng(42)
     print(f'\nN={args.n_frames} 부트스트랩({args.n_boot}회) 최종 판정:')
     tot_g = tot_c = tot = 0
+    per_class = {}
+    conf = np.zeros((len(CLASSES), len(CLASSES)), np.int64)
     for cls, fr in frames.items():
         okg = okc = 0
+        gi = CLASSES.index(cls)
         for _ in range(args.n_boot):
             sel = [fr[i] for i in rng.choice(
                 len(fr), size=min(args.n_frames, len(fr)), replace=False)]
             pred, grp, _ = decide(sel)
+            conf[gi, CLASSES.index(pred)] += 1
             okg += (GROUP[pred] == GROUP[cls])
             okc += (pred == cls)
         tot_g += okg
         tot_c += okc
         tot += args.n_boot
+        per_class[cls] = {'n_frames_avail': len(fr),
+                          'group_acc': round(100 * okg / args.n_boot, 2),
+                          'class_acc': round(100 * okc / args.n_boot, 2)}
         print(f'  {cls:22s} group {100 * okg / args.n_boot:5.1f}%  '
               f'class {100 * okc / args.n_boot:5.1f}%')
     print(f'  {"종합":20s} group {100 * tot_g / tot:5.1f}%  '
           f'class {100 * tot_c / tot:5.1f}%')
+
+    # ── 결과 저장 (모델과 같은 폴더에 JSON + 혼동행렬 PNG) ──
+    out_dir = os.path.dirname(os.path.join(DOOR_DIR, args.model))
+    tag = f'eval_attr_{os.path.basename(args.base)}_{args.split}'
+    results = {'model': args.model, 'base': args.base, 'split': args.split,
+               'n_frames': args.n_frames, 'n_boot': args.n_boot,
+               'group_acc': round(100 * tot_g / tot, 2),
+               'class_acc': round(100 * tot_c / tot, 2),
+               'per_class': per_class,
+               'confusion_matrix': conf.tolist(),
+               'evaluated_at': time.strftime('%Y-%m-%d %H:%M:%S')}
+    json_path = os.path.join(out_dir, f'{tag}.json')
+    json.dump(results, open(json_path, 'w', encoding='utf-8'),
+              ensure_ascii=False, indent=2)
+
+    conf_pct = conf / np.maximum(conf.sum(axis=1, keepdims=True), 1) * 100
+    fig, ax = plt.subplots(figsize=(9, 8))
+    im = ax.imshow(conf_pct, cmap='Blues', vmin=0, vmax=100)
+    ax.set_xticks(range(len(CLASSES)))
+    ax.set_yticks(range(len(CLASSES)))
+    ax.set_xticklabels(CLASSES, rotation=45, ha='right', fontsize=8)
+    ax.set_yticklabels(CLASSES, fontsize=8)
+    for i in range(len(CLASSES)):
+        for j in range(len(CLASSES)):
+            if conf[i].sum() and conf_pct[i, j] >= 0.5:
+                ax.text(j, i, f'{conf_pct[i, j]:.0f}', ha='center',
+                        va='center', fontsize=8,
+                        color='white' if conf_pct[i, j] > 50 else 'black')
+    ax.set_xlabel('Predicted')
+    ax.set_ylabel('True')
+    ax.set_title(f'Attribute pipeline — {args.base} ({args.split}), '
+                 f'N={args.n_frames}')
+    fig.colorbar(im, fraction=0.046)
+    fig.tight_layout()
+    png_path = os.path.join(out_dir, f'{tag}.png')
+    fig.savefig(png_path, dpi=120)
+    print(f'\n결과 저장: {json_path}')
+    print(f'혼동행렬 저장: {png_path}')
+    finish_logging()

@@ -14,6 +14,7 @@
 import argparse
 import glob
 import json
+import sys
 import time
 import os
 import random
@@ -27,6 +28,8 @@ from torch.utils.data import DataLoader, Dataset
 from attribute_utils import VentUNet
 
 DOOR_DIR = os.path.dirname(os.path.abspath(__file__))
+REPO_DIR = os.path.dirname(os.path.dirname(DOOR_DIR))
+sys.path.insert(0, REPO_DIR)
 CROP = 256
 SPLIT_SEED = 42  # 분할 전용 시드 (split.json 재사용 시 무관)
 
@@ -176,7 +179,12 @@ def dice_loss(logit, y, m):
 
 
 if __name__ == '__main__':
+    from utils.logger import setup_logging, finish_logging
+    setup_logging(f'train_{RUN_NAME}',
+                  log_dir=os.path.join(DOOR_DIR, 'logs'))
     dev = 'cuda'
+    print(f'실험: {RUN_NAME} (seed={args.seed}, epochs={args.epochs}, '
+          f'root={args.root})')
     items = build_items()
     n_tr = sum(1 for i in items if i['split'] == 'train')
     print(f'train={n_tr} val={len(items) - n_tr}', flush=True)
@@ -235,3 +243,4 @@ if __name__ == '__main__':
                                                '_train_info.json'), 'w'),
                   indent=1)
         print(f'배포 포인터 갱신: {CANONICAL} <- {RUN_NAME}')
+    finish_logging()
