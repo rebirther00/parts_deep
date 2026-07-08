@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attribute Pipeline Door Classification — 실시간 추론</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #0f172a; color: #e2e8f0; min-height: 100vh; }
+
+        .header { background: #1e293b; padding: 10px 24px; display: flex; align-items: center; justify-content: space-between; }
+        .header h1 { font-size: 1.1rem; font-weight: 600; }
+        .badge { font-size: 0.78rem; padding: 4px 14px; border-radius: 12px; background: #475569; }
+        .badge.connected { background: #16a34a; }
+
+        .container { max-width: 1100px; margin: 0 auto; padding: 16px; display: flex; gap: 16px; }
+
+        .video-section { flex: 1; }
+        .stream-box { background: #000; border-radius: 8px; overflow: hidden; position: relative; }
+        .stream-box img { width: 100%; display: block; }
+
+        .sidebar { width: 280px; display: flex; flex-direction: column; gap: 12px; }
+
+        .card { background: #1e293b; border-radius: 8px; padding: 16px; }
+        .card h3 { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.5px; color: #94a3b8; margin-bottom: 12px; }
+
+        .result-class { font-size: 1.3rem; font-weight: 700; color: #22c55e; margin-bottom: 4px; word-break: break-all; }
+        .result-conf { font-size: 1.1rem; color: #94a3b8; }
+
+        .model-tag { display: inline-block; font-size: 0.72rem; padding: 2px 8px; border-radius: 8px; background: #7c3aed; color: #fff; margin-bottom: 10px; }
+
+        .prob-bar { margin-bottom: 10px; }
+        .prob-bar .label { display: flex; justify-content: space-between; font-size: 0.82rem; margin-bottom: 3px; }
+        .prob-bar .bar { height: 8px; background: #334155; border-radius: 4px; overflow: hidden; }
+        .prob-bar .fill { height: 100%; border-radius: 4px; transition: width 0.3s; }
+        .fill-e25 { background: #3b82f6; }
+        .fill-e30 { background: #22c55e; }
+        .fill-e38 { background: #f59e0b; }
+
+        .stat-row { display: flex; justify-content: space-between; padding: 6px 0; font-size: 0.85rem; border-bottom: 1px solid #334155; }
+        .stat-row:last-child { border: none; }
+        .stat-value { font-weight: 600; color: #f8fafc; }
+
+        @media (max-width: 768px) {
+            .container { flex-direction: column; }
+            .sidebar { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <h1>Attribute Pipeline Door Classification — 실시간 추론</h1>
+    <span class="badge" id="cameraBadge">연결 중...</span>
+</div>
+
+<div class="container">
+    <div class="video-section">
+        <div class="stream-box">
+            <img id="videoStream" src="/video_feed" alt="Camera Stream">
+        </div>
+    </div>
+
+    <div class="sidebar">
+        <div class="card">
+            <h3>분류 결과</h3>
+            <span class="model-tag">Attribute Pipeline</span>
+            <div class="result-class" id="resultClass">대기 중</div>
+            <div class="result-conf" id="resultConf">—</div>
+        </div>
+
+        <div class="card">
+            <h3>클래스별 확률</h3>
+            <div id="probBars"></div>
+        </div>
+
+        <div class="card">
+            <h3>성능</h3>
+            <div class="stat-row">
+                <span>추론 시간</span>
+                <span class="stat-value" id="inferMs">—</span>
+            </div>
+            <div class="stat-row">
+                <span>추론 간격</span>
+                <span class="stat-value">연속</span>
+            </div>
+            <div class="stat-row">
+                <span>엔진</span>
+                <span class="stat-value" id="engineInfo">PyTorch</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function getBarColor(className) {
+    if (className.startsWith("E25")) return "fill-e25";
+    if (className.startsWith("E30") && !className.startsWith("E30_E38")) return "fill-e30";
+    if (className.startsWith("E38") || className.startsWith("E30_E38")) return "fill-e38";
+    return "fill-e25";
+}
+
+async function loadCameraInfo() {
+    try {
+        const res = await fetch("/api/camera_info");
+        const data = await res.json();
+        const badge = document.getElementById("cameraBadge");
+        badge.textContent = data.camera_type;
+        if (data.connected) badge.classList.add("connected");
+        if (data.engine) document.getElementById("engineInfo").textContent = data.engine;
+    } catch {}
+}
+
+async function pollResult() {
+    try {
+        const res = await fetch("/api/inference_result");
+        const r = await res.json();
+
+        document.getElementById("resultClass").textContent = r.class;
+        document.getElementById("resultClass").style.color =
+            r.confidence > 70 ? "#22c55e" : "#f59e0b";
+        document.getElementById("resultConf").textContent =
+            r.confidence > 0 ? r.confidence.toFixed(1) + "%" : "—";
+        document.getElementById("inferMs").textContent =
+            r.inference_ms > 0 ? r.inference_ms.toFixed(1) + " ms" : "—";
+
+        if (r.all_probs && r.all_probs.length > 0) {
+            let html = "";
+            for (const p of r.all_probs) {
+                const pct = (p.prob * 100).toFixed(1);
+                const label = p.class;
+                const fill = getBarColor(p.class);
+                html +=
+                    '<div class="prob-bar">' +
+                    '<div class="label"><span>' + label + '</span><span>' + pct + '%</span></div>' +
+                    '<div class="bar"><div class="fill ' + fill + '" style="width:' + pct + '%"></div></div>' +
+                    '</div>';
+            }
+            document.getElementById("probBars").innerHTML = html;
+        }
+    } catch {}
+}
+
+loadCameraInfo();
+setInterval(pollResult, 500);
+pollResult();
+</script>
+
+</body>
+</html>

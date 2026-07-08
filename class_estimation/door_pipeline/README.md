@@ -63,6 +63,10 @@ python 12_train_vent_unet.py
 # 평가 (datasets는 test 분할, aug/현장은 전체)
 python 13_evaluate_attribute_pipeline.py
 python 13_evaluate_attribute_pipeline.py --base datasets_factory
+
+# 실시간 추론 서버 (ZED 필수 — depth 사용, 웹 UI :5003)
+python 14_realtime_inference_attribute.py
+python 14_realtime_inference_attribute.py --replay datasets_factory/E30_E38_door_RH  # 카메라 없이 검증
 ```
 
 추론 API:
