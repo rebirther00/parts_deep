@@ -32,10 +32,25 @@ parser.add_argument('--split', choices=['test', 'val', 'all'], default=None,
                          'datasets_aug 계열/현장은 all (학습 미사용 셋)')
 parser.add_argument('--n_frames', type=int, default=10)
 parser.add_argument('--n_boot', type=int, default=2000)
-parser.add_argument('--model', default='attribute_models/vent_unet.pth')
+parser.add_argument('--seed', type=int, default=None,
+                    help='특정 학습 run 평가: attribute_models/runs/'
+                         'vent_unet_seed<시드>/model.pth 사용')
+parser.add_argument('--model', default=None,
+                    help='모델 경로 직접 지정 (기본: 배포 포인터 '
+                         'attribute_models/vent_unet.pth)')
 args = parser.parse_args()
 BASE = os.path.join(DOOR_DIR, args.base)
 MASK_CACHE = os.path.join(DOOR_DIR, 'factory_masks')
+
+if args.model is None:
+    if args.seed is not None:
+        args.model = f'attribute_models/runs/vent_unet_seed{args.seed}/model.pth'
+    else:
+        args.model = 'attribute_models/vent_unet.pth'
+if not os.path.exists(os.path.join(DOOR_DIR, args.model)):
+    raise SystemExit(f'모델이 없습니다: {args.model}\n'
+                     f'  학습된 run 목록: attribute_models/runs/ 참조')
+print(f'평가 모델: {args.model}')
 
 # 원본 datasets는 학습 출신이므로 기본 test-only.
 # datasets_aug 계열은 학습에 사용하지 않으므로(방법론) 전체 평가 가능.
