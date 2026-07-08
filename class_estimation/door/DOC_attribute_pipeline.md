@@ -51,22 +51,29 @@ CAD 분석으로 확정된 클래스 구조 (`attribute_models/class_spec.json`)
 마스크가 그대로 픽셀 라벨**이 된다 (클래스당 라벨 1장 공유, 정합 IoU 중앙값
 0.91~0.98, IoU<0.8은 자동 제외).
 
-## 3. 검증 결과 (2026-07-07)
+## 3. 검증 결과 (2026-07-08, 확정 방법론)
+
+평가 방법론 (레거시와 동일 기준):
+- **datasets: test 분할만** (train/val/test 70/15/15, 학습 완전 격리)
+- **datasets_aug/aug2: 전체** — 학습에 사용하지 않으므로(방법론) 순수 강건성
+  벤치마크. U-Net은 온라인 광도 증강만 사용
+- **현장: 전체** (학습 미사용 외부셋)
 
 배포형 원시 경로, N=10 집계, 부트스트랩 2000회. (group% / class%)
 
-| 모델 | datasets | datasets_aug | datasets_aug2 | 현장(정정 라벨) |
+| 모델 | datasets(test) | datasets_aug | datasets_aug2 | 현장(정정 라벨) |
 |---|---|---|---|---|
-| 레거시 CNN (RGBE NoAux) | 100 / 100 | 100 / 99.9 | 100 / 100 | 49.9 / 0.2 |
-| 속성 파이프라인 (U-Net v1) | 98.3 / 94.9 | 98.8 / 96.8 | 90.9 / 88.8 | 100 / 21.8 |
-| **속성 파이프라인 (U-Net v2)** | **100 / 97.2** | 98.9 / 96.9 | **99.9 / 97.5** | **100 / 20.5** |
+| 레거시 CNN (RGBE NoAux 448) | 100 / 100 | 100 / 99.9 | 100 / 100 | 49.9 / 0.2 |
+| **속성 파이프라인 (U-Net v3)** | **100 / 99.2** | 97.7 / 95.5 | 95.5 / 93.6 | **100 / 21.6** |
 
-- U-Net v2 = 원본+aug+aug2 3배 학습(라벨 자동 전이) + 현장풍 증강. 극단 텍스처
-  취약(aug2) 해소.
+- U-Net v3 = datasets 단독 학습 + 온라인 광도 증강 (`vent_unet.pth`).
+  aug 데이터를 학습에 넣었던 v2는 방법론 위반(벤치마크 오염)으로 폐기.
 - **현장 그룹 100%**: 대차 세션은 세션 최종 판정 정답. 실제로 대차 세션의
   라벨 오류(E25_RH로 잘못 기록)를 파이프라인 예측이 먼저 잡아냈다.
-- 현장 클래스 ~21%의 원인은 알고리즘이 아니라 **촬영 프로토콜**(아래 §5):
+- 현장 클래스 ~22%의 원인은 알고리즘이 아니라 **촬영 프로토콜**(아래 §5):
   지그 세션은 클램프·이중 도어로 마스크 오염, 기존 11장은 도어가 프레임에 잘림.
+- 극단 증강에서 약한 클래스는 RR 계열(aug2에서 80~87%) — 통풍구 검출이
+  흔들릴 때 정사각 도어(E25_RR)의 종횡비 여유가 작은 것이 원인.
 
 ### 개발 중 확인된 함정 (재현 방지용)
 
@@ -88,25 +95,24 @@ CAD 분석으로 확정된 클래스 구조 (`attribute_models/class_spec.json`)
 | `attribute_utils.py` | 공용 모듈: 렉티파이/축정렬/U-Net/템플릿 매칭/N프레임 판정 |
 | `attribute_models/class_spec.json` | 클래스 스펙 (bbox, 종횡비 중심, 슬롯 수, 판정 파라미터) |
 | `attribute_models/cad_templates.npz` | CAD 투영 템플릿 (실루엣+슬롯, 2mm/px) |
-| `attribute_models/vent_unet2.pth` | 통풍구 세그멘테이션 U-Net v2 |
+| `attribute_models/vent_unet.pth` | 통풍구 세그멘테이션 U-Net (datasets 단독 학습) |
 | `10_generate_cad_templates.py` | STL → 템플릿/스펙 재생성 |
 | `11_generate_vent_labels.py` | 학습 라벨 자동 생성 (CAD 정합) |
 | `12_train_vent_unet.py` | U-Net 학습 |
 | `13_evaluate_attribute_pipeline.py` | 평가 (datasets/aug/factory, N프레임 부트스트랩) |
 | `vent_labels/<셋>/` | 11번 산출물 (이미지는 gitignore — meta/split.json만 추적) |
 
-### 데이터 분할 (train/val)과 평가 규칙
+### 데이터 분할과 평가 규칙 (프로젝트 방법론)
 
-- 12번 학습 시 원본 라벨셋에서 클래스별 20%를 **val**로 떼어
-  `vent_labels/datasets/split.json`에 저장한다 (기존 파일이 있으면 재사용 —
-  현재 체크포인트 `vent_unet2.pth`가 학습된 실제 분할이 커밋되어 있음).
-  val은 에폭별 체크포인트 선택에 사용. 별도 test셋은 두지 않는 대신
-  **datasets_aug/aug2(val 인덱스)와 현장 데이터가 외부 테스트 역할**을 한다.
-  증강 라벨셋에서도 같은 val 인덱스는 학습에서 제외된다 (누수 방지).
-- 13번 평가는 `--base datasets`/`datasets_aug*`일 때 기본으로 **val 프레임만**
-  평가한다 (`--split all`로 전체 평가 가능하나 학습 프레임이 섞여 낙관적).
-  `datasets_factory`는 학습에 쓰인 적이 없으므로 전체 평가.
-- §3의 결과 표가 이 규칙으로 산출된 수치다 (datasets/aug/aug2 = val only).
+- 12번 학습 시 클래스별 **train/val/test = 70/15/15** 분할을
+  `vent_labels/datasets/split.json`에 저장·재사용한다 (현재 체크포인트
+  `vent_unet.pth`의 실제 분할이 커밋됨). val = 체크포인트 선택,
+  **test = 학습 과정에서 완전 격리, 평가 전용**.
+- **datasets_aug/aug2는 학습에 절대 사용하지 않는다** — 임의 증강이므로
+  모델 강건성 확인 전용. 학습에 넣으면 벤치마크가 오염되고 실추론에
+  악영향 우려. 화질 변동 대비는 온라인(on-the-fly) 광도 증강으로 해결.
+- 13번 평가 기본값: `datasets` → test 분할, `datasets_aug*`·현장 → 전체.
+- §3의 결과 표가 이 규칙으로 산출된 수치다.
 
 재현 순서: `10 → 11(원본·aug·aug2 각각) → 12 → 13`.
 
@@ -133,8 +139,8 @@ python 10_generate_cad_templates.py
 
 ```bash
 python 11_generate_vent_labels.py                                        # 원본
-python 11_generate_vent_labels.py --base datasets_aug  --out vent_labels/datasets_aug
-python 11_generate_vent_labels.py --base datasets_aug2 --out vent_labels/datasets_aug2
+python 11_generate_vent_labels.py --base datasets_aug  --out vent_labels/datasets_aug   # 평가용
+python 11_generate_vent_labels.py --base datasets_aug2 --out vent_labels/datasets_aug2  # 평가용
 # 출력: vent_labels/<셋>/<클래스>/aligned_*.png, dmask_*.png, vent_label.png, meta.json
 # 소요: 셋당 약 10분
 ```
@@ -142,10 +148,11 @@ python 11_generate_vent_labels.py --base datasets_aug2 --out vent_labels/dataset
 **③ U-Net 학습** — 라벨 재생성 후:
 
 ```bash
-python 12_train_vent_unet.py \
-    --roots vent_labels/datasets vent_labels/datasets_aug vent_labels/datasets_aug2
-# 출력: attribute_models/vent_unet2.pth (RTX 5090 기준 약 15분)
-# 옵션: --epochs 15, --min_iou 0.8, --out <경로>
+python 12_train_vent_unet.py
+# 출력: attribute_models/vent_unet.pth (RTX 5090 기준 약 10분)
+# 분할: train/val/test 70/15/15 (split.json 저장·재사용)
+# 주의: datasets_aug 계열은 학습에 넣지 말 것 (강건성 평가 전용)
+# 옵션: --root vent_labels/datasets, --epochs 15, --min_iou 0.8, --out <경로>
 ```
 
 **④ 평가** — N프레임 부트스트랩 최종 정확도:
@@ -155,7 +162,7 @@ python 13_evaluate_attribute_pipeline.py                          # datasets
 python 13_evaluate_attribute_pipeline.py --base datasets_aug2    # 극단 증강셋
 python 13_evaluate_attribute_pipeline.py --base datasets_factory # 현장
 # 현장은 마스크가 없으면 MobileSAM으로 자동 생성 (factory_masks/에 캐시)
-# 옵션: --n_frames 10, --n_boot 2000, --model attribute_models/vent_unet2.pth
+# 옵션: --split {test,val,all}, --n_frames 10, --n_boot 2000, --model <경로>
 ```
 
 **⑤ 추론 (파이썬 API)** — 프레임 스트림에서 도어 1개 판정:
@@ -164,7 +171,7 @@ python 13_evaluate_attribute_pipeline.py --base datasets_factory # 현장
 import cv2
 from attribute_utils import frame_scores, decide, load_vent_unet, load_templates
 
-net = load_vent_unet()          # attribute_models/vent_unet2.pth
+net = load_vent_unet()          # attribute_models/vent_unet.pth
 templates = load_templates()
 
 frames = []
@@ -210,3 +217,6 @@ pred_class, group, scores = decide(frames)
 - 2026-07-07 오후: U-Net 구축·검증, 대차 세션 2차 정정(E30_E38_RH, 파이프라인
   예측이 라벨 오류 적발), 결합 판별 채택, U-Net v2 재학습, 배포 경로 버그
   수정, 최종 벤치마크, 정식 코드화.
+- 2026-07-08: 방법론 확정 반영 — train/val/test 3분할(70/15/15) 도입,
+  datasets_aug 학습 배제(강건성 평가 전용 복원), U-Net v3 재학습
+  (`vent_unet.pth`). test 99.2 / aug 95.5 / aug2 93.6 / 현장 그룹 100%.

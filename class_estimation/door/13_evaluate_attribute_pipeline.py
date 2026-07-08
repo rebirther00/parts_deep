@@ -27,31 +27,30 @@ SAM_CKPT = os.path.join(DOOR_DIR, 'sam_models', 'mobile_sam.pt')
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--base', default='datasets')
-parser.add_argument('--split', choices=['val', 'all'], default=None,
-                    help='val: U-Net 학습에 안 쓴 프레임만 평가 (누수 방지). '
-                         '기본값: datasets/aug 계열은 val, 그 외(현장)는 all')
+parser.add_argument('--split', choices=['test', 'val', 'all'], default=None,
+                    help='기본값: datasets는 test(학습 완전 격리 분할), '
+                         'datasets_aug 계열/현장은 all (학습 미사용 셋)')
 parser.add_argument('--n_frames', type=int, default=10)
 parser.add_argument('--n_boot', type=int, default=2000)
-parser.add_argument('--model', default='attribute_models/vent_unet2.pth')
+parser.add_argument('--model', default='attribute_models/vent_unet.pth')
 args = parser.parse_args()
 BASE = os.path.join(DOOR_DIR, args.base)
 MASK_CACHE = os.path.join(DOOR_DIR, 'factory_masks')
 
-# 학습 데이터 출신 셋(datasets, datasets_aug*)은 기본 val-only —
-# 학습에 사용된 프레임을 평가에 넣으면 낙관적 수치가 나온다.
+# 원본 datasets는 학습 출신이므로 기본 test-only.
+# datasets_aug 계열은 학습에 사용하지 않으므로(방법론) 전체 평가 가능.
 if args.split is None:
-    args.split = 'val' if args.base.startswith('datasets') \
-        and 'factory' not in args.base else 'all'
-VAL_IDX = None
-if args.split == 'val':
+    args.split = 'test' if args.base == 'datasets' else 'all'
+SEL_IDX = None
+if args.split in ('test', 'val'):
     import json
     sp = os.path.join(DOOR_DIR, 'vent_labels', 'datasets', 'split.json')
     if not os.path.exists(sp):
         raise SystemExit(f'split.json이 없습니다: {sp} '
                          '(11→12 실행 후 생성됨, 또는 --split all 사용)')
-    VAL_IDX = {cls: set(v['val'])
+    SEL_IDX = {cls: set(v[args.split])
                for cls, v in json.load(open(sp)).items()}
-    print(f'평가 분할: val (학습 미사용 프레임만, {sp})')
+    print(f'평가 분할: {args.split} ({sp})')
 else:
     print('평가 분할: all')
 
@@ -91,7 +90,7 @@ if __name__ == '__main__':
         fr = []
         for rp in sorted(glob.glob(f'{cls_dir}/rgb_*.png')):
             idx = os.path.basename(rp)[4:8]
-            if VAL_IDX is not None and idx not in VAL_IDX.get(cls, set()):
+            if SEL_IDX is not None and idx not in SEL_IDX.get(cls, set()):
                 continue
             rgb = cv2.imread(rp)
             depth = cv2.imread(f'{cls_dir}/depth_{idx}.png',

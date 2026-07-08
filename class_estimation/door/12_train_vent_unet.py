@@ -1,15 +1,15 @@
 """통풍구 세그멘테이션 U-Net 학습.
 
 입력: 11_generate_vent_labels.py 산출물(정규화 정렬 RGB + CAD 슬롯 라벨).
-- 여러 라벨 디렉토리(원본 + 극단 RGB 증강셋) 동시 사용 가능
-- val은 첫 번째(원본) 디렉토리에서 클래스별 20%, 같은 인덱스는
-  증강 디렉토리에서도 학습 제외 (증강 벤치마크 누수 방지)
-- 현장풍 증강: 밝기/감마/가우시안 노이즈/블러
+- 분할: 클래스별 train/val/test = 70/15/15 (레거시 방법론과 동일).
+  val = 체크포인트 선택, test = 평가 전용(13번 기본값), 분할은
+  split.json에 저장·재사용.
+- datasets_aug/aug2는 학습에 사용하지 않는다 — 강건성 평가 전용
+  (프로젝트 방법론). 대신 온라인(on-the-fly) 광도 증강(밝기/감마/노이즈/
+  블러)으로 현장 화질 변동에 대비한다.
 
 실행:
-    python 12_train_vent_unet.py \
-        --roots vent_labels/datasets vent_labels/datasets_aug \
-                vent_labels/datasets_aug2
+    python 12_train_vent_unet.py
 """
 import argparse
 import glob
@@ -30,56 +30,66 @@ CROP = 256
 SEED = 42
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--roots', nargs='+',
-                    default=['vent_labels/datasets'],
-                    help='라벨 디렉토리 (첫 번째가 원본, val 기준)')
-parser.add_argument('--out', default='attribute_models/vent_unet2.pth')
+parser.add_argument('--root', default='vent_labels/datasets',
+                    help='라벨 디렉토리 (datasets_aug 계열은 평가 전용 — '
+                         '학습에 넣지 말 것)')
+parser.add_argument('--out', default='attribute_models/vent_unet.pth')
 parser.add_argument('--epochs', type=int, default=15)
 parser.add_argument('--min_iou', type=float, default=0.8,
                     help='정합 IoU 미달 라벨 제외 임계')
 args = parser.parse_args()
-ROOTS = [os.path.join(DOOR_DIR, r) for r in args.roots]
+ROOT = os.path.join(DOOR_DIR, args.root)
 CKPT = os.path.join(DOOR_DIR, args.out)
 random.seed(SEED)
 torch.manual_seed(SEED)
 
 
-def build_items():
-    # val 분할: 원본 디렉토리의 split.json 재사용 (없으면 클래스별 20%
-    # 결정적 생성 후 저장). 주의: 내장 hash()는 실행마다 달라지므로
-    # zlib.crc32 사용.
+def load_or_make_split(root, meta):
+    """클래스별 train/val/test = 70/15/15 분할 (split.json 저장·재사용).
+
+    주의: 내장 hash()는 실행마다 달라지므로 zlib.crc32 사용.
+    """
     import zlib
-    split_path = f'{ROOTS[0]}/split.json'
-    meta0 = json.load(open(f'{ROOTS[0]}/meta.json'))
+    split_path = f'{root}/split.json'
     if os.path.exists(split_path):
-        val_idx = {cls: set(v['val']) for cls, v in
-                   json.load(open(split_path)).items()}
-    else:
-        val_idx = {}
-        for cls, rows in meta0.items():
-            idxs = sorted(r['idx'] for r in rows)
-            rng = random.Random(SEED + zlib.crc32(cls.encode()) % 1000)
-            rng.shuffle(idxs)
-            val_idx[cls] = set(idxs[:max(1, len(idxs) // 5)])
-        json.dump({c: {'val': sorted(v)} for c, v in val_idx.items()},
-                  open(split_path, 'w'), indent=1)
-        print(f'val 분할 생성/저장: {split_path}')
+        sp = json.load(open(split_path))
+        if all('test' in v for v in sp.values()):
+            return {c: {'val': set(v['val']), 'test': set(v['test'])}
+                    for c, v in sp.items()}
+        print('구버전 split.json(테스트 분할 없음) → 3분할로 재생성')
+    split = {}
+    for cls, rows in meta.items():
+        idxs = sorted(r['idx'] for r in rows)
+        rng = random.Random(SEED + zlib.crc32(cls.encode()) % 1000)
+        rng.shuffle(idxs)
+        n = len(idxs)
+        n_val = max(1, int(n * 0.15))
+        n_test = max(1, int(n * 0.15))
+        split[cls] = {'val': set(idxs[:n_val]),
+                      'test': set(idxs[n_val:n_val + n_test])}
+    json.dump({c: {'val': sorted(v['val']), 'test': sorted(v['test'])}
+               for c, v in split.items()},
+              open(split_path, 'w'), indent=1)
+    print(f'train/val/test 분할 생성/저장: {split_path}')
+    return split
+
+
+def build_items():
+    meta = json.load(open(f'{ROOT}/meta.json'))
+    split = load_or_make_split(ROOT, meta)
     items = []
-    for ri, root in enumerate(ROOTS):
-        meta = json.load(open(f'{root}/meta.json'))
-        for cls, rows in meta.items():
-            good = {r['idx'] for r in rows if r['iou'] >= args.min_iou}
-            for f in sorted(glob.glob(f'{root}/{cls}/aligned_*.png')):
-                idx = os.path.basename(f)[8:12]
-                if idx not in good:
-                    continue
-                is_val = idx in val_idx.get(cls, set())
-                if is_val and ri > 0:
-                    continue
-                items.append({'img': f, 'cls': cls, 'root': root,
-                              'dmask': f.replace('aligned_', 'dmask_'),
-                              'split': 'val' if (is_val and ri == 0)
-                              else 'train'})
+    for cls, rows in meta.items():
+        good = {r['idx'] for r in rows if r['iou'] >= args.min_iou}
+        for f in sorted(glob.glob(f'{ROOT}/{cls}/aligned_*.png')):
+            idx = os.path.basename(f)[8:12]
+            if idx not in good:
+                continue
+            if idx in split[cls]['test']:
+                continue  # test는 학습 과정에서 완전 격리
+            s = 'val' if idx in split[cls]['val'] else 'train'
+            items.append({'img': f, 'cls': cls, 'root': ROOT,
+                          'dmask': f.replace('aligned_', 'dmask_'),
+                          'split': s})
     return items
 
 

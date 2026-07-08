@@ -28,7 +28,7 @@ DOOR_DIR = os.path.dirname(os.path.abspath(__file__))
 MODELS_DIR = os.path.join(DOOR_DIR, 'attribute_models')
 SPEC_PATH = os.path.join(MODELS_DIR, 'class_spec.json')
 TEMPLATES_PATH = os.path.join(MODELS_DIR, 'cad_templates.npz')
-UNET_PATH = os.path.join(MODELS_DIR, 'vent_unet2.pth')
+UNET_PATH = os.path.join(MODELS_DIR, 'vent_unet.pth')
 
 ORTHO_RES = 2.0          # 렉티파이 해상도 (mm/px)
 MIN_VENT_COMP_CM2 = 3.0  # 통풍구 소형 성분 제거 임계
