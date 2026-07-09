@@ -1,0 +1,134 @@
+{
+  "model": "attribute_models/runs/vent_unet_seed29186/model.pth",
+  "base": "datasets",
+  "split": "test",
+  "n_frames": 10,
+  "n_boot": 100,
+  "group_acc": 100.0,
+  "class_acc": 99.62,
+  "per_class": {
+    "E25_door_LH_FRT": {
+      "n_frames_avail": 23,
+      "group_acc": 100.0,
+      "class_acc": 100.0
+    },
+    "E25_door_LH_RR": {
+      "n_frames_avail": 23,
+      "group_acc": 100.0,
+      "class_acc": 100.0
+    },
+    "E25_door_RH": {
+      "n_frames_avail": 23,
+      "group_acc": 100.0,
+      "class_acc": 100.0
+    },
+    "E30_E38_door_RH": {
+      "n_frames_avail": 23,
+      "group_acc": 100.0,
+      "class_acc": 100.0
+    },
+    "E30_door_LH_FRT": {
+      "n_frames_avail": 24,
+      "group_acc": 100.0,
+      "class_acc": 98.0
+    },
+    "E30_door_LH_RR": {
+      "n_frames_avail": 23,
+      "group_acc": 100.0,
+      "class_acc": 99.0
+    },
+    "E38_door_LH_FRT": {
+      "n_frames_avail": 23,
+      "group_acc": 100.0,
+      "class_acc": 100.0
+    },
+    "E38_door_LH_RR": {
+      "n_frames_avail": 24,
+      "group_acc": 100.0,
+      "class_acc": 100.0
+    }
+  },
+  "confusion_matrix": [
+    [
+      100,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      100,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      100,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      100,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      98,
+      0,
+      2,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      99,
+      0,
+      1
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      100,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      100
+    ]
+  ],
+  "evaluated_at": "2026-07-08 15:11:44"
+}

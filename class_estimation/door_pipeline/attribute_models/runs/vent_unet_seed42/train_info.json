@@ -1,0 +1,10 @@
+{
+ "run_name": "vent_unet_seed42",
+ "seed": 42,
+ "split_seed": 42,
+ "root": "vent_labels/datasets",
+ "epochs": 15,
+ "min_iou": 0.8,
+ "best_val_iou": 0.4615,
+ "trained_at": "2026-07-08 (v3, datasets \ub2e8\ub3c5 + \uc628\ub77c\uc778 \uc99d\uac15)"
+}

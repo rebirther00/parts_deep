@@ -1,0 +1,104 @@
+{
+  "model": "attribute_models/runs/vent_unet_seed29186/model.pth",
+  "base": "datasets_factory",
+  "split": "all",
+  "n_frames": 10,
+  "n_boot": 2000,
+  "group_acc": 100.0,
+  "class_acc": 20.4,
+  "per_class": {
+    "E25_door_LH_RR": {
+      "n_frames_avail": 12,
+      "group_acc": 100.0,
+      "class_acc": 0.0
+    },
+    "E30_E38_door_RH": {
+      "n_frames_avail": 66,
+      "group_acc": 100.0,
+      "class_acc": 40.8
+    }
+  },
+  "confusion_matrix": [
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      2000
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      1184,
+      816,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ]
+  ],
+  "evaluated_at": "2026-07-08 15:14:57"
+}
