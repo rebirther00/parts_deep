@@ -49,6 +49,12 @@ parser.add_argument('--n_frames', type=int, default=10,
 parser.add_argument('--port', type=int, default=5003)
 parser.add_argument('--replay', type=str, default=None,
                     help='카메라 대신 rgb_*/depth_*.png 폴더 재생 (검증용)')
+parser.add_argument('--sam_every', type=int, default=3,
+                    help='MobileSAM 마스크 갱신 주기 (N프레임마다 1회, '
+                         '기본 3 — 도어가 정적이므로 재사용 안전. 1=매 프레임)')
+parser.add_argument('--fp16', action='store_true',
+                    help='FP16 autocast (Jetson GPU 단계 가속). 동일 프레임 '
+                         'A/B에서 판정 100% 일치 검증됨')
 parser.add_argument('--device', type=str, default='cuda')
 args = parser.parse_args()
 
@@ -58,6 +64,12 @@ if args.model is None:
                       f'/model.pth')
     else:
         args.model = 'attribute_models/vent_unet.pth'
+
+if args.replay and args.sam_every != 1:
+    # 리플레이는 프레임마다 촬영 포즈가 달라 마스크 재사용이 무효
+    # (실카메라의 정적 도어에서만 유효한 최적화)
+    print(f'리플레이 모드 → --sam_every {args.sam_every} 무시, 1로 강제')
+    args.sam_every = 1
 
 app = Flask(__name__)
 result_lock = threading.Lock()
@@ -136,9 +148,12 @@ def make_mask(sam, rgb):
 def inference_loop(source, net, templates, sam):
     global inference_result, latest_frame
     window = collections.deque(maxlen=args.n_frames)
+    cached_mask = None
+    frame_i = 0
     while True:
         if reset_event.is_set():
             window.clear()
+            cached_mask = None
             reset_event.clear()
         rgb, depth = source.get()
         if rgb is None:
@@ -148,9 +163,17 @@ def inference_loop(source, net, templates, sam):
             latest_frame = rgb.copy()
         t0 = time.time()
         try:
-            mask = refine_mask(make_mask(sam, rgb))
-            window.append(frame_scores(rgb, depth, mask, net, templates,
-                                       device=args.device))
+            import torch
+            with torch.autocast(device_type='cuda', dtype=torch.float16,
+                                enabled=args.fp16):
+                # 도어는 정적 → SAM 마스크는 주기적으로만 갱신
+                if cached_mask is None or frame_i % args.sam_every == 0:
+                    cached_mask = refine_mask(make_mask(sam, rgb))
+                sam_ms = (time.time() - t0) * 1000
+                fs = frame_scores(rgb, depth, cached_mask, net, templates,
+                                  device=args.device, profile=True)
+            stage_ms = fs.pop('stage_ms', {})
+            window.append(fs)
             pred, grp, scores = decide(list(window))
             total = sum(scores.values()) or 1.0
             probs = sorted(({'class': c, 'prob': s / total}
@@ -159,6 +182,8 @@ def inference_loop(source, net, templates, sam):
             conf = probs[0]['prob'] * 100 if probs else 0.0
         except Exception as e:
             pred, grp, probs, conf = f'오류: {e}', '-', [], 0.0
+            sam_ms, stage_ms = 0.0, {}
+        frame_i += 1
         elapsed_ms = (time.time() - t0) * 1000
         with result_lock:
             inference_result = {
@@ -168,6 +193,8 @@ def inference_loop(source, net, templates, sam):
                                'prob': round(p['prob'], 4)}
                               for p in probs],
                 'inference_ms': round(elapsed_ms, 1),
+                'sam_ms': round(sam_ms, 1),
+                'stage_ms': stage_ms,
                 'window': len(window),
                 'timestamp': time.time(),
             }

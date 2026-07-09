@@ -100,12 +100,20 @@ def load_vent_unet(path=UNET_PATH, device='cuda'):
 
 # ── 기하 처리 ────────────────────────────────────────────
 
+MAX_RECTIFY_PTS = 400_000  # 이 이상이면 서브샘플 (Jetson CPU 부하 저감)
+
+
 def rectify(rgb, depth_mm, mask, intrinsics=None, res=ORTHO_RES):
     """마스크 영역을 도어 평면 직교뷰(mm 고정 스케일)로 변환."""
     K = intrinsics or ZED_INTRINSICS
     m = (mask > 127) & (depth_mm > 0)
     rows, cols = np.where(m)
     z = depth_mm[m].astype(np.float64)
+    if len(z) > MAX_RECTIFY_PTS:
+        # 2mm/px 직교 그리드 대비 과샘플이므로 안전 (결정적 시드)
+        sel = np.random.default_rng(0).choice(len(z), MAX_RECTIFY_PTS,
+                                              replace=False)
+        rows, cols, z = rows[sel], cols[sel], z[sel]
     X = (cols - K['cx']) * z / K['fx']
     Y = (rows - K['cy']) * z / K['fy']
     pts = np.stack([X, Y, z], axis=1)
@@ -150,11 +158,20 @@ def axis_align(ortho, omask):
     return ro[y0:y1 + 1, x0:x1 + 1], rm[y0:y1 + 1, x0:x1 + 1]
 
 
-def measure_aspect(mask, depth_mm, intrinsics=None):
-    """PCA 평면 투영 실측 종횡비(최장변/차장변). 스케일 오차에 불변."""
+def measure_aspect(mask, depth_mm, intrinsics=None, max_pts=300_000):
+    """PCA 평면 투영 실측 종횡비(최장변/차장변). 스케일 오차에 불변.
+
+    포인트가 max_pts를 넘으면 마스크를 랜덤 서브샘플 (extent는
+    퍼센타일 기반이라 서브샘플에 안정적, 결정적 시드).
+    """
     K = intrinsics or ZED_INTRINSICS
-    m = measure_pca(refine_mask(mask),
-                    preprocess_depth(depth_mm.astype(np.float32)), K)
+    mm = refine_mask(mask)
+    n_valid = int((mm > 127).sum())
+    if n_valid > max_pts:
+        keep = (np.random.default_rng(0).random(mm.shape)
+                < max_pts / n_valid)
+        mm = np.where(keep, mm, 0).astype(np.uint8)
+    m = measure_pca(mm, preprocess_depth(depth_mm.astype(np.float32)), K)
     if m['width_mm'] <= 0 or m['height_mm'] <= 0:
         return None
     return m['width_mm'] / m['height_mm']
@@ -216,16 +233,32 @@ def match_templates(vent_bin, templates):
 # ── 프레임 처리 + N프레임 판정 ───────────────────────────
 
 def frame_scores(rgb, depth_mm, mask, net, templates,
-                 intrinsics=None, device='cuda'):
-    """한 프레임 → {'scores': 클래스별 템플릿 IoU, 'asp': 실측 종횡비}"""
+                 intrinsics=None, device='cuda', profile=False):
+    """한 프레임 → {'scores': 클래스별 템플릿 IoU, 'asp': 실측 종횡비}
+
+    profile=True 시 'stage_ms'에 단계별 소요시간(ms) 포함 (병목 진단용).
+    """
+    import time as _t
+    ts = [_t.time()]
     ortho, omask = rectify(rgb, depth_mm, mask, intrinsics)
+    ts.append(_t.time())
     ao, am = axis_align(ortho, omask)
     ao = cv2.medianBlur(ao, 3)
+    ts.append(_t.time())
     p = predict_vent(net, ao, device)
     p[am == 0] = 0
     vent = clean_vent(p)
-    return {'scores': match_templates(vent, templates),
-            'asp': measure_aspect(mask, depth_mm, intrinsics)}
+    ts.append(_t.time())
+    scores = match_templates(vent, templates)
+    ts.append(_t.time())
+    asp = measure_aspect(mask, depth_mm, intrinsics)
+    ts.append(_t.time())
+    out = {'scores': scores, 'asp': asp}
+    if profile:
+        names = ['rectify', 'align', 'unet', 'match', 'aspect']
+        out['stage_ms'] = {n: round((ts[i + 1] - ts[i]) * 1000, 1)
+                           for i, n in enumerate(names)}
+    return out
 
 
 def decide(frames):
