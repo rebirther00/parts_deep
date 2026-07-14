@@ -430,7 +430,26 @@ Table 12는 448과 224 해상도에서의 정확도를 비교한다.
 
 ### 5.8 224×224 해상도 — 통계적 유의성
 
-224 해상도에서는 448과 다른 통계적 패턴이 관찰되었다. Aug (Foreground) 데이터에서 RGBD와 RGBE Hybrid 간에 유의한 차이가 나타났다(p = 0.0332). 이는 448에서 유의차가 없던 것과 대비되어, Edge 채널의 강건성 기여가 해상도에 의존적임을 통계적으로도 확인시킨다.
+Table 14는 224×224 해상도에서 모델 쌍별 Macro F1 기반 paired t-test 결과를 보여준다.
+
+> **Table 14.** Pairwise paired t-test results (Macro F1, 224×224)
+
+| Model A | Model B | Dataset | t-stat | p-value | Sig. (α=0.05) |
+|---------|---------|---------|:------:|:------:|:--------------:|
+| Baseline RGB | RGBD | Aug (FG) | −0.960 | 0.3915 | No |
+| Baseline RGB | Edge-only | Aug (FG) | 3.789 | 0.0193 | **Yes** |
+| Baseline RGB | RGBE Hybrid | Aug (FG) | 0.611 | 0.5743 | No |
+| RGBD | Edge-only | Aug (FG) | 13.755 | 0.0002 | **Yes** |
+| RGBD | RGBE Hybrid | Aug (FG) | 3.192 | 0.0332 | **Yes** |
+| Edge-only | RGBE Hybrid | Aug (FG) | −7.889 | 0.0014 | **Yes** |
+| Baseline RGB | RGBD | Aug (Full) | −0.845 | 0.4458 | No |
+| Baseline RGB | Edge-only | Aug (Full) | 1.745 | 0.1559 | No |
+| Baseline RGB | RGBE Hybrid | Aug (Full) | −0.118 | 0.9114 | No |
+| RGBD | Edge-only | Aug (Full) | 10.093 | 0.0005 | **Yes** |
+| RGBD | RGBE Hybrid | Aug (Full) | 2.562 | 0.0625 | No |
+| Edge-only | RGBE Hybrid | Aug (Full) | −6.603 | 0.0027 | **Yes** |
+
+224 해상도에서는 448과 다른 통계적 패턴이 관찰되었다. Aug (Foreground) 데이터에서 RGBD와 RGBE Hybrid 간에 유의한 차이가 나타났다(p = 0.0332). 이는 448에서 유의차가 없던 것과 대비되어(Table 10, p = 0.3266), Edge 채널의 강건성 기여가 해상도에 의존적임을 통계적으로도 확인시킨다. 또한 Aug (Full)에서 Baseline RGB vs Edge-only가 비유의(p = 0.1559)로 전환된 점도 448(p = 0.0027)과의 차이이다.
 
 ### 5.9 Grad-CAM 기반 attention 영역 분석
 

@@ -221,10 +221,31 @@ v6: RGB, RGBD, Edge-only, RGBE 4종 모두 표시
 
 **Fig. 5** 이미지도 교체 → `artifacts/summary_noaux/resolution_comparison.png`
 
-#### 5.7 (224 통계)
+#### 5.7 (224 통계) — **Table 14 신규 추가**
 
-**현재**: "RGBE는 Baseline RGBD(p=0.0332) 및 Texture Aug RGBD(p=0.0302) 대비 유의하게 낮은 성능"
-**v6으로**: "RGBD와 RGBE Hybrid 간에 유의한 차이(p=0.0332)"
+**현재**: 문장만 존재, 근거 표 없음
+**v6으로**: Table 14 (Pairwise paired t-test results, Macro F1, 224×224) 추가 + 본문 보강
+
+Table 14 데이터 (12행):
+
+| Model A | Model B | Dataset | t-stat | p-value | Sig. (α=0.05) |
+|---------|---------|---------|:------:|:------:|:--------------:|
+| Baseline RGB | RGBD | Aug (FG) | −0.960 | 0.3915 | No |
+| Baseline RGB | Edge-only | Aug (FG) | 3.789 | 0.0193 | **Yes** |
+| Baseline RGB | RGBE Hybrid | Aug (FG) | 0.611 | 0.5743 | No |
+| RGBD | Edge-only | Aug (FG) | 13.755 | 0.0002 | **Yes** |
+| RGBD | RGBE Hybrid | Aug (FG) | 3.192 | 0.0332 | **Yes** |
+| Edge-only | RGBE Hybrid | Aug (FG) | −7.889 | 0.0014 | **Yes** |
+| Baseline RGB | RGBD | Aug (Full) | −0.845 | 0.4458 | No |
+| Baseline RGB | Edge-only | Aug (Full) | 1.745 | 0.1559 | No |
+| Baseline RGB | RGBE Hybrid | Aug (Full) | −0.118 | 0.9114 | No |
+| RGBD | Edge-only | Aug (Full) | 10.093 | 0.0005 | **Yes** |
+| RGBD | RGBE Hybrid | Aug (Full) | 2.562 | 0.0625 | No |
+| Edge-only | RGBE Hybrid | Aug (Full) | −6.603 | 0.0027 | **Yes** |
+
+**448 대비 핵심 차이**:
+- RGBD vs RGBE Hybrid, Aug (FG): **유의** (p=0.0332) ← 448에서는 비유의 (p=0.3266)
+- Baseline RGB vs Edge-only, Aug (Full): **비유의** (p=0.1559) ← 448에서는 유의 (p=0.0027)
 
 #### 5.8 Grad-CAM
 
@@ -335,7 +356,7 @@ v6.md에서 참고문헌 목록 자체는 변경 없음 (동일한 18개 참고�
 - [ ] 5.4 Table 8 (통계 검정) 교체 + 본문
 - [ ] 5.5 학습 수렴 데이터 교체 + Fig.4 이미지 교체
 - [ ] 5.6 Table 9 (해상도 비교) 교체 + Fig.5 이미지 교체
-- [ ] 5.7 224 통계 본문 교체
+- [ ] 5.7 224 통계: **Table 14 신규 추가** + 본문 보강
 - [ ] 5.8 Grad-CAM 본문 수정 + Fig.6, Fig.7 이미지 교체
 - [ ] 6장 고찰 전면 교체
 - [ ] 7장 결론 전면 교체
