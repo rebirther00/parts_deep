@@ -34,12 +34,14 @@
   .clsBtn.unknown.selected { background:#6b7280; border-color:#9ca3af; }
   .clsBtn:disabled { opacity:.45; }
 
-  #startBtn {
-    height:110px; border:none; border-radius:16px; font-size:34px; font-weight:800;
-    background:#1d9e55; color:#fff; cursor:pointer;
+  #actionRow { display:flex; gap:12px; }
+  #actionRow button {
+    flex:1; height:110px; border:none; border-radius:16px;
+    font-size:34px; font-weight:800; color:#fff; cursor:pointer;
   }
-  #startBtn:disabled { background:#3a4150; color:#9aa3b5; }
-  #startBtn.capturing { background:#c93a3a; }
+  #startBtn { background:#1d9e55; }
+  #stopBtn { background:#c93a3a; }
+  #actionRow button:disabled { background:#3a4150; color:#9aa3b5; }
 
   /* 우측: 프리뷰 + 상태 */
   #right { flex:1; display:flex; flex-direction:column; gap:12px; min-width:0; }
@@ -70,11 +72,11 @@
     padding:8px 12px; display:grid; grid-template-columns:repeat(3,1fr); gap:2px 12px; }
   #perClass span b { color:#e8eaf0; }
 
-  #footer { display:flex; justify-content:flex-end; }
   #shutdownBtn {
-    padding:10px 22px; border-radius:10px; border:1px solid #4a3030;
-    background:#2a1b1b; color:#d08a8a; font-size:15px; cursor:pointer;
+    width:100%; height:110px; border-radius:16px; border:2px solid #4a3030;
+    background:#2a1b1b; color:#d08a8a; font-size:34px; font-weight:800; cursor:pointer;
   }
+  #shutdownBtn:disabled { opacity:.45; }
 
   /* 모달 & 토스트 */
   #modal {
@@ -105,7 +107,10 @@
 <main>
   <section id="left">
     <div id="classGrid"></div>
-    <button id="startBtn" disabled>취득 시작</button>
+    <div id="actionRow">
+      <button id="startBtn" disabled>취득 시작</button>
+      <button id="stopBtn" disabled>취득 종료</button>
+    </div>
   </section>
   <section id="right">
     <img id="preview" src="/video_feed" alt="camera">
@@ -121,7 +126,7 @@
       <div class="stat" id="stCam"><b>-</b>카메라</div>
     </div>
     <div id="perClass"></div>
-    <div id="footer"><button id="shutdownBtn">시스템 종료</button></div>
+    <button id="shutdownBtn">시스템 종료</button>
   </section>
 </main>
 
@@ -174,17 +179,17 @@ function select(c) {
 }
 
 $("startBtn").onclick = async () => {
-  if (!st) return;
-  if (st.state === "capturing") {          // 조기 종료
-    $("mText").textContent = "취득을 조기 종료할까요?";
-    modalAction = () => api("/api/stop");
-    $("modal").style.display = "flex";
-  } else {
-    if (st.selected_class === unknown)
-      toast("Unknown으로 저장됩니다 — 나중에 수동 라벨링 필요");
-    await api("/api/start");
-    refresh();
-  }
+  if (!st || st.state === "capturing") return;
+  if (st.selected_class === unknown)
+    toast("Unknown으로 저장됩니다 — 나중에 수동 라벨링 필요");
+  await api("/api/start");
+  refresh();
+};
+
+$("stopBtn").onclick = async () => {
+  if (!st || st.state !== "capturing") return;
+  if (await api("/api/stop")) toast("취득 종료 — 도어 종류가 [모름/기타]로 초기화됩니다");
+  refresh();
 };
 
 let modalAction = null;
@@ -220,10 +225,9 @@ function render() {
   });
 
   const cap = st.state === "capturing";
-  const btn = $("startBtn");
-  btn.disabled = !st.camera_ok && !cap;
-  btn.classList.toggle("capturing", cap);
-  btn.textContent = cap ? "조기 종료" : "취득 시작";
+  $("startBtn").disabled = cap || !st.camera_ok;
+  $("stopBtn").disabled = !cap;
+  $("shutdownBtn").disabled = cap;
 
   const main = $("stateMain"), sub = $("stateSub");
   main.classList.toggle("rec", cap);
@@ -256,11 +260,22 @@ function render() {
     .map(([c, v]) => `<span>${shortName(c)}: <b>${v.images}</b></span>`).join("");
 }
 
+// 프리뷰(MJPEG)는 서버 재시작 시 스트림이 끊겨도 img가 스스로 복구하지
+// 못하므로, 오류 발생 또는 서버 복구 시점에 src를 다시 걸어준다.
+let pvBroken = false, fetchFailed = false;
+$("preview").onerror = () => { pvBroken = true; };
+function revivePreview() {
+  pvBroken = false;
+  $("preview").src = "/video_feed?t=" + Date.now();
+}
+
 async function refresh() {
   try {
     st = await (await fetch("/api/status")).json();
+    if (pvBroken || fetchFailed) revivePreview();
+    fetchFailed = false;
     render();
-  } catch (e) { /* 서버 재시작 중 등 — 다음 폴링에서 복구 */ }
+  } catch (e) { fetchFailed = true; /* 서버 재시작 중 — 다음 폴링에서 복구 */ }
 }
 setInterval(refresh, 1000);
 refresh();
