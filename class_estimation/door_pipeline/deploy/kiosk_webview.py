@@ -37,7 +37,9 @@ def main():
 
     win.connect("destroy", Gtk.main_quit)
     win.fullscreen()
+    win.set_keep_above(True)   # 키오스크: 다른 창·포커스 정책에 밀리지 않게
     win.show_all()
+    win.present()
     view.load_uri(URL)
     Gtk.main()
 

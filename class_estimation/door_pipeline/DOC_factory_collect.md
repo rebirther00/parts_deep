@@ -13,6 +13,7 @@
 | `deploy/door-capture.service` | systemd 유닛 (부팅 자동시작, 죽으면 5초 후 재시작) |
 | `deploy/kiosk.sh` + `kiosk_webview.py` + `door-kiosk.desktop` | GUI 자동로그인 시 전체화면 키오스크 자동 실행 (snap Firefox가 이 장비에서 실행 불가라 WebKit2GTK 웹뷰 사용) |
 | `deploy/install_factory.sh` | 설치 스크립트 (`sudo bash deploy/install_factory.sh` 1회) |
+| `DOC_작업자_사용설명서.docx` | 작업자 배포용 설명서 (UI 사용법 포함, 현장 게시) |
 
 ## 동작 사양
 

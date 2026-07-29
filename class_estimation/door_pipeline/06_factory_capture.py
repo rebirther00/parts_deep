@@ -319,6 +319,21 @@ def video_feed():
     )
 
 
+@app.route("/frame.jpg")
+def frame_jpg():
+    # 키오스크 웹뷰(WebKitGTK)가 MJPEG 멀티파트를 간헐적으로 렌더링하지
+    # 못해서, UI는 이 단일 프레임을 주기적으로 폴링한다
+    rgb, _ = camera.get_pair()
+    if rgb is None:
+        return Response(status=204)
+    h, w = rgb.shape[:2]
+    preview = cv2.resize(rgb, (640, int(640 * h / w)))
+    ok, jpg = cv2.imencode(".jpg", preview, [cv2.IMWRITE_JPEG_QUALITY, 70])
+    if not ok:
+        return Response(status=204)
+    return Response(jpg.tobytes(), mimetype="image/jpeg")
+
+
 @app.route("/api/status")
 def api_status():
     total_sessions, per_class = today_stats()

@@ -113,7 +113,7 @@
     </div>
   </section>
   <section id="right">
-    <img id="preview" src="/video_feed" alt="camera">
+    <img id="preview" src="/frame.jpg" alt="camera">
     <div id="stateCard">
       <div id="stateMain">대기 중</div>
       <div id="stateSub">도어 종류를 선택한 후 [취득 시작]을 누르세요</div>
@@ -260,22 +260,20 @@ function render() {
     .map(([c, v]) => `<span>${shortName(c)}: <b>${v.images}</b></span>`).join("");
 }
 
-// 프리뷰(MJPEG)는 서버 재시작 시 스트림이 끊겨도 img가 스스로 복구하지
-// 못하므로, 오류 발생 또는 서버 복구 시점에 src를 다시 걸어준다.
-let pvBroken = false, fetchFailed = false;
-$("preview").onerror = () => { pvBroken = true; };
-function revivePreview() {
-  pvBroken = false;
-  $("preview").src = "/video_feed?t=" + Date.now();
-}
+// 프리뷰: 키오스크 웹뷰(WebKitGTK)가 MJPEG 스트림(/video_feed)을
+// 간헐적으로 렌더링하지 못해, 단일 프레임을 0.5초마다 폴링한다.
+// 매 요청이 독립적이라 서버 재시작 후에도 자동 복구된다.
+setInterval(() => {
+  const im = new Image();
+  im.onload = () => { $("preview").src = im.src; };
+  im.src = "/frame.jpg?t=" + Date.now();
+}, 500);
 
 async function refresh() {
   try {
     st = await (await fetch("/api/status")).json();
-    if (pvBroken || fetchFailed) revivePreview();
-    fetchFailed = false;
     render();
-  } catch (e) { fetchFailed = true; /* 서버 재시작 중 — 다음 폴링에서 복구 */ }
+  } catch (e) { /* 서버 재시작 중 — 다음 폴링에서 복구 */ }
 }
 setInterval(refresh, 1000);
 refresh();
