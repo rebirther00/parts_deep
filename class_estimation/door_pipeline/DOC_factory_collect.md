@@ -47,6 +47,17 @@
 - SSH: `ssh user@100.70.228.127` → `tail logs/factory_$(date +%Y%m%d).log`, `cat datasets_factory_collect/events.jsonl`
 - 백업(수동): MobaXterm/WinSCP로 `datasets_factory_collect/` 전체를 NAS에 복사 (매일 저녁 권장, 최소 주 2회)
 
+## 운영 명령어 (개발자)
+
+- **서비스 재시작**: `sudo systemctl restart door-capture`
+  - sudo 없이: `kill $(systemctl show door-capture -p MainPID --value)` → systemd가 5초 내 자동 재시작
+  - `06_factory_capture.py`·`templates/factory.html` 수정 후에는 재시작 필수 (Flask debug off라 템플릿 캐시됨)
+- **상태·로그**: `systemctl status door-capture`, `journalctl -u door-capture -n 50`
+- **키오스크 화면 완전 종료**: `pkill -f 'deploy/kiosk.sh'; pkill -f kiosk_webview.py`
+  - 루프를 먼저 죽여야 함. Alt+F4는 3초 뒤 자동 재실행됨(현장 오조작 대비 의도된 동작)
+  - 다시 띄우기: 재부팅/재로그인 또는 `DISPLAY=:0 bash deploy/kiosk.sh &`
+- **부팅 시 정상 시퀀스**: CUDA 준비 전이면 journal에 `CUDA 미준비 — 프로세스 종료 후 systemd 재시작 대기`가 수 회 반복된 뒤 `카메라 연결:`이 찍힘 — 오류 아님
+
 ## 설치 (1회, sudo 필요)
 
 ```bash
