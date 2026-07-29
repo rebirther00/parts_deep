@@ -53,6 +53,11 @@
 - **서비스 재시작**: `sudo systemctl restart door-capture`
   - sudo 없이: `kill $(systemctl show door-capture -p MainPID --value)` → systemd가 5초 내 자동 재시작
   - `06_factory_capture.py`·`templates/factory.html` 수정 후에는 재시작 필수 (Flask debug off라 템플릿 캐시됨)
+- **서비스 종료**: `sudo systemctl stop door-capture` (재부팅 시 다시 자동 시작)
+  - 자동 시작까지 끄기: `sudo systemctl disable --now door-capture` / 복귀: `sudo systemctl enable --now door-capture`
+  - `kill`로는 종료 불가 — `Restart=always`라 5초 뒤 부활함 (kill은 재시작 용도)
+  - 서비스를 멈춰도 키오스크 화면은 "서버 연결 실패" 상태로 계속 떠 있음 (화면 종료는 아래 항목)
+  - UI의 [시스템 종료] 버튼은 서비스가 아니라 장비(Zed Box) 전원을 끄는 것
 - **상태·로그**: `systemctl status door-capture`, `journalctl -u door-capture -n 50`
 - **키오스크 화면 완전 종료**: `pkill -f 'deploy/kiosk.sh'; pkill -f kiosk_webview.py`
   - 루프를 먼저 죽여야 함. Alt+F4는 3초 뒤 자동 재실행됨(현장 오조작 대비 의도된 동작)
