@@ -133,6 +133,7 @@ class FactoryCamera:
 
     def _loop(self):
         fails = 0
+        open_fails = 0
         while self.running:
             if not self.ok:
                 try:
@@ -140,9 +141,17 @@ class FactoryCamera:
                     self.ok = True
                     self.last_error = ""
                     fails = 0
+                    open_fails = 0
                 except Exception as e:
                     self.last_error = str(e)
-                    log.error("카메라 연결 실패, 10초 후 재시도: %s", e)
+                    open_fails += 1
+                    log.error("카메라 연결 실패(%d/6), 10초 후 재시도: %s",
+                              open_fails, e)
+                    # CUDA가 801을 한 번 내면 프로세스 안에서는 복구 불가
+                    # → 반복 실패 시 프로세스를 죽여 systemd로 새로 시작
+                    if open_fails >= 6:
+                        log.error("카메라 연결 반복 실패 — 프로세스 재시작")
+                        os._exit(3)
                     time.sleep(10)
                     continue
 
@@ -411,24 +420,31 @@ def main():
     app.run(host="0.0.0.0", port=PORT, threaded=True)
 
 
-def _cuda_probe():
-    # systemd 서비스 컨텍스트에서는 ZED open이 sl::Mat::alloc Err[801]로
-    # 항상 실패함 (대화형 셸에서는 정상). 카메라 스레드보다 먼저 메인
-    # 스레드에서 CUDA 컨텍스트를 만들어 두면 회피됨 — 제거 금지.
+def _require_cuda_ready():
+    # 부팅 직후에는 CUDA가 아직 초기화 전이라 801(cudaErrorNotSupported)이
+    # 나오고, 한 번 801을 맞은 프로세스는 이후에도 영원히 ZED open이
+    # 실패한다(런타임이 초기화 실패를 캐시). 준비 안 됐으면 즉시 종료해서
+    # systemd(Restart=always, 5초 간격)가 새 프로세스로 재시도하게 한다.
     import ctypes
+    import sys
     try:
         rt = ctypes.CDLL("libcudart.so")
         n = ctypes.c_int(-1)
         r1 = rt.cudaGetDeviceCount(ctypes.byref(n))
         ptr = ctypes.c_void_p()
         r2 = rt.cudaMalloc(ctypes.byref(ptr), 1024 * 1024)
-        r3 = rt.cudaFree(ptr) if r2 == 0 else -1
-        log.info("CUDA probe: getDeviceCount=%d n=%d cudaMalloc=%d free=%d",
-                 r1, n.value, r2, r3)
-    except Exception as e:
-        log.error("CUDA probe 실패: %r", e)
+        if r2 == 0:
+            rt.cudaFree(ptr)
+        log.info("CUDA probe: getDeviceCount=%d n=%d cudaMalloc=%d",
+                 r1, n.value, r2)
+        if r1 != 0 or n.value < 1 or r2 != 0:
+            log.error("CUDA 미준비 — 프로세스 종료 후 systemd 재시작 대기")
+            sys.exit(3)
+    except OSError as e:
+        log.error("libcudart 로드 실패 — 프로세스 종료: %r", e)
+        sys.exit(3)
 
 
 if __name__ == "__main__":
-    _cuda_probe()
+    _require_cuda_ready()
     main()

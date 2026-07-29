@@ -1,6 +1,8 @@
 [Unit]
 Description=Door factory image capture service (Flask + ZED)
-After=network.target
+# 부팅 직후 CUDA/ZED 준비 전에는 앱이 스스로 exit(3) → 재시작 반복으로 대기
+After=network.target zed_x_daemon.service
+StartLimitIntervalSec=0
 
 [Service]
 Type=simple
