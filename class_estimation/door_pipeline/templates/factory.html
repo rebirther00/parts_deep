@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>도어 이미지 수집</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; user-select:none; }
+  html,body { height:100%; }
+  body {
+    background:#0f1218; color:#e8eaf0;
+    font-family:'Noto Sans KR','Malgun Gothic',sans-serif;
+    display:flex; flex-direction:column; overflow:hidden;
+  }
+  header {
+    display:flex; align-items:center; justify-content:space-between;
+    padding:10px 20px; background:#161b24; border-bottom:1px solid #2a3140;
+  }
+  header h1 { font-size:20px; font-weight:700; }
+  #clock { font-size:16px; color:#9aa3b5; }
+  main { flex:1; display:flex; gap:14px; padding:14px; min-height:0; }
+
+  /* 좌측: 클래스 버튼 + 시작 */
+  #left { flex:1.2; display:flex; flex-direction:column; gap:12px; min-width:0; }
+  #classGrid { flex:1; display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
+  .clsBtn {
+    border:2px solid #2a3140; border-radius:14px; background:#1b2230;
+    color:#e8eaf0; font-size:21px; font-weight:700; cursor:pointer;
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px;
+  }
+  .clsBtn small { font-size:13px; font-weight:400; color:#9aa3b5; }
+  .clsBtn.selected { background:#1f4fd8; border-color:#5b83f0; }
+  .clsBtn.unknown { background:#252a35; }
+  .clsBtn.unknown.selected { background:#6b7280; border-color:#9ca3af; }
+  .clsBtn:disabled { opacity:.45; }
+
+  #startBtn {
+    height:110px; border:none; border-radius:16px; font-size:34px; font-weight:800;
+    background:#1d9e55; color:#fff; cursor:pointer;
+  }
+  #startBtn:disabled { background:#3a4150; color:#9aa3b5; }
+  #startBtn.capturing { background:#c93a3a; }
+
+  /* 우측: 프리뷰 + 상태 */
+  #right { flex:1; display:flex; flex-direction:column; gap:12px; min-width:0; }
+  #preview {
+    width:100%; aspect-ratio:16/10; background:#000; border-radius:12px;
+    object-fit:contain; border:1px solid #2a3140;
+  }
+  #stateCard {
+    border-radius:12px; padding:14px 18px; background:#1b2230;
+    border:1px solid #2a3140; text-align:center;
+  }
+  #stateMain { font-size:30px; font-weight:800; }
+  #stateMain.rec { color:#ff5c5c; }
+  #stateSub { font-size:16px; color:#9aa3b5; margin-top:4px; }
+  #bar { height:10px; border-radius:5px; background:#2a3140; margin-top:10px; overflow:hidden; }
+  #barFill { height:100%; width:0%; background:#ff5c5c; transition:width .3s linear; }
+
+  #statsRow { display:flex; gap:10px; font-size:14px; }
+  .stat {
+    flex:1; background:#1b2230; border:1px solid #2a3140; border-radius:10px;
+    padding:8px 10px; text-align:center;
+  }
+  .stat b { display:block; font-size:20px; }
+  .stat.warn b { color:#ffb020; }
+  .stat.err b { color:#ff5c5c; }
+
+  #perClass { font-size:12.5px; color:#9aa3b5; background:#161b24; border-radius:10px;
+    padding:8px 12px; display:grid; grid-template-columns:repeat(3,1fr); gap:2px 12px; }
+  #perClass span b { color:#e8eaf0; }
+
+  #footer { display:flex; justify-content:flex-end; }
+  #shutdownBtn {
+    padding:10px 22px; border-radius:10px; border:1px solid #4a3030;
+    background:#2a1b1b; color:#d08a8a; font-size:15px; cursor:pointer;
+  }
+
+  /* 모달 & 토스트 */
+  #modal {
+    position:fixed; inset:0; background:rgba(0,0,0,.65);
+    display:none; align-items:center; justify-content:center; z-index:20;
+  }
+  #modal .box {
+    background:#1b2230; border:1px solid #2a3140; border-radius:16px;
+    padding:30px 36px; text-align:center; max-width:480px;
+  }
+  #modal .box p { font-size:22px; margin-bottom:24px; }
+  #modal button { font-size:20px; font-weight:700; border:none; border-radius:12px;
+    padding:16px 34px; margin:0 8px; cursor:pointer; }
+  #mYes { background:#c93a3a; color:#fff; }
+  #mNo { background:#3a4150; color:#e8eaf0; }
+  #toast {
+    position:fixed; bottom:24px; left:50%; transform:translateX(-50%);
+    background:#e8eaf0; color:#0f1218; font-size:17px; font-weight:700;
+    padding:12px 26px; border-radius:12px; display:none; z-index:30;
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>도어 이미지 수집 — 경주</h1>
+  <div id="clock">--/-- --:--</div>
+</header>
+<main>
+  <section id="left">
+    <div id="classGrid"></div>
+    <button id="startBtn" disabled>취득 시작</button>
+  </section>
+  <section id="right">
+    <img id="preview" src="/video_feed" alt="camera">
+    <div id="stateCard">
+      <div id="stateMain">대기 중</div>
+      <div id="stateSub">도어 종류를 선택한 후 [취득 시작]을 누르세요</div>
+      <div id="bar"><div id="barFill"></div></div>
+    </div>
+    <div id="statsRow">
+      <div class="stat" id="stSessions"><b>0</b>오늘 세션</div>
+      <div class="stat" id="stImages"><b>0</b>오늘 이미지</div>
+      <div class="stat" id="stDisk"><b>-</b>디스크 여유</div>
+      <div class="stat" id="stCam"><b>-</b>카메라</div>
+    </div>
+    <div id="perClass"></div>
+    <div id="footer"><button id="shutdownBtn">시스템 종료</button></div>
+  </section>
+</main>
+
+<div id="modal"><div class="box">
+  <p id="mText">시스템을 종료할까요?</p>
+  <button id="mYes">종료</button><button id="mNo">취소</button>
+</div></div>
+<div id="toast"></div>
+
+<script>
+const $ = id => document.getElementById(id);
+let st = null;            // 최신 status
+let classes = [];
+let unknown = "Unknown";
+
+function shortName(c) {
+  // "E25_door_LH_FRT" → 큰 글씨 "E25 LH FRT"
+  return c === unknown ? "모름 / 기타" : c.replace("_door", "").replace(/_/g, " ");
+}
+
+function buildGrid() {
+  const g = $("classGrid");
+  g.innerHTML = "";
+  classes.forEach(c => {
+    const b = document.createElement("button");
+    b.className = "clsBtn" + (c === unknown ? " unknown" : "");
+    b.innerHTML = `${shortName(c)}<small>${c === unknown ? "Unknown" : c}</small>`;
+    b.onclick = () => select(c);
+    b.dataset.cls = c;
+    g.appendChild(b);
+  });
+}
+
+async function api(path, body) {
+  try {
+    const r = await fetch(path, {
+      method: "POST", headers: {"Content-Type": "application/json"},
+      body: JSON.stringify(body || {}),
+    });
+    const j = await r.json();
+    if (!r.ok) toast(j.error || "오류");
+    return r.ok;
+  } catch (e) { toast("서버 연결 실패"); return false; }
+}
+
+function select(c) {
+  if (st && st.state === "capturing") { toast("취득 중에는 변경할 수 없습니다"); return; }
+  api("/api/select", {class_name: c});
+  refresh();
+}
+
+$("startBtn").onclick = async () => {
+  if (!st) return;
+  if (st.state === "capturing") {          // 조기 종료
+    $("mText").textContent = "취득을 조기 종료할까요?";
+    modalAction = () => api("/api/stop");
+    $("modal").style.display = "flex";
+  } else {
+    if (st.selected_class === unknown)
+      toast("Unknown으로 저장됩니다 — 나중에 수동 라벨링 필요");
+    await api("/api/start");
+    refresh();
+  }
+};
+
+let modalAction = null;
+$("shutdownBtn").onclick = () => {
+  $("mText").textContent = "시스템을 종료할까요?\n(퇴근 시 화면이 꺼진 후 멀티탭을 내려주세요)";
+  modalAction = async () => {
+    if (await api("/api/shutdown")) {
+      $("stateMain").textContent = "종료 중...";
+      $("stateSub").textContent = "화면이 꺼지면 멀티탭 전원을 내려주세요";
+    }
+  };
+  $("modal").style.display = "flex";
+};
+$("mYes").onclick = () => { $("modal").style.display = "none"; if (modalAction) modalAction(); };
+$("mNo").onclick = () => { $("modal").style.display = "none"; modalAction = null; };
+
+let toastTimer = null;
+function toast(msg) {
+  const t = $("toast");
+  t.textContent = msg; t.style.display = "block";
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.style.display = "none", 2500);
+}
+
+function render() {
+  if (!st) return;
+  if (!classes.length) { classes = st.classes; unknown = st.unknown; buildGrid(); }
+  $("clock").textContent = st.now;
+
+  document.querySelectorAll(".clsBtn").forEach(b => {
+    b.classList.toggle("selected", b.dataset.cls === st.selected_class);
+    b.disabled = st.state === "capturing";
+  });
+
+  const cap = st.state === "capturing";
+  const btn = $("startBtn");
+  btn.disabled = !st.camera_ok && !cap;
+  btn.classList.toggle("capturing", cap);
+  btn.textContent = cap ? "조기 종료" : "취득 시작";
+
+  const main = $("stateMain"), sub = $("stateSub");
+  main.classList.toggle("rec", cap);
+  if (cap) {
+    const remain = Math.max(0, st.duration - st.elapsed);
+    main.textContent = `● 취득 중 ${Math.ceil(remain)}초 남음`;
+    sub.textContent = `${st.selected_class} — ${st.saved}쌍 저장됨 (종료 후 자리를 비켜주세요)`;
+    $("barFill").style.width = (100 * st.elapsed / st.duration) + "%";
+  } else {
+    main.textContent = "대기 중";
+    sub.textContent = st.camera_ok
+      ? "도어 종류를 선택한 후 [취득 시작]을 누르세요"
+      : "카메라 연결 대기 중... " + (st.camera_error || "");
+    $("barFill").style.width = "0%";
+  }
+
+  let imgs = 0;
+  Object.values(st.per_class).forEach(v => imgs += v.images);
+  $("stSessions").firstElementChild.textContent = st.today_sessions;
+  $("stImages").firstElementChild.textContent = imgs;
+  const dk = $("stDisk");
+  dk.firstElementChild.textContent = st.disk_free_gb + "G";
+  dk.className = "stat" + (st.disk_free_gb < 20 ? " warn" : "");
+  const cm = $("stCam");
+  cm.firstElementChild.textContent = st.camera_ok ? "정상" : "오류";
+  cm.className = "stat" + (st.camera_ok ? "" : " err");
+  cm.title = st.camera_type;
+
+  $("perClass").innerHTML = Object.entries(st.per_class)
+    .map(([c, v]) => `<span>${shortName(c)}: <b>${v.images}</b></span>`).join("");
+}
+
+async function refresh() {
+  try {
+    st = await (await fetch("/api/status")).json();
+    render();
+  } catch (e) { /* 서버 재시작 중 등 — 다음 폴링에서 복구 */ }
+}
+setInterval(refresh, 1000);
+refresh();
+</script>
+</body>
+</html>

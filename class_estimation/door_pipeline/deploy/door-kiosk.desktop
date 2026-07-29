@@ -1,0 +1,5 @@
+[Desktop Entry]
+Type=Application
+Name=Door Capture Kiosk
+Exec=/home/user/workspace/parts_deep/class_estimation/door_pipeline/deploy/kiosk.sh
+X-GNOME-Autostart-enabled=true

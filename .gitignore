@@ -59,3 +59,7 @@ Thumbs.db
 *.log
 *.tmp
 
+
+# 공장 수집 데이터·로그
+class_estimation/door_pipeline/datasets_factory_collect/
+class_estimation/door_pipeline/logs/

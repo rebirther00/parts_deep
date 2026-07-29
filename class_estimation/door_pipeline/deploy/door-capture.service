@@ -1,0 +1,14 @@
+[Unit]
+Description=Door factory image capture service (Flask + ZED)
+After=network.target
+
+[Service]
+Type=simple
+User=user
+WorkingDirectory=/home/user/workspace/parts_deep/class_estimation/door_pipeline
+ExecStart=/home/user/workspace/zed_env/bin/python 06_factory_capture.py
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
