@@ -61,7 +61,12 @@
 - **상태·로그**: `systemctl status door-capture`, `journalctl -u door-capture -n 50`
 - **키오스크 화면 완전 종료**: `pkill -f 'deploy/kiosk.sh'; pkill -f kiosk_webview.py`
   - 루프를 먼저 죽여야 함. Alt+F4는 3초 뒤 자동 재실행됨(현장 오조작 대비 의도된 동작)
-  - 다시 띄우기: 재부팅/재로그인 또는 `DISPLAY=:0 bash deploy/kiosk.sh &`
+- **키오스크 화면 다시 띄우기** (서비스 재시작으로는 화면이 뜨지 않음 — 별개 프로세스):
+  ```bash
+  DISPLAY=:0 bash ~/workspace/parts_deep/class_estimation/door_pipeline/deploy/kiosk.sh &
+  ```
+  - 재부팅/재로그인해도 autostart로 다시 뜸
+  - `factory.html`(UI) 수정 시: 서비스 재시작 + `pkill -f kiosk_webview.py` (3초 뒤 새 페이지로 재실행). 파이썬 코드만 수정 시엔 서비스 재시작만으로 충분
 - **부팅 시 정상 시퀀스**: CUDA 준비 전이면 journal에 `CUDA 미준비 — 프로세스 종료 후 systemd 재시작 대기`가 수 회 반복된 뒤 `카메라 연결:`이 찍힘 — 오류 아님
 
 ## 설치 (1회, sudo 필요)
