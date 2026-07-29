@@ -3,7 +3,7 @@
 운영 흐름:
     1. 작업자가 터치모니터에서 도어 종류 버튼 선택 (기본값 Unknown)
     2. [취득 시작] → 워밍업 후 2초에 1장씩 rgb/depth 쌍 저장
-    3. 60초 경과 시 자동 종료 (조기 종료 버튼도 있음)
+    3. 300초 경과 시 자동 종료 (보통은 [취득 종료] 버튼으로 먼저 종료)
     4. 종료 시 선택 클래스는 Unknown으로 자동 복귀 (라벨링 실수 방지)
 
 원격(세종)에서는 tailscale IP로 같은 페이지를 열어 상태 확인.
@@ -49,7 +49,7 @@ CLASSES = [
 UNKNOWN = "Unknown"
 ALL_CLASSES = CLASSES + [UNKNOWN]
 
-SESSION_DURATION = float(os.environ.get("DOOR_SESSION_DURATION", 60))
+SESSION_DURATION = float(os.environ.get("DOOR_SESSION_DURATION", 300))
 CAPTURE_INTERVAL = float(os.environ.get("DOOR_CAPTURE_INTERVAL", 2.0))
 WARMUP_SEC = float(os.environ.get("DOOR_WARMUP", 2.0))
 PORT = int(os.environ.get("DOOR_PORT", 5000))
