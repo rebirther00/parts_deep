@@ -293,6 +293,14 @@ def _on_session_finish(finished_session, reason):
         session_dir=str(finished_session.session_dir.relative_to(OUTPUT_ROOT)),
         saved=finished_session.saved,
     )
+    # NAS 업로드 킥 (논블로킹 — 실패해도 cron 5분 주기가 재시도)
+    try:
+        subprocess.Popen(
+            ["bash", str(BASE_DIR / "deploy" / "nas_sync.sh")],
+            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+        )
+    except Exception as e:
+        log.warning("NAS 동기화 실행 실패: %s", e)
 
 
 @app.route("/")

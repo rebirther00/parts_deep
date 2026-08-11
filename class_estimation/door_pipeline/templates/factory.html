@@ -25,10 +25,11 @@
   #classGrid { flex:1; display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
   .clsBtn {
     border:2px solid #2a3140; border-radius:14px; background:#1b2230;
-    color:#e8eaf0; font-size:21px; font-weight:700; cursor:pointer;
+    color:#e8eaf0; font-size:clamp(21px, 3.1vw, 52px); font-weight:700; cursor:pointer;
     display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px;
+    line-height:1.1; white-space:nowrap; overflow:hidden; padding:4px;
   }
-  .clsBtn small { font-size:13px; font-weight:400; color:#9aa3b5; }
+  .clsBtn small { font-size:clamp(13px, 1.2vw, 20px); font-weight:400; color:#9aa3b5; }
   .clsBtn.selected { background:#1f4fd8; border-color:#5b83f0; }
   .clsBtn.unknown { background:#252a35; }
   .clsBtn.unknown.selected { background:#6b7280; border-color:#9ca3af; }
