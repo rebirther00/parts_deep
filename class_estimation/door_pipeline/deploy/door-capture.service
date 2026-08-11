@@ -1,13 +1,17 @@
 [Unit]
 Description=Door factory image capture service (Flask + ZED)
 # 부팅 직후 CUDA/ZED 준비 전에는 앱이 스스로 exit(3) → 재시작 반복으로 대기
-After=network.target zed_x_daemon.service
+After=network-online.target time-sync.target zed_x_daemon.service
+Wants=network-online.target
 StartLimitIntervalSec=0
 
 [Service]
 Type=simple
 User=user
 WorkingDirectory=/home/user/workspace/parts_deep/class_estimation/door_pipeline
+# 시계 동기화(NTP) 전에 시작하면 세션이 1970 날짜 폴더에 저장됨 (2026-08-10 사고)
+# → 최대 120초 대기, 그래도 안 잡히면 경고 남기고 시작 (오프라인 현장에서도 서비스는 떠야 함)
+ExecStartPre=/bin/bash -c 'for i in $(seq 1 24); do [ "$(date +%%Y)" -ge 2025 ] && exit 0; sleep 5; done; echo "경고: 시계 미동기화 상태로 시작 — 날짜 폴더가 1970으로 저장될 수 있음"; exit 0'
 ExecStart=/home/user/workspace/zed_env/bin/python 06_factory_capture.py
 Restart=always
 RestartSec=5

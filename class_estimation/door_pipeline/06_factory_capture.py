@@ -191,6 +191,9 @@ class CaptureSession(threading.Thread):
         self.t0 = time.monotonic()
 
         day = self.started_at.strftime("%Y%m%d")
+        if self.started_at.year < 2020:
+            # 시계 미동기화(1970) 상태로 부팅된 경우 — 나중에 찾기 쉽게 표시
+            day = f"unsynced_{day}"
         stamp = self.started_at.strftime("%H%M%S")
         self.session_dir = OUTPUT_ROOT / day / class_name / f"s_{stamp}"
         self.session_dir.mkdir(parents=True, exist_ok=True)
