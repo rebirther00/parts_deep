@@ -21,6 +21,9 @@ class_estimation/datasets/quick_coupler_*/
 # 학습 결과물 (artifacts)
 artifacts/
 
+# 데이터셋 메타데이터 DB (스키마/스크립트만 추적, DB 본체는 제외)
+class_estimation/door_pipeline/db/*.db
+
 # 예외: 스몰 프로젝트 폴더 구조 유지를 위한 .gitkeep는 추적
 !class_estimation/datasets/.gitkeep
 !pos_estimation/dataset_pos/.gitkeep
