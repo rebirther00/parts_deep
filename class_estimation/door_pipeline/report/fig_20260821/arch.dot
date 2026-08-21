@@ -1,0 +1,38 @@
+digraph G {
+  rankdir=TB; fontname="Noto Sans CJK KR"; fontsize=12; nodesep=0.35; ranksep=0.45; newrank=true;
+  node [shape=box, style="rounded,filled", fontname="Noto Sans CJK KR", fontsize=11, fillcolor="#FFFFFF", color="#555555"];
+  edge [fontname="Noto Sans CJK KR", fontsize=10, color="#333333"];
+
+  subgraph cluster_site { label="경주 공장 (현장 수집)"; style="rounded,filled"; fillcolor="#EAF2FB"; color="#2F6DB5"; fontsize=13;
+    cam [label="ZED X Mini\nRGB 1920×1200 + Depth(mm)", fillcolor="#FFFFFF"];
+    zb  [label="Zed Box (zedbox-weld)\n06_factory_capture.py (Flask :5000)\nsystemd door-capture.service", fillcolor="#FFFFFF"];
+    kiosk [label="16\" 터치 키오스크\ntemplates/factory.html\n(WebKit2GTK 웹뷰)", fillcolor="#FFFFFF"];
+    fs  [label="datasets_factory_collect/\n<날짜>/<클래스>/s_HHMMSS/\nrgb_*.png · depth_*.png · meta.json\nevents.jsonl", shape=folder, fillcolor="#FFF8E1"];
+    sync [label="deploy/nas_sync.sh\n(세션 종료 킥 + cron 5분)\nrclone copy · .uploaded 마커", fillcolor="#FFF3CD"];
+  }
+  subgraph cluster_nas { label="세종 NAS (정본)"; style="rounded,filled"; fillcolor="#EEF7EE"; color="#3A8F3A"; fontsize=13;
+    nas [label="nas:Guest/weld\n<날짜>/<클래스>/s_HHMMSS/…\nevents.jsonl", shape=cylinder, fillcolor="#FFFFFF"];
+  }
+  subgraph cluster_train { label="학습 PC (RTX 5090, 세종)"; style="rounded,filled"; fillcolor="#F6EEF9"; color="#7B4FA3"; fontsize=13;
+    local [label="로컬 데이터셋\ndatasets / datasets_factory\ndatasets_aug / datasets_aug2", shape=folder, fillcolor="#FFF8E1"];
+    ing_l [label="db/ingest_local.py", fillcolor="#FFF3CD"];
+    ing_n [label="db/ingest_nas.py\n(rclone lsjson/cat, 메타만)", fillcolor="#FFF3CD"];
+    db  [label="db/door_pipeline.db (SQLite)\ndatasets · classes · images\ncapture_sessions · models\ntraining_* · evaluation_results", shape=cylinder, fillcolor="#FFFFFF"];
+    train [label="02_train / 03·04_evaluate\n12·13 속성 파이프라인\n(3단계: DB 로깅 연동 예정)", style="rounded,dashed", fillcolor="#FFFFFF"];
+  }
+  dev [label="개발자 원격 확인\ntailscale / ZeroTier\nhttp://<zedbox>:5000", shape=note, fillcolor="#F5F5F5"];
+
+  {rank=same; cam; kiosk;}
+  {rank=same; local; ing_n;}
+  cam -> zb [label="GMSL"];
+  kiosk -> zb [label="HTTP /api/*", dir=both];
+  zb -> fs [label="2초/1쌍 저장"];
+  fs -> sync [label="finished:true 세션"];
+  sync -> nas [label="rclone (LTE)", penwidth=2, color="#C0392B"];
+  nas -> ing_n [label="메타 스캔", penwidth=2, color="#C0392B"];
+  local -> ing_l;
+  ing_l -> db; ing_n -> db [penwidth=2, color="#C0392B"];
+  db -> train [style=dashed];
+  local -> train;
+  dev -> zb [style=dashed, constraint=false];
+}

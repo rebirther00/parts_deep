@@ -1,0 +1,20 @@
+digraph G {
+  rankdir=TB; fontname="Noto Sans CJK KR"; nodesep=0.5; ranksep=0.4; newrank=true;
+  node [shape=box, style="rounded,filled", fontname="Noto Sans CJK KR", fontsize=11, fillcolor="#FFFFFF", color="#555555"];
+  edge [fontname="Noto Sans CJK KR", fontsize=10];
+  subgraph cluster_a { label="A. CNN 분류 (RGBE NoAux 448)"; style="rounded,filled"; fillcolor="#EAF2FB"; color="#2F6DB5";
+    a1 [label="01_capture_dataset.py\n사무실 취득 (ZED)"]; a2 [label="02_train.py\n70/15/15 분할 학습"]; a3 [label="03_evaluate.py\n04_evaluate_factory.py"]; a5 [label="05_realtime_inference.py\n웹 UI :5001"];
+    a1 -> a2 -> a3 -> a5;
+  }
+  subgraph cluster_b { label="B. 속성 파이프라인 (CAD 정합 + 통풍구 U-Net + 종횡비)"; style="rounded,filled"; fillcolor="#EEF7EE"; color="#3A8F3A";
+    b1 [label="10_generate_cad_templates.py\nSTL → 템플릿/스펙"]; b2 [label="11_generate_vent_labels.py\n라벨 자동 생성"]; b3 [label="12_train_vent_unet.py"]; b4 [label="13_evaluate_attribute_pipeline.py"]; b5 [label="14_realtime_inference_attribute.py\n웹 UI :5003"];
+    b1 -> b2 -> b3 -> b4 -> b5;
+  }
+  subgraph cluster_c { label="C. 현장 수집 · 데이터 관리 (2026-07~08 신규)"; style="rounded,filled"; fillcolor="#FFF3CD"; color="#B8860B";
+    c1 [label="06_factory_capture.py\n경주 키오스크 수집"]; c2 [label="deploy/nas_sync.sh\nNAS 자동 업로드"]; c3 [label="db/ingest_local.py\ndb/ingest_nas.py"]; c4 [label="db/door_pipeline.db\nSQLite 메타데이터", shape=cylinder];
+    c1 -> c2 -> c3 -> c4;
+  }
+  {rank=same; a1; b1; c1;}
+  ds [label="datasets* (로컬)\n현장 수집분 (NAS)", shape=folder, fillcolor="#FFF8E1"];
+  ds -> a2; ds -> b2; c2 -> ds [style=dashed, label="선별 반입"]; c4 -> a2 [style=dashed, label="3단계 연동"]; c4 -> b3 [style=dashed];
+}

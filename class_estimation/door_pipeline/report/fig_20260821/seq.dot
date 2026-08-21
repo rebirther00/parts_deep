@@ -1,0 +1,19 @@
+digraph G {
+  rankdir=TB; fontname="Noto Sans CJK KR"; nodesep=0.3; ranksep=0.35;
+  node [shape=box, style="rounded,filled", fontname="Noto Sans CJK KR", fontsize=11, fillcolor="#FFFFFF", color="#555555"];
+  edge [fontname="Noto Sans CJK KR", fontsize=10];
+  a [label="작업자 [취득 종료] 클릭\n(또는 300초 자동 종료)"];
+  b [label="meta.json 기록\nfinished: true, stop_reason, saved_pairs"];
+  c [label="_on_session_finish()\n→ nas_sync.sh 논블로킹 실행", fillcolor="#FFF3CD"];
+  cron [label="cron (5분 주기)\nnas_sync.sh", fillcolor="#FFF3CD"];
+  lock [label="flock /tmp/nas_sync.lock\n(중복 실행 방지)", shape=diamond, fillcolor="#F5F5F5"];
+  scan [label="datasets_factory_collect/*/*/s_*/meta.json 순회\n.uploaded 없음 AND finished:true 인 세션만"];
+  cp [label="rclone copy <세션> nas:Guest/weld/<날짜>/<클래스>/<세션>\n--transfers 4 --timeout 60s --retries 3"];
+  ok [label="성공 → .uploaded 마커 생성\nlogs/nas_sync.log OK", fillcolor="#E6F4EA"];
+  fail [label="실패 → 로그 FAIL\n다음 주기에 재시도", fillcolor="#FDECEA"];
+  ev [label="events.jsonl → NAS 매번 통째 백업"];
+  a -> b -> c -> lock; cron -> lock;
+  lock -> scan [label="획득"]; scan -> cp; cp -> ok [label="exit 0"]; cp -> fail [label="오류"];
+  ok -> ev; fail -> ev;
+  lock -> x [label="이미 실행 중 → 종료", style=dashed]; x [label="exit 0", shape=plaintext];
+}
