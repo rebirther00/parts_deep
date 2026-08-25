@@ -196,34 +196,70 @@ if __name__ == '__main__':
     sched = torch.optim.lr_scheduler.CosineAnnealingLR(opt, args.epochs)
     bce = nn.BCEWithLogitsLoss(reduction='none')
     best = 0
-    for ep in range(args.epochs):
-        net.train()
-        tl = 0
-        for x, y, m in tr:
-            x, y, m = x.to(dev), y.to(dev), m.to(dev)
-            logit = net(x)
-            lb = (bce(logit, y) * m).sum() / m.sum().clamp(min=1)
-            loss = lb + dice_loss(logit, y, m)
-            opt.zero_grad()
-            loss.backward()
-            opt.step()
-            tl += loss.item()
-        sched.step()
-        net.eval()
-        inter = union = 0
-        with torch.no_grad():
-            for x, y, m in va:
+    best_ep = None
+    ep = -1
+    t0 = time.time()
+
+    # DB 기록 (val_accuracy 컬럼에 val IoU(%) 저장)
+    from db.db_log import DBLog
+    db = DBLog()
+    db_model_id = db.register_model(
+        name=RUN_NAME, architecture='VentUNet', in_channels=3, num_classes=1,
+        weights_path=os.path.relpath(CKPT, DOOR_DIR), input_size=f'{CROP}x{CROP}',
+        description=f'12_train_vent_unet.py seed={args.seed} root={args.root} '
+                    f'min_iou={args.min_iou}; val_accuracy=val IoU(%)')
+    db_sess = db.start_training(
+        dataset_name=os.path.basename(args.root), model_id=db_model_id,
+        optimizer='AdamW', learning_rate=3e-4, batch_size=32,
+        max_epochs=args.epochs, early_stop_patience=None, train_ratio=0.7,
+        train_count=n_tr, test_count=None, gpu_device=dev,
+        loss_function='BCEWithLogits+Dice', class_weights=False,
+        split_indices_path=os.path.relpath(f'{ROOT}/split.json', DOOR_DIR))
+    db_status = 'completed'
+    try:
+        for ep in range(args.epochs):
+            net.train()
+            tl = 0
+            for x, y, m in tr:
                 x, y, m = x.to(dev), y.to(dev), m.to(dev)
-                p = (torch.sigmoid(net(x)) > 0.5).float() * m
-                y = y * m
-                inter += (p * y).sum().item()
-                union += (p + y - p * y).sum().item()
-        iou = inter / max(union, 1)
-        print(f'ep{ep + 1}/{args.epochs} loss={tl / len(tr):.4f} '
-              f'valIoU={iou:.4f}', flush=True)
-        if iou > best:
-            best = iou
-            torch.save(net.state_dict(), CKPT)
+                logit = net(x)
+                lb = (bce(logit, y) * m).sum() / m.sum().clamp(min=1)
+                loss = lb + dice_loss(logit, y, m)
+                opt.zero_grad()
+                loss.backward()
+                opt.step()
+                tl += loss.item()
+            sched.step()
+            net.eval()
+            inter = union = 0
+            with torch.no_grad():
+                for x, y, m in va:
+                    x, y, m = x.to(dev), y.to(dev), m.to(dev)
+                    p = (torch.sigmoid(net(x)) > 0.5).float() * m
+                    y = y * m
+                    inter += (p * y).sum().item()
+                    union += (p + y - p * y).sum().item()
+            iou = inter / max(union, 1)
+            print(f'ep{ep + 1}/{args.epochs} loss={tl / len(tr):.4f} '
+                  f'valIoU={iou:.4f}', flush=True)
+            db.log_epoch(db_sess, ep + 1, tl / len(tr), None, round(iou * 100, 2),
+                         sched.get_last_lr()[0], round(time.time() - t0, 1))
+            if iou > best:
+                best = iou
+                best_ep = ep + 1
+                torch.save(net.state_dict(), CKPT)
+    except KeyboardInterrupt:
+        db_status = 'stopped'
+        raise
+    except Exception:
+        db_status = 'failed'
+        raise
+    finally:
+        db.finish_training(db_sess, status=db_status, actual_epochs=ep + 1,
+                           best_val_accuracy=round(best * 100, 2),
+                           best_epoch=best_ep,
+                           total_time_sec=round(time.time() - t0, 1))
+        db.close()
     info = {
         'run_name': RUN_NAME,
         'seed': args.seed, 'split_seed': SPLIT_SEED, 'root': args.root,

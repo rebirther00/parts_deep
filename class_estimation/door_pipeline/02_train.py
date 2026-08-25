@@ -387,53 +387,96 @@ def main():
     scheduler = optim.lr_scheduler.ReduceLROnPlateau(
         optimizer, mode='min', patience=3, factor=0.5)
 
+    # DB 기록 (db/door_pipeline.db — 실패해도 학습은 계속, DOOR_DB_LOG=0 으로 비활성)
+    from db.db_log import DBLog
+    db = DBLog()
+    db_model_id = db.register_model(
+        name=run_name, architecture=type(model).__name__,
+        in_channels=(cfg.get("in_channels", IN_CHANNELS) if args.no_aux
+                     else IN_CHANNELS),
+        num_classes=num_classes, pretrained_base="ImageNet",
+        weights_path=os.path.relpath(model_path, PROJECT_DIR),
+        input_size=f"{args.image_size}x{args.image_size}",
+        description=f"02_train.py model_type={args.model_type} "
+                    f"no_aux={args.no_aux} seed={args.seed}")
+    db_sess = db.start_training(
+        dataset_name=os.path.basename(dataset_dir), model_id=db_model_id,
+        optimizer="Adam", learning_rate=0.001, batch_size=batch_size,
+        max_epochs=args.epochs, early_stop_patience=args.patience,
+        train_ratio=0.7, train_count=len(train_paths),
+        test_count=len(test_paths), gpu_device=str(device),
+        loss_function="CrossEntropyLoss(weighted)", class_weights=True,
+        split_indices_path=os.path.relpath(
+            os.path.join(run_dir, "split_info.json"), PROJECT_DIR))
+
     # 학습 루프
     best_val_acc = 0.0
+    best_val_loss = None
+    best_epoch = None
     patience_counter = 0
     train_log = {"epochs": []}
+    db_status = "completed"
 
     print(f"\n학습 시작 (max {args.epochs} epochs, patience {args.patience})")
     print("-" * 70)
 
-    for epoch in range(args.epochs):
-        train_loss, train_acc = train_one_epoch(
-            model, train_loader, criterion, optimizer, device)
-        val_loss, val_acc = evaluate(
-            model, val_loader, criterion, device)
-        scheduler.step(val_loss)
+    try:
+        for epoch in range(args.epochs):
+            train_loss, train_acc = train_one_epoch(
+                model, train_loader, criterion, optimizer, device)
+            val_loss, val_acc = evaluate(
+                model, val_loader, criterion, device)
+            scheduler.step(val_loss)
 
-        epoch_data = {
-            "epoch": epoch + 1,
-            "train_loss": round(train_loss, 6),
-            "train_acc": round(train_acc, 4),
-            "val_loss": round(val_loss, 6),
-            "val_acc": round(val_acc, 4),
-            "lr": optimizer.param_groups[0]['lr'],
-        }
-        train_log["epochs"].append(epoch_data)
+            epoch_data = {
+                "epoch": epoch + 1,
+                "train_loss": round(train_loss, 6),
+                "train_acc": round(train_acc, 4),
+                "val_loss": round(val_loss, 6),
+                "val_acc": round(val_acc, 4),
+                "lr": optimizer.param_groups[0]['lr'],
+            }
+            train_log["epochs"].append(epoch_data)
+            db.log_epoch(db_sess, epoch + 1, round(train_loss, 6), round(val_loss, 6), round(val_acc, 4),
+                         epoch_data["lr"], round(time.time() - start_time, 1))
 
-        improved = val_acc > best_val_acc
-        if improved:
-            best_val_acc = val_acc
-            patience_counter = 0
-            torch.save(model.state_dict(), model_path)
-        else:
-            patience_counter += 1
+            improved = val_acc > best_val_acc
+            if improved:
+                best_val_acc = val_acc
+                best_val_loss = val_loss
+                best_epoch = epoch + 1
+                patience_counter = 0
+                torch.save(model.state_dict(), model_path)
+            else:
+                patience_counter += 1
 
-        if (epoch + 1) % 5 == 0 or epoch == 0 or improved:
-            mark = "*" if improved else ""
-            print(f"  Epoch {epoch+1:3d} | "
-                  f"Train {train_acc:6.2f}% L={train_loss:.4f} | "
-                  f"Val {val_acc:6.2f}% L={val_loss:.4f} | "
-                  f"Best {best_val_acc:.2f}% "
-                  f"ES={patience_counter}/{args.patience} {mark}")
+            if (epoch + 1) % 5 == 0 or epoch == 0 or improved:
+                mark = "*" if improved else ""
+                print(f"  Epoch {epoch+1:3d} | "
+                      f"Train {train_acc:6.2f}% L={train_loss:.4f} | "
+                      f"Val {val_acc:6.2f}% L={val_loss:.4f} | "
+                      f"Best {best_val_acc:.2f}% "
+                      f"ES={patience_counter}/{args.patience} {mark}")
 
-        if torch.cuda.is_available() and (epoch + 1) % 10 == 0:
-            torch.cuda.empty_cache()
+            if torch.cuda.is_available() and (epoch + 1) % 10 == 0:
+                torch.cuda.empty_cache()
 
-        if patience_counter >= args.patience:
-            print(f"\n  Early stopping at epoch {epoch+1}")
-            break
+            if patience_counter >= args.patience:
+                print(f"\n  Early stopping at epoch {epoch+1}")
+                break
+    except KeyboardInterrupt:
+        db_status = "stopped"
+        raise
+    except Exception:
+        db_status = "failed"
+        raise
+    finally:
+        db.finish_training(
+            db_sess, status=db_status, actual_epochs=len(train_log["epochs"]),
+            best_val_accuracy=best_val_acc if best_epoch else None,
+            best_val_loss=best_val_loss, best_epoch=best_epoch,
+            total_time_sec=round(time.time() - start_time, 1))
+        db.close()
 
     elapsed = time.time() - start_time
     train_log["best_val_acc"] = best_val_acc

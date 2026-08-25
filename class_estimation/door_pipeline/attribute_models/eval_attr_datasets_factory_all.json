@@ -3,9 +3,9 @@
   "base": "datasets_factory",
   "split": "all",
   "n_frames": 10,
-  "n_boot": 200,
-  "group_acc": 100.0,
-  "class_acc": 24.25,
+  "n_boot": 2000,
+  "group_acc": 99.12,
+  "class_acc": 21.9,
   "per_class": {
     "E25_door_LH_RR": {
       "n_frames_avail": 12,
@@ -14,8 +14,8 @@
     },
     "E30_E38_door_RH": {
       "n_frames_avail": 66,
-      "group_acc": 100.0,
-      "class_acc": 48.5
+      "group_acc": 98.25,
+      "class_acc": 43.8
     }
   },
   "confusion_matrix": [
@@ -37,7 +37,7 @@
       0,
       0,
       0,
-      200
+      2000
     ],
     [
       0,
@@ -51,13 +51,13 @@
     ],
     [
       0,
+      2,
+      1089,
+      876,
       0,
-      103,
-      97,
+      4,
       0,
-      0,
-      0,
-      0
+      29
     ],
     [
       0,
@@ -100,8 +100,8 @@
       0
     ]
   ],
-  "evaluated_at": "2026-07-08 15:21:23",
-  "per_frame_acc": 30.77,
+  "evaluated_at": "2026-08-25 10:50:26",
+  "per_frame_acc": 37.18,
   "per_frame": [
     {
       "path": "datasets_factory/E25_door_LH_RR/rgb_0000.png",
@@ -178,13 +178,13 @@
     {
       "path": "datasets_factory/E30_E38_door_RH/rgb_0000.png",
       "gt": "E30_E38_door_RH",
-      "pred": "E38_door_LH_RR",
+      "pred": "E25_door_RH",
       "correct": false
     },
     {
       "path": "datasets_factory/E30_E38_door_RH/rgb_0001.png",
       "gt": "E30_E38_door_RH",
-      "pred": "E25_door_RH",
+      "pred": "E38_door_LH_RR",
       "correct": false
     },
     {
@@ -214,20 +214,20 @@
     {
       "path": "datasets_factory/E30_E38_door_RH/rgb_0006.png",
       "gt": "E30_E38_door_RH",
-      "pred": "E30_E38_door_RH",
-      "correct": true
+      "pred": "E25_door_RH",
+      "correct": false
     },
     {
       "path": "datasets_factory/E30_E38_door_RH/rgb_0007.png",
       "gt": "E30_E38_door_RH",
-      "pred": "E30_E38_door_RH",
-      "correct": true
+      "pred": "E25_door_RH",
+      "correct": false
     },
     {
       "path": "datasets_factory/E30_E38_door_RH/rgb_0008.png",
       "gt": "E30_E38_door_RH",
-      "pred": "E30_E38_door_RH",
-      "correct": true
+      "pred": "E25_door_RH",
+      "correct": false
     },
     {
       "path": "datasets_factory/E30_E38_door_RH/rgb_0009.png",
@@ -238,8 +238,8 @@
     {
       "path": "datasets_factory/E30_E38_door_RH/rgb_0010.png",
       "gt": "E30_E38_door_RH",
-      "pred": "E30_E38_door_RH",
-      "correct": true
+      "pred": "E25_door_RH",
+      "correct": false
     },
     {
       "path": "datasets_factory/E30_E38_door_RH/rgb_0012.png",
@@ -274,8 +274,8 @@
     {
       "path": "datasets_factory/E30_E38_door_RH/rgb_0017.png",
       "gt": "E30_E38_door_RH",
-      "pred": "E25_door_RH",
-      "correct": false
+      "pred": "E30_E38_door_RH",
+      "correct": true
     },
     {
       "path": "datasets_factory/E30_E38_door_RH/rgb_0018.png",
@@ -292,14 +292,14 @@
     {
       "path": "datasets_factory/E30_E38_door_RH/rgb_0020.png",
       "gt": "E30_E38_door_RH",
-      "pred": "E25_door_RH",
-      "correct": false
+      "pred": "E30_E38_door_RH",
+      "correct": true
     },
     {
       "path": "datasets_factory/E30_E38_door_RH/rgb_0021.png",
       "gt": "E30_E38_door_RH",
-      "pred": "E25_door_RH",
-      "correct": false
+      "pred": "E30_E38_door_RH",
+      "correct": true
     },
     {
       "path": "datasets_factory/E30_E38_door_RH/rgb_0022.png",
@@ -340,7 +340,7 @@
     {
       "path": "datasets_factory/E30_E38_door_RH/rgb_0028.png",
       "gt": "E30_E38_door_RH",
-      "pred": "E25_door_RH",
+      "pred": "E38_door_LH_RR",
       "correct": false
     },
     {
@@ -364,7 +364,7 @@
     {
       "path": "datasets_factory/E30_E38_door_RH/rgb_0032.png",
       "gt": "E30_E38_door_RH",
-      "pred": "E25_door_RH",
+      "pred": "E38_door_LH_RR",
       "correct": false
     },
     {
@@ -382,19 +382,19 @@
     {
       "path": "datasets_factory/E30_E38_door_RH/rgb_0035.png",
       "gt": "E30_E38_door_RH",
-      "pred": "E25_door_RH",
-      "correct": false
+      "pred": "E30_E38_door_RH",
+      "correct": true
     },
     {
       "path": "datasets_factory/E30_E38_door_RH/rgb_0036.png",
       "gt": "E30_E38_door_RH",
-      "pred": "E25_door_RH",
+      "pred": "E38_door_LH_RR",
       "correct": false
     },
     {
       "path": "datasets_factory/E30_E38_door_RH/rgb_0037.png",
       "gt": "E30_E38_door_RH",
-      "pred": "E25_door_RH",
+      "pred": "E38_door_LH_RR",
       "correct": false
     },
     {
@@ -418,8 +418,8 @@
     {
       "path": "datasets_factory/E30_E38_door_RH/rgb_0041.png",
       "gt": "E30_E38_door_RH",
-      "pred": "E25_door_RH",
-      "correct": false
+      "pred": "E30_E38_door_RH",
+      "correct": true
     },
     {
       "path": "datasets_factory/E30_E38_door_RH/rgb_0042.png",
@@ -430,13 +430,13 @@
     {
       "path": "datasets_factory/E30_E38_door_RH/rgb_0043.png",
       "gt": "E30_E38_door_RH",
-      "pred": "E25_door_RH",
+      "pred": "E38_door_LH_RR",
       "correct": false
     },
     {
       "path": "datasets_factory/E30_E38_door_RH/rgb_0044.png",
       "gt": "E30_E38_door_RH",
-      "pred": "E25_door_RH",
+      "pred": "E38_door_LH_RR",
       "correct": false
     },
     {
@@ -460,8 +460,8 @@
     {
       "path": "datasets_factory/E30_E38_door_RH/rgb_0048.png",
       "gt": "E30_E38_door_RH",
-      "pred": "E25_door_RH",
-      "correct": false
+      "pred": "E30_E38_door_RH",
+      "correct": true
     },
     {
       "path": "datasets_factory/E30_E38_door_RH/rgb_0049.png",
@@ -490,14 +490,14 @@
     {
       "path": "datasets_factory/E30_E38_door_RH/rgb_0053.png",
       "gt": "E30_E38_door_RH",
-      "pred": "E25_door_RH",
-      "correct": false
+      "pred": "E30_E38_door_RH",
+      "correct": true
     },
     {
       "path": "datasets_factory/E30_E38_door_RH/rgb_0054.png",
       "gt": "E30_E38_door_RH",
-      "pred": "E25_door_RH",
-      "correct": false
+      "pred": "E30_E38_door_RH",
+      "correct": true
     },
     {
       "path": "datasets_factory/E30_E38_door_RH/rgb_0055.png",
@@ -556,8 +556,8 @@
     {
       "path": "datasets_factory/E30_E38_door_RH/rgb_0064.png",
       "gt": "E30_E38_door_RH",
-      "pred": "E25_door_RH",
-      "correct": false
+      "pred": "E30_E38_door_RH",
+      "correct": true
     },
     {
       "path": "datasets_factory/E30_E38_door_RH/rgb_0065.png",

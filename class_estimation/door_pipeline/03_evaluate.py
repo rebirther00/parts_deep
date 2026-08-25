@@ -287,6 +287,21 @@ def main():
     transform = cfg["transform_fn"](args.image_size)
     all_results = {}
 
+    # DB 기록 (실패해도 평가는 계속)
+    from db.db_log import DBLog
+    db = DBLog()
+    db_model_id = db.find_model(weights_path=os.path.relpath(model_path, PROJECT_DIR),
+                                name=run_name)
+    if db_model_id is None:
+        db_model_id = db.register_model(
+            name=run_name, architecture=type(model).__name__,
+            in_channels=(cfg.get("in_channels", IN_CHANNELS) if args.no_aux
+                         else IN_CHANNELS),
+            num_classes=num_classes, pretrained_base="ImageNet",
+            weights_path=os.path.relpath(model_path, PROJECT_DIR),
+            input_size=f"{args.image_size}x{args.image_size}",
+            description="03_evaluate.py에서 소급 등록")
+
     for variant in [v for v in DATASET_VARIANTS if v in selected]:
         if variant == "original":
             paths = test_paths
@@ -315,6 +330,17 @@ def main():
             cm, class_names,
             f"{args.model_type.upper()} {args.image_size} seed{args.seed}\n{ds_label}",
             cm_path)
+        db.log_evaluation(
+            model_id=db_model_id, dataset_name=variant,
+            eval_type="in_domain" if variant == "original" else "cross_domain",
+            total_samples=result["n_samples"], correct=result["n_correct"],
+            accuracy=result["accuracy"],
+            precision_macro=result["macro_precision"],
+            recall_macro=result["macro_recall"], f1_macro=result["macro_f1"],
+            confusion_matrix=result["confusion_matrix"],
+            per_class_results=result["per_class"],
+            inference_device=str(device),
+            report_path=os.path.relpath(eval_path, PROJECT_DIR))
 
     # 부분 평가 시 기존 결과 보존 (병합 저장)
     merged = dict(existing)
@@ -337,6 +363,7 @@ def main():
     print(f"\n평가 완료: {run_name} ({elapsed:.1f}초)")
     print(f"  결과 저장: {eval_path}")
 
+    db.close()
     finish_logging()
 
 

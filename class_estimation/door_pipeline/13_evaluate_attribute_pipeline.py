@@ -177,6 +177,31 @@ if __name__ == '__main__':
     json.dump(results, open(json_path, 'w', encoding='utf-8'),
               ensure_ascii=False, indent=2)
 
+    # DB 기록 (inference_pipeline: accuracy=class_acc, per_class에 group_acc 포함)
+    from db.db_log import DBLog
+    db = DBLog()
+    # 배포 포인터(attribute_models/vent_unet.pth)면 원 run 이름을 train_info에서 복원
+    _db_name = _mtag
+    _ti = os.path.join(out_dir, 'vent_unet_train_info.json') \
+        if _mtag == 'attribute_models' else os.path.join(out_dir, 'train_info.json')
+    if os.path.exists(_ti):
+        _db_name = json.load(open(_ti)).get('run_name', _mtag)
+    db_model_id = db.find_model(weights_path=args.model, name=_db_name)
+    if db_model_id is None:
+        db_model_id = db.register_model(
+            name=_db_name, architecture='VentUNet', in_channels=3, num_classes=1,
+            weights_path=args.model, input_size='256x256',
+            description='13_evaluate_attribute_pipeline.py에서 소급 등록')
+    db.log_evaluation(
+        model_id=db_model_id, dataset_name=args.base,
+        eval_type='inference_pipeline', total_samples=tot, correct=tot_c,
+        accuracy=results['class_acc'], confusion_matrix=conf.tolist(),
+        per_class_results={'group_acc': results['group_acc'],
+                           'split': args.split, 'n_frames': args.n_frames,
+                           'n_boot': args.n_boot, 'per_class': per_class},
+        inference_device='cuda', report_path=json_path)
+    db.close()
+
     conf_pct = conf / np.maximum(conf.sum(axis=1, keepdims=True), 1) * 100
     fig, ax = plt.subplots(figsize=(9, 8))
     im = ax.imshow(conf_pct, cmap='Blues', vmin=0, vmax=100)

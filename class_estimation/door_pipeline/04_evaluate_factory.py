@@ -504,6 +504,29 @@ def main():
         json.dump(results, f, ensure_ascii=False, indent=2)
     print(f"\n결과 JSON 저장: {json_path}")
 
+    # DB 기록 (cross_domain: 현장 데이터)
+    from db.db_log import DBLog
+    db = DBLog()
+    db_model_id = db.find_model(weights_path=args.model,
+                                name=os.path.basename(model_dir))
+    if db_model_id is None:
+        db_model_id = db.register_model(
+            name=os.path.basename(model_dir), architecture="NoAuxResNet18",
+            in_channels=RGBE_IN_CHANNELS, num_classes=num_classes,
+            pretrained_base="ImageNet", weights_path=args.model,
+            input_size=f"{args.image_size}x{args.image_size}",
+            description="04_evaluate_factory.py에서 소급 등록")
+    db.log_evaluation(
+        model_id=db_model_id, dataset_name=dataset_dir,
+        eval_type="cross_domain", total_samples=total, correct=correct,
+        accuracy=results["accuracy"], precision_macro=results["avg_precision"],
+        recall_macro=results["avg_recall"], f1_macro=results["avg_f1"],
+        confusion_matrix=confusion_matrix,
+        per_class_results={"class_accuracies": results["class_accuracies"],
+                           "found_classes": found_classes},
+        inference_device=str(device), report_path=json_path)
+    db.close()
+
     elapsed = time.time() - total_start
     print(f"\n총 실행 시간: {elapsed:.2f}초")
     print("=" * 70)
