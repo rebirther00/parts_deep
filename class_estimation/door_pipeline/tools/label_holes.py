@@ -9,7 +9,7 @@
   python tools/label_holes.py --extra datasets_field # 추가 디렉터리(<class>/rgb_*.png)
   → http://<이 PC IP>:8090
 
-단축키: 1~6 점 선택 / 클릭 = 현재 점 찍기(자동으로 다음 점) / X 안 보임 / Z 되돌리기
+단축키: 1~8 점 선택 (7·8 = 하단 모서리 홀, 선택) / 클릭 = 현재 점 찍기(자동으로 다음 점) / X 안 보임 / Z 되돌리기
         ←→ 이전·다음 이미지 / 휠 확대·축소 / 드래그(우클릭 또는 스페이스+드래그) 이동 / R 전체 초기화
 """
 import argparse
@@ -26,6 +26,7 @@ POINTS = [
     ('bolt_tl', '볼트홀 좌상', '#3b82f6'), ('bolt_tr', '볼트홀 우상', '#3b82f6'),
     ('bolt_bl', '볼트홀 좌하', '#60a5fa'), ('bolt_br', '볼트홀 우하', '#60a5fa'),
     ('corner_hinge', '모서리 홀 (힌지측)', '#ef4444'), ('corner_latch', '모서리 홀 (래치측)', '#f97316'),
+    ('corner_hinge_bottom', '하단 모서리 홀 (힌지측, 선택)', '#a855f7'), ('corner_latch_bottom', '하단 모서리 홀 (래치측, 선택)', '#d946ef'),
 ]
 
 ap = argparse.ArgumentParser()
@@ -66,7 +67,7 @@ def api_list():
         done = None
         if os.path.exists(p):
             d = json.load(open(p))
-            done = sum(1 for k, _, _ in POINTS if d['points'].get(k) is not None or d['visible'].get(k) is False)
+            done = sum(1 for k, _, _ in POINTS[:6] if d['points'].get(k) is not None or d['visible'].get(k) is False)
         out.append(dict(id=it['id'], key=it['key'], cls=it['cls'], idx=it['idx'], src=it['src'], done=done))
     return jsonify(dict(items=out, points=POINTS))
 
@@ -113,9 +114,9 @@ kbd{background:#333;border-radius:3px;padding:0 4px;font-size:11px}
  <div id="pts"></div>
  <div style="display:flex;gap:6px"><button onclick="nav(-1)">◀ 이전</button><button onclick="nav(1)">다음 ▶</button><button onclick="resetAll()">초기화 R</button></div>
  <div style="font-size:12px;line-height:1.7;opacity:.85">
- <kbd>1</kbd>~<kbd>6</kbd> 점 선택 · 클릭 = 찍기(다음 점으로) · <kbd>X</kbd> 안 보임 · <kbd>Z</kbd> 되돌리기<br>
+ <kbd>1</kbd>~<kbd>8</kbd> 점 선택 · 클릭 = 찍기(다음 점으로) · <kbd>X</kbd> 안 보임 · <kbd>Z</kbd> 되돌리기<br>
  <kbd>←</kbd><kbd>→</kbd> 이미지 · 휠 확대 · 우클릭 드래그 이동 · <kbd>F</kbd> 맞춤<br>
- 순서: 볼트홀 4개(각공 주변, 좌상→우상→좌하→우하) → 모서리 홀 힌지측 → 래치측.<br>
+ 순서: 볼트홀 4개(각공 주변, 좌상→우상→좌하→우하) → 상단 모서리 홀 힌지측 → 래치측 → (선택) 하단 모서리 홀 2개.<br>
  저장은 자동입니다.</div>
  <div id="prog" style="font-size:12px"></div>
  <div id="list"></div>
@@ -135,8 +136,8 @@ function renderPts(){const el=document.getElementById('pts');el.innerHTML='';PTS
  const st=lab.visible[n]===false?'안 보임':(lab.points[n]?`(${lab.points[n][0].toFixed(1)}, ${lab.points[n][1].toFixed(1)})`:'—');
  d.innerHTML=`<span><b style="color:${p[2]}">${k+1}</b> ${p[1]}</span><span class="st">${st}</span>`;d.onclick=()=>{curPt=k;renderPts();draw()};el.appendChild(d)})}
 function renderList(){const el=document.getElementById('list');el.innerHTML='';let done=0;ITEMS.forEach((it,i)=>{const d=document.createElement('div');d.className=i==cur?'cur':'';
- const c=it.done==null?'none':(it.done>=PTS.length?'ok':'part');if(it.done>=PTS.length)done++;
- d.innerHTML=`<span>${it.cls} #${it.idx}</span><span class="${c}">${it.done==null?'':it.done+'/'+PTS.length}</span>`;d.onclick=()=>open(i);el.appendChild(d)});
+ const REQ=6;const c=it.done==null?'none':(it.done>=REQ?'ok':'part');if(it.done>=REQ)done++;
+ d.innerHTML=`<span>${it.cls} #${it.idx}</span><span class="${c}">${it.done==null?'':it.done+'/'+REQ}</span>`;d.onclick=()=>open(i);el.appendChild(d)});
  document.getElementById('prog').textContent=`완료 ${done}/${ITEMS.length}`;const c=el.children[cur];if(c)c.scrollIntoView({block:'nearest'})}
 function draw(){X.clearRect(0,0,C.width,C.height);if(!img.width)return;X.imageSmoothingEnabled=scale<2;X.drawImage(img,ox,oy,img.width*scale,img.height*scale);
  PTS.forEach((p,k)=>{const q=lab.points[p[0]];if(!q)return;const x=ox+q[0]*scale,y=oy+q[1]*scale;X.strokeStyle=p[2];X.lineWidth=k==curPt?3:1.5;X.beginPath();X.arc(x,y,9,0,7);X.stroke();X.beginPath();X.moveTo(x-14,y);X.lineTo(x+14,y);X.moveTo(x,y-14);X.lineTo(x,y+14);X.stroke();X.fillStyle=p[2];X.font='12px sans-serif';X.fillText(k+1,x+11,y-11)});
@@ -145,7 +146,7 @@ function drawLoupe(){if(!mouse||!img.width){LX.clearRect(0,0,220,220);return}con
  LX.drawImage(img,ix-w/2,iy-w/2,w,w,0,0,220,220);LX.strokeStyle='#0f0';LX.lineWidth=1;LX.beginPath();LX.moveTo(110,0);LX.lineTo(110,220);LX.moveTo(0,110);LX.lineTo(220,110);LX.stroke();
  PTS.forEach((p,k)=>{const q=lab.points[p[0]];if(!q)return;const x=(q[0]-ix)*z+110,y=(q[1]-iy)*z+110;if(x<0||y<0||x>220||y>220)return;LX.strokeStyle=p[2];LX.beginPath();LX.arc(x,y,8,0,7);LX.stroke()})}
 async function save(){const it=ITEMS[cur];await fetch('/api/label/'+it.id,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(lab)});
- it.done=PTS.reduce((a,p)=>a+((lab.points[p[0]]!=null||lab.visible[p[0]]===false)?1:0),0);renderList()}
+ it.done=PTS.slice(0,6).reduce((a,p)=>a+((lab.points[p[0]]!=null||lab.visible[p[0]]===false)?1:0),0);renderList()}
 function setPt(x,y){const n=PTS[curPt][0];hist.push(JSON.stringify(lab));lab.points[n]=[+x.toFixed(1),+y.toFixed(1)];lab.visible[n]=true;save();
  const nx=PTS.findIndex((p,k)=>k>curPt&&lab.points[p[0]]==null&&lab.visible[p[0]]!==false);if(nx>=0)curPt=nx;renderPts();draw()}
 M.addEventListener('mousedown',e=>{if(e.button==2||e.shiftKey){drag={x:e.clientX,y:e.clientY,ox,oy};return}
@@ -155,7 +156,7 @@ M.addEventListener('mouseup',()=>drag=null);M.addEventListener('contextmenu',e=>
 M.addEventListener('wheel',e=>{e.preventDefault();const r=C.getBoundingClientRect();const mx=e.clientX-r.left,my=e.clientY-r.top;const f=e.deltaY<0?1.25:0.8;const ns=Math.max(0.1,Math.min(20,scale*f));ox=mx-(mx-ox)*ns/scale;oy=my-(my-oy)*ns/scale;scale=ns;draw()},{passive:false});
 function nav(d){open(cur+d)}
 function resetAll(){hist.push(JSON.stringify(lab));PTS.forEach(p=>{lab.points[p[0]]=null;lab.visible[p[0]]=true});curPt=0;save();renderPts();draw()}
-document.addEventListener('keydown',e=>{if(e.key>='1'&&e.key<='6'){curPt=+e.key-1;renderPts();draw()}
+document.addEventListener('keydown',e=>{if(e.key>='1'&&e.key<='8'){curPt=+e.key-1;renderPts();draw()}
  else if(e.key=='ArrowRight'){nav(1)}else if(e.key=='ArrowLeft'){nav(-1)}
  else if(e.key=='x'||e.key=='X'){const n=PTS[curPt][0];hist.push(JSON.stringify(lab));lab.points[n]=null;lab.visible[n]=false;save();const nx=PTS.findIndex((p,k)=>k>curPt&&lab.points[p[0]]==null&&lab.visible[p[0]]!==false);if(nx>=0)curPt=nx;renderPts();draw()}
  else if(e.key=='z'||e.key=='Z'){if(hist.length){lab=JSON.parse(hist.pop());save();renderPts();draw()}}
