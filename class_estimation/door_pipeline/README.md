@@ -78,6 +78,24 @@ frames = [frame_scores(rgb, depth_mm, mask, net, templates) for ...]  # 도어�
 pred_class, group, scores = decide(frames)
 ```
 
+
+## C. 홀 랜드마크 판별기 (2026-08-26, 1순위 판정)
+
+상단 모서리 프레임 홀 2개의 거리 D(=도어 폭−106mm)로 8종을 판정한다. CNN이 홀 6점(래치 볼트홀 4 + 모서리 홀 2)을
+찾고, depth 평면상 거리 × K_DEPTH(카메라 모드별 캘리브레이션) → CAD D 최근접. 볼트 프레임 기하 게이트에 걸리면 보류.
+
+```bash
+python tools/label_holes.py --per-class 15 --extra datasets_field   # 라벨링 도구 (:8090) → labels/holes/
+python 15_train_hole_landmarks.py                                   # 학습 → attribute_models/hole_landmarks/model.pth
+python 16_evaluate_hole_classifier.py                               # test 분할·datasets 전체·현장 평가 (+DB 기록)
+python 14_realtime_inference_attribute.py --replay datasets_field/E25_door_RH_s_091317   # 홀 판별기 1순위, 속성 파이프라인 폴백 (--no_holes 로 비활성)
+```
+
+- 평가(라벨 학습분 제외): test 분할 134/189 판정·**100%**, datasets 전체 814/1162 판정·**99.0%**, 현장 16/16·**100%**.
+  보류(~30%)는 힌지측 홀이 프레임 밖이거나 경계 근접 — 사무실 촬영 프레이밍 문제, 현장은 0%.
+- 중앙 보강대 패드 홀은 옵션/리비전에 따라 달라 사용 금지. 분석 기록: `report/hole_analysis/`.
+- API `/api/inference_result`에 `source`(hole/attr/conflict)와 `hole{pred, D_mm, n_judged, gate, points}` 추가.
+
 ## 산출물/데이터 위치
 
 - `artifacts/` — CNN 모델 (rgbe_noaux_448_seed42 이식됨; *.pth는 git 미추적)

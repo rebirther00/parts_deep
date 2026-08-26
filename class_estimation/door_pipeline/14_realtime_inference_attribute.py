@@ -30,6 +30,7 @@ from flask import Flask, Response, jsonify, render_template
 from attribute_utils import (
     CLASSES, GROUP, decide, frame_scores, load_templates, load_vent_unet)
 from dimension_utils import _load_mobile_sam, refine_mask
+import hole_classifier
 
 DOOR_DIR = os.path.dirname(os.path.abspath(__file__))
 REPO_DIR = os.path.dirname(os.path.dirname(DOOR_DIR))
@@ -56,6 +57,10 @@ parser.add_argument('--fp16', action='store_true',
                     help='FP16 autocast (Jetson GPU 단계 가속). 동일 프레임 '
                          'A/B에서 판정 100% 일치 검증됨')
 parser.add_argument('--device', type=str, default='cuda')
+parser.add_argument('--no_holes', action='store_true',
+                    help='홀 랜드마크 판별기 비활성 (속성 파이프라인만)')
+parser.add_argument('--hole_min_judged', type=int, default=3,
+                    help='홀 판별 채택에 필요한 윈도 내 판정 프레임 수 (기본 3)')
 args = parser.parse_args()
 
 if args.model is None:
@@ -145,14 +150,16 @@ def make_mask(sam, rgb):
     return masks[best].astype(np.uint8) * 255
 
 
-def inference_loop(source, net, templates, sam):
+def inference_loop(source, net, templates, sam, hole=None):
     global inference_result, latest_frame
     window = collections.deque(maxlen=args.n_frames)
+    hole_window = collections.deque(maxlen=args.n_frames)
     cached_mask = None
     frame_i = 0
     while True:
         if reset_event.is_set():
             window.clear()
+            hole_window.clear()
             cached_mask = None
             reset_event.clear()
         rgb, depth = source.get()
@@ -183,6 +190,31 @@ def inference_loop(source, net, templates, sam):
         except Exception as e:
             pred, grp, probs, conf = f'오류: {e}', '-', [], 0.0
             sam_ms, stage_ms = 0.0, {}
+        # ── 홀 랜드마크 판별기 (1순위) + 속성 파이프라인(폴백/교차검증) ──
+        hole_info = None
+        source_tag = 'attr'
+        if hole is not None:
+            th = time.time()
+            try:
+                hr = hole_classifier.classify(hole[0], hole[1], rgb, depth)
+                hole_window.append(hr)
+                agg = hole_classifier.aggregate(list(hole_window))
+                hole_info = {
+                    'pred': agg['pred'], 'group': agg.get('group'),
+                    'D_mm': float(round(agg['D_mm'], 1)) if agg['D_mm'] else None,
+                    'n_judged': agg['n_judged'], 'gate': hr['gate'],
+                    'frame_D_mm': float(round(hr['D_mm'], 1)) if hr['D_mm'] else None,
+                    'points': {c: [[float(round(p[0], 1)), float(round(p[1], 1)), float(round(p[2], 2))] for p in v]
+                               for c, v in hr['points'].items()},
+                    'ms': round((time.time() - th) * 1000, 1),
+                }
+                if agg['n_judged'] >= args.hole_min_judged:
+                    pred, grp, source_tag = agg['pred'], agg['group'], 'hole'
+                    conf = float(min(100.0, 100.0 * agg['n_judged'] / args.n_frames))
+                elif agg['n_judged'] >= 1 and grp not in ('-', agg.get('group')):
+                    pred, source_tag = f'보류 (홀:{agg["group"]} vs 속성:{grp})', 'conflict'
+            except Exception as e:
+                hole_info = {'error': str(e)}
         frame_i += 1
         elapsed_ms = (time.time() - t0) * 1000
         with result_lock:
@@ -196,6 +228,8 @@ def inference_loop(source, net, templates, sam):
                 'sam_ms': round(sam_ms, 1),
                 'stage_ms': stage_ms,
                 'window': len(window),
+                'source': source_tag,
+                'hole': hole_info,
                 'timestamp': time.time(),
             }
 
@@ -217,8 +251,16 @@ def generate_mjpeg():
         overlay = frame.copy()
         cv2.rectangle(overlay, (0, 0), (480, 130), (0, 0, 0), -1)
         cv2.addWeighted(overlay, 0.6, frame, 0.4, 0, frame)
+        hi = r.get('hole') or {}
+        sc = 960.0 / w if w > 960 else 1.0
+        for c, col in (('bolt', (255, 0, 0)), ('corner_hinge', (0, 0, 255)), ('corner_latch', (0, 140, 255))):
+            for p in (hi.get('points') or {}).get(c, []):
+                cv2.circle(frame, (int(p[0] * sc), int(p[1] * sc)), 6, col, 2)
+        if hi.get('D_mm'):
+            cv2.putText(frame, f"hole D={hi['D_mm']:.0f}mm judged {hi['n_judged']}/{args.n_frames} [{hi.get('gate')}]",
+                        (10, 110), cv2.FONT_HERSHEY_SIMPLEX, 0.55, (0, 200, 255), 1)
         color = (0, 255, 0) if r['confidence'] > 60 else (0, 200, 255)
-        cv2.putText(frame, str(r['class']), (10, 42),
+        cv2.putText(frame, f"{r['class']} ({r.get('source', '')})", (10, 42),
                     cv2.FONT_HERSHEY_SIMPLEX, 1.1, color, 2)
         cv2.putText(frame,
                     f"group {r['group']} | {r['confidence']:.1f}% | "
@@ -274,8 +316,14 @@ if __name__ == '__main__':
     templates = load_templates()
     sam = _load_mobile_sam(SAM_CKPT, args.device)
     source = ReplaySource(args.replay) if args.replay else ZedSource()
+    hole = None
+    if not args.no_holes and os.path.exists(hole_classifier.MODEL_PATH):
+        hole = hole_classifier.load_model(device=args.device)
+        print(f'홀 랜드마크 판별기: {hole_classifier.MODEL_PATH} (1순위, 속성 파이프라인은 폴백)')
+    else:
+        print('홀 랜드마크 판별기 비활성 — 속성 파이프라인만 사용')
     threading.Thread(target=inference_loop,
-                     args=(source, net, templates, sam),
+                     args=(source, net, templates, sam, hole),
                      daemon=True).start()
     print(f'서버 시작: http://0.0.0.0:{args.port}')
     app.run(host='0.0.0.0', port=args.port, threaded=True)
