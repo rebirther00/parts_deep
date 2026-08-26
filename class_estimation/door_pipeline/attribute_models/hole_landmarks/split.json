@@ -1,0 +1,31 @@
+{
+ "holdout": [
+  "datasets__E25_door_LH_FRT__0070",
+  "datasets__E25_door_LH_FRT__0080",
+  "datasets__E25_door_LH_FRT__0130",
+  "datasets__E25_door_LH_RR__0020",
+  "datasets__E25_door_LH_RR__0090",
+  "datasets__E25_door_LH_RR__0120",
+  "datasets__E25_door_RH__0030",
+  "datasets__E25_door_RH__0070",
+  "datasets__E25_door_RH__0080",
+  "datasets__E30_E38_door_RH__0060",
+  "datasets__E30_E38_door_RH__0080",
+  "datasets__E30_E38_door_RH__0120",
+  "datasets__E30_door_LH_FRT__0020",
+  "datasets__E30_door_LH_FRT__0050",
+  "datasets__E30_door_LH_FRT__0070",
+  "datasets__E30_door_LH_RR__0070",
+  "datasets__E30_door_LH_RR__0080",
+  "datasets__E30_door_LH_RR__0110",
+  "datasets__E38_door_LH_FRT__0090",
+  "datasets__E38_door_LH_FRT__0110",
+  "datasets__E38_door_LH_FRT__0140",
+  "datasets__E38_door_LH_RR__0000",
+  "datasets__E38_door_LH_RR__0020",
+  "datasets__E38_door_LH_RR__0140",
+  "field__E25_door_RH_s_091317__0000",
+  "field__E25_door_RH_s_091317__0002",
+  "field__E25_door_RH_s_091317__0015"
+ ]
+}

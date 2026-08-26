@@ -1,0 +1,5246 @@
+{
+ "holdout": [
+  {
+   "key": "datasets__E25_door_LH_FRT__0070",
+   "cls": "E25_door_LH_FRT",
+   "src": "datasets",
+   "bolt_err_px": [
+    0.14094084133069762,
+    1.1064897159646019,
+    0.33375408085281955,
+    0.6980363048784237
+   ],
+   "bolt_n_det": 4,
+   "bolt_n_gt": 4,
+   "bolt_score": [
+    1.05,
+    1.035,
+    1.023,
+    0.991
+   ],
+   "corner_hinge_err_px": [
+    1.006771779351827
+   ],
+   "corner_hinge_n_det": 1,
+   "corner_hinge_n_gt": 1,
+   "corner_hinge_score": [
+    0.964
+   ],
+   "corner_latch_err_px": [
+    1.0789277122235685
+   ],
+   "corner_latch_n_det": 1,
+   "corner_latch_n_gt": 1,
+   "corner_latch_score": [
+    0.991
+   ],
+   "D_mm": 737.7789075704219,
+   "D_src": "depth",
+   "D_bolt_mm": 700.9532470703125,
+   "gate": "ok",
+   "pred": "E25_door_LH_FRT",
+   "D_gt_mm": 699.4869546932008
+  },
+  {
+   "key": "datasets__E25_door_LH_FRT__0080",
+   "cls": "E25_door_LH_FRT",
+   "src": "datasets",
+   "bolt_err_px": [
+    0.9052675384856019,
+    1.0104881746040741,
+    0.6160793226230982,
+    0.8078998674357507
+   ],
+   "bolt_n_det": 4,
+   "bolt_n_gt": 4,
+   "bolt_score": [
+    0.981,
+    0.958,
+    0.954,
+    0.931
+   ],
+   "corner_hinge_err_px": [
+    1.687685206100589
+   ],
+   "corner_hinge_n_det": 1,
+   "corner_hinge_n_gt": 1,
+   "corner_hinge_score": [
+    0.999
+   ],
+   "corner_latch_err_px": [
+    1.0445160282626527
+   ],
+   "corner_latch_n_det": 1,
+   "corner_latch_n_gt": 1,
+   "corner_latch_score": [
+    0.957
+   ],
+   "D_mm": 729.696080264889,
+   "D_src": "depth",
+   "D_bolt_mm": 722.6642456054688,
+   "gate": "ok",
+   "pred": "E25_door_LH_FRT",
+   "D_gt_mm": 721.9293929661773
+  },
+  {
+   "key": "datasets__E25_door_LH_FRT__0130",
+   "cls": "E25_door_LH_FRT",
+   "src": "datasets",
+   "bolt_err_px": [
+    0.5534464862261945,
+    0.8088442741439212,
+    1.5240503814517385,
+    0.31826258867302337
+   ],
+   "bolt_n_det": 4,
+   "bolt_n_gt": 4,
+   "bolt_score": [
+    0.999,
+    0.978,
+    0.975,
+    0.966
+   ],
+   "corner_hinge_err_px": [
+    0.771877451846441
+   ],
+   "corner_hinge_n_det": 1,
+   "corner_hinge_n_gt": 1,
+   "corner_hinge_score": [
+    0.951
+   ],
+   "corner_latch_err_px": [
+    0.8283844779719902
+   ],
+   "corner_latch_n_det": 1,
+   "corner_latch_n_gt": 1,
+   "corner_latch_score": [
+    0.942
+   ],
+   "D_mm": 723.4246200266623,
+   "D_src": "depth",
+   "D_bolt_mm": 682.4544067382812,
+   "gate": "ok",
+   "pred": "E25_door_LH_FRT",
+   "D_gt_mm": 683.8741274714073
+  },
+  {
+   "key": "datasets__E25_door_LH_RR__0020",
+   "cls": "E25_door_LH_RR",
+   "src": "datasets",
+   "bolt_err_px": [
+    1.1530492114312145,
+    1.0855337599943218,
+    0.39079960854483214,
+    1.6002861438097509
+   ],
+   "bolt_n_det": 4,
+   "bolt_n_gt": 4,
+   "bolt_score": [
+    1.022,
+    1.01,
+    0.976,
+    0.96
+   ],
+   "corner_hinge_err_px": [],
+   "corner_hinge_n_det": 1,
+   "corner_hinge_n_gt": 0,
+   "corner_hinge_score": [
+    0.163
+   ],
+   "corner_latch_err_px": [
+    0.3840248412563606
+   ],
+   "corner_latch_n_det": 1,
+   "corner_latch_n_gt": 1,
+   "corner_latch_score": [
+    1.009
+   ],
+   "D_mm": 3.7074685593916223,
+   "D_src": "depth",
+   "D_bolt_mm": 4.136940002441406,
+   "gate": "same_side"
+  },
+  {
+   "key": "datasets__E25_door_LH_RR__0090",
+   "cls": "E25_door_LH_RR",
+   "src": "datasets",
+   "bolt_err_px": [
+    0.951774942551956,
+    0.6400587818645667,
+    0.8232781186300381,
+    1.8636684745113106
+   ],
+   "bolt_n_det": 4,
+   "bolt_n_gt": 4,
+   "bolt_score": [
+    1.026,
+    0.978,
+    0.973,
+    0.951
+   ],
+   "corner_hinge_err_px": [
+    1.447326179015754
+   ],
+   "corner_hinge_n_det": 1,
+   "corner_hinge_n_gt": 1,
+   "corner_hinge_score": [
+    0.976
+   ],
+   "corner_latch_err_px": [
+    1.1931020100959162
+   ],
+   "corner_latch_n_det": 1,
+   "corner_latch_n_gt": 1,
+   "corner_latch_score": [
+    1.01
+   ],
+   "D_mm": 1027.7116454490108,
+   "D_src": "depth",
+   "D_bolt_mm": 917.6049194335938,
+   "gate": "ok",
+   "pred": "E25_door_LH_RR",
+   "D_gt_mm": 918.1427808967372
+  },
+  {
+   "key": "datasets__E25_door_LH_RR__0120",
+   "cls": "E25_door_LH_RR",
+   "src": "datasets",
+   "bolt_err_px": [
+    2.764275094273876,
+    1.3992154871627276,
+    0.9902504105181855,
+    1.79893839396667
+   ],
+   "bolt_n_det": 4,
+   "bolt_n_gt": 4,
+   "bolt_score": [
+    1.055,
+    1.0,
+    0.971,
+    0.963
+   ],
+   "corner_hinge_err_px": [
+    1.0510597941121131
+   ],
+   "corner_hinge_n_det": 1,
+   "corner_hinge_n_gt": 1,
+   "corner_hinge_score": [
+    0.969
+   ],
+   "corner_latch_err_px": [
+    1.4111130010969715
+   ],
+   "corner_latch_n_det": 1,
+   "corner_latch_n_gt": 1,
+   "corner_latch_score": [
+    0.976
+   ],
+   "D_mm": 1040.005828486339,
+   "D_src": "depth",
+   "D_bolt_mm": 1083.45556640625,
+   "gate": "ok",
+   "pred": "E25_door_LH_RR",
+   "D_gt_mm": 1091.8578023011903
+  },
+  {
+   "key": "datasets__E25_door_RH__0030",
+   "cls": "E25_door_RH",
+   "src": "datasets",
+   "bolt_err_px": [
+    1.2311705767604535,
+    0.7906033842803376,
+    1.86760917993612,
+    0.978193683162834
+   ],
+   "bolt_n_det": 4,
+   "bolt_n_gt": 4,
+   "bolt_score": [
+    1.012,
+    1.003,
+    0.977,
+    0.97
+   ],
+   "corner_hinge_err_px": [
+    1.9398695901001577
+   ],
+   "corner_hinge_n_det": 1,
+   "corner_hinge_n_gt": 1,
+   "corner_hinge_score": [
+    0.992
+   ],
+   "corner_latch_err_px": [
+    0.6672285674809667
+   ],
+   "corner_latch_n_det": 1,
+   "corner_latch_n_gt": 1,
+   "corner_latch_score": [
+    0.973
+   ],
+   "D_mm": 889.0050080175967,
+   "D_src": "depth",
+   "D_bolt_mm": 932.697509765625,
+   "gate": "ok",
+   "pred": "E25_door_RH",
+   "D_gt_mm": 931.235258420845
+  },
+  {
+   "key": "datasets__E25_door_RH__0070",
+   "cls": "E25_door_RH",
+   "src": "datasets",
+   "bolt_err_px": [
+    1.1825099379830588,
+    1.415130894029479,
+    1.1360392106508208,
+    1.5703228590158615
+   ],
+   "bolt_n_det": 4,
+   "bolt_n_gt": 4,
+   "bolt_score": [
+    1.023,
+    1.01,
+    1.003,
+    0.997
+   ],
+   "corner_hinge_err_px": [
+    1.761579102016172
+   ],
+   "corner_hinge_n_det": 1,
+   "corner_hinge_n_gt": 1,
+   "corner_hinge_score": [
+    0.967
+   ],
+   "corner_latch_err_px": [
+    2.0571261689476645
+   ],
+   "corner_latch_n_det": 1,
+   "corner_latch_n_gt": 1,
+   "corner_latch_score": [
+    0.617
+   ],
+   "D_mm": 887.1352626085555,
+   "D_src": "depth",
+   "D_bolt_mm": 908.49462890625,
+   "gate": "near_border",
+   "D_gt_mm": 921.8261474045757
+  },
+  {
+   "key": "datasets__E25_door_RH__0080",
+   "cls": "E25_door_RH",
+   "src": "datasets",
+   "bolt_err_px": [
+    0.36317849115909134,
+    1.2035149230385442,
+    1.1997925833045415,
+    0.7670099859112945
+   ],
+   "bolt_n_det": 4,
+   "bolt_n_gt": 4,
+   "bolt_score": [
+    1.026,
+    1.016,
+    0.993,
+    0.975
+   ],
+   "corner_hinge_err_px": [
+    0.7107999296494829
+   ],
+   "corner_hinge_n_det": 1,
+   "corner_hinge_n_gt": 1,
+   "corner_hinge_score": [
+    1.012
+   ],
+   "corner_latch_err_px": [
+    1.2899064538040923
+   ],
+   "corner_latch_n_det": 1,
+   "corner_latch_n_gt": 1,
+   "corner_latch_score": [
+    0.993
+   ],
+   "D_mm": 887.9367785411137,
+   "D_src": "depth",
+   "D_bolt_mm": 885.1582641601562,
+   "gate": "ok",
+   "pred": "E25_door_RH",
+   "D_gt_mm": 882.6557222949524
+  },
+  {
+   "key": "datasets__E30_E38_door_RH__0060",
+   "cls": "E30_E38_door_RH",
+   "src": "datasets",
+   "bolt_err_px": [
+    0.6264595542916326,
+    0.7467864500807267,
+    1.0097606264983074,
+    1.5107794971581159
+   ],
+   "bolt_n_det": 4,
+   "bolt_n_gt": 4,
+   "bolt_score": [
+    1.052,
+    1.026,
+    1.023,
+    0.985
+   ],
+   "corner_hinge_err_px": [],
+   "corner_hinge_n_det": 1,
+   "corner_hinge_n_gt": 0,
+   "corner_hinge_score": [
+    0.372
+   ],
+   "corner_latch_err_px": [
+    0.9261127956665937
+   ],
+   "corner_latch_n_det": 1,
+   "corner_latch_n_gt": 1,
+   "corner_latch_score": [
+    1.058
+   ],
+   "D_mm": 1028.8906542724283,
+   "D_src": "depth",
+   "gate": "ok",
+   "pred": "E25_door_LH_RR"
+  },
+  {
+   "key": "datasets__E30_E38_door_RH__0080",
+   "cls": "E30_E38_door_RH",
+   "src": "datasets",
+   "bolt_err_px": [
+    1.9729058183355341,
+    0.7824223543604631,
+    2.1062644355587703,
+    1.2229514999508495
+   ],
+   "bolt_n_det": 4,
+   "bolt_n_gt": 4,
+   "bolt_score": [
+    1.027,
+    1.011,
+    0.991,
+    0.951
+   ],
+   "corner_hinge_err_px": [],
+   "corner_hinge_n_det": 1,
+   "corner_hinge_n_gt": 0,
+   "corner_hinge_score": [
+    0.261
+   ],
+   "corner_latch_err_px": [
+    1.749757068666083
+   ],
+   "corner_latch_n_det": 1,
+   "corner_latch_n_gt": 1,
+   "corner_latch_score": [
+    0.967
+   ],
+   "D_mm": 2.809897270864436,
+   "D_src": "depth",
+   "D_bolt_mm": 2.850269079208374,
+   "gate": "same_side"
+  },
+  {
+   "key": "datasets__E30_E38_door_RH__0120",
+   "cls": "E30_E38_door_RH",
+   "src": "datasets",
+   "bolt_err_px": [
+    1.6345740565533902,
+    1.424160223954767,
+    1.3780177785749466,
+    0.5913038718226401
+   ],
+   "bolt_n_det": 4,
+   "bolt_n_gt": 4,
+   "bolt_score": [
+    1.003,
+    0.972,
+    0.938,
+    0.936
+   ],
+   "corner_hinge_err_px": [],
+   "corner_hinge_n_det": 1,
+   "corner_hinge_n_gt": 0,
+   "corner_hinge_score": [
+    0.353
+   ],
+   "corner_latch_err_px": [
+    1.0524323593974474
+   ],
+   "corner_latch_n_det": 1,
+   "corner_latch_n_gt": 1,
+   "corner_latch_score": [
+    0.963
+   ],
+   "D_mm": 4.091108823286655,
+   "D_src": "depth",
+   "gate": "same_side"
+  },
+  {
+   "key": "datasets__E30_door_LH_FRT__0020",
+   "cls": "E30_door_LH_FRT",
+   "src": "datasets",
+   "bolt_err_px": [
+    0.7788056286842083,
+    0.6623597368003734,
+    0.7611165141856064,
+    1.430568387214226
+   ],
+   "bolt_n_det": 4,
+   "bolt_n_gt": 4,
+   "bolt_score": [
+    0.995,
+    0.99,
+    0.985,
+    0.962
+   ],
+   "corner_hinge_err_px": [],
+   "corner_hinge_n_det": 0,
+   "corner_hinge_n_gt": 0,
+   "corner_hinge_score": [],
+   "corner_latch_err_px": [
+    0.9350795220605175
+   ],
+   "corner_latch_n_det": 1,
+   "corner_latch_n_gt": 1,
+   "corner_latch_score": [
+    0.949
+   ],
+   "gate": "no_corner"
+  },
+  {
+   "key": "datasets__E30_door_LH_FRT__0050",
+   "cls": "E30_door_LH_FRT",
+   "src": "datasets",
+   "bolt_err_px": [],
+   "bolt_n_det": 0,
+   "bolt_n_gt": 0,
+   "bolt_score": [],
+   "corner_hinge_err_px": [
+    2.2370516676842604
+   ],
+   "corner_hinge_n_det": 1,
+   "corner_hinge_n_gt": 1,
+   "corner_hinge_score": [
+    1.007
+   ],
+   "corner_latch_err_px": [],
+   "corner_latch_n_det": 1,
+   "corner_latch_n_gt": 0,
+   "corner_latch_score": [
+    0.31
+   ],
+   "gate": "no_frame"
+  },
+  {
+   "key": "datasets__E30_door_LH_FRT__0070",
+   "cls": "E30_door_LH_FRT",
+   "src": "datasets",
+   "bolt_err_px": [
+    1.5152613880206172,
+    1.1359529475987755,
+    1.90234906471967,
+    1.1438217453915158
+   ],
+   "bolt_n_det": 4,
+   "bolt_n_gt": 4,
+   "bolt_score": [
+    0.997,
+    0.975,
+    0.956,
+    0.951
+   ],
+   "corner_hinge_err_px": [],
+   "corner_hinge_n_det": 1,
+   "corner_hinge_n_gt": 0,
+   "corner_hinge_score": [
+    0.198
+   ],
+   "corner_latch_err_px": [
+    1.4257370096031798
+   ],
+   "corner_latch_n_det": 1,
+   "corner_latch_n_gt": 1,
+   "corner_latch_score": [
+    0.946
+   ],
+   "D_mm": 1.2589925094588064,
+   "D_src": "depth",
+   "D_bolt_mm": 1.2791889905929565,
+   "gate": "same_side"
+  },
+  {
+   "key": "datasets__E30_door_LH_RR__0070",
+   "cls": "E30_door_LH_RR",
+   "src": "datasets",
+   "bolt_err_px": [
+    1.6309662789581174,
+    1.1256445058438367,
+    2.087426726438655,
+    0.4016564665591746
+   ],
+   "bolt_n_det": 4,
+   "bolt_n_gt": 4,
+   "bolt_score": [
+    1.045,
+    1.003,
+    0.964,
+    0.956
+   ],
+   "corner_hinge_err_px": [
+    1.1389994800236392
+   ],
+   "corner_hinge_n_det": 1,
+   "corner_hinge_n_gt": 1,
+   "corner_hinge_score": [
+    0.966
+   ],
+   "corner_latch_err_px": [],
+   "corner_latch_n_det": 1,
+   "corner_latch_n_gt": 0,
+   "corner_latch_score": [
+    0.276
+   ],
+   "D_mm": 1150.155467492833,
+   "D_src": "depth",
+   "D_bolt_mm": 1097.4393310546875,
+   "gate": "near_border"
+  },
+  {
+   "key": "datasets__E30_door_LH_RR__0080",
+   "cls": "E30_door_LH_RR",
+   "src": "datasets",
+   "bolt_err_px": [
+    0.7384067030186107,
+    0.6916331360748795,
+    1.8456277148165923,
+    1.4084290274981397
+   ],
+   "bolt_n_det": 4,
+   "bolt_n_gt": 4,
+   "bolt_score": [
+    1.006,
+    1.001,
+    0.966,
+    0.935
+   ],
+   "corner_hinge_err_px": [
+    1.438906235758574
+   ],
+   "corner_hinge_n_det": 1,
+   "corner_hinge_n_gt": 1,
+   "corner_hinge_score": [
+    0.954
+   ],
+   "corner_latch_err_px": [
+    1.2479151184607642
+   ],
+   "corner_latch_n_det": 1,
+   "corner_latch_n_gt": 1,
+   "corner_latch_score": [
+    1.063
+   ],
+   "D_mm": 1158.4107715387822,
+   "D_src": "depth",
+   "D_bolt_mm": 1089.759521484375,
+   "gate": "ok",
+   "pred": "E30_door_LH_RR",
+   "D_gt_mm": 1095.8705847329786
+  },
+  {
+   "key": "datasets__E30_door_LH_RR__0110",
+   "cls": "E30_door_LH_RR",
+   "src": "datasets",
+   "bolt_err_px": [
+    2.0583796974044475,
+    0.41858510112940545,
+    1.5010758182863813,
+    0.7662702707134379
+   ],
+   "bolt_n_det": 4,
+   "bolt_n_gt": 4,
+   "bolt_score": [
+    0.988,
+    0.968,
+    0.948,
+    0.935
+   ],
+   "corner_hinge_err_px": [
+    0.3031476368759472
+   ],
+   "corner_hinge_n_det": 1,
+   "corner_hinge_n_gt": 1,
+   "corner_hinge_score": [
+    0.977
+   ],
+   "corner_latch_err_px": [
+    0.9689717853965629
+   ],
+   "corner_latch_n_det": 1,
+   "corner_latch_n_gt": 1,
+   "corner_latch_score": [
+    1.007
+   ],
+   "D_mm": 1164.5291947414573,
+   "D_src": "depth",
+   "D_bolt_mm": 1147.2310791015625,
+   "gate": "ok",
+   "pred": "E30_door_LH_RR",
+   "D_gt_mm": 1155.0376899665735
+  },
+  {
+   "key": "datasets__E38_door_LH_FRT__0090",
+   "cls": "E38_door_LH_FRT",
+   "src": "datasets",
+   "bolt_err_px": [
+    0.7750869968446018,
+    0.6476888960144391,
+    0.39363050085556633,
+    1.680500437048935
+   ],
+   "bolt_n_det": 4,
+   "bolt_n_gt": 4,
+   "bolt_score": [
+    1.043,
+    0.984,
+    0.971,
+    0.953
+   ],
+   "corner_hinge_err_px": [
+    1.3760259929412144
+   ],
+   "corner_hinge_n_det": 1,
+   "corner_hinge_n_gt": 1,
+   "corner_hinge_score": [
+    1.004
+   ],
+   "corner_latch_err_px": [],
+   "corner_latch_n_det": 1,
+   "corner_latch_n_gt": 0,
+   "corner_latch_score": [
+    0.612
+   ],
+   "D_mm": 818.2190784610852,
+   "D_src": "depth",
+   "D_bolt_mm": 799.5730590820312,
+   "gate": "latch_offset"
+  },
+  {
+   "key": "datasets__E38_door_LH_FRT__0110",
+   "cls": "E38_door_LH_FRT",
+   "src": "datasets",
+   "bolt_err_px": [
+    1.7423302127991989,
+    2.208529945028076,
+    1.559147256370316,
+    0.7160846233941225
+   ],
+   "bolt_n_det": 4,
+   "bolt_n_gt": 4,
+   "bolt_score": [
+    0.973,
+    0.934,
+    0.897,
+    0.823
+   ],
+   "corner_hinge_err_px": [],
+   "corner_hinge_n_det": 0,
+   "corner_hinge_n_gt": 0,
+   "corner_hinge_score": [],
+   "corner_latch_err_px": [
+    1.2179255646713814
+   ],
+   "corner_latch_n_det": 1,
+   "corner_latch_n_gt": 1,
+   "corner_latch_score": [
+    1.03
+   ],
+   "gate": "no_corner"
+  },
+  {
+   "key": "datasets__E38_door_LH_FRT__0140",
+   "cls": "E38_door_LH_FRT",
+   "src": "datasets",
+   "bolt_err_px": [
+    0.558612513268726,
+    1.6224445425766318,
+    2.0642114176248008,
+    2.2439882132896445
+   ],
+   "bolt_n_det": 4,
+   "bolt_n_gt": 4,
+   "bolt_score": [
+    1.096,
+    1.036,
+    1.032,
+    0.869
+   ],
+   "corner_hinge_err_px": [],
+   "corner_hinge_n_det": 1,
+   "corner_hinge_n_gt": 0,
+   "corner_hinge_score": [
+    0.264
+   ],
+   "corner_latch_err_px": [
+    2.1313062987733797
+   ],
+   "corner_latch_n_det": 1,
+   "corner_latch_n_gt": 1,
+   "corner_latch_score": [
+    0.998
+   ],
+   "D_mm": 1.304800020023121,
+   "D_src": "depth",
+   "gate": "same_side"
+  },
+  {
+   "key": "datasets__E38_door_LH_RR__0000",
+   "cls": "E38_door_LH_RR",
+   "src": "datasets",
+   "bolt_err_px": [
+    1.3666005345976233,
+    0.6743947728699141,
+    1.6144261407985308,
+    1.4358497403944117
+   ],
+   "bolt_n_det": 4,
+   "bolt_n_gt": 4,
+   "bolt_score": [
+    0.994,
+    0.993,
+    0.976,
+    0.969
+   ],
+   "corner_hinge_err_px": [
+    2.043441391330371
+   ],
+   "corner_hinge_n_det": 1,
+   "corner_hinge_n_gt": 1,
+   "corner_hinge_score": [
+    0.833
+   ],
+   "corner_latch_err_px": [
+    1.3463161913624502
+   ],
+   "corner_latch_n_det": 1,
+   "corner_latch_n_gt": 1,
+   "corner_latch_score": [
+    0.981
+   ],
+   "D_mm": 1334.3991296400354,
+   "D_src": "depth",
+   "D_bolt_mm": 1100.15625,
+   "gate": "near_border",
+   "D_gt_mm": 1106.5055002641839
+  },
+  {
+   "key": "datasets__E38_door_LH_RR__0020",
+   "cls": "E38_door_LH_RR",
+   "src": "datasets",
+   "bolt_err_px": [
+    1.8072235987198977,
+    0.6974070062405889,
+    0.9896836970411376,
+    0.5762832552131072
+   ],
+   "bolt_n_det": 4,
+   "bolt_n_gt": 4,
+   "bolt_score": [
+    1.034,
+    0.996,
+    0.965,
+    0.954
+   ],
+   "corner_hinge_err_px": [
+    1.3601432529208646
+   ],
+   "corner_hinge_n_det": 1,
+   "corner_hinge_n_gt": 1,
+   "corner_hinge_score": [
+    0.994
+   ],
+   "corner_latch_err_px": [
+    2.087900980472867
+   ],
+   "corner_latch_n_det": 1,
+   "corner_latch_n_gt": 1,
+   "corner_latch_score": [
+    0.991
+   ],
+   "D_mm": 1350.8379497837175,
+   "D_src": "depth",
+   "gate": "ok",
+   "pred": "E38_door_LH_RR"
+  },
+  {
+   "key": "datasets__E38_door_LH_RR__0140",
+   "cls": "E38_door_LH_RR",
+   "src": "datasets",
+   "bolt_err_px": [
+    0.4295536537214862,
+    0.7288589288666962,
+    1.9143972865544605,
+    1.3517935960473375
+   ],
+   "bolt_n_det": 4,
+   "bolt_n_gt": 4,
+   "bolt_score": [
+    0.963,
+    0.958,
+    0.897,
+    0.878
+   ],
+   "corner_hinge_err_px": [
+    1.577488386346915
+   ],
+   "corner_hinge_n_det": 1,
+   "corner_hinge_n_gt": 1,
+   "corner_hinge_score": [
+    1.008
+   ],
+   "corner_latch_err_px": [
+    0.9550711436738105
+   ],
+   "corner_latch_n_det": 1,
+   "corner_latch_n_gt": 1,
+   "corner_latch_score": [
+    0.927
+   ],
+   "D_mm": 1372.8932008012532,
+   "D_src": "depth",
+   "gate": "ok",
+   "pred": "E38_door_LH_RR"
+  },
+  {
+   "key": "field__E25_door_RH_s_091317__0000",
+   "cls": "E25_door_RH_s_091317",
+   "src": "field",
+   "bolt_err_px": [
+    1.3840513825379177,
+    0.9671597907421748,
+    0.12763580115440126,
+    2.075962544653736
+   ],
+   "bolt_n_det": 4,
+   "bolt_n_gt": 4,
+   "bolt_score": [
+    0.992,
+    0.95,
+    0.937,
+    0.93
+   ],
+   "corner_hinge_err_px": [
+    1.0435701692986814
+   ],
+   "corner_hinge_n_det": 1,
+   "corner_hinge_n_gt": 1,
+   "corner_hinge_score": [
+    0.924
+   ],
+   "corner_latch_err_px": [
+    3.229537304972075
+   ],
+   "corner_latch_n_det": 1,
+   "corner_latch_n_gt": 1,
+   "corner_latch_score": [
+    0.949
+   ],
+   "D_mm": 862.0194768414261,
+   "D_src": "depth",
+   "D_bolt_mm": 882.8107299804688,
+   "gate": "ok",
+   "pred": "E25_door_RH",
+   "D_gt_mm": 888.7105446806447
+  },
+  {
+   "key": "field__E25_door_RH_s_091317__0002",
+   "cls": "E25_door_RH_s_091317",
+   "src": "field",
+   "bolt_err_px": [
+    0.8116420706189807,
+    0.805203541426919,
+    0.5044502391868522,
+    1.1130014302132287
+   ],
+   "bolt_n_det": 4,
+   "bolt_n_gt": 4,
+   "bolt_score": [
+    1.02,
+    1.004,
+    0.989,
+    0.954
+   ],
+   "corner_hinge_err_px": [
+    0.8378917793008105
+   ],
+   "corner_hinge_n_det": 1,
+   "corner_hinge_n_gt": 1,
+   "corner_hinge_score": [
+    1.01
+   ],
+   "corner_latch_err_px": [
+    1.651326925023329
+   ],
+   "corner_latch_n_det": 1,
+   "corner_latch_n_gt": 1,
+   "corner_latch_score": [
+    1.01
+   ],
+   "D_mm": 857.067751473442,
+   "D_src": "depth",
+   "D_bolt_mm": 893.2772827148438,
+   "gate": "ok",
+   "pred": "E25_door_RH",
+   "D_gt_mm": 898.6882733588244
+  },
+  {
+   "key": "field__E25_door_RH_s_091317__0015",
+   "cls": "E25_door_RH_s_091317",
+   "src": "field",
+   "bolt_err_px": [
+    0.2642641285961239,
+    0.5508961828180668,
+    0.5468021216537996,
+    0.6923339272312147
+   ],
+   "bolt_n_det": 4,
+   "bolt_n_gt": 4,
+   "bolt_score": [
+    1.007,
+    1.004,
+    0.996,
+    0.949
+   ],
+   "corner_hinge_err_px": [
+    1.5388146476361917
+   ],
+   "corner_hinge_n_det": 1,
+   "corner_hinge_n_gt": 1,
+   "corner_hinge_score": [
+    0.995
+   ],
+   "corner_latch_err_px": [
+    0.317429999731752
+   ],
+   "corner_latch_n_det": 1,
+   "corner_latch_n_gt": 1,
+   "corner_latch_score": [
+    1.086
+   ],
+   "D_mm": 855.7669440797424,
+   "D_src": "depth",
+   "D_bolt_mm": 884.6890869140625,
+   "gate": "ok",
+   "pred": "E25_door_RH",
+   "D_gt_mm": 890.5397361668469
+  }
+ ],
+ "train": [
+  {
+   "key": "datasets__E25_door_LH_FRT__0000",
+   "cls": "E25_door_LH_FRT",
+   "src": "datasets",
+   "bolt_err_px": [
+    1.1928306276825555,
+    0.09038781170765567,
+    3.941498490682352,
+    0.6475134924593012
+   ],
+   "bolt_n_det": 4,
+   "bolt_n_gt": 4,
+   "bolt_score": [
+    1.146,
+    1.015,
+    1.0,
+    0.948
+   ],
+   "corner_hinge_err_px": [
+    414.6178890849205
+   ],
+   "corner_hinge_n_det": 1,
+   "corner_hinge_n_gt": 1,
+   "corner_hinge_score": [
+    0.619
+   ],
+   "corner_latch_err_px": [
+    3.6426228829873466
+   ],
+   "corner_latch_n_det": 1,
+   "corner_latch_n_gt": 1,
+   "corner_latch_score": [
+    0.908
+   ],
+   "D_mm": 2.0592380624624393,
+   "D_src": "depth",
+   "gate": "latch_offset"
+  },
+  {
+   "key": "datasets__E25_door_LH_FRT__0010",
+   "cls": "E25_door_LH_FRT",
+   "src": "datasets",
+   "bolt_err_px": [
+    0.9931384826936892,
+    0.7813486156212193,
+    3.151279201762853,
+    0.9445910932579442
+   ],
+   "bolt_n_det": 4,
+   "bolt_n_gt": 4,
+   "bolt_score": [
+    1.023,
+    1.009,
+    0.985,
+    0.964
+   ],
+   "corner_hinge_err_px": [
+    0.6713747474296704
+   ],
+   "corner_hinge_n_det": 1,
+   "corner_hinge_n_gt": 1,
+   "corner_hinge_score": [
+    1.034
+   ],
+   "corner_latch_err_px": [
+    0.6847143225811156
+   ],
+   "corner_latch_n_det": 1,
+   "corner_latch_n_gt": 1,
+   "corner_latch_score": [
+    0.993
+   ],
+   "D_mm": 720.6315673070271,
+   "D_src": "depth",
+   "D_bolt_mm": 728.260986328125,
+   "gate": "ok",
+   "pred": "E25_door_LH_FRT",
+   "D_gt_mm": 727.2255295001686
+  },
+  {
+   "key": "datasets__E25_door_LH_FRT__0020",
+   "cls": "E25_door_LH_FRT",
+   "src": "datasets",
+   "bolt_err_px": [
+    0.33331663181763266,
+    0.36985676166198894,
+    1.3851274577863584,
+    0.49992897602134456
+   ],
+   "bolt_n_det": 4,
+   "bolt_n_gt": 4,
+   "bolt_score": [
+    1.011,
+    1.003,
+    1.003,
+    0.939
+   ],
+   "corner_hinge_err_px": [
+    0.46744261353883976
+   ],
+   "corner_hinge_n_det": 1,
+   "corner_hinge_n_gt": 1,
+   "corner_hinge_score": [
+    0.964
+   ],
+   "corner_latch_err_px": [
+    1.276358116616762
+   ],
+   "corner_latch_n_det": 1,
+   "corner_latch_n_gt": 1,
+   "corner_latch_score": [
+    0.843
+   ],
+   "D_mm": 724.6871578681988,
+   "D_src": "depth",
+   "gate": "ok",
+   "pred": "E25_door_LH_FRT"
+  },
+  {
+   "key": "datasets__E25_door_LH_FRT__0030",
+   "cls": "E25_door_LH_FRT",
+   "src": "datasets",
+   "bolt_err_px": [
+    2.0491950240236014,
+    0.5790363712509452,
+    1.2208885738649913,
+    0.9428291825116782
+   ],
+   "bolt_n_det": 4,
+   "bolt_n_gt": 4,
+   "bolt_score": [
+    1.008,
+    0.987,
+    0.987,
+    0.959
+   ],
+   "corner_hinge_err_px": [
+    2.3068620688922308
+   ],
+   "corner_hinge_n_det": 1,
+   "corner_hinge_n_gt": 1,
+   "corner_hinge_score": [
+    1.025
+   ],
+   "corner_latch_err_px": [
+    0.39675266603176235
+   ],
+   "corner_latch_n_det": 1,
+   "corner_latch_n_gt": 1,
+   "corner_latch_score": [
+    0.907
+   ],
+   "D_mm": 725.361846767677,
+   "D_src": "depth",
+   "D_bolt_mm": 703.5526733398438,
+   "gate": "ok",
+   "pred": "E25_door_LH_FRT"
+  },
+  {
+   "key": "datasets__E25_door_LH_FRT__0040",
+   "cls": "E25_door_LH_FRT",
+   "src": "datasets",
+   "bolt_err_px": [
+    0.6768304867001256,
+    1.0281112839739,
+    0.9566126788774394,
+    0.7418085435830422
+   ],
+   "bolt_n_det": 4,
+   "bolt_n_gt": 4,
+   "bolt_score": [
+    1.034,
+    1.027,
+    0.957,
+    0.944
+   ],
+   "corner_hinge_err_px": [],
+   "corner_hinge_n_det": 0,
+   "corner_hinge_n_gt": 0,
+   "corner_hinge_score": [],
+   "corner_latch_err_px": [
+    0.3418575028735641
+   ],
+   "corner_latch_n_det": 1,
+   "corner_latch_n_gt": 1,
+   "corner_latch_score": [
+    0.967
+   ],
+   "gate": "no_corner"
+  },
+  {
+   "key": "datasets__E25_door_LH_FRT__0050",
+   "cls": "E25_door_LH_FRT",
+   "src": "datasets",
+   "bolt_err_px": [
+    1.937105332832096,
+    1.0376619960807907,
+    0.1978943126167714,
+    0.4033178370956307
+   ],
+   "bolt_n_det": 4,
+   "bolt_n_gt": 4,
+   "bolt_score": [
+    1.042,
+    1.012,
+    0.985,
+    0.967
+   ],
+   "corner_hinge_err_px": [
+    1.142289901310015
+   ],
+   "corner_hinge_n_det": 1,
+   "corner_hinge_n_gt": 1,
+   "corner_hinge_score": [
+    0.956
+   ],
+   "corner_latch_err_px": [
+    1.680141653719263
+   ],
+   "corner_latch_n_det": 1,
+   "corner_latch_n_gt": 1,
+   "corner_latch_score": [
+    0.974
+   ],
+   "D_mm": 725.546865967114,
+   "D_src": "depth",
+   "D_bolt_mm": 752.4742431640625,
+   "gate": "ok",
+   "pred": "E25_door_LH_FRT",
+   "D_gt_mm": 746.8413084935107
+  },
+  {
+   "key": "datasets__E25_door_LH_FRT__0060",
+   "cls": "E25_door_LH_FRT",
+   "src": "datasets",
+   "bolt_err_px": [
+    0.6479162424833335,
+    0.4312014913573975,
+    1.069908372084224,
+    0.6849133778755667
+   ],
+   "bolt_n_det": 4,
+   "bolt_n_gt": 4,
+   "bolt_score": [
+    1.013,
+    0.991,
+    0.943,
+    0.935
+   ],
+   "corner_hinge_err_px": [
+    0.9051640782971748
+   ],
+   "corner_hinge_n_det": 1,
+   "corner_hinge_n_gt": 1,
+   "corner_hinge_score": [
+    0.999
+   ],
+   "corner_latch_err_px": [
+    1.490725105251146
+   ],
+   "corner_latch_n_det": 1,
+   "corner_latch_n_gt": 1,
+   "corner_latch_score": [
+    0.991
+   ],
+   "D_mm": 723.0180926371831,
+   "D_src": "depth",
+   "gate": "ok",
+   "pred": "E25_door_LH_FRT"
+  },
+  {
+   "key": "datasets__E25_door_LH_FRT__0090",
+   "cls": "E25_door_LH_FRT",
+   "src": "datasets",
+   "bolt_err_px": [
+    0.6891565522516846,
+    0.8824927882002507,
+    1.055100213645482,
+    0.8477969184741475
+   ],
+   "bolt_n_det": 4,
+   "bolt_n_gt": 4,
+   "bolt_score": [
+    1.014,
+    0.997,
+    0.99,
+    0.975
+   ],
+   "corner_hinge_err_px": [
+    0.6559078255456846
+   ],
+   "corner_hinge_n_det": 1,
+   "corner_hinge_n_gt": 1,
+   "corner_hinge_score": [
+    0.986
+   ],
+   "corner_latch_err_px": [
+    0.4152072206807034
+   ],
+   "corner_latch_n_det": 1,
+   "corner_latch_n_gt": 1,
+   "corner_latch_score": [
+    0.987
+   ],
+   "D_mm": 727.441120037419,
+   "D_src": "depth",
+   "D_bolt_mm": 702.1219482421875,
+   "gate": "ok",
+   "pred": "E25_door_LH_FRT",
+   "D_gt_mm": 706.159692278197
+  },
+  {
+   "key": "datasets__E25_door_LH_FRT__0100",
+   "cls": "E25_door_LH_FRT",
+   "src": "datasets",
+   "bolt_err_px": [
+    2.102946805995022,
+    1.1429653167836011,
+    1.0230032895166752,
+    0.40652570286927203
+   ],
+   "bolt_n_det": 4,
+   "bolt_n_gt": 4,
+   "bolt_score": [
+    1.041,
+    1.022,
+    1.01,
+    0.967
+   ],
+   "corner_hinge_err_px": [
+    2.3449690167938795
+   ],
+   "corner_hinge_n_det": 1,
+   "corner_hinge_n_gt": 1,
+   "corner_hinge_score": [
+    0.934
+   ],
+   "corner_latch_err_px": [
+    1.3998088828756237
+   ],
+   "corner_latch_n_det": 1,
+   "corner_latch_n_gt": 1,
+   "corner_latch_score": [
+    0.996
+   ],
+   "D_mm": 723.2541389729071,
+   "D_src": "depth",
+   "D_bolt_mm": 744.9074096679688,
+   "gate": "ok",
+   "pred": "E25_door_LH_FRT",
+   "D_gt_mm": 728.5280839730414
+  },
+  {
+   "key": "datasets__E25_door_LH_FRT__0110",
+   "cls": "E25_door_LH_FRT",
+   "src": "datasets",
+   "bolt_err_px": [
+    0.4526982106204826,
+    0.8349396931583541,
+    1.586609520667159,
+    0.34671276633182296
+   ],
+   "bolt_n_det": 4,
+   "bolt_n_gt": 4,
+   "bolt_score": [
+    1.056,
+    1.034,
+    0.97,
+    0.956
+   ],
+   "corner_hinge_err_px": [
+    0.08722049827012612
+   ],
+   "corner_hinge_n_det": 1,
+   "corner_hinge_n_gt": 1,
+   "corner_hinge_score": [
+    0.964
+   ],
+   "corner_latch_err_px": [
+    0.5646346206320453
+   ],
+   "corner_latch_n_det": 1,
+   "corner_latch_n_gt": 1,
+   "corner_latch_score": [
+    1.023
+   ],
+   "D_mm": 727.4356954754655,
+   "D_src": "depth",
+   "D_bolt_mm": 699.296630859375,
+   "gate": "ok",
+   "pred": "E25_door_LH_FRT",
+   "D_gt_mm": 694.0632331228336
+  },
+  {
+   "key": "datasets__E25_door_LH_FRT__0120",
+   "cls": "E25_door_LH_FRT",
+   "src": "datasets",
+   "bolt_err_px": [
+    0.9318494947483081,
+    0.7773999237006778,
+    0.4386882748769533,
+    0.8946442532688236
+   ],
+   "bolt_n_det": 4,
+   "bolt_n_gt": 4,
+   "bolt_score": [
+    1.041,
+    1.036,
+    0.976,
+    0.965
+   ],
+   "corner_hinge_err_px": [
+    1.5057447813673377
+   ],
+   "corner_hinge_n_det": 1,
+   "corner_hinge_n_gt": 1,
+   "corner_hinge_score": [
+    0.666
+   ],
+   "corner_latch_err_px": [],
+   "corner_latch_n_det": 1,
+   "corner_latch_n_gt": 0,
+   "corner_latch_score": [
+    0.909
+   ],
+   "D_mm": 2.0496820773234785,
+   "D_src": "depth",
+   "gate": "same_side"
+  },
+  {
+   "key": "datasets__E25_door_LH_FRT__0140",
+   "cls": "E25_door_LH_FRT",
+   "src": "datasets",
+   "bolt_err_px": [
+    0.7379213419630077,
+    1.145557608989581,
+    2.485633920994539,
+    1.564906174951998
+   ],
+   "bolt_n_det": 4,
+   "bolt_n_gt": 4,
+   "bolt_score": [
+    1.017,
+    0.984,
+    0.979,
+    0.928
+   ],
+   "corner_hinge_err_px": [
+    2.0389172262591098
+   ],
+   "corner_hinge_n_det": 1,
+   "corner_hinge_n_gt": 1,
+   "corner_hinge_score": [
+    0.954
+   ],
+   "corner_latch_err_px": [
+    1.5022691027226942
+   ],
+   "corner_latch_n_det": 1,
+   "corner_latch_n_gt": 1,
+   "corner_latch_score": [
+    0.973
+   ],
+   "D_mm": 725.0579411685359,
+   "D_src": "depth",
+   "D_bolt_mm": 703.4111938476562,
+   "gate": "ok",
+   "pred": "E25_door_LH_FRT",
+   "D_gt_mm": 703.7304295231594
+  },
+  {
+   "key": "datasets__E25_door_LH_RR__0000",
+   "cls": "E25_door_LH_RR",
+   "src": "datasets",
+   "bolt_err_px": [
+    0.643611517612545,
+    0.5352130010544113,
+    0.42943611160590195,
+    0.5600480109414708
+   ],
+   "bolt_n_det": 4,
+   "bolt_n_gt": 4,
+   "bolt_score": [
+    0.985,
+    0.972,
+    0.968,
+    0.954
+   ],
+   "corner_hinge_err_px": [
+    1.4967916049428454
+   ],
+   "corner_hinge_n_det": 1,
+   "corner_hinge_n_gt": 1,
+   "corner_hinge_score": [
+    0.94
+   ],
+   "corner_latch_err_px": [
+    0.8553990222436163
+   ],
+   "corner_latch_n_det": 1,
+   "corner_latch_n_gt": 1,
+   "corner_latch_score": [
+    0.939
+   ],
+   "D_mm": 1027.756350159088,
+   "D_src": "depth",
+   "D_bolt_mm": 1180.6026611328125,
+   "gate": "ok",
+   "pred": "E25_door_LH_RR",
+   "D_gt_mm": 1177.3090668610846
+  },
+  {
+   "key": "datasets__E25_door_LH_RR__0010",
+   "cls": "E25_door_LH_RR",
+   "src": "datasets",
+   "bolt_err_px": [
+    0.6740976015916146,
+    1.0525457340580469,
+    0.7681237264247048,
+    0.5532222825240163
+   ],
+   "bolt_n_det": 4,
+   "bolt_n_gt": 4,
+   "bolt_score": [
+    1.036,
+    1.032,
+    0.981,
+    0.98
+   ],
+   "corner_hinge_err_px": [
+    0.4203822834049393
+   ],
+   "corner_hinge_n_det": 1,
+   "corner_hinge_n_gt": 1,
+   "corner_hinge_score": [
+    0.995
+   ],
+   "corner_latch_err_px": [
+    0.8431134162556703
+   ],
+   "corner_latch_n_det": 1,
+   "corner_latch_n_gt": 1,
+   "corner_latch_score": [
+    1.042
+   ],
+   "D_mm": 1033.1840712772039,
+   "D_src": "depth",
+   "D_bolt_mm": 988.8530883789062,
+   "gate": "ok",
+   "pred": "E25_door_LH_RR",
+   "D_gt_mm": 982.7708350127028
+  },
+  {
+   "key": "datasets__E25_door_LH_RR__0030",
+   "cls": "E25_door_LH_RR",
+   "src": "datasets",
+   "bolt_err_px": [
+    1.587457526241392,
+    0.39596884900690116,
+    0.4661237899711373,
+    1.614998944432767
+   ],
+   "bolt_n_det": 4,
+   "bolt_n_gt": 4,
+   "bolt_score": [
+    1.027,
+    1.006,
+    0.958,
+    0.957
+   ],
+   "corner_hinge_err_px": [
+    0.5584216152743352
+   ],
+   "corner_hinge_n_det": 1,
+   "corner_hinge_n_gt": 1,
+   "corner_hinge_score": [
+    1.001
+   ],
+   "corner_latch_err_px": [
+    0.5789425617160646
+   ],
+   "corner_latch_n_det": 1,
+   "corner_latch_n_gt": 1,
+   "corner_latch_score": [
+    0.975
+   ],
+   "D_mm": 1040.7664488663213,
+   "D_src": "depth",
+   "D_bolt_mm": 1071.7498779296875,
+   "gate": "ok",
+   "pred": "E25_door_LH_RR",
+   "D_gt_mm": 1066.427536504762
+  },
+  {
+   "key": "datasets__E25_door_LH_RR__0040",
+   "cls": "E25_door_LH_RR",
+   "src": "datasets",
+   "bolt_err_px": [
+    1.1060892594471694,
+    0.7304606010115064,
+    0.1196713158307657,
+    1.03859768461217
+   ],
+   "bolt_n_det": 4,
+   "bolt_n_gt": 4,
+   "bolt_score": [
+    1.012,
+    0.985,
+    0.971,
+    0.967
+   ],
+   "corner_hinge_err_px": [
+    0.9454317332964616
+   ],
+   "corner_hinge_n_det": 1,
+   "corner_hinge_n_gt": 1,
+   "corner_hinge_score": [
+    1.018
+   ],
+   "corner_latch_err_px": [
+    1.1846061352834747
+   ],
+   "corner_latch_n_det": 1,
+   "corner_latch_n_gt": 1,
+   "corner_latch_score": [
+    1.002
+   ],
+   "D_mm": 1043.1081284720635,
+   "D_src": "depth",
+   "D_bolt_mm": 1081.5194091796875,
+   "gate": "ok",
+   "pred": "E25_door_LH_RR",
+   "D_gt_mm": 1074.1245862788853
+  },
+  {
+   "key": "datasets__E25_door_LH_RR__0050",
+   "cls": "E25_door_LH_RR",
+   "src": "datasets",
+   "bolt_err_px": [
+    1.8785607408511618,
+    0.8559315275624202,
+    0.6108156926711695,
+    1.201477018225032
+   ],
+   "bolt_n_det": 4,
+   "bolt_n_gt": 4,
+   "bolt_score": [
+    1.016,
+    1.012,
+    1.006,
+    0.968
+   ],
+   "corner_hinge_err_px": [
+    1.5178030735942099
+   ],
+   "corner_hinge_n_det": 1,
+   "corner_hinge_n_gt": 1,
+   "corner_hinge_score": [
+    0.957
+   ],
+   "corner_latch_err_px": [
+    1.6123591201033112
+   ],
+   "corner_latch_n_det": 1,
+   "corner_latch_n_gt": 1,
+   "corner_latch_score": [
+    0.974
+   ],
+   "D_mm": 1041.286530997363,
+   "D_src": "depth",
+   "D_bolt_mm": 1084.6583251953125,
+   "gate": "ok",
+   "pred": "E25_door_LH_RR",
+   "D_gt_mm": 1085.0108759496263
+  },
+  {
+   "key": "datasets__E25_door_LH_RR__0060",
+   "cls": "E25_door_LH_RR",
+   "src": "datasets",
+   "bolt_err_px": [
+    1.494901408877001,
+    1.0175979963767596,
+    0.4463289814798426,
+    1.4986376001785426
+   ],
+   "bolt_n_det": 4,
+   "bolt_n_gt": 4,
+   "bolt_score": [
+    1.001,
+    0.984,
+    0.977,
+    0.942
+   ],
+   "corner_hinge_err_px": [
+    0.882584029569052
+   ],
+   "corner_hinge_n_det": 1,
+   "corner_hinge_n_gt": 1,
+   "corner_hinge_score": [
+    1.021
+   ],
+   "corner_latch_err_px": [
+    0.39107337014611526
+   ],
+   "corner_latch_n_det": 1,
+   "corner_latch_n_gt": 1,
+   "corner_latch_score": [
+    1.024
+   ],
+   "D_mm": 1047.647394887069,
+   "D_src": "depth",
+   "D_bolt_mm": 1094.1219482421875,
+   "gate": "ok",
+   "pred": "E25_door_LH_RR",
+   "D_gt_mm": 1087.4376088634529
+  },
+  {
+   "key": "datasets__E25_door_LH_RR__0070",
+   "cls": "E25_door_LH_RR",
+   "src": "datasets",
+   "bolt_err_px": [
+    0.7406007091747839,
+    1.030400609127053,
+    1.2184195009239087,
+    1.2071231356463494
+   ],
+   "bolt_n_det": 4,
+   "bolt_n_gt": 4,
+   "bolt_score": [
+    1.062,
+    1.022,
+    0.987,
+    0.945
+   ],
+   "corner_hinge_err_px": [
+    2.182323649475024
+   ],
+   "corner_hinge_n_det": 1,
+   "corner_hinge_n_gt": 1,
+   "corner_hinge_score": [
+    1.015
+   ],
+   "corner_latch_err_px": [
+    2.8821990567393074
+   ],
+   "corner_latch_n_det": 1,
+   "corner_latch_n_gt": 1,
+   "corner_latch_score": [
+    0.942
+   ],
+   "D_mm": 1017.3838727324563,
+   "D_src": "depth",
+   "D_bolt_mm": 907.330322265625,
+   "gate": "ok",
+   "pred": "E25_door_LH_RR",
+   "D_gt_mm": 912.0987833669167
+  },
+  {
+   "key": "datasets__E25_door_LH_RR__0080",
+   "cls": "E25_door_LH_RR",
+   "src": "datasets",
+   "bolt_err_px": [
+    1.8146727308947053,
+    0.9979614311752906,
+    1.858235548062618,
+    1.6160743220579719
+   ],
+   "bolt_n_det": 4,
+   "bolt_n_gt": 4,
+   "bolt_score": [
+    1.049,
+    1.022,
+    0.997,
+    0.938
+   ],
+   "corner_hinge_err_px": [
+    1.0097590308831836
+   ],
+   "corner_hinge_n_det": 1,
+   "corner_hinge_n_gt": 1,
+   "corner_hinge_score": [
+    1.045
+   ],
+   "corner_latch_err_px": [
+    1.0119467759316068
+   ],
+   "corner_latch_n_det": 1,
+   "corner_latch_n_gt": 1,
+   "corner_latch_score": [
+    1.032
+   ],
+   "D_mm": 1012.7830149145692,
+   "D_src": "depth",
+   "gate": "ok",
+   "pred": "E25_door_LH_RR"
+  },
+  {
+   "key": "datasets__E25_door_LH_RR__0100",
+   "cls": "E25_door_LH_RR",
+   "src": "datasets",
+   "bolt_err_px": [
+    1.8832448733959584,
+    1.9269108931396617,
+    1.0340033841088117,
+    1.3347866290580248
+   ],
+   "bolt_n_det": 4,
+   "bolt_n_gt": 4,
+   "bolt_score": [
+    0.994,
+    0.987,
+    0.972,
+    0.953
+   ],
+   "corner_hinge_err_px": [
+    1.6346016759481
+   ],
+   "corner_hinge_n_det": 1,
+   "corner_hinge_n_gt": 1,
+   "corner_hinge_score": [
+    1.014
+   ],
+   "corner_latch_err_px": [
+    0.5438240094077781
+   ],
+   "corner_latch_n_det": 1,
+   "corner_latch_n_gt": 1,
+   "corner_latch_score": [
+    1.011
+   ],
+   "D_mm": 1038.0942591551538,
+   "D_src": "depth",
+   "gate": "ok",
+   "pred": "E25_door_LH_RR"
+  },
+  {
+   "key": "datasets__E25_door_LH_RR__0110",
+   "cls": "E25_door_LH_RR",
+   "src": "datasets",
+   "bolt_err_px": [
+    2.3791939259730044,
+    0.689182654116684,
+    1.6251338722489879,
+    0.37827752768220635
+   ],
+   "bolt_n_det": 4,
+   "bolt_n_gt": 4,
+   "bolt_score": [
+    0.992,
+    0.982,
+    0.945,
+    0.918
+   ],
+   "corner_hinge_err_px": [
+    1.413187615164341
+   ],
+   "corner_hinge_n_det": 1,
+   "corner_hinge_n_gt": 1,
+   "corner_hinge_score": [
+    0.913
+   ],
+   "corner_latch_err_px": [
+    0.20760786255744587
+   ],
+   "corner_latch_n_det": 1,
+   "corner_latch_n_gt": 1,
+   "corner_latch_score": [
+    0.97
+   ],
+   "D_mm": 1035.7594877523588,
+   "D_src": "depth",
+   "D_bolt_mm": 1066.33984375,
+   "gate": "ok",
+   "pred": "E25_door_LH_RR",
+   "D_gt_mm": 1080.7167794062725
+  },
+  {
+   "key": "datasets__E25_door_LH_RR__0130",
+   "cls": "E25_door_LH_RR",
+   "src": "datasets",
+   "bolt_err_px": [
+    0.8066592179711789,
+    0.18926302230482728,
+    1.087440524310983,
+    1.0868787357042373
+   ],
+   "bolt_n_det": 4,
+   "bolt_n_gt": 4,
+   "bolt_score": [
+    1.057,
+    0.992,
+    0.976,
+    0.964
+   ],
+   "corner_hinge_err_px": [
+    2.169695400296179
+   ],
+   "corner_hinge_n_det": 1,
+   "corner_hinge_n_gt": 1,
+   "corner_hinge_score": [
+    1.001
+   ],
+   "corner_latch_err_px": [],
+   "corner_latch_n_det": 1,
+   "corner_latch_n_gt": 0,
+   "corner_latch_score": [
+    0.198
+   ],
+   "D_mm": 1038.1824085041026,
+   "D_src": "depth",
+   "D_bolt_mm": 1031.0294189453125,
+   "gate": "near_border"
+  },
+  {
+   "key": "datasets__E25_door_LH_RR__0140",
+   "cls": "E25_door_LH_RR",
+   "src": "datasets",
+   "bolt_err_px": [
+    1.1051799848583934,
+    1.2968445883482802,
+    0.8768349739973846,
+    1.6946807216451223
+   ],
+   "bolt_n_det": 4,
+   "bolt_n_gt": 4,
+   "bolt_score": [
+    0.997,
+    0.982,
+    0.982,
+    0.958
+   ],
+   "corner_hinge_err_px": [
+    0.7644911168560188
+   ],
+   "corner_hinge_n_det": 1,
+   "corner_hinge_n_gt": 1,
+   "corner_hinge_score": [
+    1.038
+   ],
+   "corner_latch_err_px": [
+    1.1179404305790581
+   ],
+   "corner_latch_n_det": 1,
+   "corner_latch_n_gt": 1,
+   "corner_latch_score": [
+    1.0
+   ],
+   "D_mm": 1030.9985035683187,
+   "D_src": "depth",
+   "D_bolt_mm": 937.19677734375,
+   "gate": "ok",
+   "pred": "E25_door_LH_RR",
+   "D_gt_mm": 938.3137809974671
+  },
+  {
+   "key": "datasets__E25_door_RH__0000",
+   "cls": "E25_door_RH",
+   "src": "datasets",
+   "bolt_err_px": [
+    0.49563842086048454,
+    0.29097307137299916,
+    2.0306812232817713,
+    0.7374409132913705
+   ],
+   "bolt_n_det": 4,
+   "bolt_n_gt": 4,
+   "bolt_score": [
+    1.007,
+    1.005,
+    0.951,
+    0.915
+   ],
+   "corner_hinge_err_px": [
+    1.0511147101149603
+   ],
+   "corner_hinge_n_det": 1,
+   "corner_hinge_n_gt": 1,
+   "corner_hinge_score": [
+    1.012
+   ],
+   "corner_latch_err_px": [
+    1.3067334035969536
+   ],
+   "corner_latch_n_det": 1,
+   "corner_latch_n_gt": 1,
+   "corner_latch_score": [
+    0.979
+   ],
+   "D_mm": 864.9093627411688,
+   "D_src": "depth",
+   "gate": "ok",
+   "pred": "E25_door_RH"
+  },
+  {
+   "key": "datasets__E25_door_RH__0010",
+   "cls": "E25_door_RH",
+   "src": "datasets",
+   "bolt_err_px": [
+    2.117270254263299,
+    1.2413652040551009,
+    0.5055002867457786,
+    1.3775047833974938
+   ],
+   "bolt_n_det": 4,
+   "bolt_n_gt": 4,
+   "bolt_score": [
+    1.026,
+    0.993,
+    0.974,
+    0.953
+   ],
+   "corner_hinge_err_px": [
+    0.8940270952183326
+   ],
+   "corner_hinge_n_det": 1,
+   "corner_hinge_n_gt": 1,
+   "corner_hinge_score": [
+    0.999
+   ],
+   "corner_latch_err_px": [
+    2.0129182991410715
+   ],
+   "corner_latch_n_det": 1,
+   "corner_latch_n_gt": 1,
+   "corner_latch_score": [
+    1.013
+   ],
+   "D_mm": 893.079771014601,
+   "D_src": "depth",
+   "D_bolt_mm": 932.1296997070312,
+   "gate": "ok",
+   "pred": "E25_door_RH",
+   "D_gt_mm": 929.1215825283834
+  },
+  {
+   "key": "datasets__E25_door_RH__0020",
+   "cls": "E25_door_RH",
+   "src": "datasets",
+   "bolt_err_px": [
+    0.10054874658509969,
+    0.7091926526245287,
+    0.2972257512202216,
+    0.999180457937611
+   ],
+   "bolt_n_det": 4,
+   "bolt_n_gt": 4,
+   "bolt_score": [
+    0.995,
+    0.987,
+    0.973,
+    0.967
+   ],
+   "corner_hinge_err_px": [
+    0.408404291586238
+   ],
+   "corner_hinge_n_det": 1,
+   "corner_hinge_n_gt": 1,
+   "corner_hinge_score": [
+    0.959
+   ],
+   "corner_latch_err_px": [
+    1.3024226034351285
+   ],
+   "corner_latch_n_det": 1,
+   "corner_latch_n_gt": 1,
+   "corner_latch_score": [
+    1.005
+   ],
+   "D_mm": 880.8199250671164,
+   "D_src": "depth",
+   "D_bolt_mm": 866.5708618164062,
+   "gate": "ok",
+   "pred": "E25_door_RH",
+   "D_gt_mm": 864.817553316763
+  },
+  {
+   "key": "datasets__E25_door_RH__0040",
+   "cls": "E25_door_RH",
+   "src": "datasets",
+   "bolt_err_px": [
+    1.4514705881907124,
+    0.617153157715282,
+    1.2496935841387697,
+    1.1795443549055429
+   ],
+   "bolt_n_det": 4,
+   "bolt_n_gt": 4,
+   "bolt_score": [
+    1.037,
+    0.998,
+    0.972,
+    0.936
+   ],
+   "corner_hinge_err_px": [
+    1.321100176373174
+   ],
+   "corner_hinge_n_det": 1,
+   "corner_hinge_n_gt": 1,
+   "corner_hinge_score": [
+    1.038
+   ],
+   "corner_latch_err_px": [
+    0.6516606536239082
+   ],
+   "corner_latch_n_det": 1,
+   "corner_latch_n_gt": 1,
+   "corner_latch_score": [
+    1.024
+   ],
+   "D_mm": 890.260144176154,
+   "D_src": "depth",
+   "D_bolt_mm": 916.3587646484375,
+   "gate": "ok",
+   "pred": "E25_door_RH",
+   "D_gt_mm": 916.6819642769015
+  },
+  {
+   "key": "datasets__E25_door_RH__0050",
+   "cls": "E25_door_RH",
+   "src": "datasets",
+   "bolt_err_px": [
+    0.13755960743855727,
+    1.0415936380854216,
+    0.451732769876882,
+    0.8713821224615985
+   ],
+   "bolt_n_det": 4,
+   "bolt_n_gt": 4,
+   "bolt_score": [
+    1.01,
+    0.994,
+    0.966,
+    0.913
+   ],
+   "corner_hinge_err_px": [
+    1.8122930858391848
+   ],
+   "corner_hinge_n_det": 1,
+   "corner_hinge_n_gt": 1,
+   "corner_hinge_score": [
+    0.96
+   ],
+   "corner_latch_err_px": [
+    0.6639336853750867
+   ],
+   "corner_latch_n_det": 1,
+   "corner_latch_n_gt": 1,
+   "corner_latch_score": [
+    0.935
+   ],
+   "D_mm": 890.0834890384587,
+   "D_src": "depth",
+   "D_bolt_mm": 867.2888793945312,
+   "gate": "ok",
+   "pred": "E25_door_RH",
+   "D_gt_mm": 870.4828936867099
+  },
+  {
+   "key": "datasets__E25_door_RH__0060",
+   "cls": "E25_door_RH",
+   "src": "datasets",
+   "bolt_err_px": [
+    0.8741487487809597,
+    1.4457918158462246,
+    0.2758836121284378,
+    0.6780921365535976
+   ],
+   "bolt_n_det": 4,
+   "bolt_n_gt": 4,
+   "bolt_score": [
+    1.002,
+    0.966,
+    0.96,
+    0.952
+   ],
+   "corner_hinge_err_px": [
+    0.9186430468433017
+   ],
+   "corner_hinge_n_det": 1,
+   "corner_hinge_n_gt": 1,
+   "corner_hinge_score": [
+    0.91
+   ],
+   "corner_latch_err_px": [
+    0.9981263254123408
+   ],
+   "corner_latch_n_det": 1,
+   "corner_latch_n_gt": 1,
+   "corner_latch_score": [
+    0.954
+   ],
+   "D_mm": 882.8018220603727,
+   "D_src": "depth",
+   "D_bolt_mm": 832.781005859375,
+   "gate": "ok",
+   "pred": "E25_door_RH",
+   "D_gt_mm": 838.313481885531
+  },
+  {
+   "key": "datasets__E25_door_RH__0090",
+   "cls": "E25_door_RH",
+   "src": "datasets",
+   "bolt_err_px": [
+    1.8372662423135206,
+    0.4281892013095615,
+    1.3995663612584852,
+    0.43297617120897713
+   ],
+   "bolt_n_det": 4,
+   "bolt_n_gt": 4,
+   "bolt_score": [
+    0.993,
+    0.984,
+    0.98,
+    0.975
+   ],
+   "corner_hinge_err_px": [
+    1.9455250749936586
+   ],
+   "corner_hinge_n_det": 1,
+   "corner_hinge_n_gt": 1,
+   "corner_hinge_score": [
+    0.956
+   ],
+   "corner_latch_err_px": [
+    1.2839456279654093
+   ],
+   "corner_latch_n_det": 1,
+   "corner_latch_n_gt": 1,
+   "corner_latch_score": [
+    0.904
+   ],
+   "D_mm": 891.940762335017,
+   "D_src": "depth",
+   "D_bolt_mm": 868.9136962890625,
+   "gate": "ok",
+   "pred": "E25_door_RH",
+   "D_gt_mm": 872.8185494939592
+  },
+  {
+   "key": "datasets__E25_door_RH__0100",
+   "cls": "E25_door_RH",
+   "src": "datasets",
+   "bolt_err_px": [
+    0.91982197472193,
+    1.3769865261923644,
+    2.260879935894086,
+    1.1053420708663968
+   ],
+   "bolt_n_det": 4,
+   "bolt_n_gt": 4,
+   "bolt_score": [
+    1.008,
+    0.983,
+    0.981,
+    0.953
+   ],
+   "corner_hinge_err_px": [
+    1.1443288122822215
+   ],
+   "corner_hinge_n_det": 1,
+   "corner_hinge_n_gt": 1,
+   "corner_hinge_score": [
+    1.01
+   ],
+   "corner_latch_err_px": [
+    1.0034450425256876
+   ],
+   "corner_latch_n_det": 1,
+   "corner_latch_n_gt": 1,
+   "corner_latch_score": [
+    0.976
+   ],
+   "D_mm": 896.6238564318752,
+   "D_src": "depth",
+   "D_bolt_mm": 920.0081787109375,
+   "gate": "ok",
+   "pred": "E25_door_RH",
+   "D_gt_mm": 922.5335328727857
+  },
+  {
+   "key": "datasets__E25_door_RH__0110",
+   "cls": "E25_door_RH",
+   "src": "datasets",
+   "bolt_err_px": [
+    0.613189219597678,
+    1.3086796120330701,
+    1.7585249802638292,
+    1.0673595959929716
+   ],
+   "bolt_n_det": 4,
+   "bolt_n_gt": 4,
+   "bolt_score": [
+    1.029,
+    0.99,
+    0.96,
+    0.935
+   ],
+   "corner_hinge_err_px": [
+    1.5617131564682771
+   ],
+   "corner_hinge_n_det": 1,
+   "corner_hinge_n_gt": 1,
+   "corner_hinge_score": [
+    0.949
+   ],
+   "corner_latch_err_px": [
+    1.1320516995313248
+   ],
+   "corner_latch_n_det": 1,
+   "corner_latch_n_gt": 1,
+   "corner_latch_score": [
+    0.963
+   ],
+   "D_mm": 862.9534752681201,
+   "D_src": "depth",
+   "D_bolt_mm": 928.70849609375,
+   "gate": "ok",
+   "pred": "E25_door_RH",
+   "D_gt_mm": 935.0928950032695
+  },
+  {
+   "key": "datasets__E25_door_RH__0120",
+   "cls": "E25_door_RH",
+   "src": "datasets",
+   "bolt_err_px": [
+    0.6910055475702365,
+    0.31515534106243126,
+    0.8919104373264949,
+    0.52570362853668
+   ],
+   "bolt_n_det": 4,
+   "bolt_n_gt": 4,
+   "bolt_score": [
+    1.01,
+    0.975,
+    0.965,
+    0.955
+   ],
+   "corner_hinge_err_px": [
+    0.554186723374986
+   ],
+   "corner_hinge_n_det": 1,
+   "corner_hinge_n_gt": 1,
+   "corner_hinge_score": [
+    0.935
+   ],
+   "corner_latch_err_px": [
+    0.9937060297116742
+   ],
+   "corner_latch_n_det": 1,
+   "corner_latch_n_gt": 1,
+   "corner_latch_score": [
+    0.984
+   ],
+   "D_mm": 891.134251296516,
+   "D_src": "depth",
+   "D_bolt_mm": 884.5948486328125,
+   "gate": "ok",
+   "pred": "E25_door_RH",
+   "D_gt_mm": 886.3951006432746
+  },
+  {
+   "key": "datasets__E25_door_RH__0130",
+   "cls": "E25_door_RH",
+   "src": "datasets",
+   "bolt_err_px": [
+    1.3301884903681163,
+    0.4051506913683186,
+    0.8953157341650689,
+    1.1718146916606815
+   ],
+   "bolt_n_det": 4,
+   "bolt_n_gt": 4,
+   "bolt_score": [
+    0.994,
+    0.991,
+    0.99,
+    0.959
+   ],
+   "corner_hinge_err_px": [
+    1.6384296464297832
+   ],
+   "corner_hinge_n_det": 1,
+   "corner_hinge_n_gt": 1,
+   "corner_hinge_score": [
+    0.972
+   ],
+   "corner_latch_err_px": [
+    1.59733416970453
+   ],
+   "corner_latch_n_det": 1,
+   "corner_latch_n_gt": 1,
+   "corner_latch_score": [
+    0.972
+   ],
+   "D_mm": 890.6889091496982,
+   "D_src": "depth",
+   "D_bolt_mm": 852.3919677734375,
+   "gate": "ok",
+   "pred": "E25_door_RH",
+   "D_gt_mm": 847.1561593037252
+  },
+  {
+   "key": "datasets__E25_door_RH__0140",
+   "cls": "E25_door_RH",
+   "src": "datasets",
+   "bolt_err_px": [
+    1.890432058294043,
+    1.4937601490154806,
+    0.922085308174413,
+    1.0165973153882168
+   ],
+   "bolt_n_det": 4,
+   "bolt_n_gt": 4,
+   "bolt_score": [
+    1.021,
+    1.01,
+    1.008,
+    0.934
+   ],
+   "corner_hinge_err_px": [
+    0.7813999985702452
+   ],
+   "corner_hinge_n_det": 1,
+   "corner_hinge_n_gt": 1,
+   "corner_hinge_score": [
+    1.042
+   ],
+   "corner_latch_err_px": [
+    1.1801834047013675
+   ],
+   "corner_latch_n_det": 1,
+   "corner_latch_n_gt": 1,
+   "corner_latch_score": [
+    1.054
+   ],
+   "D_mm": 895.1066480101191,
+   "D_src": "depth",
+   "D_bolt_mm": 933.8499755859375,
+   "gate": "ok",
+   "pred": "E25_door_RH",
+   "D_gt_mm": 935.8700839652068
+  },
+  {
+   "key": "datasets__E30_E38_door_RH__0000",
+   "cls": "E30_E38_door_RH",
+   "src": "datasets",
+   "bolt_err_px": [
+    1.1973035131187786,
+    2.181274888844849,
+    1.0685429005712737,
+    0.8538613415781521
+   ],
+   "bolt_n_det": 4,
+   "bolt_n_gt": 4,
+   "bolt_score": [
+    1.0,
+    0.978,
+    0.969,
+    0.967
+   ],
+   "corner_hinge_err_px": [
+    0.6865758970791411
+   ],
+   "corner_hinge_n_det": 1,
+   "corner_hinge_n_gt": 1,
+   "corner_hinge_score": [
+    1.015
+   ],
+   "corner_latch_err_px": [
+    0.8840216335918588
+   ],
+   "corner_latch_n_det": 1,
+   "corner_latch_n_gt": 1,
+   "corner_latch_score": [
+    0.973
+   ],
+   "D_mm": 1094.8162259555852,
+   "D_src": "depth",
+   "D_bolt_mm": 1129.99169921875,
+   "gate": "ok",
+   "pred": "E30_E38_door_RH",
+   "D_gt_mm": 1125.8225443605734
+  },
+  {
+   "key": "datasets__E30_E38_door_RH__0010",
+   "cls": "E30_E38_door_RH",
+   "src": "datasets",
+   "bolt_err_px": [
+    1.0437393078891677,
+    1.0714091301706232,
+    0.917740655521807,
+    0.7192864754735981
+   ],
+   "bolt_n_det": 4,
+   "bolt_n_gt": 4,
+   "bolt_score": [
+    1.031,
+    1.003,
+    0.987,
+    0.987
+   ],
+   "corner_hinge_err_px": [
+    2.2725998951155963
+   ],
+   "corner_hinge_n_det": 1,
+   "corner_hinge_n_gt": 1,
+   "corner_hinge_score": [
+    0.972
+   ],
+   "corner_latch_err_px": [],
+   "corner_latch_n_det": 0,
+   "corner_latch_n_gt": 0,
+   "corner_latch_score": [],
+   "gate": "no_corner"
+  },
+  {
+   "key": "datasets__E30_E38_door_RH__0020",
+   "cls": "E30_E38_door_RH",
+   "src": "datasets",
+   "bolt_err_px": [
+    1.773052772582865,
+    1.3694340708387043,
+    1.4714576007645415,
+    1.5387296994556732
+   ],
+   "bolt_n_det": 4,
+   "bolt_n_gt": 4,
+   "bolt_score": [
+    1.033,
+    0.986,
+    0.976,
+    0.967
+   ],
+   "corner_hinge_err_px": [
+    0.5132086300391331
+   ],
+   "corner_hinge_n_det": 1,
+   "corner_hinge_n_gt": 1,
+   "corner_hinge_score": [
+    0.948
+   ],
+   "corner_latch_err_px": [
+    1.8136814109067634
+   ],
+   "corner_latch_n_det": 1,
+   "corner_latch_n_gt": 1,
+   "corner_latch_score": [
+    0.983
+   ],
+   "D_mm": 1095.539211364507,
+   "D_src": "depth",
+   "D_bolt_mm": 1081.6788330078125,
+   "gate": "ok",
+   "pred": "E30_E38_door_RH",
+   "D_gt_mm": 1084.941917124728
+  },
+  {
+   "key": "datasets__E30_E38_door_RH__0030",
+   "cls": "E30_E38_door_RH",
+   "src": "datasets",
+   "bolt_err_px": [],
+   "bolt_n_det": 0,
+   "bolt_n_gt": 0,
+   "bolt_score": [],
+   "corner_hinge_err_px": [
+    1.4146401518985006
+   ],
+   "corner_hinge_n_det": 1,
+   "corner_hinge_n_gt": 1,
+   "corner_hinge_score": [
+    0.91
+   ],
+   "corner_latch_err_px": [],
+   "corner_latch_n_det": 0,
+   "corner_latch_n_gt": 0,
+   "corner_latch_score": [],
+   "gate": "no_corner"
+  },
+  {
+   "key": "datasets__E30_E38_door_RH__0040",
+   "cls": "E30_E38_door_RH",
+   "src": "datasets",
+   "bolt_err_px": [
+    1.7806825426709065,
+    0.9257684663501607,
+    0.10692676975302123,
+    0.2830425929679551
+   ],
+   "bolt_n_det": 4,
+   "bolt_n_gt": 4,
+   "bolt_score": [
+    0.988,
+    0.959,
+    0.953,
+    0.952
+   ],
+   "corner_hinge_err_px": [],
+   "corner_hinge_n_det": 0,
+   "corner_hinge_n_gt": 0,
+   "corner_hinge_score": [],
+   "corner_latch_err_px": [
+    1.33568078575359
+   ],
+   "corner_latch_n_det": 1,
+   "corner_latch_n_gt": 1,
+   "corner_latch_score": [
+    0.968
+   ],
+   "gate": "no_corner"
+  },
+  {
+   "key": "datasets__E30_E38_door_RH__0050",
+   "cls": "E30_E38_door_RH",
+   "src": "datasets",
+   "bolt_err_px": [
+    2.495349505185341,
+    1.6620238727044716,
+    1.0788926781139803,
+    1.0399653968332854
+   ],
+   "bolt_n_det": 4,
+   "bolt_n_gt": 4,
+   "bolt_score": [
+    1.013,
+    0.973,
+    0.969,
+    0.967
+   ],
+   "corner_hinge_err_px": [
+    0.11856799797236658
+   ],
+   "corner_hinge_n_det": 1,
+   "corner_hinge_n_gt": 1,
+   "corner_hinge_score": [
+    0.907
+   ],
+   "corner_latch_err_px": [
+    0.5392631627210835
+   ],
+   "corner_latch_n_det": 1,
+   "corner_latch_n_gt": 1,
+   "corner_latch_score": [
+    1.07
+   ],
+   "D_mm": 1079.0673093619969,
+   "D_src": "depth",
+   "D_bolt_mm": 934.1990356445312,
+   "gate": "ok",
+   "pred": "E30_E38_door_RH",
+   "D_gt_mm": 945.8605908875431
+  },
+  {
+   "key": "datasets__E30_E38_door_RH__0070",
+   "cls": "E30_E38_door_RH",
+   "src": "datasets",
+   "bolt_err_px": [
+    1.0078365268541583,
+    0.45683183558116003,
+    1.7920066773143224,
+    0.7605069283935778
+   ],
+   "bolt_n_det": 4,
+   "bolt_n_gt": 4,
+   "bolt_score": [
+    0.992,
+    0.979,
+    0.957,
+    0.945
+   ],
+   "corner_hinge_err_px": [
+    1.4143092989917165
+   ],
+   "corner_hinge_n_det": 1,
+   "corner_hinge_n_gt": 1,
+   "corner_hinge_score": [
+    1.047
+   ],
+   "corner_latch_err_px": [
+    2.336930160530779
+   ],
+   "corner_latch_n_det": 1,
+   "corner_latch_n_gt": 1,
+   "corner_latch_score": [
+    0.987
+   ],
+   "D_mm": 1083.2217095092824,
+   "D_src": "depth",
+   "D_bolt_mm": 1176.335205078125,
+   "gate": "ok",
+   "pred": "E30_E38_door_RH",
+   "D_gt_mm": 1173.7559252777141
+  },
+  {
+   "key": "datasets__E30_E38_door_RH__0090",
+   "cls": "E30_E38_door_RH",
+   "src": "datasets",
+   "bolt_err_px": [
+    1.7402755184426153,
+    0.46239688149018526,
+    0.9898837068677965,
+    0.7639014174717562
+   ],
+   "bolt_n_det": 4,
+   "bolt_n_gt": 4,
+   "bolt_score": [
+    1.046,
+    1.012,
+    1.001,
+    0.974
+   ],
+   "corner_hinge_err_px": [
+    1.5950027619816716
+   ],
+   "corner_hinge_n_det": 1,
+   "corner_hinge_n_gt": 1,
+   "corner_hinge_score": [
+    1.011
+   ],
+   "corner_latch_err_px": [
+    1.1400594828091897
+   ],
+   "corner_latch_n_det": 1,
+   "corner_latch_n_gt": 1,
+   "corner_latch_score": [
+    0.939
+   ],
+   "D_mm": 1104.4565141094113,
+   "D_src": "depth",
+   "D_bolt_mm": 1073.8447265625,
+   "gate": "ok",
+   "pred": "E30_E38_door_RH",
+   "D_gt_mm": 1071.1917987669979
+  },
+  {
+   "key": "datasets__E30_E38_door_RH__0100",
+   "cls": "E30_E38_door_RH",
+   "src": "datasets",
+   "bolt_err_px": [
+    0.7784121685316874,
+    0.5265381063136819,
+    0.5410796206802644,
+    1.8468387279079135
+   ],
+   "bolt_n_det": 4,
+   "bolt_n_gt": 4,
+   "bolt_score": [
+    1.057,
+    0.995,
+    0.979,
+    0.971
+   ],
+   "corner_hinge_err_px": [
+    0.8564972513776405
+   ],
+   "corner_hinge_n_det": 1,
+   "corner_hinge_n_gt": 1,
+   "corner_hinge_score": [
+    1.065
+   ],
+   "corner_latch_err_px": [
+    1.346218830074216
+   ],
+   "corner_latch_n_det": 1,
+   "corner_latch_n_gt": 1,
+   "corner_latch_score": [
+    1.002
+   ],
+   "D_mm": 1092.1823459611062,
+   "D_src": "depth",
+   "D_bolt_mm": 1096.5706787109375,
+   "gate": "ok",
+   "pred": "E30_E38_door_RH",
+   "D_gt_mm": 1105.4180379814266
+  },
+  {
+   "key": "datasets__E30_E38_door_RH__0110",
+   "cls": "E30_E38_door_RH",
+   "src": "datasets",
+   "bolt_err_px": [
+    1.0456014865219743,
+    0.6993207404273094,
+    1.0499518712684563,
+    1.3260605769583287
+   ],
+   "bolt_n_det": 4,
+   "bolt_n_gt": 4,
+   "bolt_score": [
+    1.015,
+    0.963,
+    0.96,
+    0.953
+   ],
+   "corner_hinge_err_px": [
+    1.1905486037307305
+   ],
+   "corner_hinge_n_det": 1,
+   "corner_hinge_n_gt": 1,
+   "corner_hinge_score": [
+    1.01
+   ],
+   "corner_latch_err_px": [
+    0.8694185498386566
+   ],
+   "corner_latch_n_det": 1,
+   "corner_latch_n_gt": 1,
+   "corner_latch_score": [
+    1.021
+   ],
+   "D_mm": 1084.4595292235024,
+   "D_src": "depth",
+   "D_bolt_mm": 983.319091796875,
+   "gate": "ok",
+   "pred": "E30_E38_door_RH",
+   "D_gt_mm": 983.6377115436442
+  },
+  {
+   "key": "datasets__E30_E38_door_RH__0130",
+   "cls": "E30_E38_door_RH",
+   "src": "datasets",
+   "bolt_err_px": [
+    1.304704991615276,
+    1.392302594206446,
+    1.004401027642671,
+    0.4585021072415841
+   ],
+   "bolt_n_det": 4,
+   "bolt_n_gt": 4,
+   "bolt_score": [
+    1.047,
+    1.001,
+    0.987,
+    0.979
+   ],
+   "corner_hinge_err_px": [
+    0.5691338731814276
+   ],
+   "corner_hinge_n_det": 1,
+   "corner_hinge_n_gt": 1,
+   "corner_hinge_score": [
+    1.037
+   ],
+   "corner_latch_err_px": [
+    2.2500631512697016
+   ],
+   "corner_latch_n_det": 1,
+   "corner_latch_n_gt": 1,
+   "corner_latch_score": [
+    0.898
+   ],
+   "D_mm": 1074.1002201683775,
+   "D_src": "depth",
+   "gate": "ok",
+   "pred": "E30_E38_door_RH"
+  },
+  {
+   "key": "datasets__E30_E38_door_RH__0140",
+   "cls": "E30_E38_door_RH",
+   "src": "datasets",
+   "bolt_err_px": [
+    1.078891000011487,
+    0.9792034031523774,
+    0.20230650135500666,
+    0.7996244984451218
+   ],
+   "bolt_n_det": 4,
+   "bolt_n_gt": 4,
+   "bolt_score": [
+    1.001,
+    0.993,
+    0.963,
+    0.953
+   ],
+   "corner_hinge_err_px": [
+    1.14904293009402
+   ],
+   "corner_hinge_n_det": 1,
+   "corner_hinge_n_gt": 1,
+   "corner_hinge_score": [
+    0.992
+   ],
+   "corner_latch_err_px": [
+    1.8508347973035641
+   ],
+   "corner_latch_n_det": 1,
+   "corner_latch_n_gt": 1,
+   "corner_latch_score": [
+    0.958
+   ],
+   "D_mm": 1084.9478710768765,
+   "D_src": "depth",
+   "D_bolt_mm": 1166.8050537109375,
+   "gate": "ok",
+   "pred": "E30_E38_door_RH",
+   "D_gt_mm": 1161.4237554444264
+  },
+  {
+   "key": "datasets__E30_door_LH_FRT__0000",
+   "cls": "E30_door_LH_FRT",
+   "src": "datasets",
+   "bolt_err_px": [
+    0.4025161580507299,
+    2.3411705065869084
+   ],
+   "bolt_n_det": 4,
+   "bolt_n_gt": 2,
+   "bolt_score": [
+    0.993,
+    0.971,
+    0.691,
+    0.539
+   ],
+   "corner_hinge_err_px": [
+    1.942574978198217
+   ],
+   "corner_hinge_n_det": 1,
+   "corner_hinge_n_gt": 1,
+   "corner_hinge_score": [
+    0.965
+   ],
+   "corner_latch_err_px": [],
+   "corner_latch_n_det": 0,
+   "corner_latch_n_gt": 0,
+   "corner_latch_score": [],
+   "gate": "no_corner"
+  },
+  {
+   "key": "datasets__E30_door_LH_FRT__0010",
+   "cls": "E30_door_LH_FRT",
+   "src": "datasets",
+   "bolt_err_px": [
+    0.31272306229778374,
+    2.0490782796843523,
+    2.0405958375939095,
+    1.221423399333186
+   ],
+   "bolt_n_det": 4,
+   "bolt_n_gt": 4,
+   "bolt_score": [
+    1.023,
+    0.965,
+    0.95,
+    0.93
+   ],
+   "corner_hinge_err_px": [],
+   "corner_hinge_n_det": 0,
+   "corner_hinge_n_gt": 0,
+   "corner_hinge_score": [],
+   "corner_latch_err_px": [
+    1.1545553488397766
+   ],
+   "corner_latch_n_det": 1,
+   "corner_latch_n_gt": 1,
+   "corner_latch_score": [
+    0.944
+   ],
+   "gate": "no_corner"
+  },
+  {
+   "key": "datasets__E30_door_LH_FRT__0030",
+   "cls": "E30_door_LH_FRT",
+   "src": "datasets",
+   "bolt_err_px": [
+    0.9304996537394189,
+    1.738517316583335,
+    0.5767798271331127,
+    2.112938228168961
+   ],
+   "bolt_n_det": 4,
+   "bolt_n_gt": 4,
+   "bolt_score": [
+    1.008,
+    0.98,
+    0.973,
+    0.97
+   ],
+   "corner_hinge_err_px": [
+    0.5405161510986894
+   ],
+   "corner_hinge_n_det": 1,
+   "corner_hinge_n_gt": 1,
+   "corner_hinge_score": [
+    1.009
+   ],
+   "corner_latch_err_px": [
+    0.13143868110786333
+   ],
+   "corner_latch_n_det": 1,
+   "corner_latch_n_gt": 1,
+   "corner_latch_score": [
+    1.013
+   ],
+   "D_mm": 770.0753478557918,
+   "D_src": "depth",
+   "D_bolt_mm": 743.6915283203125,
+   "gate": "ok",
+   "pred": "E30_door_LH_FRT",
+   "D_gt_mm": 740.263258705842
+  },
+  {
+   "key": "datasets__E30_door_LH_FRT__0040",
+   "cls": "E30_door_LH_FRT",
+   "src": "datasets",
+   "bolt_err_px": [
+    0.8991563927002657,
+    1.132003116850429,
+    0.2683425776598288,
+    1.1061578361999258
+   ],
+   "bolt_n_det": 4,
+   "bolt_n_gt": 4,
+   "bolt_score": [
+    1.046,
+    0.97,
+    0.968,
+    0.964
+   ],
+   "corner_hinge_err_px": [
+    0.4658950849616995
+   ],
+   "corner_hinge_n_det": 1,
+   "corner_hinge_n_gt": 1,
+   "corner_hinge_score": [
+    0.982
+   ],
+   "corner_latch_err_px": [
+    1.4644432334128306
+   ],
+   "corner_latch_n_det": 1,
+   "corner_latch_n_gt": 1,
+   "corner_latch_score": [
+    0.967
+   ],
+   "D_mm": 765.0385225084859,
+   "D_src": "depth",
+   "D_bolt_mm": 791.9243774414062,
+   "gate": "ok",
+   "pred": "E30_door_LH_FRT",
+   "D_gt_mm": 791.5665078461428
+  },
+  {
+   "key": "datasets__E30_door_LH_FRT__0060",
+   "cls": "E30_door_LH_FRT",
+   "src": "datasets",
+   "bolt_err_px": [
+    1.4252872499597555,
+    1.140243453802862,
+    1.8526337538565705,
+    0.8482105205298156
+   ],
+   "bolt_n_det": 4,
+   "bolt_n_gt": 4,
+   "bolt_score": [
+    1.017,
+    0.994,
+    0.991,
+    0.937
+   ],
+   "corner_hinge_err_px": [],
+   "corner_hinge_n_det": 1,
+   "corner_hinge_n_gt": 0,
+   "corner_hinge_score": [
+    0.186
+   ],
+   "corner_latch_err_px": [
+    1.154354139221096
+   ],
+   "corner_latch_n_det": 1,
+   "corner_latch_n_gt": 1,
+   "corner_latch_score": [
+    0.987
+   ],
+   "D_mm": 1.2891921931630783,
+   "D_src": "depth",
+   "D_bolt_mm": 1.3182332515716553,
+   "gate": "same_side"
+  },
+  {
+   "key": "datasets__E30_door_LH_FRT__0080",
+   "cls": "E30_door_LH_FRT",
+   "src": "datasets",
+   "bolt_err_px": [
+    0.46255303498445743,
+    1.181571580114941,
+    0.05559927533049673,
+    1.699443961159866
+   ],
+   "bolt_n_det": 4,
+   "bolt_n_gt": 4,
+   "bolt_score": [
+    1.026,
+    1.0,
+    0.973,
+    0.951
+   ],
+   "corner_hinge_err_px": [
+    1.5832819774783753
+   ],
+   "corner_hinge_n_det": 1,
+   "corner_hinge_n_gt": 1,
+   "corner_hinge_score": [
+    1.03
+   ],
+   "corner_latch_err_px": [
+    1.18657381241223
+   ],
+   "corner_latch_n_det": 1,
+   "corner_latch_n_gt": 1,
+   "corner_latch_score": [
+    0.986
+   ],
+   "D_mm": 765.8285410718424,
+   "D_src": "depth",
+   "D_bolt_mm": 814.9844970703125,
+   "gate": "ok",
+   "pred": "E30_door_LH_FRT",
+   "D_gt_mm": 815.2540917264653
+  },
+  {
+   "key": "datasets__E30_door_LH_FRT__0090",
+   "cls": "E30_door_LH_FRT",
+   "src": "datasets",
+   "bolt_err_px": [
+    2.413053347939878,
+    0.34301823517543,
+    2.2138864712407456,
+    1.4656665487541067
+   ],
+   "bolt_n_det": 4,
+   "bolt_n_gt": 4,
+   "bolt_score": [
+    0.996,
+    0.995,
+    0.958,
+    0.949
+   ],
+   "corner_hinge_err_px": [
+    1.6433723924328463
+   ],
+   "corner_hinge_n_det": 1,
+   "corner_hinge_n_gt": 1,
+   "corner_hinge_score": [
+    0.99
+   ],
+   "corner_latch_err_px": [
+    1.7884078598032547
+   ],
+   "corner_latch_n_det": 1,
+   "corner_latch_n_gt": 1,
+   "corner_latch_score": [
+    0.955
+   ],
+   "D_mm": 769.1126242548721,
+   "D_src": "depth",
+   "gate": "ok",
+   "pred": "E30_door_LH_FRT",
+   "D_gt_mm": 691.7055003012683
+  },
+  {
+   "key": "datasets__E30_door_LH_FRT__0100",
+   "cls": "E30_door_LH_FRT",
+   "src": "datasets",
+   "bolt_err_px": [
+    1.82133527913145,
+    0.9195373145424465,
+    1.5843373551666045,
+    1.493988726567727
+   ],
+   "bolt_n_det": 4,
+   "bolt_n_gt": 4,
+   "bolt_score": [
+    1.003,
+    1.002,
+    0.984,
+    0.972
+   ],
+   "corner_hinge_err_px": [
+    2.1562165701734926
+   ],
+   "corner_hinge_n_det": 1,
+   "corner_hinge_n_gt": 1,
+   "corner_hinge_score": [
+    1.009
+   ],
+   "corner_latch_err_px": [
+    0.9672553198890677
+   ],
+   "corner_latch_n_det": 1,
+   "corner_latch_n_gt": 1,
+   "corner_latch_score": [
+    1.011
+   ],
+   "D_mm": 764.2364795488161,
+   "D_src": "depth",
+   "D_bolt_mm": 789.1672973632812,
+   "gate": "ok",
+   "pred": "E30_door_LH_FRT",
+   "D_gt_mm": 792.70093697032
+  },
+  {
+   "key": "datasets__E30_door_LH_FRT__0110",
+   "cls": "E30_door_LH_FRT",
+   "src": "datasets",
+   "bolt_err_px": [
+    0.947699296626954,
+    0.9578110943016951,
+    2.074784738876924,
+    1.2288396920370297
+   ],
+   "bolt_n_det": 4,
+   "bolt_n_gt": 4,
+   "bolt_score": [
+    1.044,
+    0.991,
+    0.98,
+    0.918
+   ],
+   "corner_hinge_err_px": [
+    1.0588328582758237
+   ],
+   "corner_hinge_n_det": 1,
+   "corner_hinge_n_gt": 1,
+   "corner_hinge_score": [
+    0.971
+   ],
+   "corner_latch_err_px": [
+    1.297387522010478
+   ],
+   "corner_latch_n_det": 1,
+   "corner_latch_n_gt": 1,
+   "corner_latch_score": [
+    0.98
+   ],
+   "D_mm": 762.9942209523679,
+   "D_src": "depth",
+   "D_bolt_mm": 751.6549072265625,
+   "gate": "near_border"
+  },
+  {
+   "key": "datasets__E30_door_LH_FRT__0120",
+   "cls": "E30_door_LH_FRT",
+   "src": "datasets",
+   "bolt_err_px": [
+    1.2730687373936158,
+    0.5348833912984404,
+    1.4873781154788928,
+    0.1018497366677552
+   ],
+   "bolt_n_det": 4,
+   "bolt_n_gt": 4,
+   "bolt_score": [
+    1.048,
+    1.037,
+    0.991,
+    0.959
+   ],
+   "corner_hinge_err_px": [
+    1.9911783563231737
+   ],
+   "corner_hinge_n_det": 1,
+   "corner_hinge_n_gt": 1,
+   "corner_hinge_score": [
+    0.961
+   ],
+   "corner_latch_err_px": [
+    1.1009835757820057
+   ],
+   "corner_latch_n_det": 1,
+   "corner_latch_n_gt": 1,
+   "corner_latch_score": [
+    1.006
+   ],
+   "D_mm": 766.0747859652158,
+   "D_src": "depth",
+   "D_bolt_mm": 734.6361694335938,
+   "gate": "ok",
+   "pred": "E30_door_LH_FRT",
+   "D_gt_mm": 729.7570037504457
+  },
+  {
+   "key": "datasets__E30_door_LH_FRT__0140",
+   "cls": "E30_door_LH_FRT",
+   "src": "datasets",
+   "bolt_err_px": [
+    1.395720201097449,
+    1.9169808784341724,
+    1.2714587489562028,
+    2.8266866679092417
+   ],
+   "bolt_n_det": 4,
+   "bolt_n_gt": 4,
+   "bolt_score": [
+    1.018,
+    1.01,
+    0.979,
+    0.976
+   ],
+   "corner_hinge_err_px": [
+    1.400768491077345
+   ],
+   "corner_hinge_n_det": 1,
+   "corner_hinge_n_gt": 1,
+   "corner_hinge_score": [
+    0.977
+   ],
+   "corner_latch_err_px": [
+    1.1570222267794568
+   ],
+   "corner_latch_n_det": 1,
+   "corner_latch_n_gt": 1,
+   "corner_latch_score": [
+    0.928
+   ],
+   "D_mm": 764.3380317377838,
+   "D_src": "depth",
+   "D_bolt_mm": 791.4921264648438,
+   "gate": "ok",
+   "pred": "E30_door_LH_FRT",
+   "D_gt_mm": 788.753045200016
+  },
+  {
+   "key": "datasets__E30_door_LH_RR__0000",
+   "cls": "E30_door_LH_RR",
+   "src": "datasets",
+   "bolt_err_px": [
+    0.675015859505871,
+    1.0876063912105887,
+    0.8032310601348452,
+    1.1432382111492119
+   ],
+   "bolt_n_det": 4,
+   "bolt_n_gt": 4,
+   "bolt_score": [
+    0.996,
+    0.966,
+    0.965,
+    0.926
+   ],
+   "corner_hinge_err_px": [],
+   "corner_hinge_n_det": 0,
+   "corner_hinge_n_gt": 0,
+   "corner_hinge_score": [],
+   "corner_latch_err_px": [
+    0.24640420979373012
+   ],
+   "corner_latch_n_det": 1,
+   "corner_latch_n_gt": 1,
+   "corner_latch_score": [
+    0.978
+   ],
+   "gate": "no_corner"
+  },
+  {
+   "key": "datasets__E30_door_LH_RR__0010",
+   "cls": "E30_door_LH_RR",
+   "src": "datasets",
+   "bolt_err_px": [
+    1.867524767984954,
+    1.6351826374040852,
+    1.4779312170582113,
+    1.3814330049363197
+   ],
+   "bolt_n_det": 4,
+   "bolt_n_gt": 4,
+   "bolt_score": [
+    0.998,
+    0.995,
+    0.984,
+    0.934
+   ],
+   "corner_hinge_err_px": [
+    1.0090988456488452
+   ],
+   "corner_hinge_n_det": 1,
+   "corner_hinge_n_gt": 1,
+   "corner_hinge_score": [
+    0.97
+   ],
+   "corner_latch_err_px": [
+    0.9585740441035535
+   ],
+   "corner_latch_n_det": 1,
+   "corner_latch_n_gt": 1,
+   "corner_latch_score": [
+    1.043
+   ],
+   "D_mm": 1156.080210311525,
+   "D_src": "depth",
+   "D_bolt_mm": 1114.75634765625,
+   "gate": "ok",
+   "pred": "E30_door_LH_RR",
+   "D_gt_mm": 1094.1451280260792
+  },
+  {
+   "key": "datasets__E30_door_LH_RR__0020",
+   "cls": "E30_door_LH_RR",
+   "src": "datasets",
+   "bolt_err_px": [
+    0.8493880498836582,
+    0.8107598863625869,
+    0.6597156069797551,
+    1.0002198350191167
+   ],
+   "bolt_n_det": 4,
+   "bolt_n_gt": 4,
+   "bolt_score": [
+    1.028,
+    1.006,
+    0.983,
+    0.972
+   ],
+   "corner_hinge_err_px": [
+    1.9917895688815135
+   ],
+   "corner_hinge_n_det": 1,
+   "corner_hinge_n_gt": 1,
+   "corner_hinge_score": [
+    1.001
+   ],
+   "corner_latch_err_px": [
+    0.8170228847032374
+   ],
+   "corner_latch_n_det": 1,
+   "corner_latch_n_gt": 1,
+   "corner_latch_score": [
+    1.013
+   ],
+   "D_mm": 1160.6623627698834,
+   "D_src": "depth",
+   "D_bolt_mm": 1068.6265869140625,
+   "gate": "ok",
+   "pred": "E30_door_LH_RR",
+   "D_gt_mm": 1065.7938599285724
+  },
+  {
+   "key": "datasets__E30_door_LH_RR__0030",
+   "cls": "E30_door_LH_RR",
+   "src": "datasets",
+   "bolt_err_px": [
+    1.0107268917382222,
+    1.6905843629818467,
+    0.5422619157067144,
+    0.6702629199954406
+   ],
+   "bolt_n_det": 4,
+   "bolt_n_gt": 4,
+   "bolt_score": [
+    1.059,
+    1.035,
+    1.01,
+    0.987
+   ],
+   "corner_hinge_err_px": [],
+   "corner_hinge_n_det": 0,
+   "corner_hinge_n_gt": 0,
+   "corner_hinge_score": [],
+   "corner_latch_err_px": [
+    1.3479240925312623
+   ],
+   "corner_latch_n_det": 1,
+   "corner_latch_n_gt": 1,
+   "corner_latch_score": [
+    0.821
+   ],
+   "gate": "no_corner"
+  },
+  {
+   "key": "datasets__E30_door_LH_RR__0040",
+   "cls": "E30_door_LH_RR",
+   "src": "datasets",
+   "bolt_err_px": [
+    2.031263579726676,
+    1.4805510710045413,
+    1.0264417369892183,
+    1.032954122901103
+   ],
+   "bolt_n_det": 4,
+   "bolt_n_gt": 4,
+   "bolt_score": [
+    1.008,
+    1.005,
+    0.975,
+    0.966
+   ],
+   "corner_hinge_err_px": [
+    0.5280600768875855
+   ],
+   "corner_hinge_n_det": 1,
+   "corner_hinge_n_gt": 1,
+   "corner_hinge_score": [
+    1.022
+   ],
+   "corner_latch_err_px": [
+    1.0627027841377898
+   ],
+   "corner_latch_n_det": 1,
+   "corner_latch_n_gt": 1,
+   "corner_latch_score": [
+    0.933
+   ],
+   "D_mm": 1163.6052179305664,
+   "D_src": "depth",
+   "D_bolt_mm": 1231.362060546875,
+   "gate": "ok",
+   "pred": "E30_door_LH_RR",
+   "D_gt_mm": 1242.57362929232
+  },
+  {
+   "key": "datasets__E30_door_LH_RR__0050",
+   "cls": "E30_door_LH_RR",
+   "src": "datasets",
+   "bolt_err_px": [
+    1.2384133768589882,
+    1.4587286504181791,
+    2.463327490286067,
+    2.2530862946433063
+   ],
+   "bolt_n_det": 4,
+   "bolt_n_gt": 4,
+   "bolt_score": [
+    1.029,
+    0.995,
+    0.976,
+    0.969
+   ],
+   "corner_hinge_err_px": [
+    0.9049155264370491
+   ],
+   "corner_hinge_n_det": 1,
+   "corner_hinge_n_gt": 1,
+   "corner_hinge_score": [
+    1.013
+   ],
+   "corner_latch_err_px": [
+    0.8562052487074244
+   ],
+   "corner_latch_n_det": 1,
+   "corner_latch_n_gt": 1,
+   "corner_latch_score": [
+    1.035
+   ],
+   "D_mm": 1162.4595706513574,
+   "D_src": "depth",
+   "D_bolt_mm": 1221.15625,
+   "gate": "ok",
+   "pred": "E30_door_LH_RR",
+   "D_gt_mm": 1215.1700257516118
+  },
+  {
+   "key": "datasets__E30_door_LH_RR__0060",
+   "cls": "E30_door_LH_RR",
+   "src": "datasets",
+   "bolt_err_px": [
+    0.7564645021882076,
+    1.1543627367577793,
+    1.1338649612637777,
+    2.427010018427677
+   ],
+   "bolt_n_det": 4,
+   "bolt_n_gt": 4,
+   "bolt_score": [
+    1.012,
+    0.996,
+    0.996,
+    0.951
+   ],
+   "corner_hinge_err_px": [],
+   "corner_hinge_n_det": 0,
+   "corner_hinge_n_gt": 0,
+   "corner_hinge_score": [],
+   "corner_latch_err_px": [
+    0.271799866458936
+   ],
+   "corner_latch_n_det": 1,
+   "corner_latch_n_gt": 1,
+   "corner_latch_score": [
+    1.012
+   ],
+   "gate": "no_corner"
+  },
+  {
+   "key": "datasets__E30_door_LH_RR__0090",
+   "cls": "E30_door_LH_RR",
+   "src": "datasets",
+   "bolt_err_px": [
+    1.0721769261457232,
+    0.4788991403285336,
+    0.6525626614735468,
+    0.5484154836740397
+   ],
+   "bolt_n_det": 4,
+   "bolt_n_gt": 4,
+   "bolt_score": [
+    1.044,
+    1.035,
+    1.007,
+    0.971
+   ],
+   "corner_hinge_err_px": [
+    2.1330390668902397
+   ],
+   "corner_hinge_n_det": 1,
+   "corner_hinge_n_gt": 1,
+   "corner_hinge_score": [
+    1.012
+   ],
+   "corner_latch_err_px": [
+    1.1291942855963415
+   ],
+   "corner_latch_n_det": 1,
+   "corner_latch_n_gt": 1,
+   "corner_latch_score": [
+    0.913
+   ],
+   "D_mm": 1162.7135981727104,
+   "D_src": "depth",
+   "D_bolt_mm": 1109.3994140625,
+   "gate": "ok",
+   "pred": "E30_door_LH_RR",
+   "D_gt_mm": 1107.8996484858835
+  },
+  {
+   "key": "datasets__E30_door_LH_RR__0100",
+   "cls": "E30_door_LH_RR",
+   "src": "datasets",
+   "bolt_err_px": [
+    1.120494325066924,
+    1.0567678843808503,
+    1.0825550936413957,
+    1.443276632670572
+   ],
+   "bolt_n_det": 4,
+   "bolt_n_gt": 4,
+   "bolt_score": [
+    1.034,
+    1.007,
+    0.957,
+    0.949
+   ],
+   "corner_hinge_err_px": [],
+   "corner_hinge_n_det": 0,
+   "corner_hinge_n_gt": 0,
+   "corner_hinge_score": [],
+   "corner_latch_err_px": [
+    1.1979897768750856
+   ],
+   "corner_latch_n_det": 1,
+   "corner_latch_n_gt": 1,
+   "corner_latch_score": [
+    1.04
+   ],
+   "gate": "no_corner"
+  },
+  {
+   "key": "datasets__E30_door_LH_RR__0120",
+   "cls": "E30_door_LH_RR",
+   "src": "datasets",
+   "bolt_err_px": [
+    1.5494444518731803,
+    1.9137924593202027,
+    0.5544953122442278,
+    1.0995155200406346
+   ],
+   "bolt_n_det": 4,
+   "bolt_n_gt": 4,
+   "bolt_score": [
+    1.013,
+    0.998,
+    0.969,
+    0.956
+   ],
+   "corner_hinge_err_px": [
+    0.35646130251618613
+   ],
+   "corner_hinge_n_det": 1,
+   "corner_hinge_n_gt": 1,
+   "corner_hinge_score": [
+    0.949
+   ],
+   "corner_latch_err_px": [
+    1.2679113259310388
+   ],
+   "corner_latch_n_det": 1,
+   "corner_latch_n_gt": 1,
+   "corner_latch_score": [
+    1.056
+   ],
+   "D_mm": 1162.0184459767424,
+   "D_src": "depth",
+   "D_bolt_mm": 1185.4462890625,
+   "gate": "ok",
+   "pred": "E30_door_LH_RR",
+   "D_gt_mm": 1173.9434033578034
+  },
+  {
+   "key": "datasets__E30_door_LH_RR__0130",
+   "cls": "E30_door_LH_RR",
+   "src": "datasets",
+   "bolt_err_px": [
+    1.1129667205877731,
+    1.6838996768570746,
+    2.035672162912238,
+    0.6214978804640409
+   ],
+   "bolt_n_det": 4,
+   "bolt_n_gt": 4,
+   "bolt_score": [
+    1.017,
+    0.996,
+    0.981,
+    0.971
+   ],
+   "corner_hinge_err_px": [
+    1.032177237321938
+   ],
+   "corner_hinge_n_det": 1,
+   "corner_hinge_n_gt": 1,
+   "corner_hinge_score": [
+    1.052
+   ],
+   "corner_latch_err_px": [
+    0.9974294439766479
+   ],
+   "corner_latch_n_det": 1,
+   "corner_latch_n_gt": 1,
+   "corner_latch_score": [
+    1.034
+   ],
+   "D_mm": 1151.7671041738524,
+   "D_src": "depth",
+   "gate": "ok",
+   "pred": "E30_door_LH_RR"
+  },
+  {
+   "key": "datasets__E30_door_LH_RR__0140",
+   "cls": "E30_door_LH_RR",
+   "src": "datasets",
+   "bolt_err_px": [
+    1.207213244559889,
+    0.8809246918679883,
+    1.37625066275585,
+    0.18460165494386738
+   ],
+   "bolt_n_det": 4,
+   "bolt_n_gt": 4,
+   "bolt_score": [
+    1.04,
+    1.025,
+    1.008,
+    0.969
+   ],
+   "corner_hinge_err_px": [
+    2.0630973922496723
+   ],
+   "corner_hinge_n_det": 1,
+   "corner_hinge_n_gt": 1,
+   "corner_hinge_score": [
+    1.058
+   ],
+   "corner_latch_err_px": [
+    1.5980953182168829
+   ],
+   "corner_latch_n_det": 1,
+   "corner_latch_n_gt": 1,
+   "corner_latch_score": [
+    1.011
+   ],
+   "D_mm": 1151.5682349806239,
+   "D_src": "depth",
+   "D_bolt_mm": 1046.248046875,
+   "gate": "ok",
+   "pred": "E30_door_LH_RR",
+   "D_gt_mm": 1045.4155603747297
+  },
+  {
+   "key": "datasets__E38_door_LH_FRT__0000",
+   "cls": "E38_door_LH_FRT",
+   "src": "datasets",
+   "bolt_err_px": [
+    1.0866976794209657,
+    1.934252475507983,
+    0.5732615563468862,
+    1.5385574163150755
+   ],
+   "bolt_n_det": 4,
+   "bolt_n_gt": 4,
+   "bolt_score": [
+    1.022,
+    0.991,
+    0.976,
+    0.937
+   ],
+   "corner_hinge_err_px": [
+    1.6172282817324022
+   ],
+   "corner_hinge_n_det": 1,
+   "corner_hinge_n_gt": 1,
+   "corner_hinge_score": [
+    0.998
+   ],
+   "corner_latch_err_px": [
+    1.400461082069356
+   ],
+   "corner_latch_n_det": 1,
+   "corner_latch_n_gt": 1,
+   "corner_latch_score": [
+    0.935
+   ],
+   "D_mm": 807.9308977334097,
+   "D_src": "depth",
+   "gate": "no_frame"
+  },
+  {
+   "key": "datasets__E38_door_LH_FRT__0010",
+   "cls": "E38_door_LH_FRT",
+   "src": "datasets",
+   "bolt_err_px": [
+    1.627586119106687,
+    2.623706731789344,
+    1.0632374781982161,
+    1.9963963742510868
+   ],
+   "bolt_n_det": 4,
+   "bolt_n_gt": 4,
+   "bolt_score": [
+    0.996,
+    0.962,
+    0.945,
+    0.939
+   ],
+   "corner_hinge_err_px": [],
+   "corner_hinge_n_det": 0,
+   "corner_hinge_n_gt": 0,
+   "corner_hinge_score": [],
+   "corner_latch_err_px": [
+    1.323355797257731
+   ],
+   "corner_latch_n_det": 1,
+   "corner_latch_n_gt": 1,
+   "corner_latch_score": [
+    1.008
+   ],
+   "gate": "no_corner"
+  },
+  {
+   "key": "datasets__E38_door_LH_FRT__0020",
+   "cls": "E38_door_LH_FRT",
+   "src": "datasets",
+   "bolt_err_px": [
+    0.6382804977991535,
+    2.5485035868729025,
+    0.973589721154644,
+    1.6716784446364938
+   ],
+   "bolt_n_det": 4,
+   "bolt_n_gt": 4,
+   "bolt_score": [
+    0.989,
+    0.982,
+    0.938,
+    0.921
+   ],
+   "corner_hinge_err_px": [
+    0.9383150451951892
+   ],
+   "corner_hinge_n_det": 1,
+   "corner_hinge_n_gt": 1,
+   "corner_hinge_score": [
+    0.965
+   ],
+   "corner_latch_err_px": [
+    0.5983233375320925
+   ],
+   "corner_latch_n_det": 1,
+   "corner_latch_n_gt": 1,
+   "corner_latch_score": [
+    1.065
+   ],
+   "D_mm": 814.6887695755237,
+   "D_src": "depth",
+   "D_bolt_mm": 834.53857421875,
+   "gate": "ok",
+   "pred": "E38_door_LH_FRT",
+   "D_gt_mm": 841.2589008254695
+  },
+  {
+   "key": "datasets__E38_door_LH_FRT__0030",
+   "cls": "E38_door_LH_FRT",
+   "src": "datasets",
+   "bolt_err_px": [
+    0.40407221075870253,
+    1.8176748624909063,
+    1.294187629610629,
+    3.1170633716774403
+   ],
+   "bolt_n_det": 4,
+   "bolt_n_gt": 4,
+   "bolt_score": [
+    0.984,
+    0.946,
+    0.941,
+    0.907
+   ],
+   "corner_hinge_err_px": [],
+   "corner_hinge_n_det": 0,
+   "corner_hinge_n_gt": 0,
+   "corner_hinge_score": [],
+   "corner_latch_err_px": [
+    1.0738221808772825
+   ],
+   "corner_latch_n_det": 1,
+   "corner_latch_n_gt": 1,
+   "corner_latch_score": [
+    0.969
+   ],
+   "gate": "no_corner"
+  },
+  {
+   "key": "datasets__E38_door_LH_FRT__0040",
+   "cls": "E38_door_LH_FRT",
+   "src": "datasets",
+   "bolt_err_px": [
+    1.2469137212201256,
+    1.5753240222340206,
+    0.19225993080573459,
+    1.5067471078140309
+   ],
+   "bolt_n_det": 4,
+   "bolt_n_gt": 4,
+   "bolt_score": [
+    1.001,
+    0.972,
+    0.956,
+    0.865
+   ],
+   "corner_hinge_err_px": [
+    2.9948130870827034
+   ],
+   "corner_hinge_n_det": 1,
+   "corner_hinge_n_gt": 1,
+   "corner_hinge_score": [
+    0.913
+   ],
+   "corner_latch_err_px": [
+    0.7963532406279921
+   ],
+   "corner_latch_n_det": 1,
+   "corner_latch_n_gt": 1,
+   "corner_latch_score": [
+    0.977
+   ],
+   "D_mm": 808.3999829106759,
+   "D_src": "depth",
+   "D_bolt_mm": 867.4814453125,
+   "gate": "ok",
+   "pred": "E38_door_LH_FRT",
+   "D_gt_mm": 870.5016609553984
+  },
+  {
+   "key": "datasets__E38_door_LH_FRT__0050",
+   "cls": "E38_door_LH_FRT",
+   "src": "datasets",
+   "bolt_err_px": [
+    1.5239446773903693,
+    2.5668502043317574,
+    0.6224899014741568,
+    1.3378522129531183
+   ],
+   "bolt_n_det": 4,
+   "bolt_n_gt": 4,
+   "bolt_score": [
+    1.035,
+    1.012,
+    0.963,
+    0.943
+   ],
+   "corner_hinge_err_px": [
+    0.8052444752572047
+   ],
+   "corner_hinge_n_det": 1,
+   "corner_hinge_n_gt": 1,
+   "corner_hinge_score": [
+    1.041
+   ],
+   "corner_latch_err_px": [
+    0.9452816843889827
+   ],
+   "corner_latch_n_det": 1,
+   "corner_latch_n_gt": 1,
+   "corner_latch_score": [
+    0.946
+   ],
+   "D_mm": 826.2447251212731,
+   "D_src": "depth",
+   "D_bolt_mm": 813.7903442382812,
+   "gate": "ok",
+   "pred": "E38_door_LH_FRT",
+   "D_gt_mm": 823.669138425891
+  },
+  {
+   "key": "datasets__E38_door_LH_FRT__0060",
+   "cls": "E38_door_LH_FRT",
+   "src": "datasets",
+   "bolt_err_px": [
+    0.8597419032752561,
+    1.9941463797296626,
+    0.7982686692046078,
+    1.0028894837965732
+   ],
+   "bolt_n_det": 4,
+   "bolt_n_gt": 4,
+   "bolt_score": [
+    1.013,
+    0.996,
+    0.985,
+    0.981
+   ],
+   "corner_hinge_err_px": [
+    1.8707720951916333
+   ],
+   "corner_hinge_n_det": 1,
+   "corner_hinge_n_gt": 1,
+   "corner_hinge_score": [
+    0.915
+   ],
+   "corner_latch_err_px": [
+    1.0390159427996803
+   ],
+   "corner_latch_n_det": 1,
+   "corner_latch_n_gt": 1,
+   "corner_latch_score": [
+    0.935
+   ],
+   "D_mm": 791.8491519104256,
+   "D_src": "depth",
+   "gate": "no_frame"
+  },
+  {
+   "key": "datasets__E38_door_LH_FRT__0070",
+   "cls": "E38_door_LH_FRT",
+   "src": "datasets",
+   "bolt_err_px": [
+    0.9529775364726077,
+    1.4730364592640928,
+    0.5277835848416316,
+    0.7678605474926473
+   ],
+   "bolt_n_det": 4,
+   "bolt_n_gt": 4,
+   "bolt_score": [
+    1.018,
+    0.997,
+    0.977,
+    0.971
+   ],
+   "corner_hinge_err_px": [
+    1.473785166262209
+   ],
+   "corner_hinge_n_det": 1,
+   "corner_hinge_n_gt": 1,
+   "corner_hinge_score": [
+    0.995
+   ],
+   "corner_latch_err_px": [
+    0.6607443248842193
+   ],
+   "corner_latch_n_det": 1,
+   "corner_latch_n_gt": 1,
+   "corner_latch_score": [
+    1.036
+   ],
+   "D_mm": 815.5450065528682,
+   "D_src": "depth",
+   "D_bolt_mm": 858.4714965820312,
+   "gate": "ok",
+   "pred": "E38_door_LH_FRT",
+   "D_gt_mm": 858.6693376154636
+  },
+  {
+   "key": "datasets__E38_door_LH_FRT__0080",
+   "cls": "E38_door_LH_FRT",
+   "src": "datasets",
+   "bolt_err_px": [
+    1.444650663450417,
+    3.8708172342371463,
+    0.7114514625747216,
+    1.3596996010255218
+   ],
+   "bolt_n_det": 4,
+   "bolt_n_gt": 4,
+   "bolt_score": [
+    0.996,
+    0.986,
+    0.958,
+    0.882
+   ],
+   "corner_hinge_err_px": [
+    0.2340111132900845
+   ],
+   "corner_hinge_n_det": 1,
+   "corner_hinge_n_gt": 1,
+   "corner_hinge_score": [
+    1.0
+   ],
+   "corner_latch_err_px": [
+    0.5823075067712015
+   ],
+   "corner_latch_n_det": 1,
+   "corner_latch_n_gt": 1,
+   "corner_latch_score": [
+    1.027
+   ],
+   "D_mm": 828.4193597779423,
+   "D_src": "depth",
+   "gate": "ok",
+   "pred": "E38_door_LH_FRT",
+   "D_gt_mm": 764.6914114642855
+  },
+  {
+   "key": "datasets__E38_door_LH_FRT__0100",
+   "cls": "E38_door_LH_FRT",
+   "src": "datasets",
+   "bolt_err_px": [
+    0.7086673165884821,
+    0.6070066578374623,
+    1.6779352824567757,
+    3.0421381307650766
+   ],
+   "bolt_n_det": 4,
+   "bolt_n_gt": 4,
+   "bolt_score": [
+    1.033,
+    1.014,
+    0.947,
+    0.93
+   ],
+   "corner_hinge_err_px": [
+    1.2032244768137441
+   ],
+   "corner_hinge_n_det": 1,
+   "corner_hinge_n_gt": 1,
+   "corner_hinge_score": [
+    1.012
+   ],
+   "corner_latch_err_px": [
+    1.8192537521286625
+   ],
+   "corner_latch_n_det": 1,
+   "corner_latch_n_gt": 1,
+   "corner_latch_score": [
+    0.958
+   ],
+   "D_mm": 794.0128214135608,
+   "D_src": "depth",
+   "gate": "near_border"
+  },
+  {
+   "key": "datasets__E38_door_LH_FRT__0120",
+   "cls": "E38_door_LH_FRT",
+   "src": "datasets",
+   "bolt_err_px": [
+    0.685778500105613,
+    3.1081495034050004,
+    1.5881289858056815,
+    2.5522894920394554
+   ],
+   "bolt_n_det": 4,
+   "bolt_n_gt": 4,
+   "bolt_score": [
+    0.999,
+    0.983,
+    0.972,
+    0.922
+   ],
+   "corner_hinge_err_px": [
+    3.409641760701215
+   ],
+   "corner_hinge_n_det": 1,
+   "corner_hinge_n_gt": 1,
+   "corner_hinge_score": [
+    0.971
+   ],
+   "corner_latch_err_px": [
+    0.6707945969580176
+   ],
+   "corner_latch_n_det": 1,
+   "corner_latch_n_gt": 1,
+   "corner_latch_score": [
+    0.948
+   ],
+   "D_mm": 799.9154795532512,
+   "D_src": "depth",
+   "gate": "ok",
+   "pred": "E38_door_LH_FRT"
+  },
+  {
+   "key": "datasets__E38_door_LH_FRT__0130",
+   "cls": "E38_door_LH_FRT",
+   "src": "datasets",
+   "bolt_err_px": [
+    0.8180573891794747,
+    2.265351970433729,
+    0.49468167278667563,
+    1.5069658998427187
+   ],
+   "bolt_n_det": 4,
+   "bolt_n_gt": 4,
+   "bolt_score": [
+    1.011,
+    0.965,
+    0.962,
+    0.945
+   ],
+   "corner_hinge_err_px": [
+    1.9502190486741406
+   ],
+   "corner_hinge_n_det": 1,
+   "corner_hinge_n_gt": 1,
+   "corner_hinge_score": [
+    0.952
+   ],
+   "corner_latch_err_px": [
+    0.8123370245559561
+   ],
+   "corner_latch_n_det": 1,
+   "corner_latch_n_gt": 1,
+   "corner_latch_score": [
+    0.979
+   ],
+   "D_mm": 813.639159972613,
+   "D_src": "depth",
+   "D_bolt_mm": 783.1085205078125,
+   "gate": "ok",
+   "pred": "E38_door_LH_FRT",
+   "D_gt_mm": 788.4864439639871
+  },
+  {
+   "key": "datasets__E38_door_LH_RR__0010",
+   "cls": "E38_door_LH_RR",
+   "src": "datasets",
+   "bolt_err_px": [
+    0.4540864060036246,
+    1.1639807759630094,
+    1.1084453169533883,
+    1.1321881135548786
+   ],
+   "bolt_n_det": 4,
+   "bolt_n_gt": 4,
+   "bolt_score": [
+    1.102,
+    1.034,
+    1.023,
+    0.968
+   ],
+   "corner_hinge_err_px": [
+    0.9776115219135559
+   ],
+   "corner_hinge_n_det": 1,
+   "corner_hinge_n_gt": 1,
+   "corner_hinge_score": [
+    0.935
+   ],
+   "corner_latch_err_px": [
+    0.4454855300384867
+   ],
+   "corner_latch_n_det": 1,
+   "corner_latch_n_gt": 1,
+   "corner_latch_score": [
+    1.03
+   ],
+   "D_mm": 1363.6074756567225,
+   "D_src": "depth",
+   "D_bolt_mm": 1334.7080078125,
+   "gate": "ok",
+   "pred": "E38_door_LH_RR",
+   "D_gt_mm": 1343.0369867348325
+  },
+  {
+   "key": "datasets__E38_door_LH_RR__0030",
+   "cls": "E38_door_LH_RR",
+   "src": "datasets",
+   "bolt_err_px": [
+    0.924012472216256,
+    1.2901910306837605,
+    2.616381885600788,
+    0.8635584722711985
+   ],
+   "bolt_n_det": 4,
+   "bolt_n_gt": 4,
+   "bolt_score": [
+    1.033,
+    0.988,
+    0.957,
+    0.952
+   ],
+   "corner_hinge_err_px": [],
+   "corner_hinge_n_det": 1,
+   "corner_hinge_n_gt": 0,
+   "corner_hinge_score": [
+    0.194
+   ],
+   "corner_latch_err_px": [
+    1.3683016569666024
+   ],
+   "corner_latch_n_det": 1,
+   "corner_latch_n_gt": 1,
+   "corner_latch_score": [
+    1.029
+   ],
+   "D_mm": 4.7563873263635985,
+   "D_src": "depth",
+   "D_bolt_mm": 5.139411449432373,
+   "gate": "same_side"
+  },
+  {
+   "key": "datasets__E38_door_LH_RR__0040",
+   "cls": "E38_door_LH_RR",
+   "src": "datasets",
+   "bolt_err_px": [
+    1.3683665154374516,
+    0.5957612337631264,
+    1.5113393667300392,
+    0.280493918700178
+   ],
+   "bolt_n_det": 4,
+   "bolt_n_gt": 4,
+   "bolt_score": [
+    1.033,
+    1.021,
+    0.983,
+    0.975
+   ],
+   "corner_hinge_err_px": [
+    1.4341183009381446
+   ],
+   "corner_hinge_n_det": 1,
+   "corner_hinge_n_gt": 1,
+   "corner_hinge_score": [
+    0.966
+   ],
+   "corner_latch_err_px": [
+    0.7208467175067108
+   ],
+   "corner_latch_n_det": 1,
+   "corner_latch_n_gt": 1,
+   "corner_latch_score": [
+    0.978
+   ],
+   "D_mm": 1363.696650116314,
+   "D_src": "depth",
+   "D_bolt_mm": 1383.4459228515625,
+   "gate": "ok",
+   "pred": "E38_door_LH_RR",
+   "D_gt_mm": 1379.694762966495
+  },
+  {
+   "key": "datasets__E38_door_LH_RR__0050",
+   "cls": "E38_door_LH_RR",
+   "src": "datasets",
+   "bolt_err_px": [
+    1.3461073460725301,
+    0.7388223048066918,
+    1.7858234980301304,
+    1.4143228725856418
+   ],
+   "bolt_n_det": 4,
+   "bolt_n_gt": 4,
+   "bolt_score": [
+    0.997,
+    0.987,
+    0.952,
+    0.822
+   ],
+   "corner_hinge_err_px": [
+    0.7857888600680104
+   ],
+   "corner_hinge_n_det": 1,
+   "corner_hinge_n_gt": 1,
+   "corner_hinge_score": [
+    0.961
+   ],
+   "corner_latch_err_px": [
+    1.4083758974367864
+   ],
+   "corner_latch_n_det": 1,
+   "corner_latch_n_gt": 1,
+   "corner_latch_score": [
+    1.005
+   ],
+   "D_mm": 1366.9419157834411,
+   "D_src": "depth",
+   "D_bolt_mm": 1409.5325927734375,
+   "gate": "ok",
+   "pred": "E38_door_LH_RR",
+   "D_gt_mm": 1402.0621495736832
+  },
+  {
+   "key": "datasets__E38_door_LH_RR__0060",
+   "cls": "E38_door_LH_RR",
+   "src": "datasets",
+   "bolt_err_px": [
+    0.4852386473745686,
+    1.2980719552155606,
+    0.32054155144255925,
+    0.6286905708166411
+   ],
+   "bolt_n_det": 4,
+   "bolt_n_gt": 4,
+   "bolt_score": [
+    1.01,
+    0.982,
+    0.973,
+    0.949
+   ],
+   "corner_hinge_err_px": [],
+   "corner_hinge_n_det": 1,
+   "corner_hinge_n_gt": 0,
+   "corner_hinge_score": [
+    0.173
+   ],
+   "corner_latch_err_px": [
+    1.7267476595871474
+   ],
+   "corner_latch_n_det": 1,
+   "corner_latch_n_gt": 1,
+   "corner_latch_score": [
+    0.951
+   ],
+   "D_mm": 6.331491501863335,
+   "D_src": "depth",
+   "D_bolt_mm": 7.120811939239502,
+   "gate": "same_side"
+  },
+  {
+   "key": "datasets__E38_door_LH_RR__0070",
+   "cls": "E38_door_LH_RR",
+   "src": "datasets",
+   "bolt_err_px": [
+    1.051716259106282,
+    0.624208545243325,
+    0.5755258055099846,
+    0.9039626873765314
+   ],
+   "bolt_n_det": 4,
+   "bolt_n_gt": 4,
+   "bolt_score": [
+    0.947,
+    0.94,
+    0.907,
+    0.892
+   ],
+   "corner_hinge_err_px": [
+    1.1699999367681306
+   ],
+   "corner_hinge_n_det": 1,
+   "corner_hinge_n_gt": 1,
+   "corner_hinge_score": [
+    0.986
+   ],
+   "corner_latch_err_px": [],
+   "corner_latch_n_det": 0,
+   "corner_latch_n_gt": 0,
+   "corner_latch_score": [],
+   "gate": "no_corner"
+  },
+  {
+   "key": "datasets__E38_door_LH_RR__0080",
+   "cls": "E38_door_LH_RR",
+   "src": "datasets",
+   "bolt_err_px": [
+    0.6759794838893735,
+    1.9929525488823379,
+    1.4753535963183482,
+    1.4226561463186822
+   ],
+   "bolt_n_det": 4,
+   "bolt_n_gt": 4,
+   "bolt_score": [
+    1.037,
+    0.996,
+    0.969,
+    0.958
+   ],
+   "corner_hinge_err_px": [
+    2.7435268435175653
+   ],
+   "corner_hinge_n_det": 1,
+   "corner_hinge_n_gt": 1,
+   "corner_hinge_score": [
+    0.918
+   ],
+   "corner_latch_err_px": [
+    0.9913857686367347
+   ],
+   "corner_latch_n_det": 1,
+   "corner_latch_n_gt": 1,
+   "corner_latch_score": [
+    0.96
+   ],
+   "D_mm": 1327.6151168863137,
+   "D_src": "depth",
+   "gate": "near_border"
+  },
+  {
+   "key": "datasets__E38_door_LH_RR__0090",
+   "cls": "E38_door_LH_RR",
+   "src": "datasets",
+   "bolt_err_px": [
+    1.2407835773162286,
+    1.355980212171779,
+    0.9401286669384656,
+    2.178345629520074
+   ],
+   "bolt_n_det": 4,
+   "bolt_n_gt": 4,
+   "bolt_score": [
+    1.009,
+    1.002,
+    0.976,
+    0.928
+   ],
+   "corner_hinge_err_px": [
+    1.6311665833820066
+   ],
+   "corner_hinge_n_det": 1,
+   "corner_hinge_n_gt": 1,
+   "corner_hinge_score": [
+    0.981
+   ],
+   "corner_latch_err_px": [
+    1.072161509006179
+   ],
+   "corner_latch_n_det": 1,
+   "corner_latch_n_gt": 1,
+   "corner_latch_score": [
+    0.972
+   ],
+   "D_mm": 1353.551354480686,
+   "D_src": "depth",
+   "D_bolt_mm": 1455.772705078125,
+   "gate": "ok",
+   "pred": "E38_door_LH_RR",
+   "D_gt_mm": 1444.1295472426812
+  },
+  {
+   "key": "datasets__E38_door_LH_RR__0100",
+   "cls": "E38_door_LH_RR",
+   "src": "datasets",
+   "bolt_err_px": [
+    0.4120422643101425,
+    1.0725789697985393,
+    1.273837687793669,
+    0.6060808133718666
+   ],
+   "bolt_n_det": 4,
+   "bolt_n_gt": 4,
+   "bolt_score": [
+    0.974,
+    0.973,
+    0.964,
+    0.931
+   ],
+   "corner_hinge_err_px": [
+    1.8306552055452072
+   ],
+   "corner_hinge_n_det": 1,
+   "corner_hinge_n_gt": 1,
+   "corner_hinge_score": [
+    1.032
+   ],
+   "corner_latch_err_px": [
+    0.9064440560573623
+   ],
+   "corner_latch_n_det": 1,
+   "corner_latch_n_gt": 1,
+   "corner_latch_score": [
+    1.047
+   ],
+   "D_mm": 1351.3742336028652,
+   "D_src": "depth",
+   "D_bolt_mm": 1195.4248046875,
+   "gate": "ok",
+   "pred": "E38_door_LH_RR",
+   "D_gt_mm": 1193.4916090848558
+  },
+  {
+   "key": "datasets__E38_door_LH_RR__0120",
+   "cls": "E38_door_LH_RR",
+   "src": "datasets",
+   "bolt_err_px": [
+    0.8876892363463077,
+    0.7206045770852874,
+    1.4602901562791166,
+    0.24509925320736045
+   ],
+   "bolt_n_det": 4,
+   "bolt_n_gt": 4,
+   "bolt_score": [
+    1.055,
+    1.007,
+    0.982,
+    0.965
+   ],
+   "corner_hinge_err_px": [],
+   "corner_hinge_n_det": 1,
+   "corner_hinge_n_gt": 0,
+   "corner_hinge_score": [
+    0.333
+   ],
+   "corner_latch_err_px": [
+    0.8393386120127115
+   ],
+   "corner_latch_n_det": 1,
+   "corner_latch_n_gt": 1,
+   "corner_latch_score": [
+    0.991
+   ],
+   "D_mm": 0.6825187886839887,
+   "D_src": "depth",
+   "gate": "no_frame"
+  },
+  {
+   "key": "datasets__E38_door_LH_RR__0130",
+   "cls": "E38_door_LH_RR",
+   "src": "datasets",
+   "bolt_err_px": [
+    0.7259046719608778,
+    1.424014348801723,
+    1.3935875197073608,
+    0.35823610979672516
+   ],
+   "bolt_n_det": 4,
+   "bolt_n_gt": 4,
+   "bolt_score": [
+    1.012,
+    0.981,
+    0.98,
+    0.973
+   ],
+   "corner_hinge_err_px": [
+    1.3226635713911186
+   ],
+   "corner_hinge_n_det": 1,
+   "corner_hinge_n_gt": 1,
+   "corner_hinge_score": [
+    1.02
+   ],
+   "corner_latch_err_px": [],
+   "corner_latch_n_det": 1,
+   "corner_latch_n_gt": 0,
+   "corner_latch_score": [
+    0.343
+   ],
+   "D_mm": 1165.1530836964714,
+   "D_src": "depth",
+   "D_bolt_mm": 1036.0238037109375,
+   "gate": "latch_offset"
+  },
+  {
+   "key": "field__E25_door_RH_s_091317__0001",
+   "cls": "E25_door_RH_s_091317",
+   "src": "field",
+   "bolt_err_px": [
+    0.9954332910927642,
+    0.6063851835016584,
+    0.898991225479982,
+    0.7003433950140396
+   ],
+   "bolt_n_det": 4,
+   "bolt_n_gt": 4,
+   "bolt_score": [
+    1.052,
+    0.997,
+    0.969,
+    0.967
+   ],
+   "corner_hinge_err_px": [
+    0.5815844717197782
+   ],
+   "corner_hinge_n_det": 1,
+   "corner_hinge_n_gt": 1,
+   "corner_hinge_score": [
+    0.971
+   ],
+   "corner_latch_err_px": [
+    0.7918732556180476
+   ],
+   "corner_latch_n_det": 1,
+   "corner_latch_n_gt": 1,
+   "corner_latch_score": [
+    0.978
+   ],
+   "D_mm": 859.5738733510141,
+   "D_src": "depth",
+   "D_bolt_mm": 883.9705810546875,
+   "gate": "ok",
+   "pred": "E25_door_RH",
+   "D_gt_mm": 889.6973602904411
+  },
+  {
+   "key": "field__E25_door_RH_s_091317__0003",
+   "cls": "E25_door_RH_s_091317",
+   "src": "field",
+   "bolt_err_px": [
+    0.289279785197459,
+    0.2728574049043574,
+    0.9049331623242232,
+    0.8491741781329326
+   ],
+   "bolt_n_det": 4,
+   "bolt_n_gt": 4,
+   "bolt_score": [
+    1.049,
+    1.045,
+    0.972,
+    0.943
+   ],
+   "corner_hinge_err_px": [
+    0.41970125324419416
+   ],
+   "corner_hinge_n_det": 1,
+   "corner_hinge_n_gt": 1,
+   "corner_hinge_score": [
+    0.903
+   ],
+   "corner_latch_err_px": [
+    1.628239426840793
+   ],
+   "corner_latch_n_det": 1,
+   "corner_latch_n_gt": 1,
+   "corner_latch_score": [
+    0.978
+   ],
+   "D_mm": 857.2861792459706,
+   "D_src": "depth",
+   "D_bolt_mm": 886.0650634765625,
+   "gate": "ok",
+   "pred": "E25_door_RH",
+   "D_gt_mm": 891.7246276291073
+  },
+  {
+   "key": "field__E25_door_RH_s_091317__0004",
+   "cls": "E25_door_RH_s_091317",
+   "src": "field",
+   "bolt_err_px": [
+    4.294049235932741,
+    0.5203543368765933,
+    1.9208792504659957,
+    3.15106397141754
+   ],
+   "bolt_n_det": 4,
+   "bolt_n_gt": 4,
+   "bolt_score": [
+    0.948,
+    0.926,
+    0.922,
+    0.913
+   ],
+   "corner_hinge_err_px": [
+    3.5245359777367886
+   ],
+   "corner_hinge_n_det": 1,
+   "corner_hinge_n_gt": 1,
+   "corner_hinge_score": [
+    0.833
+   ],
+   "corner_latch_err_px": [
+    1.961433067811551
+   ],
+   "corner_latch_n_det": 1,
+   "corner_latch_n_gt": 1,
+   "corner_latch_score": [
+    0.994
+   ],
+   "D_mm": 859.02579543038,
+   "D_src": "depth",
+   "D_bolt_mm": 887.7048950195312,
+   "gate": "ok",
+   "pred": "E25_door_RH",
+   "D_gt_mm": 889.605419696803
+  },
+  {
+   "key": "field__E25_door_RH_s_091317__0005",
+   "cls": "E25_door_RH_s_091317",
+   "src": "field",
+   "bolt_err_px": [
+    1.268211474326238,
+    1.6082592320841365,
+    1.209744228895013,
+    0.8717289141029759
+   ],
+   "bolt_n_det": 4,
+   "bolt_n_gt": 4,
+   "bolt_score": [
+    0.971,
+    0.967,
+    0.933,
+    0.929
+   ],
+   "corner_hinge_err_px": [
+    2.5585929246347856
+   ],
+   "corner_hinge_n_det": 1,
+   "corner_hinge_n_gt": 1,
+   "corner_hinge_score": [
+    0.987
+   ],
+   "corner_latch_err_px": [
+    0.9966945822939204
+   ],
+   "corner_latch_n_det": 1,
+   "corner_latch_n_gt": 1,
+   "corner_latch_score": [
+    1.03
+   ],
+   "D_mm": 860.5073005711297,
+   "D_src": "depth",
+   "D_bolt_mm": 883.236572265625,
+   "gate": "ok",
+   "pred": "E25_door_RH",
+   "D_gt_mm": 883.972994081979
+  },
+  {
+   "key": "field__E25_door_RH_s_091317__0006",
+   "cls": "E25_door_RH_s_091317",
+   "src": "field",
+   "bolt_err_px": [
+    0.0785967886547782,
+    1.055503988348357,
+    1.4517132248658888,
+    0.5775302198685799
+   ],
+   "bolt_n_det": 4,
+   "bolt_n_gt": 4,
+   "bolt_score": [
+    1.027,
+    0.988,
+    0.982,
+    0.952
+   ],
+   "corner_hinge_err_px": [
+    0.34115430683218284
+   ],
+   "corner_hinge_n_det": 1,
+   "corner_hinge_n_gt": 1,
+   "corner_hinge_score": [
+    1.027
+   ],
+   "corner_latch_err_px": [
+    0.9836903662492883
+   ],
+   "corner_latch_n_det": 1,
+   "corner_latch_n_gt": 1,
+   "corner_latch_score": [
+    0.994
+   ],
+   "D_mm": 857.9334152501181,
+   "D_src": "depth",
+   "D_bolt_mm": 885.062744140625,
+   "gate": "ok",
+   "pred": "E25_door_RH",
+   "D_gt_mm": 891.770953110462
+  },
+  {
+   "key": "field__E25_door_RH_s_091317__0007",
+   "cls": "E25_door_RH_s_091317",
+   "src": "field",
+   "bolt_err_px": [
+    0.6949081986718162,
+    0.5787711407003738,
+    0.5568275974201712,
+    0.3554503061414274
+   ],
+   "bolt_n_det": 4,
+   "bolt_n_gt": 4,
+   "bolt_score": [
+    1.025,
+    0.981,
+    0.949,
+    0.938
+   ],
+   "corner_hinge_err_px": [
+    0.9744707069335806
+   ],
+   "corner_hinge_n_det": 1,
+   "corner_hinge_n_gt": 1,
+   "corner_hinge_score": [
+    0.994
+   ],
+   "corner_latch_err_px": [
+    0.4975618890160929
+   ],
+   "corner_latch_n_det": 1,
+   "corner_latch_n_gt": 1,
+   "corner_latch_score": [
+    0.974
+   ],
+   "D_mm": 857.543955609102,
+   "D_src": "depth",
+   "D_bolt_mm": 890.9170532226562,
+   "gate": "ok",
+   "pred": "E25_door_RH",
+   "D_gt_mm": 888.7462032753095
+  },
+  {
+   "key": "field__E25_door_RH_s_091317__0008",
+   "cls": "E25_door_RH_s_091317",
+   "src": "field",
+   "bolt_err_px": [
+    0.6296608230581515,
+    0.2524656435400825,
+    0.27989533470236216,
+    0.7876153135123669
+   ],
+   "bolt_n_det": 4,
+   "bolt_n_gt": 4,
+   "bolt_score": [
+    1.011,
+    0.999,
+    0.966,
+    0.959
+   ],
+   "corner_hinge_err_px": [
+    1.8145816901662042
+   ],
+   "corner_hinge_n_det": 1,
+   "corner_hinge_n_gt": 1,
+   "corner_hinge_score": [
+    0.97
+   ],
+   "corner_latch_err_px": [
+    1.2458668057628326
+   ],
+   "corner_latch_n_det": 1,
+   "corner_latch_n_gt": 1,
+   "corner_latch_score": [
+    0.98
+   ],
+   "D_mm": 858.7968167674968,
+   "D_src": "depth",
+   "D_bolt_mm": 890.9534301757812,
+   "gate": "ok",
+   "pred": "E25_door_RH",
+   "D_gt_mm": 890.9238510554694
+  },
+  {
+   "key": "field__E25_door_RH_s_091317__0009",
+   "cls": "E25_door_RH_s_091317",
+   "src": "field",
+   "bolt_err_px": [
+    0.21394209442657633,
+    0.5454101869861454,
+    1.3808512117530356,
+    0.8158303401514313
+   ],
+   "bolt_n_det": 4,
+   "bolt_n_gt": 4,
+   "bolt_score": [
+    1.001,
+    0.983,
+    0.977,
+    0.964
+   ],
+   "corner_hinge_err_px": [
+    1.0999028579025198
+   ],
+   "corner_hinge_n_det": 1,
+   "corner_hinge_n_gt": 1,
+   "corner_hinge_score": [
+    1.031
+   ],
+   "corner_latch_err_px": [
+    0.8594639841794505
+   ],
+   "corner_latch_n_det": 1,
+   "corner_latch_n_gt": 1,
+   "corner_latch_score": [
+    0.967
+   ],
+   "D_mm": 857.2804800271593,
+   "D_src": "depth",
+   "D_bolt_mm": 886.0419311523438,
+   "gate": "ok",
+   "pred": "E25_door_RH",
+   "D_gt_mm": 886.9683640430502
+  },
+  {
+   "key": "field__E25_door_RH_s_091317__0010",
+   "cls": "E25_door_RH_s_091317",
+   "src": "field",
+   "bolt_err_px": [
+    0.44881701542822355,
+    0.9256764812379346,
+    0.9523122680763234,
+    1.3232990354735024
+   ],
+   "bolt_n_det": 4,
+   "bolt_n_gt": 4,
+   "bolt_score": [
+    1.03,
+    1.018,
+    0.997,
+    0.964
+   ],
+   "corner_hinge_err_px": [
+    0.8496522147241263
+   ],
+   "corner_hinge_n_det": 1,
+   "corner_hinge_n_gt": 1,
+   "corner_hinge_score": [
+    1.0
+   ],
+   "corner_latch_err_px": [
+    1.5660269583041975
+   ],
+   "corner_latch_n_det": 1,
+   "corner_latch_n_gt": 1,
+   "corner_latch_score": [
+    0.952
+   ],
+   "D_mm": 855.6063463489052,
+   "D_src": "depth",
+   "D_bolt_mm": 876.657470703125,
+   "gate": "ok",
+   "pred": "E25_door_RH",
+   "D_gt_mm": 882.7385568380025
+  },
+  {
+   "key": "field__E25_door_RH_s_091317__0011",
+   "cls": "E25_door_RH_s_091317",
+   "src": "field",
+   "bolt_err_px": [
+    0.4305623695649791,
+    0.5888820293637455,
+    1.087423131681525,
+    1.4969979039751395
+   ],
+   "bolt_n_det": 4,
+   "bolt_n_gt": 4,
+   "bolt_score": [
+    1.059,
+    1.018,
+    0.998,
+    0.986
+   ],
+   "corner_hinge_err_px": [
+    1.126235369725945
+   ],
+   "corner_hinge_n_det": 1,
+   "corner_hinge_n_gt": 1,
+   "corner_hinge_score": [
+    1.001
+   ],
+   "corner_latch_err_px": [
+    1.0915265713685187
+   ],
+   "corner_latch_n_det": 1,
+   "corner_latch_n_gt": 1,
+   "corner_latch_score": [
+    0.949
+   ],
+   "D_mm": 858.5243201352231,
+   "D_src": "depth",
+   "D_bolt_mm": 880.9828491210938,
+   "gate": "ok",
+   "pred": "E25_door_RH",
+   "D_gt_mm": 889.7029569219885
+  },
+  {
+   "key": "field__E25_door_RH_s_091317__0012",
+   "cls": "E25_door_RH_s_091317",
+   "src": "field",
+   "bolt_err_px": [
+    0.3649493867605358,
+    0.940922839058593,
+    1.7915236024145544,
+    0.6459657607161865
+   ],
+   "bolt_n_det": 4,
+   "bolt_n_gt": 4,
+   "bolt_score": [
+    1.013,
+    0.99,
+    0.988,
+    0.954
+   ],
+   "corner_hinge_err_px": [
+    1.1900272863756418
+   ],
+   "corner_hinge_n_det": 1,
+   "corner_hinge_n_gt": 1,
+   "corner_hinge_score": [
+    1.039
+   ],
+   "corner_latch_err_px": [
+    1.460079724445515
+   ],
+   "corner_latch_n_det": 1,
+   "corner_latch_n_gt": 1,
+   "corner_latch_score": [
+    1.053
+   ],
+   "D_mm": 857.1748051572462,
+   "D_src": "depth",
+   "D_bolt_mm": 884.017333984375,
+   "gate": "ok",
+   "pred": "E25_door_RH",
+   "D_gt_mm": 884.1320671474241
+  },
+  {
+   "key": "field__E25_door_RH_s_091317__0013",
+   "cls": "E25_door_RH_s_091317",
+   "src": "field",
+   "bolt_err_px": [
+    0.6443583661188547,
+    0.4877207944168673,
+    0.18277930137585602,
+    0.5276327859893304
+   ],
+   "bolt_n_det": 4,
+   "bolt_n_gt": 4,
+   "bolt_score": [
+    1.016,
+    0.977,
+    0.969,
+    0.948
+   ],
+   "corner_hinge_err_px": [
+    1.4525521662491503
+   ],
+   "corner_hinge_n_det": 1,
+   "corner_hinge_n_gt": 1,
+   "corner_hinge_score": [
+    1.048
+   ],
+   "corner_latch_err_px": [
+    2.3897051573083457
+   ],
+   "corner_latch_n_det": 1,
+   "corner_latch_n_gt": 1,
+   "corner_latch_score": [
+    1.034
+   ],
+   "D_mm": 859.1274641207535,
+   "D_src": "depth",
+   "D_bolt_mm": 887.8218383789062,
+   "gate": "ok",
+   "pred": "E25_door_RH",
+   "D_gt_mm": 885.2794602588593
+  },
+  {
+   "key": "field__E25_door_RH_s_091317__0014",
+   "cls": "E25_door_RH_s_091317",
+   "src": "field",
+   "bolt_err_px": [
+    0.727233685018405,
+    0.32748862841024534,
+    0.6329402625362277,
+    1.70480662436876
+   ],
+   "bolt_n_det": 4,
+   "bolt_n_gt": 4,
+   "bolt_score": [
+    1.014,
+    1.01,
+    0.969,
+    0.965
+   ],
+   "corner_hinge_err_px": [
+    1.2464373423719248
+   ],
+   "corner_hinge_n_det": 1,
+   "corner_hinge_n_gt": 1,
+   "corner_hinge_score": [
+    1.013
+   ],
+   "corner_latch_err_px": [
+    1.4650173694716855
+   ],
+   "corner_latch_n_det": 1,
+   "corner_latch_n_gt": 1,
+   "corner_latch_score": [
+    0.984
+   ],
+   "D_mm": 856.7260093463425,
+   "D_src": "depth",
+   "D_bolt_mm": 883.7820434570312,
+   "gate": "ok",
+   "pred": "E25_door_RH",
+   "D_gt_mm": 885.7307752098396
+  }
+ ],
+ "summary": [
+  "[eval] 27\uc7a5",
+  "bolt          n=104 med=  1.0px  \u22644px  100%  \u22648px  100%  >20px    0%",
+  "corner_hinge  n= 19 med=  1.4px  \u22644px  100%  \u22648px  100%  >20px    0%",
+  "corner_latch  n= 24 med=  1.2px  \u22644px  100%  \u22648px  100%  >20px    0%",
+  "D \ud310\uc815: \ud310\uc815 12/24 (\ubcf4\ub958 \uc0ac\uc720 {'ok': 12, 'same_side': 5, 'near_border': 3, 'no_corner': 2, 'no_frame': 1, 'latch_offset': 1})  \ud310\uc815 \uc911 \uc815\ud655\ub3c4 91.7%  \uc804\uccb4 \ub300\ube44 \uc815\ub2f5 11/24",
+  "D \uc624\ucc28 |det-gt| med=38.9mm  \u226410mm 21%"
+ ],
+ "summary_train": [
+  "[train] 107\uc7a5",
+  "bolt          n=422 med=  1.0px  \u22644px  100%  \u22648px  100%  >20px    0%",
+  "corner_hinge  n= 94 med=  1.2px  \u22644px   99%  \u22648px   99%  >20px    1%",
+  "corner_latch  n=100 med=  1.1px  \u22644px  100%  \u22648px  100%  >20px    0%",
+  "D \ud310\uc815: \ud310\uc815 68/94 (\ubcf4\ub958 \uc0ac\uc720 {'latch_offset': 2, 'ok': 68, 'no_corner': 13, 'same_side': 4, 'near_border': 4, 'no_frame': 3})  \ud310\uc815 \uc911 \uc815\ud655\ub3c4 100.0%  \uc804\uccb4 \ub300\ube44 \uc815\ub2f5 68/94",
+  "D \uc624\ucc28 |det-gt| med=31.7mm  \u226410mm 6%"
+ ]
+}

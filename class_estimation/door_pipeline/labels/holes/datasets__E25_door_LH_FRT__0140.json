@@ -1,0 +1,41 @@
+{
+ "points": {
+  "bolt_bl": [
+   1160.1,
+   710.8
+  ],
+  "bolt_br": [
+   1100.8,
+   597.7
+  ],
+  "bolt_tl": [
+   1093.5,
+   746.1
+  ],
+  "bolt_tr": [
+   1033,
+   633.5
+  ],
+  "corner_hinge": [
+   1011.3,
+   215
+  ],
+  "corner_latch": [
+   1284.4,
+   709.6
+  ]
+ },
+ "visible": {
+  "bolt_bl": true,
+  "bolt_br": true,
+  "bolt_tl": true,
+  "bolt_tr": true,
+  "corner_hinge": true,
+  "corner_latch": true
+ },
+ "image": "datasets/E25_door_LH_FRT/rgb_0140.png",
+ "cls": "E25_door_LH_FRT",
+ "idx": "0140",
+ "src": "datasets",
+ "labeled_at": "2026-08-26 12:47:54"
+}
