@@ -5,8 +5,8 @@
 증강: 임의 회전·스케일·플립·밝기 (도어가 바닥에 아무 각도로 놓이는 상황).
 
 실행:
-  python 15_train_hole_landmarks.py                 # 학습 + 홀드아웃 평가
-  python 15_train_hole_landmarks.py --eval_only     # 저장 모델로 평가만
+  python 16_train_hole_landmarks.py                 # 학습 + 홀드아웃 평가
+  python 16_train_hole_landmarks.py --eval_only     # 저장 모델로 평가만
 산출: attribute_models/hole_landmarks/{model.pth, split.json, eval.json, eval_*.jpg}
 """
 import argparse, glob, json, math, os, random, sys, time
@@ -336,7 +336,7 @@ if __name__ == '__main__':
         from db.db_log import DBLog
         db = DBLog(); mid = db.register_model(name='hole_landmarks_resnet18', architecture='ResNet18-FPN-heatmap', in_channels=3,
                                               num_classes=len(CH), weights_path=os.path.relpath(mp, DOOR), input_size=f'{IN_W}x{IN_H}',
-                                              description='15_train_hole_landmarks.py (bolt/corner_hinge/corner_latch)')
+                                              description='16_train_hole_landmarks.py (bolt/corner_hinge/corner_latch)')
         sess = db.start_training(dataset_name='hole_labels', model_id=mid, optimizer='AdamW', learning_rate=args.lr, batch_size=args.bs,
                                  max_epochs=args.epochs, early_stop_patience=None, train_ratio=1 - args.holdout,
                                  train_count=len(train_items), test_count=len(hold_items), gpu_device=str(dev), loss_function='weighted MSE')

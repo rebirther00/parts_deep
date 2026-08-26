@@ -1,7 +1,7 @@
 """홀 랜드마크 기반 도어 판별기 (추론 모듈).
 
 classify(rgb, depth) → dict(pred, D_mm, gate, points, scores, ...)
-  1) ResNet18-FPN 히트맵(15_train_hole_landmarks.py 학습)으로 볼트홀 4 + 상단 모서리 홀 2 검출
+  1) ResNet18-FPN 히트맵(16_train_hole_landmarks.py 학습)으로 볼트홀 4 + 상단 모서리 홀 2 검출
   2) depth 평면상 두 모서리 홀 거리(mm) × K_DEPTH[카메라 모드] → D
   3) 볼트 프레임 기하 게이트 통과 시 CAD D 최근접 클래스, 아니면 pred=None(보류)
 
@@ -167,8 +167,14 @@ def depth_distance_mm(depth, pts_all, pa, pb, intrinsics=None):
     return float(np.linalg.norm(to3d(pa) - to3d(pb))) * k
 
 
-def classify(net, dev, rgb, depth=None):
-    """단일 프레임 판정. depth 없으면 볼트 피치 스케일 사용."""
+def nearest_class(D, group=None):
+    """CAD D 최근접 클래스. group(FRT/RR/RH)이 주어지면 그 그룹 안에서만 탐색 (속성 파이프라인 그룹 판별과 결합)."""
+    cands = [k for k in CAD_D if group is None or GROUP[k] == group]
+    return min(cands, key=lambda k: abs(CAD_D[k] - D))
+
+
+def classify(net, dev, rgb, depth=None, group=None):
+    """단일 프레임 판정. depth 없으면 볼트 피치 스케일 사용. group 지정 시 그룹 내 최근접."""
     det = detect(net, dev, rgb)
     hinge = det['corner_hinge'][0] if det['corner_hinge'] else None
     latch = det['corner_latch'][0] if det['corner_latch'] else None
@@ -184,16 +190,21 @@ def classify(net, dev, rgb, depth=None):
         D = math.hypot(hinge[0] - latch[0], hinge[1] - latch[1]) / fr['s']; out['D_src'] = 'bolt'
     out['D_mm'] = D
     if D is not None and gate == 'ok':
-        out['pred'] = min(CAD_D, key=lambda k: abs(CAD_D[k] - D))
+        out['pred'] = nearest_class(D, group)
         out['group'] = GROUP[out['pred']]
-        out['margin_mm'] = float(sorted(abs(CAD_D[k] - D) for k in CAD_D)[1] - abs(CAD_D[out['pred']] - D))
+        cands = [k for k in CAD_D if group is None or GROUP[k] == group]
+        ds = sorted(abs(CAD_D[k] - D) for k in cands)
+        out['margin_mm'] = float((ds[1] if len(ds) > 1 else 1e9) - ds[0])
     return out
 
 
-def aggregate(results):
-    """N프레임 집계: 판정된 프레임의 D 중앙값 → 클래스. 판정 프레임이 없으면 None."""
-    Ds = [r['D_mm'] for r in results if r.get('pred')]
+def aggregate(results, group=None):
+    """N프레임 집계: 게이트 통과 프레임의 D 중앙값 → 클래스(group 지정 시 그룹 내). 판정 프레임이 없으면 None."""
+    Ds = [r['D_mm'] for r in results if r.get('gate') == 'ok' and r.get('D_mm')]
     if not Ds:
         return dict(pred=None, D_mm=None, n_judged=0, n=len(results))
-    D = float(np.median(Ds)); pred = min(CAD_D, key=lambda k: abs(CAD_D[k] - D))
-    return dict(pred=pred, group=GROUP[pred], D_mm=D, n_judged=len(Ds), n=len(results))
+    D = float(np.median(Ds)); pred = nearest_class(D, group)
+    cands = [k for k in CAD_D if group is None or GROUP[k] == group]
+    ds = sorted(abs(CAD_D[k] - D) for k in cands)
+    return dict(pred=pred, group=GROUP[pred], D_mm=D, n_judged=len(Ds), n=len(results),
+                margin_mm=float((ds[1] if len(ds) > 1 else 1e9) - ds[0]))

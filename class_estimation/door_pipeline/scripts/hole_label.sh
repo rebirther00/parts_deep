@@ -5,4 +5,4 @@ source "$(dirname "$0")/hole_common.sh"
 N=${1:-15}; shift
 EXTRA=""; for d in "$@"; do EXTRA="$EXTRA --extra $d"; done
 [ -z "$EXTRA" ] && [ -d datasets_field ] && EXTRA="--extra datasets_field"
-python tools/label_holes.py --per-class "$N" $EXTRA --port 8090
+python 15_label_holes.py --per-class "$N" $EXTRA --port 8090

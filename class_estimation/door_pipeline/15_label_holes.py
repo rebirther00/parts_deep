@@ -4,12 +4,12 @@
 좌표는 원본 픽셀. 결과: labels/holes/<클래스>__<idx>.json
 
 실행:
-  python tools/label_holes.py                       # datasets/ 8종 × 15장
-  python tools/label_holes.py --per-class 40
-  python tools/label_holes.py --extra datasets_field # 추가 디렉터리(<class>/rgb_*.png)
+  python 15_label_holes.py                       # datasets/ 8종 × 15장
+  python 15_label_holes.py --per-class 40
+  python 15_label_holes.py --extra datasets_field # 추가 디렉터리(<class>/rgb_*.png)
   → http://<이 PC IP>:8090
 
-단축키: 1~8 점 선택 (7·8 = 하단 모서리 홀, 선택) / 클릭 = 현재 점 찍기(자동으로 다음 점) / X 안 보임 / Z 되돌리기
+단축키: 1~6 점 선택 / 클릭 = 현재 점 찍기(자동으로 다음 점) / X 안 보임 / Z 되돌리기
         ←→ 이전·다음 이미지 / 휠 확대·축소 / 드래그(우클릭 또는 스페이스+드래그) 이동 / R 전체 초기화
 """
 import argparse
@@ -20,13 +20,12 @@ import time
 
 from flask import Flask, jsonify, request, send_file, Response
 
-BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+BASE = os.path.dirname(os.path.abspath(__file__))
 LABEL_DIR = os.path.join(BASE, 'labels', 'holes')
 POINTS = [
     ('bolt_tl', '볼트홀 좌상', '#3b82f6'), ('bolt_tr', '볼트홀 우상', '#3b82f6'),
     ('bolt_bl', '볼트홀 좌하', '#60a5fa'), ('bolt_br', '볼트홀 우하', '#60a5fa'),
     ('corner_hinge', '모서리 홀 (힌지측)', '#ef4444'), ('corner_latch', '모서리 홀 (래치측)', '#f97316'),
-    ('corner_hinge_bottom', '하단 모서리 홀 (힌지측, 선택)', '#a855f7'), ('corner_latch_bottom', '하단 모서리 홀 (래치측, 선택)', '#d946ef'),
 ]
 
 ap = argparse.ArgumentParser()
@@ -114,9 +113,9 @@ kbd{background:#333;border-radius:3px;padding:0 4px;font-size:11px}
  <div id="pts"></div>
  <div style="display:flex;gap:6px"><button onclick="nav(-1)">◀ 이전</button><button onclick="nav(1)">다음 ▶</button><button onclick="resetAll()">초기화 R</button></div>
  <div style="font-size:12px;line-height:1.7;opacity:.85">
- <kbd>1</kbd>~<kbd>8</kbd> 점 선택 · 클릭 = 찍기(다음 점으로) · <kbd>X</kbd> 안 보임 · <kbd>Z</kbd> 되돌리기<br>
+ <kbd>1</kbd>~<kbd>6</kbd> 점 선택 · 클릭 = 찍기(다음 점으로) · <kbd>X</kbd> 안 보임 · <kbd>Z</kbd> 되돌리기<br>
  <kbd>←</kbd><kbd>→</kbd> 이미지 · 휠 확대 · 우클릭 드래그 이동 · <kbd>F</kbd> 맞춤<br>
- 순서: 볼트홀 4개(각공 주변, 좌상→우상→좌하→우하) → 상단 모서리 홀 힌지측 → 래치측 → (선택) 하단 모서리 홀 2개.<br>
+ 순서: 볼트홀 4개(각공 주변, 좌상→우상→좌하→우하) → 모서리 홀 힌지측 → 래치측.<br>
  저장은 자동입니다.</div>
  <div id="prog" style="font-size:12px"></div>
  <div id="list"></div>
@@ -156,7 +155,7 @@ M.addEventListener('mouseup',()=>drag=null);M.addEventListener('contextmenu',e=>
 M.addEventListener('wheel',e=>{e.preventDefault();const r=C.getBoundingClientRect();const mx=e.clientX-r.left,my=e.clientY-r.top;const f=e.deltaY<0?1.25:0.8;const ns=Math.max(0.1,Math.min(20,scale*f));ox=mx-(mx-ox)*ns/scale;oy=my-(my-oy)*ns/scale;scale=ns;draw()},{passive:false});
 function nav(d){open(cur+d)}
 function resetAll(){hist.push(JSON.stringify(lab));PTS.forEach(p=>{lab.points[p[0]]=null;lab.visible[p[0]]=true});curPt=0;save();renderPts();draw()}
-document.addEventListener('keydown',e=>{if(e.key>='1'&&e.key<='8'){curPt=+e.key-1;renderPts();draw()}
+document.addEventListener('keydown',e=>{if(e.key>='1'&&e.key<='6'){curPt=+e.key-1;renderPts();draw()}
  else if(e.key=='ArrowRight'){nav(1)}else if(e.key=='ArrowLeft'){nav(-1)}
  else if(e.key=='x'||e.key=='X'){const n=PTS[curPt][0];hist.push(JSON.stringify(lab));lab.points[n]=null;lab.visible[n]=false;save();const nx=PTS.findIndex((p,k)=>k>curPt&&lab.points[p[0]]==null&&lab.visible[p[0]]!==false);if(nx>=0)curPt=nx;renderPts();draw()}
  else if(e.key=='z'||e.key=='Z'){if(hist.length){lab=JSON.parse(hist.pop());save();renderPts();draw()}}

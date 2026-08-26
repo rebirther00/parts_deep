@@ -1,6 +1,6 @@
 """홀 판별기 결과 샘플 이미지 생성 (성공 / 오판 / 보류) + 학습 곡선.
 
-입력: attribute_models/hole_landmarks/eval_classifier.json (16_evaluate_hole_classifier.py 출력)
+입력: attribute_models/hole_landmarks/eval_classifier.json (17_evaluate_hole_classifier.py 출력)
 출력: report/hole_analysis/samples/{success,failure,abstain}_*.jpg, montage_*.png, training_curve.png
 """
 import json, os, sqlite3, sys, collections

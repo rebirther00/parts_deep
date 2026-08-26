@@ -59,6 +59,8 @@ parser.add_argument('--fp16', action='store_true',
 parser.add_argument('--device', type=str, default='cuda')
 parser.add_argument('--no_holes', action='store_true',
                     help='홀 랜드마크 판별기 비활성 (속성 파이프라인만)')
+parser.add_argument('--hole_margin_mm', type=float, default=30.0,
+                    help='홀 D가 이웃 클래스와 이 마진(mm) 이상 떨어지면 속성 그룹과 달라도 홀 판정 우선 (기본 30)')
 parser.add_argument('--hole_min_judged', type=int, default=3,
                     help='홀 판별 채택에 필요한 윈도 내 판정 프레임 수 (기본 3)')
 args = parser.parse_args()
@@ -198,11 +200,21 @@ def inference_loop(source, net, templates, sam, hole=None):
             try:
                 hr = hole_classifier.classify(hole[0], hole[1], rgb, depth)
                 hole_window.append(hr)
-                agg = hole_classifier.aggregate(list(hole_window))
+                # 홀 판정(제약 없음) + 속성 파이프라인 그룹을 보조로: 홀 마진이 작을 때만 그룹 제약 적용
+                attr_group = grp if grp in ('FRT', 'RR', 'RH') else None
+                free = hole_classifier.aggregate(list(hole_window))
+                agg = free
+                policy = 'hole'
+                if free['pred'] and attr_group and free.get('group') != attr_group:
+                    if free.get('margin_mm', 0) < args.hole_margin_mm:
+                        agg = hole_classifier.aggregate(list(hole_window), group=attr_group); policy = 'group_constrained'
+                    else:
+                        policy = 'hole_over_attr'   # 홀 마진이 충분 → 홀 우선, 속성 그룹 불일치는 기록만
                 hole_info = {
                     'pred': agg['pred'], 'group': agg.get('group'),
                     'D_mm': float(round(agg['D_mm'], 1)) if agg['D_mm'] else None,
-                    'n_judged': agg['n_judged'], 'gate': hr['gate'],
+                    'margin_mm': float(round(free.get('margin_mm', 0), 1)) if free.get('pred') else None,
+                    'n_judged': agg['n_judged'], 'gate': hr['gate'], 'attr_group': attr_group, 'policy': policy,
                     'frame_D_mm': float(round(hr['D_mm'], 1)) if hr['D_mm'] else None,
                     'points': {c: [[float(round(p[0], 1)), float(round(p[1], 1)), float(round(p[2], 2))] for p in v]
                                for c, v in hr['points'].items()},
@@ -211,8 +223,8 @@ def inference_loop(source, net, templates, sam, hole=None):
                 if agg['n_judged'] >= args.hole_min_judged:
                     pred, grp, source_tag = agg['pred'], agg['group'], 'hole'
                     conf = float(min(100.0, 100.0 * agg['n_judged'] / args.n_frames))
-                elif agg['n_judged'] >= 1 and grp not in ('-', agg.get('group')):
-                    pred, source_tag = f'보류 (홀:{agg["group"]} vs 속성:{grp})', 'conflict'
+                    if policy == 'group_constrained' and free.get('margin_mm', 0) < args.hole_margin_mm / 2:
+                        pred, source_tag = f'보류 (홀:{free["group"]} vs 속성:{attr_group}, 마진 {free.get("margin_mm", 0):.0f}mm)', 'conflict'
             except Exception as e:
                 hole_info = {'error': str(e)}
         frame_i += 1

@@ -1,7 +1,7 @@
 """홀 랜드마크 판별기 평가.
 
-  python 16_evaluate_hole_classifier.py                 # ① 공식 test 분할(seed42) ② datasets 전체(라벨 학습분 제외) ③ datasets_field
-  python 16_evaluate_hole_classifier.py --base datasets_factory   # 임의 디렉터리(<class>/rgb_*.png)
+  python 17_evaluate_hole_classifier.py                 # ① 공식 test 분할(seed42) ② datasets 전체(라벨 학습분 제외) ③ datasets_field
+  python 17_evaluate_hole_classifier.py --base datasets_factory   # 임의 디렉터리(<class>/rgb_*.png)
 
 출력: attribute_models/hole_landmarks/eval_classifier.json + DB evaluation_results(inference_pipeline)
 """
@@ -15,6 +15,7 @@ ap = argparse.ArgumentParser()
 ap.add_argument('--base', default=None, help='평가 디렉터리 (기본: test분할 + datasets 전체 + datasets_field)')
 ap.add_argument('--split_info', default=os.path.join(DOOR, 'artifacts', 'rgbe_noaux_448_seed42', 'split_info.json'))
 ap.add_argument('--no_db', action='store_true')
+ap.add_argument('--oracle_group', action='store_true', help='정답 그룹을 제약으로 사용 (그룹 선판별 상한 평가)')
 args = ap.parse_args()
 
 
@@ -35,7 +36,8 @@ def run_set(net, dev, name, files, cls_of):
         depth = cv2.imread(dp, cv2.IMREAD_UNCHANGED) if os.path.exists(dp) else None
         if rgb is None:
             continue
-        r = classify(net, dev, rgb, depth)
+        c0 = cls_of(f)
+        r = classify(net, dev, rgb, depth, group=(GROUP.get(c0) if args.oracle_group else None))
         rows.append(dict(image=os.path.relpath(f, DOOR), cls=cls_of(f), pred=r['pred'], D_mm=r['D_mm'], gate=r['gate'],
                          D_src=r['D_src'], margin_mm=r.get('margin_mm')))
     # 집계
