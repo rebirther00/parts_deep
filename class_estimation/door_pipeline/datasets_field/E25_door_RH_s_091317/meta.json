@@ -1,0 +1,13 @@
+{
+  "class_name": "E25_door_RH",
+  "started_at": "2026-08-10 09:13:17",
+  "camera": "ZED ZED X Mini 1920x1200",
+  "capture_interval_s": 2.0,
+  "session_duration_s": 300.0,
+  "saved_pairs": 16,
+  "finished": true,
+  "stop_reason": "manual_stop",
+  "ended_at": "2026-08-10 09:13:51",
+  "clock_note": "부팅 시 시계 미동기화로 1970-01-01로 기록됨 — 날짜만 2026-08-10으로 복구, 시각(HH:MM:SS)은 실제와 다름",
+  "label_note": "현장에서 E25_door_LH_RR로 잘못 선택 — 2026-08-11 E25_door_RH로 정정"
+}
