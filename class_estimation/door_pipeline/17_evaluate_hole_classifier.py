@@ -2,8 +2,9 @@
 
   python 17_evaluate_hole_classifier.py                 # ① 공식 test 분할(seed42) ② datasets 전체(라벨 학습분 제외) ③ datasets_field
   python 17_evaluate_hole_classifier.py --base datasets_factory   # 임의 디렉터리(<class>/rgb_*.png)
+  python 17_evaluate_hole_classifier.py --base datasets_factory_collect   # 06 수집분(<date>/<class>/s_*/rgb_*.png)
 
-출력: attribute_models/hole_landmarks/eval_classifier.json + DB evaluation_results(inference_pipeline)
+출력: attribute_models/hole_landmarks/eval_classifier.json (--base 시 eval_classifier_<base>.json) + DB evaluation_results(inference_pipeline)
 """
 import argparse, glob, json, os, time, collections
 import cv2, numpy as np
@@ -66,8 +67,17 @@ if __name__ == '__main__':
     results = {}
     if args.base:
         base = os.path.join(DOOR, args.base)
-        files = sorted(glob.glob(os.path.join(base, '*', 'rgb_*.png')))
-        results[args.base] = run_set(net, dev, args.base, files, lambda f: os.path.basename(os.path.dirname(f)))
+        # <class>/rgb_*.png 또는 06 수집 구조 <date>/<class>/s_HHMMSS/rgb_*.png 모두 지원
+        files = sorted(glob.glob(os.path.join(base, '*', 'rgb_*.png')) + glob.glob(os.path.join(base, '*', '*', 's_*', 'rgb_*.png')))
+
+        def cls_of(f):  # 상위 폴더 중 클래스명(또는 <class>_s_HHMMSS)인 첫 폴더
+            d = os.path.dirname(f)
+            while d and d != base:
+                n = os.path.basename(d).split('_s_')[0]
+                if n in CAD_D: return n
+                d = os.path.dirname(d)
+            return os.path.basename(os.path.dirname(f))
+        results[args.base] = run_set(net, dev, args.base, files, cls_of)
     else:
         trained = train_label_keys()
         # ① 공식 test 분할
@@ -83,7 +93,8 @@ if __name__ == '__main__':
         files = sorted(glob.glob(os.path.join(DOOR, 'datasets_field', '*', 'rgb_*.png')))
         if files:
             results['datasets_field'] = run_set(net, dev, 'datasets_field(현장)', files, lambda f: os.path.basename(os.path.dirname(f)).split('_s_')[0])
-    json.dump(results, open(os.path.join(OUT, 'eval_classifier.json'), 'w'), ensure_ascii=False, indent=1, default=float)
+    out_name = 'eval_classifier.json' if not args.base else 'eval_classifier_' + args.base.strip('/').replace('/', '_') + '.json'
+    json.dump(results, open(os.path.join(OUT, out_name), 'w'), ensure_ascii=False, indent=1, default=float)
     if not args.no_db:
         from db.db_log import DBLog
         db = DBLog(); mid = db.find_model(weights_path='attribute_models/hole_landmarks/model.pth', name='hole_landmarks_resnet18')
@@ -92,5 +103,5 @@ if __name__ == '__main__':
             db.log_evaluation(model_id=mid, dataset_name=dsmap.get(k, k), eval_type='inference_pipeline', total_samples=v['n'],
                               correct=v['correct'], accuracy=100.0 * v['correct'] / max(1, v['n']),
                               per_class_results=dict(set=k, judged=v['judged'], acc_judged=v['acc_judged'], group_acc_judged=v['group_acc_judged'], gates=v['gates']),
-                              inference_device=str(dev), report_path='attribute_models/hole_landmarks/eval_classifier.json')
+                              inference_device=str(dev), report_path='attribute_models/hole_landmarks/' + out_name)
         db.close()
