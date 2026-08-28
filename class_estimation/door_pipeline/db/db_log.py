@@ -42,8 +42,13 @@ DATASET_BY_DIR = {
 
 
 def dataset_name_for(dir_or_variant):
-    key = os.path.basename(str(dir_or_variant).rstrip("/"))
-    return DATASET_BY_DIR.get(key, key)
+    """경로의 마지막 폴더부터 상위로 올라가며 DATASET_BY_DIR에 있는 첫 이름을 데이터셋으로 본다.
+    예: datasets_factory_v2/test → door_factory_collect. 어디에도 없으면 마지막 폴더명(자동 생성용)."""
+    parts = [p for p in str(dir_or_variant).rstrip("/").split(os.sep) if p and p != "."]
+    for key in reversed(parts):
+        if key in DATASET_BY_DIR:
+            return DATASET_BY_DIR[key]
+    return parts[-1] if parts else str(dir_or_variant)
 
 
 def _now():
