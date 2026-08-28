@@ -1,0 +1,869 @@
+{
+ "eval_collect_20260828": {
+  "rows": [
+   {
+    "image": "eval_collect_20260828/20260828/E25_door_RH/s_073428/rgb_0000.png",
+    "cls": "E25_door_RH",
+    "pred": "E25_door_RH",
+    "D_mm": 893.6920168749567,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 74.0
+   },
+   {
+    "image": "eval_collect_20260828/20260828/E25_door_RH/s_073428/rgb_0001.png",
+    "cls": "E25_door_RH",
+    "pred": "E25_door_RH",
+    "D_mm": 893.5831570530773,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 74.0
+   },
+   {
+    "image": "eval_collect_20260828/20260828/E25_door_RH/s_073428/rgb_0002.png",
+    "cls": "E25_door_RH",
+    "pred": "E25_door_RH",
+    "D_mm": 893.3332598017718,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 74.0
+   },
+   {
+    "image": "eval_collect_20260828/20260828/E25_door_RH/s_073428/rgb_0003.png",
+    "cls": "E25_door_RH",
+    "pred": "E25_door_RH",
+    "D_mm": 894.5338867319559,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 74.0
+   },
+   {
+    "image": "eval_collect_20260828/20260828/E25_door_RH/s_073428/rgb_0004.png",
+    "cls": "E25_door_RH",
+    "pred": "E25_door_RH",
+    "D_mm": 894.4757680980853,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 74.0
+   },
+   {
+    "image": "eval_collect_20260828/20260828/E25_door_RH/s_073428/rgb_0005.png",
+    "cls": "E25_door_RH",
+    "pred": "E25_door_RH",
+    "D_mm": 894.701768275756,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 74.0
+   },
+   {
+    "image": "eval_collect_20260828/20260828/E25_door_RH/s_073428/rgb_0006.png",
+    "cls": "E25_door_RH",
+    "pred": "E25_door_RH",
+    "D_mm": 895.7244649219315,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 74.0
+   },
+   {
+    "image": "eval_collect_20260828/20260828/E25_door_RH/s_073451/rgb_0000.png",
+    "cls": "E25_door_RH",
+    "pred": "E25_door_RH",
+    "D_mm": 893.5221394610354,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 74.0
+   },
+   {
+    "image": "eval_collect_20260828/20260828/E25_door_RH/s_073451/rgb_0016.png",
+    "cls": "E25_door_RH",
+    "pred": "E25_door_RH",
+    "D_mm": 896.4442491646191,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 74.0
+   },
+   {
+    "image": "eval_collect_20260828/20260828/E25_door_RH/s_073451/rgb_0033.png",
+    "cls": "E25_door_RH",
+    "pred": "E25_door_RH",
+    "D_mm": 893.6323445126361,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 74.0
+   },
+   {
+    "image": "eval_collect_20260828/20260828/E25_door_RH/s_073451/rgb_0049.png",
+    "cls": "E25_door_RH",
+    "pred": "E25_door_RH",
+    "D_mm": 894.0976816329859,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 74.0
+   },
+   {
+    "image": "eval_collect_20260828/20260828/E25_door_RH/s_073451/rgb_0066.png",
+    "cls": "E25_door_RH",
+    "pred": "E25_door_RH",
+    "D_mm": 895.9095621986648,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 74.0
+   },
+   {
+    "image": "eval_collect_20260828/20260828/E25_door_RH/s_073451/rgb_0082.png",
+    "cls": "E25_door_RH",
+    "pred": "E25_door_RH",
+    "D_mm": 893.8014336566921,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 74.0
+   },
+   {
+    "image": "eval_collect_20260828/20260828/E25_door_RH/s_073451/rgb_0099.png",
+    "cls": "E25_door_RH",
+    "pred": "E25_door_RH",
+    "D_mm": 894.583125579377,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 74.0
+   },
+   {
+    "image": "eval_collect_20260828/20260828/E25_door_RH/s_073451/rgb_0115.png",
+    "cls": "E25_door_RH",
+    "pred": "E25_door_RH",
+    "D_mm": 894.1050979476012,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 74.0
+   },
+   {
+    "image": "eval_collect_20260828/20260828/E25_door_RH/s_073451/rgb_0132.png",
+    "cls": "E25_door_RH",
+    "pred": "E25_door_RH",
+    "D_mm": 894.0177536091654,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 74.0
+   },
+   {
+    "image": "eval_collect_20260828/20260828/E25_door_RH/s_073451/rgb_0148.png",
+    "cls": "E25_door_RH",
+    "pred": "E25_door_RH",
+    "D_mm": 893.8945387880237,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 74.0
+   },
+   {
+    "image": "eval_collect_20260828/20260828/E25_door_RH/s_081059/rgb_0000.png",
+    "cls": "E25_door_RH",
+    "pred": "E25_door_RH",
+    "D_mm": 889.5420694111484,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 74.0
+   },
+   {
+    "image": "eval_collect_20260828/20260828/E25_door_RH/s_081059/rgb_0016.png",
+    "cls": "E25_door_RH",
+    "pred": "E25_door_RH",
+    "D_mm": 888.6453968928581,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 74.0
+   },
+   {
+    "image": "eval_collect_20260828/20260828/E25_door_RH/s_081059/rgb_0033.png",
+    "cls": "E25_door_RH",
+    "pred": "E25_door_RH",
+    "D_mm": 889.7647447348627,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 74.0
+   },
+   {
+    "image": "eval_collect_20260828/20260828/E25_door_RH/s_081059/rgb_0049.png",
+    "cls": "E25_door_RH",
+    "pred": "E25_door_RH",
+    "D_mm": 889.3474527646341,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 74.0
+   },
+   {
+    "image": "eval_collect_20260828/20260828/E25_door_RH/s_081059/rgb_0066.png",
+    "cls": "E25_door_RH",
+    "pred": "E25_door_RH",
+    "D_mm": 890.0905317697728,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 74.0
+   },
+   {
+    "image": "eval_collect_20260828/20260828/E25_door_RH/s_081059/rgb_0082.png",
+    "cls": "E25_door_RH",
+    "pred": "E25_door_RH",
+    "D_mm": 889.0330411628864,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 74.0
+   },
+   {
+    "image": "eval_collect_20260828/20260828/E25_door_RH/s_081059/rgb_0099.png",
+    "cls": "E25_door_RH",
+    "pred": "E25_door_RH",
+    "D_mm": 888.9620283083312,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 74.0
+   },
+   {
+    "image": "eval_collect_20260828/20260828/E25_door_RH/s_081059/rgb_0115.png",
+    "cls": "E25_door_RH",
+    "pred": "E25_door_RH",
+    "D_mm": 887.6586648861063,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 74.0
+   },
+   {
+    "image": "eval_collect_20260828/20260828/E25_door_RH/s_081059/rgb_0132.png",
+    "cls": "E25_door_RH",
+    "pred": "E25_door_RH",
+    "D_mm": 889.765945650468,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 74.0
+   },
+   {
+    "image": "eval_collect_20260828/20260828/E25_door_RH/s_081059/rgb_0148.png",
+    "cls": "E25_door_RH",
+    "pred": "E25_door_RH",
+    "D_mm": 888.999772483345,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 74.0
+   },
+   {
+    "image": "eval_collect_20260828/20260828/E25_door_RH/s_085518/rgb_0000.png",
+    "cls": "E25_door_RH",
+    "pred": "E25_door_RH",
+    "D_mm": 891.4802069692132,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 74.0
+   },
+   {
+    "image": "eval_collect_20260828/20260828/E25_door_RH/s_085518/rgb_0016.png",
+    "cls": "E25_door_RH",
+    "pred": "E25_door_RH",
+    "D_mm": 891.7996198775874,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 74.0
+   },
+   {
+    "image": "eval_collect_20260828/20260828/E25_door_RH/s_085518/rgb_0033.png",
+    "cls": "E25_door_RH",
+    "pred": "E25_door_RH",
+    "D_mm": 891.946907282646,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 74.0
+   },
+   {
+    "image": "eval_collect_20260828/20260828/E25_door_RH/s_085518/rgb_0049.png",
+    "cls": "E25_door_RH",
+    "pred": "E25_door_RH",
+    "D_mm": 892.6299508039966,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 74.0
+   },
+   {
+    "image": "eval_collect_20260828/20260828/E25_door_RH/s_085518/rgb_0066.png",
+    "cls": "E25_door_RH",
+    "pred": "E25_door_RH",
+    "D_mm": 902.3207141521292,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 74.0
+   },
+   {
+    "image": "eval_collect_20260828/20260828/E25_door_RH/s_085518/rgb_0082.png",
+    "cls": "E25_door_RH",
+    "pred": "E25_door_RH",
+    "D_mm": 895.8249570547566,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 74.0
+   },
+   {
+    "image": "eval_collect_20260828/20260828/E25_door_RH/s_085518/rgb_0099.png",
+    "cls": "E25_door_RH",
+    "pred": "E25_door_RH",
+    "D_mm": 900.6117724418746,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 74.0
+   },
+   {
+    "image": "eval_collect_20260828/20260828/E25_door_RH/s_085518/rgb_0115.png",
+    "cls": "E25_door_RH",
+    "pred": "E25_door_RH",
+    "D_mm": 905.5748330745355,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 74.0
+   },
+   {
+    "image": "eval_collect_20260828/20260828/E25_door_RH/s_085518/rgb_0132.png",
+    "cls": "E25_door_RH",
+    "pred": "E25_door_RH",
+    "D_mm": 890.215518850629,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 74.0
+   },
+   {
+    "image": "eval_collect_20260828/20260828/E25_door_RH/s_085518/rgb_0148.png",
+    "cls": "E25_door_RH",
+    "pred": "E25_door_RH",
+    "D_mm": 899.5153752130265,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 74.0
+   },
+   {
+    "image": "eval_collect_20260828/20260828/E30_E38_door_RH/s_143127/rgb_0000.png",
+    "cls": "E30_E38_door_RH",
+    "pred": "E30_E38_door_RH",
+    "D_mm": 1092.2596852100125,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 50.0
+   },
+   {
+    "image": "eval_collect_20260828/20260828/E30_E38_door_RH/s_143127/rgb_0007.png",
+    "cls": "E30_E38_door_RH",
+    "pred": "E30_E38_door_RH",
+    "D_mm": 1097.1568475903348,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 50.0
+   },
+   {
+    "image": "eval_collect_20260828/20260828/E30_E38_door_RH/s_143127/rgb_0015.png",
+    "cls": "E30_E38_door_RH",
+    "pred": "E30_E38_door_RH",
+    "D_mm": 1094.7428971102304,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 50.0
+   },
+   {
+    "image": "eval_collect_20260828/20260828/E30_E38_door_RH/s_143127/rgb_0022.png",
+    "cls": "E30_E38_door_RH",
+    "pred": "E30_E38_door_RH",
+    "D_mm": 1097.630711064739,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 49.73857787052202
+   },
+   {
+    "image": "eval_collect_20260828/20260828/E30_E38_door_RH/s_143127/rgb_0030.png",
+    "cls": "E30_E38_door_RH",
+    "pred": "E30_E38_door_RH",
+    "D_mm": 1097.1726510854703,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 50.0
+   },
+   {
+    "image": "eval_collect_20260828/20260828/E30_E38_door_RH/s_143127/rgb_0037.png",
+    "cls": "E30_E38_door_RH",
+    "pred": "E30_E38_door_RH",
+    "D_mm": 1095.5264909365521,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 50.0
+   },
+   {
+    "image": "eval_collect_20260828/20260828/E30_E38_door_RH/s_143127/rgb_0045.png",
+    "cls": "E30_E38_door_RH",
+    "pred": "E30_E38_door_RH",
+    "D_mm": 1085.1657643347914,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 46.331528669582895
+   },
+   {
+    "image": "eval_collect_20260828/20260828/E30_E38_door_RH/s_143127/rgb_0052.png",
+    "cls": "E30_E38_door_RH",
+    "pred": "E30_E38_door_RH",
+    "D_mm": 1088.9899332896905,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 50.0
+   },
+   {
+    "image": "eval_collect_20260828/20260828/E30_E38_door_RH/s_143127/rgb_0060.png",
+    "cls": "E30_E38_door_RH",
+    "pred": "E30_E38_door_RH",
+    "D_mm": 1095.1759960744723,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 50.0
+   },
+   {
+    "image": "eval_collect_20260828/20260828/E30_E38_door_RH/s_143127/rgb_0067.png",
+    "cls": "E30_E38_door_RH",
+    "pred": "E30_E38_door_RH",
+    "D_mm": 1096.0126485206947,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 50.0
+   },
+   {
+    "image": "eval_collect_20260828/20260828/E30_E38_door_RH/s_153953/rgb_0000.png",
+    "cls": "E30_E38_door_RH",
+    "pred": "E30_E38_door_RH",
+    "D_mm": 1101.9156978755964,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 41.16860424880724
+   },
+   {
+    "image": "eval_collect_20260828/20260828/E30_E38_door_RH/s_153953/rgb_0012.png",
+    "cls": "E30_E38_door_RH",
+    "pred": "E30_E38_door_RH",
+    "D_mm": 1104.810495377158,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 35.37900924568385
+   },
+   {
+    "image": "eval_collect_20260828/20260828/E30_E38_door_RH/s_153953/rgb_0025.png",
+    "cls": "E30_E38_door_RH",
+    "pred": "E30_E38_door_RH",
+    "D_mm": 1098.1047159199084,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 48.790568160183284
+   },
+   {
+    "image": "eval_collect_20260828/20260828/E30_E38_door_RH/s_153953/rgb_0037.png",
+    "cls": "E30_E38_door_RH",
+    "pred": "E30_E38_door_RH",
+    "D_mm": 1096.527529535336,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 50.0
+   },
+   {
+    "image": "eval_collect_20260828/20260828/E30_E38_door_RH/s_153953/rgb_0050.png",
+    "cls": "E30_E38_door_RH",
+    "pred": "E30_E38_door_RH",
+    "D_mm": 1106.0311073852463,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 32.937785229507426
+   },
+   {
+    "image": "eval_collect_20260828/20260828/E30_E38_door_RH/s_153953/rgb_0062.png",
+    "cls": "E30_E38_door_RH",
+    "pred": "E30_E38_door_RH",
+    "D_mm": 1097.0326836807742,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 50.0
+   },
+   {
+    "image": "eval_collect_20260828/20260828/E30_E38_door_RH/s_153953/rgb_0075.png",
+    "cls": "E30_E38_door_RH",
+    "pred": "E30_E38_door_RH",
+    "D_mm": 1104.4582244132205,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 36.083551173559044
+   },
+   {
+    "image": "eval_collect_20260828/20260828/E30_E38_door_RH/s_153953/rgb_0087.png",
+    "cls": "E30_E38_door_RH",
+    "pred": "E30_E38_door_RH",
+    "D_mm": 1099.2780908483414,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 46.44381830331713
+   },
+   {
+    "image": "eval_collect_20260828/20260828/E30_E38_door_RH/s_153953/rgb_0100.png",
+    "cls": "E30_E38_door_RH",
+    "pred": "E30_E38_door_RH",
+    "D_mm": 1096.5798562182715,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 50.0
+   },
+   {
+    "image": "eval_collect_20260828/20260828/E30_E38_door_RH/s_153953/rgb_0112.png",
+    "cls": "E30_E38_door_RH",
+    "pred": "E30_E38_door_RH",
+    "D_mm": 1099.0250112317394,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 46.949977536521146
+   },
+   {
+    "image": "eval_collect_20260828/20260828/E30_door_LH_RR/s_125907/rgb_0000.png",
+    "cls": "E30_door_LH_RR",
+    "pred": "E30_door_LH_RR",
+    "D_mm": 1156.1700865969428,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 67.34017319388568
+   },
+   {
+    "image": "eval_collect_20260828/20260828/E30_door_LH_RR/s_125907/rgb_0016.png",
+    "cls": "E30_door_LH_RR",
+    "pred": "E30_door_LH_RR",
+    "D_mm": 1156.8633529414303,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 68.72670588286064
+   },
+   {
+    "image": "eval_collect_20260828/20260828/E30_door_LH_RR/s_125907/rgb_0033.png",
+    "cls": "E30_door_LH_RR",
+    "pred": "E30_door_LH_RR",
+    "D_mm": 1155.7364868794682,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 66.4729737589364
+   },
+   {
+    "image": "eval_collect_20260828/20260828/E30_door_LH_RR/s_125907/rgb_0049.png",
+    "cls": "E30_door_LH_RR",
+    "pred": "E30_door_LH_RR",
+    "D_mm": 1155.8408501720003,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 66.68170034400055
+   },
+   {
+    "image": "eval_collect_20260828/20260828/E30_door_LH_RR/s_125907/rgb_0066.png",
+    "cls": "E30_door_LH_RR",
+    "pred": "E30_door_LH_RR",
+    "D_mm": 1156.0433949037676,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 67.0867898075353
+   },
+   {
+    "image": "eval_collect_20260828/20260828/E30_door_LH_RR/s_125907/rgb_0082.png",
+    "cls": "E30_door_LH_RR",
+    "pred": "E30_door_LH_RR",
+    "D_mm": 1158.9336282141533,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 71.0
+   },
+   {
+    "image": "eval_collect_20260828/20260828/E30_door_LH_RR/s_125907/rgb_0099.png",
+    "cls": "E30_door_LH_RR",
+    "pred": "E30_door_LH_RR",
+    "D_mm": 1155.9784303334502,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 66.95686066690041
+   },
+   {
+    "image": "eval_collect_20260828/20260828/E30_door_LH_RR/s_125907/rgb_0115.png",
+    "cls": "E30_door_LH_RR",
+    "pred": "E30_door_LH_RR",
+    "D_mm": 1156.5468787526047,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 68.0937575052094
+   },
+   {
+    "image": "eval_collect_20260828/20260828/E30_door_LH_RR/s_125907/rgb_0132.png",
+    "cls": "E30_door_LH_RR",
+    "pred": "E30_door_LH_RR",
+    "D_mm": 1156.1381289862218,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 67.27625797244355
+   },
+   {
+    "image": "eval_collect_20260828/20260828/E30_door_LH_RR/s_125907/rgb_0148.png",
+    "cls": "E30_door_LH_RR",
+    "pred": "E30_door_LH_RR",
+    "D_mm": 1156.8606975210382,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 68.72139504207644
+   },
+   {
+    "image": "eval_collect_20260828/20260828/E30_door_LH_RR/s_133831/rgb_0000.png",
+    "cls": "E30_door_LH_RR",
+    "pred": "E30_door_LH_RR",
+    "D_mm": 1159.528789703408,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 71.0
+   },
+   {
+    "image": "eval_collect_20260828/20260828/E30_door_LH_RR/s_133831/rgb_0010.png",
+    "cls": "E30_door_LH_RR",
+    "pred": "E30_door_LH_RR",
+    "D_mm": 1158.9939255898432,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 71.0
+   },
+   {
+    "image": "eval_collect_20260828/20260828/E30_door_LH_RR/s_133831/rgb_0020.png",
+    "cls": "E30_door_LH_RR",
+    "pred": "E30_door_LH_RR",
+    "D_mm": 1159.1613877173063,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 71.0
+   },
+   {
+    "image": "eval_collect_20260828/20260828/E30_door_LH_RR/s_133831/rgb_0030.png",
+    "cls": "E30_door_LH_RR",
+    "pred": "E30_door_LH_RR",
+    "D_mm": 1159.6801341763062,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 71.0
+   },
+   {
+    "image": "eval_collect_20260828/20260828/E30_door_LH_RR/s_133831/rgb_0040.png",
+    "cls": "E30_door_LH_RR",
+    "pred": "E30_door_LH_RR",
+    "D_mm": 1159.145560836001,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 71.0
+   },
+   {
+    "image": "eval_collect_20260828/20260828/E30_door_LH_RR/s_133831/rgb_0050.png",
+    "cls": "E30_door_LH_RR",
+    "pred": "E30_door_LH_RR",
+    "D_mm": 1159.621714455686,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 71.0
+   },
+   {
+    "image": "eval_collect_20260828/20260828/E30_door_LH_RR/s_133831/rgb_0060.png",
+    "cls": "E30_door_LH_RR",
+    "pred": "E30_door_LH_RR",
+    "D_mm": 1159.3807165586438,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 71.0
+   },
+   {
+    "image": "eval_collect_20260828/20260828/E30_door_LH_RR/s_133831/rgb_0070.png",
+    "cls": "E30_door_LH_RR",
+    "pred": "E30_door_LH_RR",
+    "D_mm": 1160.8736120417889,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 71.0
+   },
+   {
+    "image": "eval_collect_20260828/20260828/E30_door_LH_RR/s_133831/rgb_0080.png",
+    "cls": "E30_door_LH_RR",
+    "pred": "E30_door_LH_RR",
+    "D_mm": 1158.7019805401062,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 71.0
+   },
+   {
+    "image": "eval_collect_20260828/20260828/E30_door_LH_RR/s_133831/rgb_0090.png",
+    "cls": "E30_door_LH_RR",
+    "pred": "E30_door_LH_RR",
+    "D_mm": 1158.393320330511,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 71.0
+   },
+   {
+    "image": "eval_collect_20260828/20260828/E38_door_LH_RR/s_122530/rgb_0000.png",
+    "cls": "E38_door_LH_RR",
+    "pred": "E38_door_LH_RR",
+    "D_mm": 1348.3864173111835,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 186.7728346223671
+   },
+   {
+    "image": "eval_collect_20260828/20260828/E38_door_LH_RR/s_122530/rgb_0001.png",
+    "cls": "E38_door_LH_RR",
+    "pred": "E38_door_LH_RR",
+    "D_mm": 1349.2355444425357,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 188.47108888507137
+   },
+   {
+    "image": "eval_collect_20260828/20260828/E38_door_LH_RR/s_122530/rgb_0002.png",
+    "cls": "E38_door_LH_RR",
+    "pred": "E38_door_LH_RR",
+    "D_mm": 1350.4316534918294,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 190.86330698365873
+   },
+   {
+    "image": "eval_collect_20260828/20260828/E38_door_LH_RR/s_122530/rgb_0003.png",
+    "cls": "E38_door_LH_RR",
+    "pred": "E38_door_LH_RR",
+    "D_mm": 1349.1734315080068,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 188.34686301601369
+   },
+   {
+    "image": "eval_collect_20260828/20260828/E38_door_LH_RR/s_122530/rgb_0004.png",
+    "cls": "E38_door_LH_RR",
+    "pred": "E38_door_LH_RR",
+    "D_mm": 1349.827661058389,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 189.65532211677782
+   },
+   {
+    "image": "eval_collect_20260828/20260828/E38_door_LH_RR/s_122530/rgb_0005.png",
+    "cls": "E38_door_LH_RR",
+    "pred": "E38_door_LH_RR",
+    "D_mm": 1349.8847775218762,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 189.76955504375246
+   },
+   {
+    "image": "eval_collect_20260828/20260828/E38_door_LH_RR/s_122530/rgb_0006.png",
+    "cls": "E38_door_LH_RR",
+    "pred": "E38_door_LH_RR",
+    "D_mm": 1350.074676900378,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 190.14935380075622
+   },
+   {
+    "image": "eval_collect_20260828/20260828/E38_door_LH_RR/s_122530/rgb_0007.png",
+    "cls": "E38_door_LH_RR",
+    "pred": "E38_door_LH_RR",
+    "D_mm": 1349.0704828917267,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 188.14096578345334
+   },
+   {
+    "image": "eval_collect_20260828/20260828/E38_door_LH_RR/s_122557/rgb_0000.png",
+    "cls": "E38_door_LH_RR",
+    "pred": "E38_door_LH_RR",
+    "D_mm": 1347.5387220609223,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 185.07744412184456
+   },
+   {
+    "image": "eval_collect_20260828/20260828/E38_door_LH_RR/s_122557/rgb_0007.png",
+    "cls": "E38_door_LH_RR",
+    "pred": "E38_door_LH_RR",
+    "D_mm": 1349.6208073113885,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 189.24161462277698
+   },
+   {
+    "image": "eval_collect_20260828/20260828/E38_door_LH_RR/s_122557/rgb_0014.png",
+    "cls": "E38_door_LH_RR",
+    "pred": "E38_door_LH_RR",
+    "D_mm": 1347.5065230728903,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 185.01304614578066
+   },
+   {
+    "image": "eval_collect_20260828/20260828/E38_door_LH_RR/s_122557/rgb_0020.png",
+    "cls": "E38_door_LH_RR",
+    "pred": "E38_door_LH_RR",
+    "D_mm": 1348.6967358072086,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 187.3934716144172
+   },
+   {
+    "image": "eval_collect_20260828/20260828/E38_door_LH_RR/s_122557/rgb_0027.png",
+    "cls": "E38_door_LH_RR",
+    "pred": "E38_door_LH_RR",
+    "D_mm": 1347.7496447979736,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 185.49928959594718
+   },
+   {
+    "image": "eval_collect_20260828/20260828/E38_door_LH_RR/s_122557/rgb_0034.png",
+    "cls": "E38_door_LH_RR",
+    "pred": "E38_door_LH_RR",
+    "D_mm": 1349.8504631218752,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 189.70092624375047
+   },
+   {
+    "image": "eval_collect_20260828/20260828/E38_door_LH_RR/s_122557/rgb_0041.png",
+    "cls": "E38_door_LH_RR",
+    "pred": "E38_door_LH_RR",
+    "D_mm": 1347.6280157694807,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 185.25603153896145
+   },
+   {
+    "image": "eval_collect_20260828/20260828/E38_door_LH_RR/s_122557/rgb_0047.png",
+    "cls": "E38_door_LH_RR",
+    "pred": "E38_door_LH_RR",
+    "D_mm": 1350.2659333110644,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 190.53186662212875
+   },
+   {
+    "image": "eval_collect_20260828/20260828/E38_door_LH_RR/s_122557/rgb_0054.png",
+    "cls": "E38_door_LH_RR",
+    "pred": "E38_door_LH_RR",
+    "D_mm": 1349.473732526908,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 188.9474650538159
+   },
+   {
+    "image": "eval_collect_20260828/20260828/E38_door_LH_RR/s_122557/rgb_0061.png",
+    "cls": "E38_door_LH_RR",
+    "pred": "E38_door_LH_RR",
+    "D_mm": 1347.187748016264,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 184.3754960325282
+   }
+  ],
+  "n": 95,
+  "judged": 95,
+  "correct": 95,
+  "acc_judged": 100.0,
+  "group_acc_judged": 100.0,
+  "gates": {
+   "ok": 95
+  }
+ }
+}

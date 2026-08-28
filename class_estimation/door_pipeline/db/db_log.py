@@ -37,6 +37,7 @@ DATASET_BY_DIR = {
     "original": "door_real",           # 03_evaluate.py의 variant 이름
     "datasets_field": "door_field",    # 현장 세션 로컬 복사본 (17_evaluate)
     "datasets_factory_collect": "door_factory_collect",  # 06 수집 로컬 복사본 = NAS 정본과 같은 데이터셋
+    "datasets_factory_v2": "door_factory_collect",       # 미러의 학습·평가용 링크 뷰 (db/build_dataset.py)
 }
 
 

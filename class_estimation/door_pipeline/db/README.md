@@ -69,3 +69,24 @@ pipx run sqlite-web db/door_pipeline.db     # 또는: pipx run datasette db/door
   코드에서 `CURRENT_TIMESTAMP`(UTC) 사용 금지.
 - 2026-08-28 이전에는 `datasets.created_at/updated_at`, `models.created_at`만 UTC로 기록되어 있어
   `db/migrate_kst.py`로 +9시간 보정·재생성했다 (`PRAGMA user_version=1`, 원본은 `*.bak_utc_*`로 보존).
+
+## 현장 데이터 활용 흐름 (2026-08-28)
+
+NAS(전량, 정본) ⊃ `datasets_factory_collect/`(미러: NAS와 같은 `날짜/클래스/s_*/` 구조, **세션당 20장 샘플만**)
+← `datasets_factory_v2/`(학습·평가용 **심볼릭 링크 뷰**, 파일 없음). 2초 간격 연속 프레임은 거의 중복이라
+학습엔 샘플이면 충분하고, 전량은 NAS에서 필요 시 `--all`로 받는다.
+
+```bash
+python db/ingest_nas.py [--refresh]        # ① NAS 세션 → DB 등록 (메타만). 수집 중 등록된 세션은 --refresh로 수량 갱신
+python db/pull_nas.py [--date YYYYMMDD]    # ② 세션당 20장 고르게 pull → 미러, synced_local 갱신
+python db/build_dataset.py status          # ③ 세션별 라벨·split 현황
+python db/build_dataset.py relabel <session_dir> <class>   #    라벨 정정/Unknown 확정 (DB만, 파일 이동 없음)
+python db/build_dataset.py auto-split      # ④ 클래스별 첫 세션=test, 나머지=train (미지정 세션만)
+python db/build_dataset.py split <session_dir> test|train|val|none
+python db/build_dataset.py build           # ⑤ datasets_factory_v2/{all,train,val,test}/<class>/rgb_<날짜>_<세션>_<idx>.png + manifest.json
+python 17_evaluate_hole_classifier.py --base datasets_factory_v2/test   # ⑥ 평가 (DB 자동 기록)
+```
+
+- split은 **세션 단위**만 허용(프레임 단위 분할 금지). 클래스별 첫 확보 세션을 test로 고정해 현장 벤치마크를 유지한다.
+- `Unknown` 세션·`is_valid=0`·미동기화 이미지는 뷰에서 제외된다.
+- `datasets_field/`, `datasets_factory/`(2026-04 ZED 2i)는 레거시 — 신규 작업은 v2 뷰를 쓴다.

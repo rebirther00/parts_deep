@@ -116,6 +116,7 @@ python scripts/hole_classify_image.py rgb_0003.png    # 단일 이미지
 - `vent_labels/` — 자동 생성 라벨 (이미지 미추적, meta/split.json만 추적)
 - `datasets*`, `sam_models` — `../door/` 심볼릭 링크
 - `factory_masks/` — 현장 MobileSAM 마스크 캐시 (재생성 가능)
+- `datasets_factory_collect/` — NAS 미러(세션당 20장 샘플, `db/pull_nas.py`), `datasets_factory_v2/` — 학습·평가용 링크 뷰(`db/build_dataset.py build`). 흐름은 `db/README.md` 참조
 
 ## 유의사항
 
