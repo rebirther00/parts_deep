@@ -114,7 +114,7 @@ def main():
         """INSERT INTO datasets (name, type, description, base_path)
            VALUES (?, 'real', ?, ?)
            ON CONFLICT(name) DO UPDATE SET
-             base_path = excluded.base_path, updated_at = CURRENT_TIMESTAMP""",
+             base_path = excluded.base_path, updated_at = datetime('now','localtime')""",
         (DATASET_NAME, "경주 공장 현장 수집 원본 (NAS 정본, 세션 단위)", source_label),
     )
     dataset_id = cur.execute(
@@ -200,7 +200,7 @@ def main():
              total_images = (SELECT COUNT(*) FROM images i
                              JOIN classes c ON i.class_id = c.id
                              WHERE c.dataset_id = ?),
-             updated_at = CURRENT_TIMESTAMP
+             updated_at = datetime('now','localtime')
            WHERE id = ?""",
         (dataset_id, dataset_id, dataset_id),
     )

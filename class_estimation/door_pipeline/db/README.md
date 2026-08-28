@@ -62,3 +62,10 @@ pipx run sqlite-web db/door_pipeline.db     # 또는: pipx run datasette db/door
   SELECT epoch, train_loss, val_loss, val_accuracy FROM training_metrics
    WHERE session_id = ? ORDER BY epoch;   -- 학습 곡선
   ```
+
+## 시각 기준 (2026-08-28)
+
+- DB의 모든 TIMESTAMP는 **한국 시간(KST)** 이다. 스키마 기본값은 `datetime('now','localtime')`,
+  코드에서 `CURRENT_TIMESTAMP`(UTC) 사용 금지.
+- 2026-08-28 이전에는 `datasets.created_at/updated_at`, `models.created_at`만 UTC로 기록되어 있어
+  `db/migrate_kst.py`로 +9시간 보정·재생성했다 (`PRAGMA user_version=1`, 원본은 `*.bak_utc_*`로 보존).

@@ -1,5 +1,6 @@
 -- 부품 인식 AI 학습 데이터 관리 DB 스키마 (SQLite 3)
 -- 원 설계: report/DBMS_SCHEMA_DESIGN.md
+-- 시각은 모두 한국 시간(KST, localtime)으로 기록 — CURRENT_TIMESTAMP(UTC) 사용 금지 (2026-08-28, migrate_kst.py)
 -- 설계 대비 변경점:
 --   * images.width/height NULL 허용 — NAS에만 있고 아직 동기화 안 된 이미지는 해상도를 모름
 --   * images.synced_local 추가 — 학습 PC 로컬 존재 여부
@@ -17,8 +18,8 @@ CREATE TABLE IF NOT EXISTS datasets (
     total_images    INTEGER NOT NULL DEFAULT 0,
     base_path       VARCHAR(500) NOT NULL,
     background_mode VARCHAR(20),
-    created_at      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    created_at      TIMESTAMP NOT NULL DEFAULT (datetime('now','localtime')),
+    updated_at      TIMESTAMP NOT NULL DEFAULT (datetime('now','localtime'))
 );
 
 CREATE TABLE IF NOT EXISTS classes (
@@ -55,7 +56,7 @@ CREATE TABLE IF NOT EXISTS capture_sessions (
     saved_pairs     INTEGER DEFAULT 0,
     finished        BOOLEAN,
     stop_reason     VARCHAR(30),
-    started_at      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    started_at      TIMESTAMP NOT NULL DEFAULT (datetime('now','localtime')),
     ended_at        TIMESTAMP,
     notes           TEXT
 );
@@ -94,7 +95,7 @@ CREATE TABLE IF NOT EXISTS models (
     trt_path        VARCHAR(500),
     input_size      VARCHAR(20) DEFAULT '224x224',
     description     TEXT,
-    created_at      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    created_at      TIMESTAMP NOT NULL DEFAULT (datetime('now','localtime'))
 );
 
 CREATE TABLE IF NOT EXISTS training_sessions (
@@ -118,7 +119,7 @@ CREATE TABLE IF NOT EXISTS training_sessions (
     loss_function       VARCHAR(50) DEFAULT 'CrossEntropyLoss',
     class_weights       BOOLEAN DEFAULT TRUE,
     split_indices_path  VARCHAR(500),
-    started_at      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    started_at      TIMESTAMP NOT NULL DEFAULT (datetime('now','localtime')),
     ended_at        TIMESTAMP,
     status          VARCHAR(20) DEFAULT 'running'
                     CHECK (status IN ('running', 'completed', 'failed', 'stopped'))
@@ -154,7 +155,7 @@ CREATE TABLE IF NOT EXISTS evaluation_results (
     inference_time_ms REAL,
     inference_device  VARCHAR(50),
     report_path     VARCHAR(500),
-    evaluated_at    TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    evaluated_at    TIMESTAMP NOT NULL DEFAULT (datetime('now','localtime'))
 );
 
 CREATE TABLE IF NOT EXISTS augmentation_configs (

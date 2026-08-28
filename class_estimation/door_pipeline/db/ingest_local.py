@@ -66,7 +66,7 @@ def ingest_dataset(cur, db_name, dir_name, ds_type, data_source, desc):
            VALUES (?, ?, ?, ?)
            ON CONFLICT(name) DO UPDATE SET
              description = excluded.description,
-             updated_at = CURRENT_TIMESTAMP""",
+             updated_at = datetime('now','localtime')""",
         (db_name, ds_type, desc, dir_name + "/"),
     )
     dataset_id = cur.execute(
@@ -128,7 +128,7 @@ def ingest_dataset(cur, db_name, dir_name, ds_type, data_source, desc):
              total_images = (SELECT COUNT(*) FROM images i
                              JOIN classes c ON i.class_id = c.id
                              WHERE c.dataset_id = ?),
-             updated_at = CURRENT_TIMESTAMP
+             updated_at = datetime('now','localtime')
            WHERE id = ?""",
         (dataset_id, dataset_id, dataset_id),
     )
