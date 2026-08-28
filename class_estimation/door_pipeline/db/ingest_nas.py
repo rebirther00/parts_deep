@@ -49,6 +49,24 @@ def read_local(root, relpath):
     return json.loads((Path(root) / relpath).read_text())
 
 
+LOCAL_COPY = BASE_DIR / "datasets_factory_collect"
+
+
+def mark_synced_local(cur, dataset_id):
+    """학습 PC에 복사된 세션(datasets_factory_collect/<day>/<class>/s_*)은 synced_local=TRUE."""
+    if not LOCAL_COPY.is_dir():
+        return 0
+    rows = cur.execute(
+        """SELECT i.id, i.rgb_path FROM images i JOIN classes c ON i.class_id = c.id
+           WHERE c.dataset_id = ?""", (dataset_id,)).fetchall()
+    n = 0
+    for iid, rel in rows:
+        local = (LOCAL_COPY / rel).exists()
+        cur.execute("UPDATE images SET synced_local = ? WHERE id = ?", (local, iid))
+        n += local
+    return n
+
+
 def parse_class_name(name):
     if "_door_" not in name:
         return None, None
@@ -186,6 +204,7 @@ def main():
            WHERE id = ?""",
         (dataset_id, dataset_id, dataset_id),
     )
+    n_local = mark_synced_local(cur, dataset_id)
     con.commit()
 
     total, finished = cur.execute(
@@ -197,7 +216,7 @@ def main():
            WHERE c.dataset_id = ?""", (dataset_id,)
     ).fetchone()[0]
     print(f"등록 {n_new}개 / 기존 {n_skip}개 — DB에 세션 {total}개"
-          f"(완료 {finished}), 이미지 {imgs}장")
+          f"(완료 {finished}), 이미지 {imgs}장, 학습 PC 로컬 보유 {n_local}장")
     con.close()
 
 

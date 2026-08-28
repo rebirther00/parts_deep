@@ -27,6 +27,8 @@ LOCAL_DATASETS = [
      "증강 데이터 — 강건성 평가 전용, 학습 사용 금지"),
     ("door_aug2", "datasets_aug2", "real", "augmented",
      "증강 데이터 2차 — 강건성 평가 전용, 학습 사용 금지"),
+    ("door_field", "datasets_field", "real", "camera",
+     "경주 공장 현장 세션 로컬 복사본 (<class>_s_HHMMSS 폴더, 홀 판별기 평가용)"),
 ]
 
 
@@ -74,7 +76,8 @@ def ingest_dataset(cur, db_name, dir_name, ds_type, data_source, desc):
     n_images = 0
     class_dirs = sorted(d for d in root.iterdir() if d.is_dir())
     for cdir in class_dirs:
-        cname = cdir.name
+        dname = cdir.name
+        cname = dname.split("_s_")[0]   # 'E25_door_RH_s_091317' → 'E25_door_RH'
         model_name, part_type = parse_class_name(cname)
 
         meta_path = cdir / "metadata.json"
@@ -106,8 +109,8 @@ def ingest_dataset(cur, db_name, dir_name, ds_type, data_source, desc):
                     width, height, channels, data_source, synced_local, captured_at)
                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, TRUE, ?)""",
                 (class_id, rgb.name, depth.name if has_depth else None,
-                 f"{cname}/{rgb.name}",
-                 f"{cname}/{depth.name}" if has_depth else None,
+                 f"{dname}/{rgb.name}",
+                 f"{dname}/{depth.name}" if has_depth else None,
                  w, h, 4 if has_depth else 3, data_source, captured),
             )
             count += 1
