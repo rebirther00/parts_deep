@@ -184,6 +184,13 @@ parser.add_argument('--patience', type=int, default=10)
 parser.add_argument('--no_aux', action='store_true',
                     help='Aux MLP 제거 ablation 실험')
 parser.add_argument('-cpu', '--cpu', action='store_true')
+parser.add_argument('--dataset_dir', type=str, default='datasets',
+                    help='클래스 폴더 루트 (PROJECT_DIR 기준). 기본 datasets(실험실)')
+parser.add_argument('--presplit', action='store_true',
+                    help='dataset_dir 아래 train/ test/ (선택 val/) 폴더를 그대로 사용 — '
+                         '현장 데이터처럼 세션 단위로 미리 나눈 뷰용(db/build_dataset.py build). '
+                         'val/ 이 없으면 train에서 15%%를 프레임 단위로 떼어 체크포인트 선택에만 쓴다 '
+                         '(test는 세션 단위 격리 유지)')
 args = parser.parse_args()
 if args.seed is None:
     args.seed = random.randint(0, 99999)
@@ -292,6 +299,8 @@ def main():
     cfg = MODEL_CONFIGS[args.model_type]
     suffix = "_noaux" if args.no_aux else ""
     run_name = f"{args.model_type}{suffix}_{args.image_size}_seed{args.seed}"
+    if args.dataset_dir != 'datasets':   # 실험실 기본셋이 아니면 run 이름에 데이터셋 표기 (artifacts 덮어쓰기 방지)
+        run_name += "_" + os.path.basename(args.dataset_dir.rstrip('/'))
     run_dir = os.path.join(PROJECT_DIR, "artifacts", run_name)
     os.makedirs(run_dir, exist_ok=True)
 
@@ -312,18 +321,47 @@ def main():
     set_seed(args.seed)
 
     # 데이터 로드 및 분할
-    dataset_dir = os.path.join(PROJECT_DIR, "datasets")
-    class_names, image_paths, labels = scan_dataset(dataset_dir)
-    num_classes = len(class_names)
-    print(f"  클래스: {num_classes}개, 전체 이미지: {len(image_paths)}장")
+    dataset_dir = os.path.join(PROJECT_DIR, args.dataset_dir)
+    if args.presplit:
+        # 세션 단위로 미리 나눈 뷰: train/ test/ (선택 val/) — 클래스 인덱스는 세 폴더의 합집합 기준
+        sub = {s: os.path.join(dataset_dir, s) for s in ("train", "val", "test")}
+        if not (os.path.isdir(sub["train"]) and os.path.isdir(sub["test"])):
+            sys.exit(f"--presplit: {dataset_dir} 아래 train/ 과 test/ 폴더가 필요합니다")
+        scanned = {s: scan_dataset(d) for s, d in sub.items() if os.path.isdir(d)}
+        class_names = sorted(set().union(*(set(v[0]) for v in scanned.values())))
+        num_classes = len(class_names)
 
-    train_idx, val_idx, test_idx = split_data(image_paths, labels, args.seed)
-    train_paths = [image_paths[i] for i in train_idx]
-    train_labels = [labels[i] for i in train_idx]
-    val_paths = [image_paths[i] for i in val_idx]
-    val_labels = [labels[i] for i in val_idx]
-    test_paths = [image_paths[i] for i in test_idx]
-    test_labels = [labels[i] for i in test_idx]
+        def relabel(s):
+            names, paths, labs = scanned[s]
+            return paths, [class_names.index(names[l]) for l in labs]
+
+        train_paths, train_labels = relabel("train")
+        test_paths, test_labels = relabel("test")
+        if "val" in scanned:
+            val_paths, val_labels = relabel("val")
+        else:
+            idx = list(range(len(train_paths)))
+            tr_idx, va_idx = train_test_split(idx, test_size=0.15, random_state=args.seed,
+                                              stratify=train_labels)
+            val_paths = [train_paths[i] for i in va_idx]
+            val_labels = [train_labels[i] for i in va_idx]
+            train_paths = [train_paths[i] for i in tr_idx]
+            train_labels = [train_labels[i] for i in tr_idx]
+            print("  val/ 없음 → train에서 15%를 프레임 단위로 분리 (체크포인트 선택 전용)")
+        print(f"  클래스: {num_classes}개 (presplit), 전체 이미지: "
+              f"{len(train_paths) + len(val_paths) + len(test_paths)}장")
+    else:
+        class_names, image_paths, labels = scan_dataset(dataset_dir)
+        num_classes = len(class_names)
+        print(f"  클래스: {num_classes}개, 전체 이미지: {len(image_paths)}장")
+
+        train_idx, val_idx, test_idx = split_data(image_paths, labels, args.seed)
+        train_paths = [image_paths[i] for i in train_idx]
+        train_labels = [labels[i] for i in train_idx]
+        val_paths = [image_paths[i] for i in val_idx]
+        val_labels = [labels[i] for i in val_idx]
+        test_paths = [image_paths[i] for i in test_idx]
+        test_labels = [labels[i] for i in test_idx]
 
     print(f"  Train: {len(train_paths)}, Val: {len(val_paths)}, Test: {len(test_paths)}")
 
@@ -377,8 +415,11 @@ def main():
     class_counts = [sum(1 for l in train_labels if l == i)
                     for i in range(num_classes)]
     total_count = len(train_labels)
+    empty = [class_names[i] for i, c in enumerate(class_counts) if c == 0]
+    if empty:   # presplit 뷰에서 test 세션만 있는 클래스 — 학습 불가, 가중치 0 (평가 시 해당 클래스는 항상 오답)
+        print(f"  경고: train 샘플 0장 클래스 {empty} → 손실 가중치 0 (이 클래스는 학습되지 않음)")
     weights = torch.tensor(
-        [total_count / (num_classes * c) for c in class_counts],
+        [total_count / (num_classes * c) if c else 0.0 for c in class_counts],
         dtype=torch.float32
     ).to(device)
     criterion = nn.CrossEntropyLoss(weight=weights)

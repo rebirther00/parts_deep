@@ -12,8 +12,9 @@ DB 기준(synced_local=1, is_valid=1, 클래스 확정, split 지정)으로만 �
   python db/build_dataset.py build                       # 뷰 생성
   python db/build_dataset.py status                      # 클래스·세션별 split 현황
   python db/build_dataset.py split <session_dir> <train|val|test|none>
-  python db/build_dataset.py auto-split                  # 클래스별 첫 세션=test, 나머지=train (미지정 세션만)
+  python db/build_dataset.py auto-split [--reset-nontest]   # 세션 단위 70/15/15: 시간순 test=max(1,15%) → val=max(1,15%)(세션≥3) → train
   python db/build_dataset.py relabel <session_dir> <class>   # 라벨 정정(Unknown 포함) — 파일 이동 없이 DB만
+  python db/build_dataset.py invalidate <session_dir> "<사유>"   # 세션 무효화(시험 촬영·빈 지그) → 뷰 제외. validate 로 복귀
 
 규칙: split은 항상 세션 단위(프레임 단위 분할 금지). 라벨 정정은 capture_sessions.class_name(현장 입력 원본)은
 그대로 두고 images.class_id 만 재배정, notes 에 이력을 남긴다.
@@ -67,28 +68,46 @@ def cmd_split(con, session_dir, split):
     print(f"{session_dir}: split={val}")
 
 
-def cmd_auto_split(con):
+def cmd_auto_split(con, reset_nontest=False):
+    """세션 단위 70/15/15. 클래스별 세션을 시간순으로 놓고 test=max(1,15%), val=max(1,15%)(세션≥3),
+    나머지 train. 가장 이른 세션이 test(현장 벤치마크 고정). 이미 지정된 세션은 유지하고 미지정만 채운다
+    (--reset-nontest 면 test 는 유지, val/train 은 다시 계산)."""
     ds = dataset_id(con)
     rows = con.execute(
         """SELECT s.id, s.session_dir, c.name AS cls, s.started_at,
                   (SELECT split FROM images WHERE session_id = s.id LIMIT 1) AS split,
-                  (SELECT COUNT(*) FROM images WHERE session_id = s.id AND synced_local) AS n_local
+                  (SELECT COUNT(*) FROM images WHERE session_id = s.id AND synced_local AND is_valid) AS n_use
            FROM capture_sessions s
            JOIN images i ON i.session_id = s.id JOIN classes c ON c.id = i.class_id
            WHERE s.dataset_id = ? AND c.name != 'Unknown'
            GROUP BY s.id ORDER BY c.name, s.started_at""", (ds,)).fetchall()
     by_cls = defaultdict(list)
     for r in rows:
-        by_cls[r["cls"]].append(r)
+        if r["n_use"]:
+            by_cls[r["cls"]].append(dict(r))
     for cls, ss in by_cls.items():
-        has_test = any(r["split"] == "test" for r in ss)
-        for r in ss:
-            if r["split"] or r["n_local"] == 0:
+        if reset_nontest:
+            for r in ss:
+                if r["split"] != "test":
+                    r["split"] = None
+        n = len(ss)
+        target = {"test": max(1, round(0.15 * n)), "val": max(1, round(0.15 * n)) if n >= 3 else 0}
+        have = {k: sum(r["split"] == k for r in ss) for k in ("test", "val")}
+        for r in ss:                      # 시간순: test → val → train 순으로 부족분 채움
+            if r["split"]:
                 continue
-            new = "train" if has_test else "test"
-            has_test = has_test or new == "test"
-            con.execute("UPDATE images SET split = ? WHERE session_id = ?", (new, r["id"]))
-            print(f"  {r['session_dir']:40s} → {new}")
+            for k in ("test", "val"):
+                if have[k] < target[k]:
+                    r["split"] = k; have[k] += 1
+                    break
+            else:
+                r["split"] = "train"
+        for r in ss:
+            con.execute("UPDATE images SET split = ? WHERE session_id = ?", (r["split"], r["id"]))
+        summary = {k: sum(r["split"] == k for r in ss) for k in SPLITS}
+        print(f"  {cls:18s} 세션 {n}개 → " + " ".join(f"{k}={v}" for k, v in summary.items()))
+        for r in ss:
+            print(f"      {r['session_dir']:40s} {r['split']}")
     con.commit()
 
 
@@ -115,11 +134,22 @@ def cmd_relabel(con, session_dir, new_cls):
     print(f"{session_dir}: {note}  (현장 입력 원본 class_name={s['class_name']} 유지)")
 
 
+def cmd_validity(con, session_dir, valid, reason):
+    """세션 전체 is_valid 설정 (예: 설치 전 시험 촬영, 빈 지그). 뷰에서 제외/복귀."""
+    s = session_row(con, session_dir)
+    n = con.execute("UPDATE images SET is_valid = ? WHERE session_id = ?", (valid, s["id"])).rowcount
+    note = f"[{time.strftime('%Y-%m-%d %H:%M')}] {'validate' if valid else 'invalidate'} ({n}장): {reason}"
+    con.execute("UPDATE capture_sessions SET notes = COALESCE(notes || '\n', '') || ? WHERE id = ?",
+                (note, s["id"]))
+    con.commit()
+    print(f"{session_dir}: {note}")
+
+
 def cmd_status(con):
     ds = dataset_id(con)
     rows = con.execute(
         """SELECT c.name AS cls, s.session_dir, s.class_name AS field_label,
-                  COUNT(*) AS n, SUM(i.synced_local) AS n_local,
+                  COUNT(*) AS n, SUM(i.synced_local) AS n_local, MIN(i.is_valid) AS valid,
                   MAX(i.split) AS split, s.notes
            FROM images i JOIN classes c ON c.id = i.class_id
            JOIN capture_sessions s ON s.id = i.session_id
@@ -127,6 +157,8 @@ def cmd_status(con):
     print(f"{'클래스(DB)':18s} {'세션':38s} {'현장입력':16s}  NAS 로컬  split")
     for r in rows:
         flag = "" if r["field_label"] == r["cls"] else " *정정"
+        if not r["valid"]:
+            flag += " (무효)"
         print(f"{r['cls']:18s} {r['session_dir']:38s} {r['field_label']:16s} {r['n']:4d} {r['n_local']:4d}  "
               f"{r['split'] or '-'}{flag}")
     tot = con.execute(
@@ -181,9 +213,13 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--db", default=str(BASE_DIR / "db" / "door_pipeline.db"))
     sub = ap.add_subparsers(dest="cmd", required=True)
-    sub.add_parser("build"); sub.add_parser("status"); sub.add_parser("auto-split")
+    sub.add_parser("build"); sub.add_parser("status")
+    p = sub.add_parser("auto-split"); p.add_argument("--reset-nontest", action="store_true",
+                                                    help="test 유지, val/train 재계산")
     p = sub.add_parser("split"); p.add_argument("session_dir"); p.add_argument("split", choices=SPLITS + ("none",))
     p = sub.add_parser("relabel"); p.add_argument("session_dir"); p.add_argument("new_class")
+    for name in ("invalidate", "validate"):
+        p = sub.add_parser(name); p.add_argument("session_dir"); p.add_argument("reason")
     a = ap.parse_args()
     con = connect(a.db)
     if a.cmd == "build":
@@ -191,11 +227,13 @@ def main():
     elif a.cmd == "status":
         cmd_status(con)
     elif a.cmd == "auto-split":
-        cmd_auto_split(con)
+        cmd_auto_split(con, a.reset_nontest)
     elif a.cmd == "split":
         cmd_split(con, a.session_dir, a.split)
     elif a.cmd == "relabel":
         cmd_relabel(con, a.session_dir, a.new_class)
+    elif a.cmd in ("invalidate", "validate"):
+        cmd_validity(con, a.session_dir, a.cmd == "validate", a.reason)
 
 
 if __name__ == "__main__":

@@ -85,6 +85,8 @@ python db/build_dataset.py auto-split      # ④ 클래스별 첫 세션=test, �
 python db/build_dataset.py split <session_dir> test|train|val|none
 python db/build_dataset.py build           # ⑤ datasets_factory_v2/{all,train,val,test}/<class>/rgb_<날짜>_<세션>_<idx>.png + manifest.json
 python 17_evaluate_hole_classifier.py --base datasets_factory_v2/test   # ⑥ 평가 (DB 자동 기록)
+python 02_train.py --model_type rgbe --no_aux --image_size 448 --dataset_dir datasets_factory_v2 --presplit
+                                           # ⑦ CNN fine-tune 시: train/val/test 폴더 그대로 사용(세션 격리), run 이름에 _datasets_factory_v2
 ```
 
 - split은 **세션 단위**만 허용(프레임 단위 분할 금지). 클래스별 첫 확보 세션을 test로 고정해 현장 벤치마크를 유지한다.
