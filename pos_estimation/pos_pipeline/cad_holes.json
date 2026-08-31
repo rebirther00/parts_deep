@@ -1,0 +1,1059 @@
+{
+ "meta": {
+  "units": "mm",
+  "source": "cad/door_stl",
+  "door_frame": "origin=corner midpoint, X=hinge->latch, Z=6-hole plane normal(camera side), Y=Z×X",
+  "note": "CAD 좌표계는 차체 기준(부품에서 1~3m 오프셋) — T_door_to_cad로만 사용",
+  "landmark_names": [
+   "bolt_tl",
+   "bolt_tr",
+   "bolt_bl",
+   "bolt_br",
+   "corner_hinge",
+   "corner_latch"
+  ]
+ },
+ "classes": {
+  "E25_door_LH_FRT": {
+   "D_mm": 723.6,
+   "D_cad": 724,
+   "field_fit_mm": 1.84,
+   "field_margin_mm": 32.64,
+   "n_field": 22,
+   "field_features": {
+    "ul": 149.0,
+    "wl": 185.5,
+    "uh": -574.8,
+    "wh": 186.9,
+    "D": 725.5
+   },
+   "rect_err": 0.67,
+   "dist_rect_to_latch": 236.1,
+   "view_from": "+Y",
+   "view_free": "+Y",
+   "chirality_ok": true,
+   "chirality_votes": {
+    "1": 12,
+    "-1": 1
+   },
+   "n_circular_holes": 124,
+   "holes_cad": {
+    "bolt_tl": [
+     -947.05,
+     -5.92,
+     193.5
+    ],
+    "bolt_tr": [
+     -791.0,
+     -5.92,
+     193.5
+    ],
+    "bolt_bl": [
+     -947.05,
+     -6.23,
+     290.0
+    ],
+    "bolt_br": [
+     -791.0,
+     -6.23,
+     290.0
+    ],
+    "corner_hinge": [
+     -1444.8,
+     7.42,
+     58.17
+    ],
+    "corner_latch": [
+     -721.2,
+     7.42,
+     58.16
+    ]
+   },
+   "holes_door": {
+    "bolt_tl": [
+     135.95,
+     -135.89,
+     -5.28
+    ],
+    "bolt_tr": [
+     292.0,
+     -135.89,
+     -5.28
+    ],
+    "bolt_bl": [
+     135.95,
+     -232.24,
+     0.13
+    ],
+    "bolt_br": [
+     292.0,
+     -232.24,
+     0.13
+    ],
+    "corner_hinge": [
+     -361.8,
+     -0.0,
+     0.0
+    ],
+    "corner_latch": [
+     361.8,
+     0.0,
+     -0.0
+    ]
+   },
+   "hole_r_mm": {
+    "bolt_tl": 5.0,
+    "bolt_tr": 5.0,
+    "bolt_bl": 5.0,
+    "bolt_br": 5.0,
+    "corner_hinge": 4.75,
+    "corner_latch": 4.75
+   },
+   "plane_offset_mm": {
+    "bolt_tl": -3.58,
+    "bolt_tr": -3.25,
+    "bolt_bl": 1.83,
+    "bolt_br": 2.16,
+    "corner_hinge": 0.65,
+    "corner_latch": 2.18
+   },
+   "coplanarity_mm": 5.76,
+   "T_door_to_cad": [
+    [
+     1.0,
+     -3e-06,
+     0.0,
+     -1083.002769
+    ],
+    [
+     -0.0,
+     0.059316,
+     0.998239,
+     7.415715
+    ],
+    [
+     -3e-06,
+     -0.998239,
+     0.059316,
+     58.164073
+    ],
+    [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ]
+   ]
+  },
+  "E25_door_LH_RR": {
+   "D_mm": 1036.6,
+   "D_cad": 1037,
+   "field_fit_mm": 6.19,
+   "field_margin_mm": 23.41,
+   "n_field": 24,
+   "field_features": {
+    "ul": 153.0,
+    "wl": -187.6,
+    "uh": -892.1,
+    "wh": -175.4,
+    "D": 1045.1
+   },
+   "rect_err": 0.7,
+   "dist_rect_to_latch": 236.0,
+   "view_from": "+Y",
+   "view_free": "+Y",
+   "chirality_ok": true,
+   "chirality_votes": {
+    "-1": 13
+   },
+   "n_circular_holes": 158,
+   "holes_cad": {
+    "bolt_tl": [
+     -953.0,
+     -6.23,
+     290.0
+    ],
+    "bolt_tr": [
+     -1109.0,
+     -6.23,
+     290.0
+    ],
+    "bolt_bl": [
+     -953.0,
+     -5.92,
+     193.5
+    ],
+    "bolt_br": [
+     -1109.0,
+     -5.92,
+     193.5
+    ],
+    "corner_hinge": [
+     -142.2,
+     7.43,
+     58.2
+    ],
+    "corner_latch": [
+     -1178.8,
+     7.43,
+     58.2
+    ]
+   },
+   "holes_door": {
+    "bolt_tl": [
+     292.5,
+     232.2,
+     -0.11
+    ],
+    "bolt_tr": [
+     448.5,
+     232.2,
+     -0.11
+    ],
+    "bolt_bl": [
+     292.5,
+     135.85,
+     -5.43
+    ],
+    "bolt_br": [
+     448.5,
+     135.85,
+     -5.43
+    ],
+    "corner_hinge": [
+     -518.3,
+     -0.0,
+     0.0
+    ],
+    "corner_latch": [
+     518.3,
+     -0.0,
+     0.0
+    ]
+   },
+   "hole_r_mm": {
+    "bolt_tl": 5.0,
+    "bolt_tr": 5.0,
+    "bolt_bl": 5.0,
+    "bolt_br": 5.0,
+    "corner_hinge": 4.75,
+    "corner_latch": 4.75
+   },
+   "plane_offset_mm": {
+    "bolt_tl": 1.82,
+    "bolt_tr": 2.11,
+    "bolt_bl": -3.5,
+    "bolt_br": -3.21,
+    "corner_hinge": 0.44,
+    "corner_latch": 2.35
+   },
+   "coplanarity_mm": 5.85,
+   "T_door_to_cad": [
+    [
+     -1.0,
+     0.0,
+     0.0,
+     -660.502776
+    ],
+    [
+     0.0,
+     -0.058376,
+     0.998295,
+     7.432486
+    ],
+    [
+     0.0,
+     0.998295,
+     0.058376,
+     58.202009
+    ],
+    [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ]
+   ]
+  },
+  "E25_door_RH": {
+   "D_mm": 885.61,
+   "D_cad": 886,
+   "field_fit_mm": 8.87,
+   "field_margin_mm": 20.6,
+   "n_field": 24,
+   "field_features": {
+    "ul": 162.3,
+    "wl": 187.9,
+    "uh": -731.2,
+    "wh": 173.8,
+    "D": 893.4
+   },
+   "rect_err": 0.7,
+   "dist_rect_to_latch": 249.1,
+   "view_from": "+Y",
+   "view_free": "-Y",
+   "chirality_ok": true,
+   "chirality_votes": {
+    "1": 15
+   },
+   "n_circular_holes": 158,
+   "holes_cad": {
+    "bolt_tl": [
+     -2106.0,
+     -1483.86,
+     497.5
+    ],
+    "bolt_tr": [
+     -1950.0,
+     -1483.86,
+     497.5
+    ],
+    "bolt_bl": [
+     -2106.0,
+     -1484.17,
+     594.0
+    ],
+    "bolt_br": [
+     -1950.0,
+     -1484.17,
+     594.0
+    ],
+    "corner_hinge": [
+     -2745.81,
+     -1470.52,
+     362.2
+    ],
+    "corner_latch": [
+     -1860.2,
+     -1470.52,
+     362.2
+    ]
+   },
+   "holes_door": {
+    "bolt_tl": [
+     197.0,
+     -135.85,
+     -5.32
+    ],
+    "bolt_tr": [
+     353.0,
+     -135.85,
+     -5.32
+    ],
+    "bolt_bl": [
+     197.0,
+     -232.2,
+     0.07
+    ],
+    "bolt_br": [
+     353.0,
+     -232.2,
+     0.07
+    ],
+    "corner_hinge": [
+     -442.8,
+     -0.0,
+     0.0
+    ],
+    "corner_latch": [
+     442.8,
+     -0.0,
+     0.0
+    ]
+   },
+   "hole_r_mm": {
+    "bolt_tl": 5.0,
+    "bolt_tr": 5.0,
+    "bolt_bl": 5.0,
+    "bolt_br": 5.0,
+    "corner_hinge": 4.75,
+    "corner_latch": 4.75
+   },
+   "plane_offset_mm": {
+    "bolt_tl": -3.54,
+    "bolt_tr": -3.25,
+    "bolt_bl": 1.84,
+    "bolt_br": 2.13,
+    "corner_hinge": 0.59,
+    "corner_latch": 2.23
+   },
+   "coplanarity_mm": 5.78,
+   "T_door_to_cad": [
+    [
+     1.0,
+     -2e-06,
+     0.0,
+     -2303.002839
+    ],
+    [
+     0.0,
+     0.059068,
+     0.998254,
+     -1470.521251
+    ],
+    [
+     -2e-06,
+     -0.998254,
+     0.059068,
+     362.200979
+    ],
+    [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ]
+   ]
+  },
+  "E30_E38_door_RH": {
+   "D_mm": 1086.6,
+   "D_cad": 1087,
+   "field_fit_mm": 9.21,
+   "field_margin_mm": 20.8,
+   "n_field": 24,
+   "field_features": {
+    "ul": 163.7,
+    "wl": 187.1,
+    "uh": -932.9,
+    "wh": 174.8,
+    "D": 1097.0
+   },
+   "rect_err": 0.7,
+   "dist_rect_to_latch": 249.1,
+   "view_from": "+Y",
+   "view_free": "-Y",
+   "chirality_ok": true,
+   "chirality_votes": {
+    "1": 9
+   },
+   "n_circular_holes": 157,
+   "holes_cad": {
+    "bolt_tl": [
+     286.17,
+     -60.94,
+     142.99
+    ],
+    "bolt_tr": [
+     442.17,
+     -60.94,
+     142.99
+    ],
+    "bolt_bl": [
+     286.17,
+     -61.26,
+     239.49
+    ],
+    "bolt_br": [
+     442.17,
+     -61.26,
+     239.49
+    ],
+    "corner_hinge": [
+     -554.61,
+     -47.38,
+     7.69
+    ],
+    "corner_latch": [
+     531.99,
+     -47.38,
+     7.69
+    ]
+   },
+   "holes_door": {
+    "bolt_tl": [
+     297.48,
+     -135.87,
+     -5.49
+    ],
+    "bolt_tr": [
+     453.48,
+     -135.87,
+     -5.49
+    ],
+    "bolt_bl": [
+     297.48,
+     -232.22,
+     -0.07
+    ],
+    "bolt_br": [
+     453.48,
+     -232.22,
+     -0.07
+    ],
+    "corner_hinge": [
+     -543.3,
+     0.0,
+     0.0
+    ],
+    "corner_latch": [
+     543.3,
+     0.0,
+     0.0
+    ]
+   },
+   "hole_r_mm": {
+    "bolt_tl": 5.0,
+    "bolt_tr": 5.0,
+    "bolt_bl": 5.0,
+    "bolt_br": 5.0,
+    "corner_hinge": 4.75,
+    "corner_latch": 4.75
+   },
+   "plane_offset_mm": {
+    "bolt_tl": -3.56,
+    "bolt_tr": -3.29,
+    "bolt_bl": 1.87,
+    "bolt_br": 2.14,
+    "corner_hinge": 0.48,
+    "corner_latch": 2.36
+   },
+   "coplanarity_mm": 5.92,
+   "T_door_to_cad": [
+    [
+     1.0,
+     -2e-06,
+     -3e-06,
+     -11.308794
+    ],
+    [
+     3e-06,
+     0.059466,
+     0.99823,
+     -47.379407
+    ],
+    [
+     -2e-06,
+     -0.99823,
+     0.059466,
+     7.690594
+    ],
+    [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ]
+   ]
+  },
+  "E30_door_LH_FRT": {
+   "D_mm": 764.6,
+   "D_cad": 765,
+   "field_fit_mm": 6.89,
+   "field_margin_mm": 23.82,
+   "n_field": 24,
+   "field_features": {
+    "ul": 145.2,
+    "wl": 189.3,
+    "uh": -626.9,
+    "wh": 177.4,
+    "D": 771.7
+   },
+   "rect_err": 0.7,
+   "dist_rect_to_latch": 236.0,
+   "view_from": "-Y",
+   "view_free": "-Y",
+   "chirality_ok": true,
+   "chirality_votes": {
+    "1": 8
+   },
+   "n_circular_holes": 135,
+   "holes_cad": {
+    "bolt_tl": [
+     -1315.0,
+     1501.17,
+     499.0
+    ],
+    "bolt_tr": [
+     -1471.0,
+     1501.17,
+     499.0
+    ],
+    "bolt_bl": [
+     -1315.0,
+     1501.48,
+     595.5
+    ],
+    "bolt_br": [
+     -1471.0,
+     1501.48,
+     595.5
+    ],
+    "corner_hinge": [
+     -776.2,
+     1487.86,
+     363.72
+    ],
+    "corner_latch": [
+     -1540.8,
+     1487.86,
+     363.76
+    ]
+   },
+   "holes_door": {
+    "bolt_tl": [
+     156.51,
+     -135.81,
+     -5.3
+    ],
+    "bolt_tr": [
+     312.51,
+     -135.8,
+     -5.3
+    ],
+    "bolt_bl": [
+     156.51,
+     -232.16,
+     0.09
+    ],
+    "bolt_br": [
+     312.51,
+     -232.15,
+     0.09
+    ],
+    "corner_hinge": [
+     -382.3,
+     0.0,
+     -0.0
+    ],
+    "corner_latch": [
+     382.3,
+     0.0,
+     0.0
+    ]
+   },
+   "hole_r_mm": {
+    "bolt_tl": 5.0,
+    "bolt_tr": 5.0,
+    "bolt_bl": 5.0,
+    "bolt_br": 5.0,
+    "corner_hinge": 4.75,
+    "corner_latch": 4.75
+   },
+   "plane_offset_mm": {
+    "bolt_tl": -3.56,
+    "bolt_tr": -3.24,
+    "bolt_bl": 1.83,
+    "bolt_br": 2.15,
+    "corner_hinge": 0.61,
+    "corner_latch": 2.21
+   },
+   "coplanarity_mm": 5.77,
+   "T_door_to_cad": [
+    [
+     -1.0,
+     -5.2e-05,
+     4e-06,
+     -1158.49808
+    ],
+    [
+     -0.0,
+     -0.059072,
+     -0.998254,
+     1487.855297
+    ],
+    [
+     5.2e-05,
+     -0.998254,
+     0.059072,
+     363.73528
+    ],
+    [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ]
+   ]
+  },
+  "E30_door_LH_RR": {
+   "D_mm": 1157.61,
+   "D_cad": 1158,
+   "field_fit_mm": 5.22,
+   "field_margin_mm": 29.22,
+   "n_field": 22,
+   "field_features": {
+    "ul": 155.1,
+    "wl": -188.8,
+    "uh": -1002.4,
+    "wh": -186.0,
+    "D": 1157.5
+   },
+   "rect_err": 0.7,
+   "dist_rect_to_latch": 236.1,
+   "view_from": "-Y",
+   "view_free": "-Y",
+   "chirality_ok": true,
+   "chirality_votes": {
+    "-1": 10
+   },
+   "n_circular_holes": 156,
+   "holes_cad": {
+    "bolt_tl": [
+     -2075.01,
+     1501.5,
+     595.76
+    ],
+    "bolt_tr": [
+     -1919.01,
+     1501.5,
+     595.76
+    ],
+    "bolt_bl": [
+     -2075.01,
+     1501.19,
+     499.26
+    ],
+    "bolt_br": [
+     -1919.01,
+     1501.19,
+     499.26
+    ],
+    "corner_hinge": [
+     -3006.8,
+     1487.86,
+     363.94
+    ],
+    "corner_latch": [
+     -1849.19,
+     1487.84,
+     363.95
+    ]
+   },
+   "holes_door": {
+    "bolt_tl": [
+     352.99,
+     232.21,
+     -0.17
+    ],
+    "bolt_tr": [
+     508.99,
+     232.21,
+     -0.17
+    ],
+    "bolt_bl": [
+     352.99,
+     135.86,
+     -5.46
+    ],
+    "bolt_br": [
+     508.99,
+     135.86,
+     -5.46
+    ],
+    "corner_hinge": [
+     -578.8,
+     -0.0,
+     0.0
+    ],
+    "corner_latch": [
+     578.8,
+     -0.0,
+     0.0
+    ]
+   },
+   "hole_r_mm": {
+    "bolt_tl": 5.0,
+    "bolt_tr": 5.0,
+    "bolt_bl": 5.0,
+    "bolt_br": 5.0,
+    "corner_hinge": 4.75,
+    "corner_latch": 4.75
+   },
+   "plane_offset_mm": {
+    "bolt_tl": 1.82,
+    "bolt_tr": 2.09,
+    "bolt_bl": -3.47,
+    "bolt_br": -3.2,
+    "corner_hinge": 0.39,
+    "corner_latch": 2.38
+   },
+   "coplanarity_mm": 5.85,
+   "T_door_to_cad": [
+    [
+     1.0,
+     -2e-06,
+     -1.1e-05,
+     -2427.997079
+    ],
+    [
+     -1.1e-05,
+     0.058058,
+     -0.998313,
+     1487.849803
+    ],
+    [
+     3e-06,
+     0.998313,
+     0.058058,
+     363.94468
+    ],
+    [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ]
+   ]
+  },
+  "E38_door_LH_FRT": {
+   "D_mm": 811.6,
+   "D_cad": 812,
+   "field_fit_mm": 5.96,
+   "field_margin_mm": 22.29,
+   "n_field": 21,
+   "field_features": {
+    "ul": 148.0,
+    "wl": 187.6,
+    "uh": -659.4,
+    "wh": 172.4,
+    "D": 808.7
+   },
+   "rect_err": 0.7,
+   "dist_rect_to_latch": 236.0,
+   "view_from": "-Y",
+   "view_free": "-Y",
+   "chirality_ok": true,
+   "chirality_votes": {
+    "1": 10
+   },
+   "n_circular_holes": 135,
+   "holes_cad": {
+    "bolt_tl": [
+     -1315.0,
+     1501.17,
+     499.0
+    ],
+    "bolt_tr": [
+     -1471.0,
+     1501.17,
+     499.0
+    ],
+    "bolt_bl": [
+     -1315.0,
+     1501.48,
+     595.5
+    ],
+    "bolt_br": [
+     -1471.0,
+     1501.48,
+     595.5
+    ],
+    "corner_hinge": [
+     -729.2,
+     1487.85,
+     363.7
+    ],
+    "corner_latch": [
+     -1540.8,
+     1487.85,
+     363.71
+    ]
+   },
+   "holes_door": {
+    "bolt_tl": [
+     180.0,
+     -135.84,
+     -5.32
+    ],
+    "bolt_tr": [
+     336.0,
+     -135.84,
+     -5.32
+    ],
+    "bolt_bl": [
+     180.0,
+     -232.19,
+     0.05
+    ],
+    "bolt_br": [
+     336.0,
+     -232.19,
+     0.05
+    ],
+    "corner_hinge": [
+     -405.8,
+     0.0,
+     -0.0
+    ],
+    "corner_latch": [
+     405.8,
+     0.0,
+     -0.0
+    ]
+   },
+   "hole_r_mm": {
+    "bolt_tl": 5.0,
+    "bolt_tr": 5.0,
+    "bolt_bl": 5.0,
+    "bolt_br": 5.0,
+    "corner_hinge": 4.75,
+    "corner_latch": 4.75
+   },
+   "plane_offset_mm": {
+    "bolt_tl": -3.55,
+    "bolt_tr": -3.23,
+    "bolt_bl": 1.82,
+    "bolt_br": 2.14,
+    "corner_hinge": 0.57,
+    "corner_latch": 2.24
+   },
+   "coplanarity_mm": 5.79,
+   "T_door_to_cad": [
+    [
+     -1.0,
+     -8e-06,
+     5e-06,
+     -1134.998259
+    ],
+    [
+     -4e-06,
+     -0.058902,
+     -0.998264,
+     1487.85295
+    ],
+    [
+     8e-06,
+     -0.998264,
+     0.058902,
+     363.705516
+    ],
+    [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ]
+   ]
+  },
+  "E38_door_LH_RR": {
+   "D_mm": 1351.6,
+   "D_cad": 1352,
+   "field_fit_mm": 5.3,
+   "field_margin_mm": 25.33,
+   "n_field": 24,
+   "field_features": {
+    "ul": 153.5,
+    "wl": -185.1,
+    "uh": -1195.9,
+    "wh": -177.5,
+    "D": 1349.2
+   },
+   "rect_err": 0.7,
+   "dist_rect_to_latch": 236.0,
+   "view_from": "-Y",
+   "view_free": "-Y",
+   "chirality_ok": true,
+   "chirality_votes": {
+    "-1": 9
+   },
+   "n_circular_holes": 156,
+   "holes_cad": {
+    "bolt_tl": [
+     -1881.0,
+     1501.5,
+     596.0
+    ],
+    "bolt_tr": [
+     -1725.0,
+     1501.5,
+     596.0
+    ],
+    "bolt_bl": [
+     -1881.0,
+     1501.18,
+     499.5
+    ],
+    "bolt_br": [
+     -1725.0,
+     1501.18,
+     499.5
+    ],
+    "corner_hinge": [
+     -3006.79,
+     1487.85,
+     364.21
+    ],
+    "corner_latch": [
+     -1655.19,
+     1487.86,
+     364.21
+    ]
+   },
+   "holes_door": {
+    "bolt_tl": [
+     449.99,
+     232.19,
+     -0.25
+    ],
+    "bolt_tr": [
+     605.99,
+     232.19,
+     -0.25
+    ],
+    "bolt_bl": [
+     449.99,
+     135.83,
+     -5.51
+    ],
+    "bolt_br": [
+     605.99,
+     135.83,
+     -5.51
+    ],
+    "corner_hinge": [
+     -675.8,
+     0.0,
+     -0.0
+    ],
+    "corner_latch": [
+     675.8,
+     0.0,
+     0.0
+    ]
+   },
+   "hole_r_mm": {
+    "bolt_tl": 5.0,
+    "bolt_tr": 5.0,
+    "bolt_bl": 5.0,
+    "bolt_br": 5.0,
+    "corner_hinge": 4.75,
+    "corner_latch": 4.75
+   },
+   "plane_offset_mm": {
+    "bolt_tl": 1.82,
+    "bolt_tr": 2.06,
+    "bolt_bl": -3.43,
+    "bolt_br": -3.19,
+    "corner_hinge": 0.33,
+    "corner_latch": 2.42
+   },
+   "coplanarity_mm": 5.86,
+   "T_door_to_cad": [
+    [
+     1.0,
+     -2e-06,
+     3e-06,
+     -2330.987961
+    ],
+    [
+     3e-06,
+     0.057663,
+     -0.998336,
+     1487.854073
+    ],
+    [
+     2e-06,
+     0.998336,
+     0.057663,
+     364.211084
+    ],
+    [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ]
+   ]
+  }
+ }
+}
