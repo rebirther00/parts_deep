@@ -90,7 +90,7 @@ def solve_frame(det, depth, cls, cad, K=None, min_holes=4):
         return dict(ok=False, reason='no_plane', n_holes=len(named_px))
     c, n, pstats = pl
     offsets = {k: float(e['pts'][k][2]) for k in named_px}       # 도어 z = 평면 오프셋(카메라 쪽 +)
-    P3 = pu.landmarks_3d(named_px, c, n, K, offsets)
+    P3 = pu.landmarks_3d(named_px, c, n, K, offsets, depth=depth)
     if P3 is None:
         return dict(ok=False, reason='backproject', n_holes=len(named_px))
     names = sorted(named_px)
@@ -106,11 +106,46 @@ def solve_frame(det, depth, cls, cad, K=None, min_holes=4):
                 normal_ok=bool(R[2, 2] < 0), plane=pstats, gate=(rms <= RMS_GATE))
 
 
-def solve(net, dev, rgb, depth, cls, cad, K=None):
+def solve_frame_pnp(det, shape, cls, cad, K=None, min_holes=4):
+    """PnP 대조군: depth 미사용, 2D 검출점 + CAD 3D만으로 포즈 (cv2.solvePnP SQPNP).
+
+    depth 경로와 오차 원인이 독립(렌즈 파라미터만 의존) — 교차 검증·depth 편향 진단용."""
+    import cv2
+    e = cad.get(cls)
+    hinge = det['corner_hinge'][0] if det['corner_hinge'] else None
+    latch = det['corner_latch'][0] if det['corner_latch'] else None
+    if e is None or hinge is None or latch is None:
+        return dict(ok=False, reason='no_corner')
+    K = K or pu.intrinsics_for(shape)
+    named_px = dict(corner_hinge=hinge[:2], corner_latch=latch[:2])
+    named_px.update(correspond_bolts(det['bolt'], hinge, latch, e['pts']))
+    if len(named_px) < min_holes:
+        return dict(ok=False, reason='few_holes', n_holes=len(named_px))
+    names = sorted(named_px)
+    obj = np.stack([e['pts'][k] for k in names]).astype(np.float64)
+    img = np.array([named_px[k] for k in names], np.float64)
+    Km = np.array([[K['fx'], 0, K['cx']], [0, K['fy'], K['cy']], [0, 0, 1.0]])
+    ok, rvec, tvec = cv2.solvePnP(obj, img, Km, None, flags=cv2.SOLVEPNP_SQPNP)
+    if not ok:
+        return dict(ok=False, reason='pnp_fail', n_holes=len(names))
+    R, _ = cv2.Rodrigues(rvec)
+    t = tvec.ravel()
+    proj, _ = cv2.projectPoints(obj, rvec, tvec, Km, None)
+    rms_px = float(np.sqrt(np.mean(np.sum((proj[:, 0] - img) ** 2, 1))))
+    T = np.eye(4); T[:3, :3] = R; T[:3, 3] = t
+    return dict(ok=True, T=T, R=R, t=t, rms_px=rms_px, n_holes=len(names),
+                theta_deg=float(np.degrees(np.arctan2(R[1, 0], R[0, 0]))),
+                tilt_deg=float(np.degrees(np.arccos(np.clip(-R[2, 2], -1, 1)))),
+                normal_ok=bool(R[2, 2] < 0), gate=(rms_px <= 4.0))
+
+
+def solve(net, dev, rgb, depth, cls, cad, K=None, pnp=False):
     """편의 함수: 검출부터 포즈까지. hole_classifier.classify 게이트와 독립."""
     det = hc.detect(net, dev, rgb)
     out = solve_frame(det, depth, cls, cad, K)
     out['det'] = det
+    if pnp:
+        out['pnp'] = solve_frame_pnp(det, rgb.shape, cls, cad, K)
     return out
 
 

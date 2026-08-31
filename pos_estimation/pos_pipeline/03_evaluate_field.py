@@ -30,6 +30,8 @@ ap = argparse.ArgumentParser()
 ap.add_argument('--base', default='datasets_factory_v2/all')
 ap.add_argument('--per_session', type=int, default=20)
 ap.add_argument('--overlays', type=int, default=2, help='세션당 오버레이 저장 수(첫/최악)')
+ap.add_argument('--pnp', action='store_true', help='PnP 대조군(depth 미사용) 병행 비교')
+ap.add_argument('--no_db', action='store_true')
 args = ap.parse_args()
 OUT_DIR = os.path.join(BASE, 'artifacts')
 OVL_DIR = os.path.join(OUT_DIR, 'overlays')
@@ -98,9 +100,20 @@ def main():
             depth = cv2.imread(fp.replace('rgb_', 'depth_'), cv2.IMREAD_UNCHANGED)
             if rgb is None or depth is None:
                 continue
-            f = ps.solve(net, dev, rgb, depth, cls, cad)
+            f = ps.solve(net, dev, rgb, depth, cls, cad, pnp=args.pnp)
             frames.append(f); imgs.append((fp, rgb))
         agg = ps.aggregate_poses(frames)
+        pnp_diff = None
+        if args.pnp:
+            from scipy.spatial.transform import Rotation
+            ds = [(f['pnp']['t'][2] - f['t'][2],
+                   float(np.linalg.norm(f['pnp']['t'][:2] - f['t'][:2])),
+                   float(np.degrees(Rotation.from_matrix(f['R'].T @ f['pnp']['R']).magnitude())))
+                  for f in frames if f.get('ok') and f.get('gate') and f.get('pnp', {}).get('ok')]
+            if ds:
+                a = np.array(ds)
+                pnp_diff = dict(n=len(ds), dz_med=float(np.median(a[:, 0])),
+                                dxy_med=float(np.median(a[:, 1])), dang_med=float(np.median(a[:, 2])))
         ok_idx = [i for i, f in enumerate(frames) if f.get('ok') and f.get('gate')]
         if ok_idx and args.overlays:
             K = pu.intrinsics_for(imgs[0][1].shape)
@@ -115,12 +128,15 @@ def main():
         reasons = collections.Counter(f.get('reason', 'ok') for f in frames if not (f.get('ok') and f.get('gate')))
         row = dict(cls=cls, session=key, n=len(frames), n_used=agg.get('n_used', 0),
                    agg={k: v for k, v in agg.items() if k not in ('T',)}, fail=dict(reasons),
+                   pnp_diff=pnp_diff,
                    rms_all=[round(f['rms'], 2) for f in frames if f.get('ok')])
         rows.append(row)
         if agg.get('ok'):
             s = agg['std']
+            extra = (f"  | pnp Δz {pnp_diff['dz_med']:+6.1f} Δxy {pnp_diff['dxy_med']:5.1f} "
+                     f"Δ각 {pnp_diff['dang_med']:4.2f}" if pnp_diff else '')
             print(f"{key:42s} {row['n']:3d} {row['n_used']:4d} {agg['rms_med']:7.2f} | "
-                  f"{s['x']:10.2f} {s['y']:5.2f} {s['z']:5.2f} {s['theta']:5.2f} {s['tilt']:5.2f}")
+                  f"{s['x']:10.2f} {s['y']:5.2f} {s['z']:5.2f} {s['theta']:5.2f} {s['tilt']:5.2f}{extra}")
         else:
             print(f"{key:42s} {row['n']:3d}    0       - | 실패 {dict(reasons)}")
 
@@ -145,11 +161,34 @@ def main():
                             used=sum(r['n_used'] for r in rs),
                             rms_med=float(np.median(rmss)) if rmss else None,
                             rms_max=float(max(rmss)) if rmss else None, std_med=meds)
+    if args.pnp:
+        dd = [r['pnp_diff'] for r in rows if r.get('pnp_diff')]
+        if dd:
+            print(f"\n[PnP 대조군] depth 경로 대비 (세션 med의 med): "
+                  f"Δz {np.median([d['dz_med'] for d in dd]):+.1f}mm  "
+                  f"Δxy {np.median([d['dxy_med'] for d in dd]):.1f}mm  "
+                  f"Δ각 {np.median([d['dang_med'] for d in dd]):.2f}°")
     out = dict(base=args.base, per_session=args.per_session, rms_gate=ps.RMS_GATE,
                elapsed_s=round(time.time() - t0, 1), sessions=rows, summary=summary)
     name = 'eval_field_' + args.base.strip('/').replace('/', '_') + '.json'
-    json.dump(out, open(os.path.join(OUT_DIR, name), 'w'), ensure_ascii=False, indent=1, default=float)
-    print(f"\n→ {os.path.join(OUT_DIR, name)}\n→ {OVL_DIR}/")
+    json_path = os.path.join(OUT_DIR, name)
+    json.dump(out, open(json_path, 'w'), ensure_ascii=False, indent=1, default=float)
+    print(f"\n→ {json_path}\n→ {OVL_DIR}/")
+
+    if not args.no_db:
+        from db.db_log import DBLog, dataset_name_for
+        db = DBLog()
+        mid = db.find_model(weights_path='attribute_models/hole_landmarks/model.pth',
+                            name='hole_landmarks_resnet18')
+        total = sum(r['n'] for r in rows); used = sum(r['n_used'] for r in rows)
+        db.log_evaluation(
+            model_id=mid, dataset_name=dataset_name_for(args.base), eval_type='pose_pipeline',
+            total_samples=total, correct=used, accuracy=100.0 * used / max(1, total),
+            per_class_results=dict(summary=summary, rms_gate=ps.RMS_GATE,
+                                   pnp=args.pnp, sessions=len(rows)),
+            inference_device=str(dev), report_path=os.path.relpath(json_path, DOOR))
+        db.close()
+        print('→ DB evaluation_results(pose_pipeline) 기록')
 
 
 if __name__ == '__main__':

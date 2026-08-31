@@ -43,7 +43,9 @@ def intrinsics_for(shape, calib=None):
         calib = next((c for c in KNOWN_CAMERAS.values()
                       if c['width'] == w and c['height'] == h), None)
     if calib:
-        ds = K_DEPTH[h] * float(calib['fx']) / 1065.0 if h in K_DEPTH else 1.0
+        ds = calib.get('depth_scale')                 # 합성 등 무편향 depth는 1.0 명시
+        if ds is None:
+            ds = K_DEPTH[h] * float(calib['fx']) / 1065.0 if h in K_DEPTH else 1.0
         return dict(fx=float(calib['fx']), fy=float(calib['fy']),
                     cx=float(calib['cx']), cy=float(calib['cy']),
                     k=1.0, depth_scale=ds)
@@ -51,10 +53,42 @@ def intrinsics_for(shape, calib=None):
                 k=K_DEPTH.get(h, K_DEPTH[1080]), depth_scale=1.0)
 
 
-def fit_plane(depth, pts, K):
-    """검출점 볼록껍질 내부 유효 depth로 평면 피팅.
+def _ring_z(depth, x, y, r_in=6, r_out=16, min_px=20):
+    """(x,y) 주변 링(홀 내부 제외)의 유효 depth 중앙값 (무보정 mm) — 홀을 품은 국소 면."""
+    h, w = depth.shape
+    xi, yi = int(round(x)), int(round(y))
+    x0, x1 = max(0, xi - r_out), min(w, xi + r_out + 1)
+    y0, y1 = max(0, yi - r_out), min(h, yi + r_out + 1)
+    sub = depth[y0:y1, x0:x1].astype(np.float64)
+    gy, gx = np.mgrid[y0:y1, x0:x1]
+    rr = np.hypot(gx - x, gy - y)
+    vals = sub[(rr >= r_in) & (rr <= r_out) & (sub > 0)]
+    return float(np.median(vals)) if len(vals) >= min_px else None
 
-    반환: (c, n, stats) — c/n 무보정 카메라 좌표(mm), n은 카메라 쪽(nz<0), 실패 시 None."""
+
+def _ring_seed(depth, pts, K):
+    """랜드마크 링 depth들 → 시드 평면 (c, n).
+
+    벤트 관통 배경·돌출 부품이 섞인 다봉 depth에서 '홀을 품은 면'으로 초기화."""
+    ds = K.get('depth_scale', 1.0)
+    P3 = []
+    for x, y in pts:
+        z = _ring_z(depth, x, y)
+        if z is None:
+            continue
+        z *= ds
+        P3.append([(x - K['cx']) * z / K['fx'], (y - K['cy']) * z / K['fy'], z])
+    if len(P3) < 3:
+        return None
+    P3 = np.array(P3)
+    c = P3.mean(0)
+    return c, np.linalg.svd(P3 - c, full_matrices=False)[2][2]
+
+
+def fit_plane(depth, pts, K):
+    """검출점 볼록껍질 내부 유효 depth로 평면 피팅 (링 시드 → ±15 → ±10 inlier 재피팅).
+
+    반환: (c, n, stats) — 좌표는 depth_scale 보정된 카메라 mm, n은 카메라 쪽(nz<0)."""
     P = np.array([(p[0], p[1]) for p in pts], np.float32)
     if len(P) < 3:
         return None
@@ -69,8 +103,16 @@ def fit_plane(depth, pts, K):
         rows, cols = rows[sel], cols[sel]
     z = depth[rows, cols].astype(np.float64) * K.get('depth_scale', 1.0)
     Q = np.stack([(cols - K['cx']) * z / K['fx'], (rows - K['cy']) * z / K['fy'], z], 1)
-    c = Q.mean(0)
-    n = np.linalg.svd(Q - c, full_matrices=False)[2][2]
+    seed = _ring_seed(depth, [(p[0], p[1]) for p in pts], K)
+    if seed is not None:
+        c, n = seed
+        keep = np.abs((Q - c) @ n) < 15
+        if keep.sum() > 300:
+            c = Q[keep].mean(0)
+            n = np.linalg.svd(Q[keep] - c, full_matrices=False)[2][2]
+    else:
+        c = Q.mean(0)
+        n = np.linalg.svd(Q - c, full_matrices=False)[2][2]
     keep = np.abs((Q - c) @ n) < 10
     if keep.sum() > 200:
         c = Q[keep].mean(0)
@@ -80,7 +122,7 @@ def fit_plane(depth, pts, K):
     d = (Q - c) @ n
     inl = np.abs(d) < 10
     stats = dict(inlier_rms=float(np.sqrt(np.mean(d[inl] ** 2))) if inl.any() else None,
-                 n_px=int(len(rows)), inlier_ratio=float(inl.mean()))
+                 n_px=int(len(rows)), inlier_ratio=float(inl.mean()), seeded=seed is not None)
     return c, n, stats
 
 
@@ -94,15 +136,27 @@ def backproject(p, c, n, K, offset=0.0):
     return r * (np.dot(c2, n) / denom)
 
 
-def landmarks_3d(pts_px, c, n, K, offsets=None):
-    """{이름: (x,y)px} → {이름: 3D mm(K_DEPTH 보정)}. offsets: 홀별 평면 오프셋(진짜 mm, 카메라 쪽 +)."""
+def landmarks_3d(pts_px, c, n, K, offsets=None, depth=None, gate_mm=15.0):
+    """{이름: (x,y)px} → {이름: 3D mm(스케일 보정)}.
+
+    depth 지정 시 홀별 링 국소 depth(홀을 품은 실제 면)를 우선 사용 — 전역 평면과의
+    z 차이가 gate_mm 이내일 때만. 아니면 평면+offsets(CAD z_door, 카메라 쪽 +) 폴백.
+    국소 depth가 전역 평면의 오프셋·기울기 편향(합성 검증에서 dz~11mm/3° 확인)을 제거한다."""
+    ds, k = K.get('depth_scale', 1.0), K['k']
     out = {}
     for name, p in pts_px.items():
-        off = (offsets.get(name, 0.0) if offsets else 0.0) / K['k']
+        off = (offsets.get(name, 0.0) if offsets else 0.0) / k
         q = backproject(p, c, n, K, off)
         if q is None:
             return None
-        out[name] = q * K['k']
+        if depth is not None:
+            zl = _ring_z(depth, p[0], p[1])
+            if zl is not None:
+                zl *= ds
+                if abs(zl - q[2]) < gate_mm:
+                    q = np.array([(p[0] - K['cx']) / K['fx'],
+                                  (p[1] - K['cy']) / K['fy'], 1.0]) * zl
+        out[name] = q * k
     return out
 
 
