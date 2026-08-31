@@ -24,7 +24,7 @@ from pathlib import Path
 
 from flask import (Flask, abort, flash, g, redirect, render_template_string,
                    request, send_file, url_for)
-from PIL import Image
+from PIL import Image, ImageDraw
 
 import build_dataset as bd
 
@@ -132,7 +132,7 @@ svg text { fill:var(--muted); font-size:10px; }
 </style></head><body>
 <nav>
   <span class="brand">🗄️ door_pipeline DB</span>
-  {% for ep, label in [('dashboard','대시보드'), ('sessions','세션'), ('images','이미지'), ('training','학습·평가')] %}
+  {% for ep, label in [('dashboard','대시보드'), ('sessions','세션'), ('images','이미지'), ('labels','라벨'), ('training','학습·평가')] %}
     <a class="tab {{ 'on' if active == ep }}" href="{{ url_for(ep) }}">{{ label }}</a>
   {% endfor %}
   {% if readonly %}<span class="ro">열람 전용 모드</span>{% endif %}
@@ -568,6 +568,142 @@ def images():
     return page("이미지", "images", IMAGES, rows=rows, total=total, pg=pg, pages=pages,
                 cur=type("F", (), cur), dsets=dsets, clss=clss,
                 prev_url=url_at(pg - 1), next_url=url_at(pg + 1))
+
+
+# ── 홀 랜드마크 라벨 (labels/holes/*.json) ────────────────
+
+LABELS_DIR = BASE_DIR / "labels" / "holes"
+POINT_COLORS = {"corner_hinge": (217, 90, 30), "corner_latch": (200, 40, 40),
+                "bolt_tl": (46, 94, 140), "bolt_tr": (46, 94, 140),
+                "bolt_bl": (46, 94, 140), "bolt_br": (46, 94, 140)}
+
+LABELS = """
+<h1>홀 랜드마크 라벨 <span class="muted small">{{ rows|length }}건 표시 / 전체 {{ total }}건 — 15_label_holes.py로 수동 라벨링, 랜드마크 CNN 학습 데이터</span></h1>
+<p class="small muted" style="margin:-8px 0 12px">
+  점 색: <span style="color:#D95A1E">■ corner_hinge</span> ·
+  <span style="color:#C82828">■ corner_latch</span> ·
+  <span style="color:#2E5E8C">■ bolt ×4</span>
+  — 썸네일 클릭 시 원본 크기로 라벨 확인 · 라벨링 기간 {{ first_at }} ~ {{ last_at }}
+</p>
+<form class="filters" method="get">
+  <select name="cls" onchange="this.form.submit()">
+    <option value="">클래스 전체</option>
+    {% for c in clss %}<option {{ 'selected' if c == cur_cls }}>{{ c }}</option>{% endfor %}
+  </select>
+  <select name="src" onchange="this.form.submit()">
+    <option value="">소스 전체</option>
+    {% for s in srcs %}<option {{ 'selected' if s == cur_src }}>{{ s }}</option>{% endfor %}
+  </select>
+  <a class="small" href="{{ url_for('labels') }}">필터 초기화</a>
+</form>
+<div class="tbl" style="margin-bottom:16px"><table>
+<tr><th>클래스</th><th class="n">라벨 수</th><th>첫 라벨</th><th>마지막 라벨</th></tr>
+{% for c in per_cls %}
+<tr><td>{{ c['cls'] }}</td><td class="n">{{ c['n'] }}</td>
+    <td class="muted">{{ c['first'] }}</td><td class="muted">{{ c['last'] }}</td></tr>
+{% endfor %}
+</table></div>
+<div class="grid">
+{% for r in rows %}
+  <div class="thumb"><a href="{{ url_for('label_image', stem=r['stem']) }}" target="_blank">
+    <img src="{{ url_for('label_thumb', stem=r['stem']) }}" loading="lazy" alt="{{ r['stem'] }}"></a>
+    <div class="cap">{{ r['cls'] }} · {{ r['idx'] }} <span class="muted">({{ r['src'] }})</span><br>
+      {{ r['labeled_at'] }}{% if r['hidden'] %}<br><span class="warn">비가시: {{ r['hidden'] }}</span>{% endif %}</div></div>
+{% endfor %}
+</div>
+"""
+
+
+def load_labels():
+    out = []
+    for p in sorted(LABELS_DIR.glob("*.json")):
+        try:
+            d = json.loads(p.read_text())
+        except ValueError:
+            continue
+        hidden = [k for k, v in (d.get("visible") or {}).items() if not v]
+        out.append({"stem": p.stem, "cls": d.get("cls", "?"), "src": d.get("src", "?"),
+                    "idx": d.get("idx", ""), "image": d.get("image", ""),
+                    "labeled_at": d.get("labeled_at", ""), "points": d.get("points", {}),
+                    "visible": d.get("visible", {}), "hidden": ", ".join(hidden)})
+    return out
+
+
+@app.route("/labels")
+def labels():
+    rows = load_labels()
+    total = len(rows)
+    clss = sorted({r["cls"] for r in rows})
+    srcs = sorted({r["src"] for r in rows})
+    per_cls = []
+    for c in clss:
+        ts = sorted(r["labeled_at"] for r in rows if r["cls"] == c)
+        per_cls.append({"cls": c, "n": len(ts), "first": ts[0], "last": ts[-1]})
+    times = sorted(r["labeled_at"] for r in rows if r["labeled_at"])
+    cur_cls = request.args.get("cls", "")
+    cur_src = request.args.get("src", "")
+    if cur_cls:
+        rows = [r for r in rows if r["cls"] == cur_cls]
+    if cur_src:
+        rows = [r for r in rows if r["src"] == cur_src]
+    return page("라벨", "labels", LABELS, rows=rows, total=total, clss=clss, srcs=srcs,
+                cur_cls=cur_cls, cur_src=cur_src, per_cls=per_cls,
+                first_at=times[0] if times else "—", last_at=times[-1] if times else "—")
+
+
+def _label_record(stem):
+    if not stem.replace("_", "").replace("-", "").isalnum():
+        abort(404)
+    p = LABELS_DIR / f"{stem}.json"
+    if not p.exists():
+        abort(404)
+    d = json.loads(p.read_text())
+    src_img = BASE_DIR / d.get("image", "")
+    if not src_img.exists():
+        abort(404, "라벨의 원본 이미지가 로컬에 없습니다.")
+    return d, src_img
+
+
+def _draw_label(d, src_img, max_side=None):
+    """라벨 점을 이미지 위에 그려서 PIL Image 반환. 비가시 점은 테두리만."""
+    im = Image.open(src_img).convert("RGB")
+    w0 = im.size[0]
+    if max_side and max(im.size) > max_side:
+        im.thumbnail((max_side, max_side))
+    scale = im.size[0] / w0
+    dr = ImageDraw.Draw(im)
+    r = max(4, im.size[0] // 130)
+    for name, xy in (d.get("points") or {}).items():
+        x, y = xy[0] * scale, xy[1] * scale
+        color = POINT_COLORS.get(name, (100, 100, 100))
+        vis = (d.get("visible") or {}).get(name, True)
+        if vis:
+            dr.ellipse([x - r, y - r, x + r, y + r], outline=color, width=max(2, r // 3))
+            dr.line([x - r * 2, y, x + r * 2, y], fill=color, width=1)
+            dr.line([x, y - r * 2, x, y + r * 2], fill=color, width=1)
+        else:
+            dr.ellipse([x - r, y - r, x + r, y + r], outline=(150, 150, 150), width=1)
+    return im
+
+
+@app.route("/labels/thumb/<stem>")
+def label_thumb(stem):
+    THUMB_DIR.mkdir(exist_ok=True)
+    cached = THUMB_DIR / f"label_{stem}.jpg"
+    if not cached.exists():
+        d, src_img = _label_record(stem)
+        _draw_label(d, src_img, max_side=420).save(cached, "JPEG", quality=82)
+    return send_file(cached, max_age=86400)
+
+
+@app.route("/labels/img/<stem>")
+def label_image(stem):
+    THUMB_DIR.mkdir(exist_ok=True)
+    cached = THUMB_DIR / f"label_full_{stem}.jpg"
+    if not cached.exists():
+        d, src_img = _label_record(stem)
+        _draw_label(d, src_img).save(cached, "JPEG", quality=90)
+    return send_file(cached, max_age=86400)
 
 
 # ── 학습·평가 이력 ───────────────────────────────────────

@@ -14,7 +14,7 @@
 | `ingest_local.py` | 로컬 `datasets*/` 스캔 → datasets/classes/images 등록 |
 | `ingest_nas.py` | NAS 세션 트리 스캔 → capture_sessions/images 등록 (`synced_local=FALSE`) |
 | `db_log.py` | 학습·평가 스크립트 → DB 자동 기록 헬퍼 (3단계) |
-| `webapp.py` | 열람·관리 웹 도구 — 대시보드/세션/이미지 썸네일/학습 이력 + 라벨정정·split·무효화 버튼 |
+| `webapp.py` | 열람·관리 웹 도구 — 대시보드/세션/이미지 썸네일/홀 라벨 뷰(점 오버레이)/학습 이력 + 라벨정정·split·무효화 버튼 |
 | `door_pipeline.db` | SQLite DB 본체 (git 미추적) |
 
 ## 사용
