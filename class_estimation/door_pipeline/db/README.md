@@ -73,6 +73,13 @@ pipx run sqlite-web db/door_pipeline.db     # 또는: pipx run datasette db/door
 - 2026-08-28 이전에는 `datasets.created_at/updated_at`, `models.created_at`만 UTC로 기록되어 있어
   `db/migrate_kst.py`로 +9시간 보정·재생성했다 (`PRAGMA user_version=1`, 원본은 `*.bak_utc_*`로 보존).
 
+## 스키마 버전 (PRAGMA user_version)
+
+| 버전 | 마이그레이션 | 내용 |
+|---|---|---|
+| 1 | `migrate_kst.py` (2026-08-28) | UTC→KST 시각 보정 |
+| 2 | `migrate_eval_types.py` (2026-08-31) | `eval_type`에 `pose_pipeline` 추가 — pos_pipeline/03의 자세 평가 기록이 CHECK 위반으로 조용히 유실되던 문제 수정. 기존 현장 평가 1건은 JSON에서 소급 기록 |
+
 ## 현장 데이터 활용 흐름 (2026-08-28)
 
 NAS(전량, 정본) ⊃ `datasets_factory_collect/`(미러: NAS와 같은 `날짜/클래스/s_*/` 구조, **세션당 20장 샘플만**)

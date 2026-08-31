@@ -762,6 +762,23 @@ TRAINING = """
     {% endfor %}
     </table></div>
     {% endfor %}
+    {% if rpt[e['id']]['pose'] %}
+    <div class="small" style="margin:8px 0 4px"><b>세션별 자세 추정</b>
+      <span class="muted">(리포트 파일 기준 — RMS·std 단위 mm, 각도 °)</span></div>
+    <div class="tbl" style="margin-bottom:8px"><table>
+    <tr><th>세션</th><th>클래스</th><th class="n">프레임</th><th class="n">사용</th>
+        <th class="n">RMS med</th><th class="n">θ</th><th class="n">tilt</th><th class="n">std z</th><th>집계</th></tr>
+    {% for p in rpt[e['id']]['pose'] %}
+    <tr><td class="small">{{ p['session'] }}</td><td>{{ p['cls'] }}</td>
+        <td class="n">{{ p['n'] }}</td><td class="n">{{ p['used'] }}</td>
+        <td class="n">{{ '%.2f'|format(p['rms']) if p['rms'] is not none else '—' }}</td>
+        <td class="n">{{ '%.2f'|format(p['theta']) if p['theta'] is not none else '—' }}</td>
+        <td class="n">{{ '%.2f'|format(p['tilt']) if p['tilt'] is not none else '—' }}</td>
+        <td class="n">{{ '%.2f'|format(p['stdz']) if p['stdz'] is not none else '—' }}</td>
+        <td>{% if p['ok'] %}<span class="ok">ok</span>{% else %}<span class="warn">불충분</span>{% endif %}</td></tr>
+    {% endfor %}
+    </table></div>
+    {% endif %}
     {% if rpt[e['id']]['held'] %}
     <div class="small" style="margin:8px 0 6px"><b>보류 이미지 {{ rpt[e['id']]['held']|length }}건</b>
       <span class="muted">— no_corner=모서리(힌지·래치) 홀 미검출, no_frame=볼트 4점 프레임 피팅 실패,
@@ -829,9 +846,25 @@ def _class_stats(rows):
     return out
 
 
+def _pose_rows(data):
+    """pos_pipeline/03 리포트(sessions 구조) → 세션별 자세 추정 표."""
+    rows = data.get("sessions")
+    if not (isinstance(rows, list) and rows and isinstance(rows[0], dict) and "agg" in rows[0]):
+        return []
+    out = []
+    for s in rows:
+        agg = s.get("agg") or {}
+        std = agg.get("std") or {}
+        out.append({"session": s.get("session", "?"), "cls": s.get("cls", "?"),
+                    "n": s.get("n"), "used": s.get("n_used"), "ok": agg.get("ok"),
+                    "rms": agg.get("rms_med"), "theta": agg.get("theta_deg"),
+                    "tilt": agg.get("tilt_deg"), "stdz": std.get("z")})
+    return out
+
+
 def eval_report_view(con, report_path):
-    """평가 리포트 JSON → 세트별 클래스 집계표 + 보류 이미지(DB 썸네일 매칭)."""
-    empty = {"tables": [], "held": []}
+    """평가 리포트 JSON → 세트별 클래스 집계표 + 포즈 세션표 + 보류 이미지(DB 썸네일 매칭)."""
+    empty = {"tables": [], "held": [], "pose": []}
     if not report_path or not (BASE_DIR / report_path).exists():
         return empty
     try:
@@ -867,7 +900,7 @@ def eval_report_view(con, report_path):
         out_held.append({"image": img, "gate": r.get("gate"), "cls": r.get("cls"),
                          "label": label,
                          "img_id": row["id"] if row and row["synced_local"] else None})
-    return {"tables": tables, "held": out_held}
+    return {"tables": tables, "held": out_held, "pose": _pose_rows(data)}
 
 
 def curve_svg(metrics):

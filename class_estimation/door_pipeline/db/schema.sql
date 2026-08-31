@@ -143,7 +143,8 @@ CREATE TABLE IF NOT EXISTS evaluation_results (
     model_id        INTEGER NOT NULL REFERENCES models(id),
     dataset_id      INTEGER NOT NULL REFERENCES datasets(id),
     eval_type       VARCHAR(30) NOT NULL
-                    CHECK (eval_type IN ('in_domain', 'cross_domain', 'inference_pipeline')),
+                    -- pose_pipeline 추가: migrate_eval_types.py (user_version=2, 2026-08-31)
+                    CHECK (eval_type IN ('in_domain', 'cross_domain', 'inference_pipeline', 'pose_pipeline')),
     total_samples   INTEGER NOT NULL,
     correct         INTEGER NOT NULL,
     accuracy        REAL    NOT NULL,
