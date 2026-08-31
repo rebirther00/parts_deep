@@ -102,3 +102,23 @@ python 02_train.py --model_type rgbe --no_aux --image_size 448 --dataset_dir dat
 - split은 **세션 단위**만 허용(프레임 단위 분할 금지). 클래스별 첫 확보 세션을 test로 고정해 현장 벤치마크를 유지한다.
 - `Unknown` 세션·`is_valid=0`·미동기화 이미지는 뷰에서 제외된다.
 - `datasets_field/`, `datasets_factory/`(2026-04 ZED 2i)는 레거시 — 신규 작업은 v2 뷰를 쓴다.
+
+## 다음 작업 (TODO, 2026-08-31 정리)
+
+우선순위 순. 완료 시 줄을 지우거나 취소선 처리.
+
+1. **라벨 검수** — webapp 라벨 탭에서:
+   - 미기입 점 라벨 31건 확인. 특히 6점 중 5점 미기입 2건
+     (`E30_E38_door_RH__0030`, `E30_door_LH_FRT__0050`)은 재라벨 또는 제외 결정.
+   - 힌지/래치 스왑 오라벨 `E25_door_LH_FRT__0000` 재라벨 (15_label_holes.py).
+2. **05_evaluate_tracker_gt.py에 db_log 연동** — 레이저 트래커 실측 전에.
+   03처럼 eval_type='pose_pipeline'으로 기록 (04 합성 검증은 일회성이라 생략 가능).
+3. **DB 전문가 미팅 준비** — 브리핑 문서 §11 빈칸(예산·일정·인원·보안 규정) 직접 기입,
+   문서 공유 링크 전달. 미팅 안건: webapp 정식화 vs 기성 도구, SQLite→PostgreSQL 시점,
+   스키마 리뷰 Q5 (a)~(g).
+4. **auto-split 이미지 수 가중 개선** — rgbe CNN 현장 재학습 노선이 확정되면.
+   현재 세션 개수 기준이라 클래스별 이미지 비율(70/15/15)이 왜곡됨
+   (예: E30_door_LH_FRT는 세션 1개 = 전량 test). 그 전까지는 신규 세션 split 미지정 유지가 정상.
+5. **(pos_pipeline 쪽)** 레이저 트래커 실측 실행, 미평가 2클래스(E25/E38_LH_FRT) 현장 수집 대기.
+
+메모: 08-31 수집 세션 4개(E25_RH 2·E38_LH_RR 2)는 pull·평가 완료, split은 4번 결정 전까지 미지정 유지.
