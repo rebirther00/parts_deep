@@ -608,7 +608,7 @@ LABELS = """
   <div class="thumb"><a href="{{ url_for('label_image', stem=r['stem']) }}" target="_blank">
     <img src="{{ url_for('label_thumb', stem=r['stem']) }}" loading="lazy" alt="{{ r['stem'] }}"></a>
     <div class="cap">{{ r['cls'] }} · {{ r['idx'] }} <span class="muted">({{ r['src'] }})</span><br>
-      {{ r['labeled_at'] }}{% if r['hidden'] %}<br><span class="warn">비가시: {{ r['hidden'] }}</span>{% endif %}</div></div>
+      {{ r['labeled_at'] }}{% if r['hidden'] %}<br><span class="warn">비가시: {{ r['hidden'] }}</span>{% endif %}{% if r['missing'] %}<br><span class="warn">미기입: {{ r['missing'] }}</span>{% endif %}</div></div>
 {% endfor %}
 </div>
 """
@@ -622,10 +622,12 @@ def load_labels():
         except ValueError:
             continue
         hidden = [k for k, v in (d.get("visible") or {}).items() if not v]
+        missing = [k for k, v in (d.get("points") or {}).items() if not v]
         out.append({"stem": p.stem, "cls": d.get("cls", "?"), "src": d.get("src", "?"),
                     "idx": d.get("idx", ""), "image": d.get("image", ""),
                     "labeled_at": d.get("labeled_at", ""), "points": d.get("points", {}),
-                    "visible": d.get("visible", {}), "hidden": ", ".join(hidden)})
+                    "visible": d.get("visible", {}), "hidden": ", ".join(hidden),
+                    "missing": ", ".join(missing)})
     return out
 
 
@@ -674,6 +676,8 @@ def _draw_label(d, src_img, max_side=None):
     dr = ImageDraw.Draw(im)
     r = max(4, im.size[0] // 130)
     for name, xy in (d.get("points") or {}).items():
+        if not xy:                       # 좌표 없음(null) = 안 찍은 점 — 건너뜀
+            continue
         x, y = xy[0] * scale, xy[1] * scale
         color = POINT_COLORS.get(name, (100, 100, 100))
         vis = (d.get("visible") or {}).get(name, True)
