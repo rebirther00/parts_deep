@@ -1,0 +1,30 @@
+{
+  "_설명": "레이저 트래커 GT 측정 기록 양식 (GT_TRACKER_PROTOCOL.md 7절). 좌표는 트래커 좌표계 mm. camera_session 은 door_pipeline 기준 상대 경로. pin_offset_mm 은 핀 네스트 사용 시 표면 위 SMR 중심 높이(미사용 시 0).",
+  "class": "E25_door_RH",
+  "date": "2026-09-05",
+  "pin_offset_mm": 0.0,
+  "poses": {
+    "P1": {
+      "tracker_holes_mm": {
+        "corner_hinge": [0.0, 0.0, 0.0],
+        "corner_latch": [0.0, 0.0, 0.0],
+        "bolt_tl": [0.0, 0.0, 0.0],
+        "bolt_tr": [0.0, 0.0, 0.0],
+        "bolt_bl": [0.0, 0.0, 0.0],
+        "bolt_br": [0.0, 0.0, 0.0]
+      },
+      "camera_session": "datasets_factory_collect/20260905/E25_door_RH/s_101500",
+      "drift_recheck_mm": 0.0
+    },
+    "P2": {
+      "tracker_holes_mm": {},
+      "camera_session": "",
+      "drift_recheck_mm": 0.0
+    }
+  },
+  "reference_targets": {
+    "_설명": "선택(방법 3). 트래커와 카메라 양쪽에서 잰 동일 기준점 3개 이상.",
+    "tracker_mm": {"T1": [0, 0, 0], "T2": [0, 0, 0], "T3": [0, 0, 0]},
+    "camera_mm": {"T1": [0, 0, 0], "T2": [0, 0, 0], "T3": [0, 0, 0]}
+  }
+}
