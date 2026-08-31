@@ -14,6 +14,7 @@
 | `ingest_local.py` | 로컬 `datasets*/` 스캔 → datasets/classes/images 등록 |
 | `ingest_nas.py` | NAS 세션 트리 스캔 → capture_sessions/images 등록 (`synced_local=FALSE`) |
 | `db_log.py` | 학습·평가 스크립트 → DB 자동 기록 헬퍼 (3단계) |
+| `webapp.py` | 열람·관리 웹 도구 — 대시보드/세션/이미지 썸네일/학습 이력 + 라벨정정·split·무효화 버튼 |
 | `door_pipeline.db` | SQLite DB 본체 (git 미추적) |
 
 ## 사용
@@ -27,7 +28,9 @@ python db/ingest_nas.py --remote nas:Guest/weld
 # 또는 NAS 마운트/복사본 경로로
 python db/ingest_nas.py --local-dir /mnt/nas/weld
 
-# 브라우저로 열람 (선택)
+# 브라우저로 열람·관리 (권장) — http://localhost:5050
+python db/webapp.py                # --readonly 로 열람 전용, --port 로 포트 변경
+# SQL로 직접 보고 싶을 때 (선택)
 pipx run sqlite-web db/door_pipeline.db     # 또는: pipx run datasette db/door_pipeline.db
 ```
 

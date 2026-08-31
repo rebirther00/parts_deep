@@ -68,6 +68,7 @@ class_estimation/door_pipeline/datasets_factory_collect/
 class_estimation/door_pipeline/logs/
 class_estimation/door_pipeline/db/door_pipeline.db-shm
 class_estimation/door_pipeline/db/door_pipeline.db-wal
+class_estimation/door_pipeline/db/.thumb_cache/
 class_estimation/door_pipeline/attribute_models/hole_landmarks/eval_*.jpg
 class_estimation/door_pipeline/attribute_models/hole_landmarks/field_*.jpg
 class_estimation/door_pipeline/attribute_models/hole_landmarks/*.pth
