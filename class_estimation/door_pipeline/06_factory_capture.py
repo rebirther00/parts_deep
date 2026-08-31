@@ -72,6 +72,7 @@ class FactoryCamera:
         self.latest_rgb = None
         self.latest_depth = None
         self.camera_type = "none"
+        self.calib = None            # 좌안 rectified intrinsics (포즈 추정용)
         self.ok = False
         self.last_error = ""
         self.running = False
@@ -120,10 +121,31 @@ class FactoryCamera:
                 )
                 self._img, self._dep = sl.Mat(), sl.Mat()
                 self._runtime = sl.RuntimeParameters()
-                log.info("카메라 연결: %s", self.camera_type)
+                self.calib = self._read_calib(info)
+                log.info("카메라 연결: %s intrinsics=%s", self.camera_type, self.calib)
                 return
             last_err = err
         raise RuntimeError(f"ZED open 실패: {last_err}")
+
+    @staticmethod
+    def _read_calib(info):
+        """좌안(rectified, 저장 영상과 동일 기하) intrinsics + 시리얼.
+
+        pose 추정용 메타 — 어떤 실패도 수집에 영향을 주지 않는다."""
+        try:
+            cc = getattr(info, "camera_configuration", info)
+            cam = cc.calibration_parameters.left_cam
+            res = cc.resolution
+            return {
+                "serial": int(info.serial_number),
+                "width": int(res.width), "height": int(res.height),
+                "fx": round(float(cam.fx), 3), "fy": round(float(cam.fy), 3),
+                "cx": round(float(cam.cx), 3), "cy": round(float(cam.cy), 3),
+                "rectified": True,
+            }
+        except Exception as e:                      # noqa: BLE001
+            log.warning("intrinsics 읽기 실패(수집 영향 없음): %s", e)
+            return None
 
     def _close(self):
         try:
@@ -237,6 +259,7 @@ class CaptureSession(threading.Thread):
             "camera": self.camera.camera_type,
             "capture_interval_s": CAPTURE_INTERVAL,
             "session_duration_s": SESSION_DURATION,
+            "intrinsics": getattr(self.camera, "calib", None),
             "saved_pairs": self.saved,
             "finished": final,
             "stop_reason": reason,
