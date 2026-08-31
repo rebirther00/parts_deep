@@ -1,7 +1,9 @@
 """포즈 파이프라인 공용 기하 유틸 (01 CAD 검증 · 02 솔버 공용).
 
-- intrinsics: fx=1065 근사 + K_DEPTH 스칼라 보정 — hole_classifier(현장 검증)와 동일 규약.
-  실측 캘리브레이션이 세션 메타로 제공되면 그쪽을 우선 사용(수집측 TODO).
+- intrinsics: 실측 캘리브레이션 우선(KNOWN_CAMERAS 시리얼 키 또는 세션 meta 'intrinsics';
+  06_factory_capture가 2026-08-31부터 기록) + depth_scale로 depth 절대 편향 보정.
+  실측이 없으면 fx=1065 근사 + K_DEPTH 폴백(hole_classifier 규약) — 이 경로의 절대 위치는
+  K_DEPTH배 압축이므로 상대 기하 전용.
 - fit_plane: 검출점 볼록껍질 내부 depth SVD 평면(10mm inlier 재피팅), 법선은 카메라 쪽(-Z).
 - backproject: 픽셀 레이 × (법선 방향 offset 적용) 평면 교점. 홀별 리세스 보정용.
 - landmarks_3d: 랜드마크 픽셀 → 카메라 좌표 3D(mm, K_DEPTH 보정 포함).
@@ -22,10 +24,31 @@ if DOOR not in sys.path:
 from hole_classifier import K_DEPTH  # 해상도(세로)별 근사 intrinsics 편향 보정
 
 
-def intrinsics_for(shape):
+# 실측 캘리브레이션 (SDK rectified, 세션 meta.json 'intrinsics'와 동일 형식).
+# depth_scale 유도: K_DEPTH는 '근사 fx=1065 역투영 × K_DEPTH = CAD 실거리'로 현장 캘리브레이션
+# 되었으므로 z_true = z_meas × K_DEPTH[h]·fx_real/1065. 좌우(상대) 거리는 legacy 경로와 동일,
+# 절대 위치 t만 물리 스케일로 복원된다 (legacy 경로의 t는 K_DEPTH배 압축 — 상대 기하 전용).
+KNOWN_CAMERAS = {
+    54910212: dict(width=1920, height=1200, fx=1269.746, fy=1269.746,
+                   cx=961.669, cy=598.594,
+                   note='현장 ZED X Mini, SDK rectified, 2026-08-31 확보'),
+}
+
+
+def intrinsics_for(shape, calib=None):
+    """K dict 구성. calib(세션 meta 'intrinsics' dict) 지정 시 그 값을, 없으면 해상도가
+    KNOWN_CAMERAS와 일치할 때 실측 값을 사용(k=1, depth_scale 보정). 그 외 근사 폴백."""
     h, w = shape[:2]
+    if calib is None:
+        calib = next((c for c in KNOWN_CAMERAS.values()
+                      if c['width'] == w and c['height'] == h), None)
+    if calib:
+        ds = K_DEPTH[h] * float(calib['fx']) / 1065.0 if h in K_DEPTH else 1.0
+        return dict(fx=float(calib['fx']), fy=float(calib['fy']),
+                    cx=float(calib['cx']), cy=float(calib['cy']),
+                    k=1.0, depth_scale=ds)
     return dict(fx=1065.0, fy=1065.0, cx=w / 2.0, cy=h / 2.0,
-                k=K_DEPTH.get(h, K_DEPTH[1080]))
+                k=K_DEPTH.get(h, K_DEPTH[1080]), depth_scale=1.0)
 
 
 def fit_plane(depth, pts, K):
@@ -44,7 +67,7 @@ def fit_plane(depth, pts, K):
     if len(rows) > 40000:
         sel = np.random.default_rng(0).choice(len(rows), 40000, replace=False)
         rows, cols = rows[sel], cols[sel]
-    z = depth[rows, cols].astype(np.float64)
+    z = depth[rows, cols].astype(np.float64) * K.get('depth_scale', 1.0)
     Q = np.stack([(cols - K['cx']) * z / K['fx'], (rows - K['cy']) * z / K['fy'], z], 1)
     c = Q.mean(0)
     n = np.linalg.svd(Q - c, full_matrices=False)[2][2]
