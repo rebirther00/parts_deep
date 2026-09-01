@@ -16,13 +16,15 @@
 """
 import argparse
 import ast
+import hmac
 import json
+import os
 import sqlite3
 import statistics
 import time
 from pathlib import Path
 
-from flask import (Flask, abort, flash, g, redirect, render_template_string,
+from flask import (Flask, Response, abort, flash, g, redirect, render_template_string,
                    request, send_file, url_for)
 from PIL import Image, ImageDraw
 
@@ -1036,12 +1038,39 @@ def main():
     ap.add_argument("--port", type=int, default=5050)
     ap.add_argument("--host", default="0.0.0.0")
     ap.add_argument("--readonly", action="store_true", help="열람 전용 (수정 버튼 비활성)")
+    ap.add_argument("--auth", default=os.environ.get("WEBAPP_AUTH", ""),
+                    help="기본 인증 'id:pw' (외부 공개 시 필수, 미지정=인증 없음). env WEBAPP_AUTH 로도 지정 가능")
     a = ap.parse_args()
     app.config["DB_PATH"] = a.db
     app.config["READONLY"] = a.readonly
+    if a.auth:
+        auth_user, _, auth_pw = a.auth.partition(":")
+        if not auth_pw:
+            ap.error("--auth 형식은 'id:pw'")
+
+        @app.before_request
+        def _basic_auth():
+            c = request.authorization
+            if not (c and c.type == "basic"
+                    and hmac.compare_digest(c.username or "", auth_user)
+                    and hmac.compare_digest(c.password or "", auth_pw)):
+                return Response("인증이 필요합니다", 401,
+                                {"WWW-Authenticate": 'Basic realm="door_pipeline"'})
     print(f"door_pipeline DB 웹 도구: http://localhost:{a.port}  (DB: {a.db}"
-          f"{', 열람 전용' if a.readonly else ''})")
-    app.run(host=a.host, port=a.port, threaded=True)
+          f"{', 열람 전용' if a.readonly else ''}{', 기본 인증' if a.auth else ''})")
+    # funnel(HTTPS 프록시) 뒤에서 리다이렉트가 http 로 생성되지 않게 X-Forwarded-Proto 신뢰
+    # (개발 서버 폴백용 — waitress 경로에서는 trusted_proxy 설정이 같은 역할)
+    from werkzeug.middleware.proxy_fix import ProxyFix
+    app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_for=1)
+    try:
+        # 프록시(tailscale funnel) 뒤에서 Flask 개발 서버는 간헐 연결 리셋 — 가능하면 운영용 서버 사용
+        from waitress import serve
+        serve(app, host=a.host, port=a.port, threads=8,
+              trusted_proxy="127.0.0.1", trusted_proxy_count=1,
+              trusted_proxy_headers={"x-forwarded-for", "x-forwarded-proto",
+                                     "x-forwarded-host", "x-forwarded-port"})
+    except ImportError:
+        app.run(host=a.host, port=a.port, threaded=True)
 
 
 if __name__ == "__main__":

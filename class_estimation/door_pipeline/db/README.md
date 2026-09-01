@@ -29,10 +29,12 @@ python db/ingest_nas.py --remote nas:Guest/weld
 python db/ingest_nas.py --local-dir /mnt/nas/weld
 
 # 브라우저로 열람·관리 (권장) — http://localhost:5050
-python db/webapp.py                # --readonly 로 열람 전용, --port 로 포트 변경
+python db/webapp.py                # --readonly 로 열람 전용, --port 로 포트 변경, --auth id:pw 로 기본 인증
 # SQL로 직접 보고 싶을 때 (선택)
 pipx run sqlite-web db/door_pipeline.db     # 또는: pipx run datasette db/door_pipeline.db
 ```
+
+외부 사용자(인터넷) 공개 절차는 `../DOC_external_access.md` 참조 (tailscale funnel + 인증·읽기 전용).
 
 ## 주의
 
