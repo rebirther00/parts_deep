@@ -5,7 +5,7 @@
   python db/webapp.py --port 5051 --db 다른경로.db
 
 화면:
-  /          대시보드 — 규모 요약, 데이터셋 현황, 현장 수집 클래스×split, 최근 세션·평가
+  /          대시보드 — 규모 요약, 데이터셋 현황, 현장 수집 클래스별 세션·수집량, 최근 세션·평가
   /sessions  세션 목록 — build_dataset.py status 와 같은 내용을 표로
   /sessions/<id>  세션 상세 — 메타·이력(notes)·썸네일 + 라벨정정/split/무효화 버튼
   /images    이미지 브라우저 — 데이터셋·클래스·split 필터 + 썸네일
@@ -176,14 +176,21 @@ DASH = """
 {% endfor %}
 </table></div>
 
-<h2>현장 수집(door_factory_collect) — 클래스 × split <span class="muted small">로컬·유효·라벨확정 기준 (학습에 실제로 쓰이는 수)</span></h2>
+<h2>현장 수집(door_factory_collect) — 클래스별 수집 현황 <span class="muted small">쌍 = NAS 수집량(메타 기준), 로컬 = 유효·동기화(평가에 가용)</span></h2>
 <div class="tbl"><table>
-<tr><th>클래스</th><th class="n">train</th><th class="n">val</th><th class="n">test</th><th class="n">미지정</th><th class="n">계</th></tr>
-{% for cls, row in matrix.items() %}
-<tr><td>{{ cls }}</td>
-  {% for k in ['train','val','test',None] %}<td class="n">{{ row.get(k, 0) or '·' }}</td>{% endfor %}
-  <td class="n"><b>{{ row.values()|sum }}</b></td></tr>
+<tr><th>클래스</th><th class="n">세션</th><th class="n">수집 쌍</th><th class="n">로컬 보유</th><th>최근 수집</th></tr>
+{% for r in field_rows %}
+<tr><td>{{ r.cls }}
+  {%- if r.pairs == 0 %} <span class="warn">미수집</span>
+  {%- elif r.cls == 'Unknown' %} <span class="warn">라벨 미정</span>{% endif %}</td>
+  <td class="n">{{ r.sessions or '·' }}</td>
+  <td class="n">{{ '{:,}'.format(r.pairs) if r.pairs else '·' }}</td>
+  <td class="n">{{ r.local or '·' }}</td>
+  <td class="muted">{{ r.latest or '—' }}</td></tr>
 {% endfor %}
+<tr><td><b>계</b></td><td class="n"><b>{{ field_total.sessions }}</b></td>
+  <td class="n"><b>{{ '{:,}'.format(field_total.pairs) }}</b></td>
+  <td class="n"><b>{{ '{:,}'.format(field_total.local) }}</b></td><td></td></tr>
 </table></div>
 
 <h2>최근 세션</h2>
@@ -231,13 +238,32 @@ def dashboard():
                   (SELECT COUNT(*) FROM images i JOIN classes c ON c.id=i.class_id
                     WHERE c.dataset_id=d.id AND i.synced_local) n_local
            FROM datasets d ORDER BY d.id""").fetchall()
-    matrix = {}
-    for r in con.execute(
-            """SELECT c.name cls, i.split, COUNT(*) n FROM images i JOIN classes c ON c.id=i.class_id
-               JOIN datasets d ON d.id=c.dataset_id
-               WHERE d.name=? AND i.synced_local AND i.is_valid AND c.name!='Unknown'
-               GROUP BY 1,2 ORDER BY 1""", (bd.DATASET_NAME,)):
-        matrix.setdefault(r["cls"], {})[r["split"]] = r["n"]
+    collected = {r["cls"]: r for r in con.execute(
+        """SELECT c.name cls, COUNT(DISTINCT i.session_id) sessions, COUNT(*) pairs,
+                  SUM(i.synced_local AND i.is_valid) local, MAX(s.started_at) latest
+           FROM images i JOIN classes c ON c.id=i.class_id
+           JOIN datasets d ON d.id=c.dataset_id
+           LEFT JOIN capture_sessions s ON s.id=i.session_id
+           WHERE d.name=? GROUP BY c.name""", (bd.DATASET_NAME,))}
+    # 실험실 8종을 기준 목록으로 삼아 미수집 클래스도 0으로 노출 (Unknown은 맨 뒤)
+    all_cls = [r[0] for r in con.execute(
+        """SELECT c.name FROM classes c JOIN datasets d ON d.id=c.dataset_id
+           WHERE d.name='door_real' AND c.name!='Unknown' ORDER BY c.name""")]
+    field_rows, field_total = [], {"sessions": 0, "pairs": 0, "local": 0}
+    for cls in all_cls + sorted(c for c in collected if c not in all_cls):
+        r = collected.get(cls)
+        row = {"cls": cls,
+               "sessions": r["sessions"] if r else 0,
+               "pairs": r["pairs"] if r else 0,
+               "local": (r["local"] or 0) if r else 0,
+               "latest": (r["latest"] or "")[:16] if r else ""}
+        field_rows.append(row)
+        for k in field_total:
+            field_total[k] += row[k]
+    # 라벨 정정으로 한 세션이 두 클래스에 걸치면 클래스별 합이 과대 — 계는 고유 세션 수로
+    field_total["sessions"] = con.execute(
+        """SELECT COUNT(DISTINCT i.session_id) FROM images i JOIN classes c ON c.id=i.class_id
+           JOIN datasets d ON d.id=c.dataset_id WHERE d.name=?""", (bd.DATASET_NAME,)).fetchone()[0]
     recent_sessions = con.execute(
         """SELECT s.id, s.session_dir, s.class_name, s.started_at,
                   (SELECT c.name FROM images i JOIN classes c ON c.id=i.class_id
@@ -250,7 +276,8 @@ def dashboard():
            JOIN models m ON m.id=e.model_id JOIN datasets d ON d.id=e.dataset_id
            ORDER BY e.evaluated_at DESC LIMIT 6""").fetchall()
     return page("대시보드", "dashboard", DASH, c=type("C", (), c), datasets=datasets,
-                matrix=matrix, recent_sessions=recent_sessions, recent_evals=recent_evals)
+                field_rows=field_rows, field_total=field_total,
+                recent_sessions=recent_sessions, recent_evals=recent_evals)
 
 
 # ── 세션 목록·상세 ───────────────────────────────────────
