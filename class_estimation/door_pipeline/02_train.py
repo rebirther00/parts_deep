@@ -2,7 +2,7 @@
 논문용 통합 학습 스크립트
 - 6종 모델(rgbd, texture_aug, edge, rgbe, rgbe_texture_aug, + no_aux 변형) 지원
 - Train/Val/Test 70/15/15 stratified split
-- Val accuracy 기반 early stopping (data leakage 제거)
+- Val accuracy 기반 early stopping (data leakage 제거); --select val_loss 로 val 손실 기준 선택 가능(2026-09-07)
 - Epoch별 메트릭 JSON 로깅
 """
 import torch
@@ -181,6 +181,9 @@ parser.add_argument('--seed', type=int, default=None,
 parser.add_argument('--image_size', type=int, default=448)
 parser.add_argument('--epochs', type=int, default=60)
 parser.add_argument('--patience', type=int, default=10)
+parser.add_argument('--select', choices=['val_acc', 'val_loss'], default='val_acc',
+                    help='체크포인트·조기종료 기준. val_loss: val 손실 최소 에폭 저장(세션 수가 적어 val 정확도가 '
+                         '에폭마다 크게 출렁일 때 안정적). run 이름에 _vloss 접미')
 parser.add_argument('--no_aux', action='store_true',
                     help='Aux MLP 제거 ablation 실험')
 parser.add_argument('-cpu', '--cpu', action='store_true')
@@ -301,6 +304,8 @@ def main():
     run_name = f"{args.model_type}{suffix}_{args.image_size}_seed{args.seed}"
     if args.dataset_dir != 'datasets':   # 실험실 기본셋이 아니면 run 이름에 데이터셋 표기 (artifacts 덮어쓰기 방지)
         run_name += "_" + os.path.basename(args.dataset_dir.rstrip('/'))
+    if args.select == 'val_loss':
+        run_name += "_vloss"
     run_dir = os.path.join(PROJECT_DIR, "artifacts", run_name)
     os.makedirs(run_dir, exist_ok=True)
 
@@ -481,7 +486,8 @@ def main():
             db.log_epoch(db_sess, epoch + 1, round(train_loss, 6), round(val_loss, 6), round(val_acc, 4),
                          epoch_data["lr"], round(time.time() - start_time, 1))
 
-            improved = val_acc > best_val_acc
+            improved = (val_acc > best_val_acc) if args.select == 'val_acc' else \
+                       (best_val_loss is None or val_loss < best_val_loss)
             if improved:
                 best_val_acc = val_acc
                 best_val_loss = val_loss
@@ -496,7 +502,7 @@ def main():
                 print(f"  Epoch {epoch+1:3d} | "
                       f"Train {train_acc:6.2f}% L={train_loss:.4f} | "
                       f"Val {val_acc:6.2f}% L={val_loss:.4f} | "
-                      f"Best {best_val_acc:.2f}% "
+                      f"Best {best_val_acc:.2f}%{' (loss ' + format(best_val_loss, '.4f') + ')' if args.select == 'val_loss' else ''} "
                       f"ES={patience_counter}/{args.patience} {mark}")
 
             if torch.cuda.is_available() and (epoch + 1) % 10 == 0:
