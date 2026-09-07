@@ -185,3 +185,6 @@ CREATE INDEX IF NOT EXISTS idx_eval_type        ON evaluation_results(eval_type)
 CREATE INDEX IF NOT EXISTS idx_metrics_session  ON training_metrics(session_id);
 CREATE INDEX IF NOT EXISTS idx_sessions_dataset ON capture_sessions(dataset_id);
 CREATE INDEX IF NOT EXISTS idx_sessions_class   ON capture_sessions(class_name);
+
+-- 2026-09-08: 같은 세션·파일의 이미지 행 중복 방지 (relabel 후 --refresh 재삽입 사고 재발 방지)
+CREATE UNIQUE INDEX IF NOT EXISTS ux_images_session_file ON images(session_id, rgb_filename);

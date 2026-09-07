@@ -41,6 +41,9 @@ pipx run sqlite-web db/door_pipeline.db     # 또는: pipx run datasette db/door
 - 라벨 정정은 파일을 옮기지 말고 DB에서: `capture_sessions.class_name`은 현장 입력
   원본이고, 정정 이력은 `classes`/`images` 재배정 + `notes`에 남긴다.
   (예: 대차 세션 #12~66 → E30_E38_door_RH 정정 사례)
+- **`ingest_nas.py --refresh`는 정정 라벨을 유지한다**(2026-09-08 수정). 그 전 버전은 폴더명 클래스로 이미지 행을
+  재삽입해 relabel 세션에 중복 행(362건)이 생겼고, 뷰·평가에 옛 라벨이 섞였다. 재발 방지로 `images(session_id, rgb_filename)`
+  UNIQUE 인덱스 추가(`schema.sql`, 기존 DB에는 직접 적용). 사고 전 백업: `door_pipeline.db.bak_dup_20260908`.
 - `door_aug`/`door_aug2`는 강건성 평가 전용 — 학습에 사용 금지 (description에 명시).
 ## 학습·평가 자동 기록 (3단계, 2026-08-25)
 

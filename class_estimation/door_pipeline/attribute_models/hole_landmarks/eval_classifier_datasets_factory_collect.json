@@ -7267,11 +7267,11 @@
    {
     "image": "datasets_factory_collect/20260831/E38_door_LH_FRT/s_183313/rgb_0117.png",
     "cls": "E38_door_LH_FRT",
-    "pred": "E25_door_LH_FRT",
+    "pred": null,
     "D_mm": 34.8233830944318,
-    "gate": "ok",
+    "gate": "D_range",
     "D_src": "depth",
-    "margin_mm": 41.0
+    "margin_mm": null
    },
    {
     "image": "datasets_factory_collect/20260831/E38_door_LH_FRT/s_183313/rgb_0125.png",
@@ -9823,542 +9823,542 @@
    {
     "image": "datasets_factory_collect/20260903/E25_door_LH_FRT/s_124446/rgb_0000.png",
     "cls": "E25_door_LH_FRT",
-    "pred": null,
+    "pred": "E23_door_LH_FRT",
     "D_mm": 460.3121053188788,
-    "gate": "D_range",
+    "gate": "ok",
     "D_src": "depth",
-    "margin_mm": null
+    "margin_mm": 259.37578936224236
    },
    {
     "image": "datasets_factory_collect/20260903/E25_door_LH_FRT/s_124446/rgb_0003.png",
     "cls": "E25_door_LH_FRT",
-    "pred": null,
+    "pred": "E23_door_LH_FRT",
     "D_mm": 461.171741636684,
-    "gate": "D_range",
+    "gate": "ok",
     "D_src": "depth",
-    "margin_mm": null
+    "margin_mm": 257.65651672663205
    },
    {
     "image": "datasets_factory_collect/20260903/E25_door_LH_FRT/s_124446/rgb_0006.png",
     "cls": "E25_door_LH_FRT",
-    "pred": null,
+    "pred": "E23_door_LH_FRT",
     "D_mm": 462.50459097169465,
-    "gate": "D_range",
+    "gate": "ok",
     "D_src": "depth",
-    "margin_mm": null
+    "margin_mm": 254.9908180566107
    },
    {
     "image": "datasets_factory_collect/20260903/E25_door_LH_FRT/s_124446/rgb_0009.png",
     "cls": "E25_door_LH_FRT",
-    "pred": null,
+    "pred": "E23_door_LH_FRT",
     "D_mm": 462.5075227505359,
-    "gate": "D_range",
+    "gate": "ok",
     "D_src": "depth",
-    "margin_mm": null
+    "margin_mm": 254.98495449892823
    },
    {
     "image": "datasets_factory_collect/20260903/E25_door_LH_FRT/s_124446/rgb_0013.png",
     "cls": "E25_door_LH_FRT",
-    "pred": null,
+    "pred": "E23_door_LH_FRT",
     "D_mm": 462.96244749278577,
-    "gate": "D_range",
+    "gate": "ok",
     "D_src": "depth",
-    "margin_mm": null
+    "margin_mm": 254.07510501442846
    },
    {
     "image": "datasets_factory_collect/20260903/E25_door_LH_FRT/s_124446/rgb_0016.png",
     "cls": "E25_door_LH_FRT",
-    "pred": null,
+    "pred": "E23_door_LH_FRT",
     "D_mm": 463.0816654656705,
-    "gate": "D_range",
+    "gate": "ok",
     "D_src": "depth",
-    "margin_mm": null
+    "margin_mm": 253.83666906865903
    },
    {
     "image": "datasets_factory_collect/20260903/E25_door_LH_FRT/s_124446/rgb_0019.png",
     "cls": "E25_door_LH_FRT",
-    "pred": null,
+    "pred": "E23_door_LH_FRT",
     "D_mm": 462.79971400907885,
-    "gate": "D_range",
+    "gate": "ok",
     "D_src": "depth",
-    "margin_mm": null
+    "margin_mm": 254.4005719818423
    },
    {
     "image": "datasets_factory_collect/20260903/E25_door_LH_FRT/s_124446/rgb_0022.png",
     "cls": "E25_door_LH_FRT",
-    "pred": null,
+    "pred": "E23_door_LH_FRT",
     "D_mm": 461.92301698794336,
-    "gate": "D_range",
+    "gate": "ok",
     "D_src": "depth",
-    "margin_mm": null
+    "margin_mm": 256.1539660241133
    },
    {
     "image": "datasets_factory_collect/20260903/E25_door_LH_FRT/s_124446/rgb_0025.png",
     "cls": "E25_door_LH_FRT",
-    "pred": null,
+    "pred": "E23_door_LH_FRT",
     "D_mm": 461.3935534761996,
-    "gate": "D_range",
+    "gate": "ok",
     "D_src": "depth",
-    "margin_mm": null
+    "margin_mm": 257.2128930476008
    },
    {
     "image": "datasets_factory_collect/20260903/E25_door_LH_FRT/s_124446/rgb_0028.png",
     "cls": "E25_door_LH_FRT",
-    "pred": null,
+    "pred": "E23_door_LH_FRT",
     "D_mm": 460.21393606322476,
-    "gate": "D_range",
+    "gate": "ok",
     "D_src": "depth",
-    "margin_mm": null
+    "margin_mm": 259.57212787355047
    },
    {
     "image": "datasets_factory_collect/20260903/E25_door_LH_FRT/s_124446/rgb_0032.png",
     "cls": "E25_door_LH_FRT",
-    "pred": null,
+    "pred": "E23_door_LH_FRT",
     "D_mm": 461.007001350068,
-    "gate": "D_range",
+    "gate": "ok",
     "D_src": "depth",
-    "margin_mm": null
+    "margin_mm": 257.98599729986404
    },
    {
     "image": "datasets_factory_collect/20260903/E25_door_LH_FRT/s_124446/rgb_0035.png",
     "cls": "E25_door_LH_FRT",
-    "pred": null,
+    "pred": "E23_door_LH_FRT",
     "D_mm": 461.9092659776075,
-    "gate": "D_range",
+    "gate": "ok",
     "D_src": "depth",
-    "margin_mm": null
+    "margin_mm": 256.181468044785
    },
    {
     "image": "datasets_factory_collect/20260903/E25_door_LH_FRT/s_124446/rgb_0038.png",
     "cls": "E25_door_LH_FRT",
-    "pred": null,
+    "pred": "E23_door_LH_FRT",
     "D_mm": 462.3612217537066,
-    "gate": "D_range",
+    "gate": "ok",
     "D_src": "depth",
-    "margin_mm": null
+    "margin_mm": 255.27755649258677
    },
    {
     "image": "datasets_factory_collect/20260903/E25_door_LH_FRT/s_124446/rgb_0041.png",
     "cls": "E25_door_LH_FRT",
-    "pred": null,
+    "pred": "E23_door_LH_FRT",
     "D_mm": 462.4716101309954,
-    "gate": "D_range",
+    "gate": "ok",
     "D_src": "depth",
-    "margin_mm": null
+    "margin_mm": 255.05677973800925
    },
    {
     "image": "datasets_factory_collect/20260903/E25_door_LH_FRT/s_124446/rgb_0044.png",
     "cls": "E25_door_LH_FRT",
-    "pred": null,
+    "pred": "E23_door_LH_FRT",
     "D_mm": 461.44534809363614,
-    "gate": "D_range",
+    "gate": "ok",
     "D_src": "depth",
-    "margin_mm": null
+    "margin_mm": 257.1093038127277
    },
    {
     "image": "datasets_factory_collect/20260903/E25_door_LH_FRT/s_124446/rgb_0047.png",
     "cls": "E25_door_LH_FRT",
-    "pred": null,
+    "pred": "E23_door_LH_FRT",
     "D_mm": 460.44693418308606,
-    "gate": "D_range",
+    "gate": "ok",
     "D_src": "depth",
-    "margin_mm": null
+    "margin_mm": 259.1061316338279
    },
    {
     "image": "datasets_factory_collect/20260903/E25_door_LH_FRT/s_124446/rgb_0051.png",
     "cls": "E25_door_LH_FRT",
-    "pred": null,
+    "pred": "E23_door_LH_FRT",
     "D_mm": 460.3091603425299,
-    "gate": "D_range",
+    "gate": "ok",
     "D_src": "depth",
-    "margin_mm": null
+    "margin_mm": 259.38167931494024
    },
    {
     "image": "datasets_factory_collect/20260903/E25_door_LH_FRT/s_124446/rgb_0054.png",
     "cls": "E25_door_LH_FRT",
-    "pred": null,
+    "pred": "E23_door_LH_FRT",
     "D_mm": 462.20343213465725,
-    "gate": "D_range",
+    "gate": "ok",
     "D_src": "depth",
-    "margin_mm": null
+    "margin_mm": 255.5931357306855
    },
    {
     "image": "datasets_factory_collect/20260903/E25_door_LH_FRT/s_124446/rgb_0057.png",
     "cls": "E25_door_LH_FRT",
-    "pred": null,
+    "pred": "E23_door_LH_FRT",
     "D_mm": 462.475335996943,
-    "gate": "D_range",
+    "gate": "ok",
     "D_src": "depth",
-    "margin_mm": null
+    "margin_mm": 255.04932800611402
    },
    {
     "image": "datasets_factory_collect/20260903/E25_door_LH_FRT/s_124446/rgb_0060.png",
     "cls": "E25_door_LH_FRT",
-    "pred": null,
+    "pred": "E23_door_LH_FRT",
     "D_mm": 461.75670582904695,
-    "gate": "D_range",
+    "gate": "ok",
     "D_src": "depth",
-    "margin_mm": null
+    "margin_mm": 256.4865883419061
    },
    {
     "image": "datasets_factory_collect/20260903/E25_door_LH_FRT/s_132914/rgb_0000.png",
     "cls": "E25_door_LH_FRT",
-    "pred": null,
+    "pred": "E23_door_LH_FRT",
     "D_mm": 456.578619814645,
-    "gate": "D_range",
+    "gate": "ok",
     "D_src": "depth",
-    "margin_mm": null
+    "margin_mm": 266.84276037071004
    },
    {
     "image": "datasets_factory_collect/20260903/E25_door_LH_FRT/s_132914/rgb_0004.png",
     "cls": "E25_door_LH_FRT",
-    "pred": null,
+    "pred": "E23_door_LH_FRT",
     "D_mm": 457.60208888118336,
-    "gate": "D_range",
+    "gate": "ok",
     "D_src": "depth",
-    "margin_mm": null
+    "margin_mm": 264.7958222376333
    },
    {
     "image": "datasets_factory_collect/20260903/E25_door_LH_FRT/s_132914/rgb_0007.png",
     "cls": "E25_door_LH_FRT",
-    "pred": null,
+    "pred": "E23_door_LH_FRT",
     "D_mm": 456.90796552338276,
-    "gate": "D_range",
+    "gate": "ok",
     "D_src": "depth",
-    "margin_mm": null
+    "margin_mm": 266.1840689532345
    },
    {
     "image": "datasets_factory_collect/20260903/E25_door_LH_FRT/s_132914/rgb_0011.png",
     "cls": "E25_door_LH_FRT",
-    "pred": null,
+    "pred": "E23_door_LH_FRT",
     "D_mm": 457.80855029351915,
-    "gate": "D_range",
+    "gate": "ok",
     "D_src": "depth",
-    "margin_mm": null
+    "margin_mm": 264.3828994129617
    },
    {
     "image": "datasets_factory_collect/20260903/E25_door_LH_FRT/s_132914/rgb_0015.png",
     "cls": "E25_door_LH_FRT",
-    "pred": null,
+    "pred": "E23_door_LH_FRT",
     "D_mm": 457.05616059564323,
-    "gate": "D_range",
+    "gate": "ok",
     "D_src": "depth",
-    "margin_mm": null
+    "margin_mm": 265.88767880871353
    },
    {
     "image": "datasets_factory_collect/20260903/E25_door_LH_FRT/s_132914/rgb_0019.png",
     "cls": "E25_door_LH_FRT",
-    "pred": null,
+    "pred": "E23_door_LH_FRT",
     "D_mm": 456.6704943084767,
-    "gate": "D_range",
+    "gate": "ok",
     "D_src": "depth",
-    "margin_mm": null
+    "margin_mm": 266.6590113830466
    },
    {
     "image": "datasets_factory_collect/20260903/E25_door_LH_FRT/s_132914/rgb_0022.png",
     "cls": "E25_door_LH_FRT",
-    "pred": null,
+    "pred": "E23_door_LH_FRT",
     "D_mm": 456.39203900048835,
-    "gate": "D_range",
+    "gate": "ok",
     "D_src": "depth",
-    "margin_mm": null
+    "margin_mm": 267.2159219990233
    },
    {
     "image": "datasets_factory_collect/20260903/E25_door_LH_FRT/s_132914/rgb_0026.png",
     "cls": "E25_door_LH_FRT",
-    "pred": null,
+    "pred": "E23_door_LH_FRT",
     "D_mm": 456.7136498518825,
-    "gate": "D_range",
+    "gate": "ok",
     "D_src": "depth",
-    "margin_mm": null
+    "margin_mm": 266.572700296235
    },
    {
     "image": "datasets_factory_collect/20260903/E25_door_LH_FRT/s_132914/rgb_0030.png",
     "cls": "E25_door_LH_FRT",
-    "pred": null,
+    "pred": "E23_door_LH_FRT",
     "D_mm": 456.30130786891465,
-    "gate": "D_range",
+    "gate": "ok",
     "D_src": "depth",
-    "margin_mm": null
+    "margin_mm": 267.3973842621707
    },
    {
     "image": "datasets_factory_collect/20260903/E25_door_LH_FRT/s_132914/rgb_0034.png",
     "cls": "E25_door_LH_FRT",
-    "pred": null,
+    "pred": "E23_door_LH_FRT",
     "D_mm": 457.0070125341139,
-    "gate": "D_range",
+    "gate": "ok",
     "D_src": "depth",
-    "margin_mm": null
+    "margin_mm": 265.98597493177215
    },
    {
     "image": "datasets_factory_collect/20260903/E25_door_LH_FRT/s_132914/rgb_0037.png",
     "cls": "E25_door_LH_FRT",
-    "pred": null,
+    "pred": "E23_door_LH_FRT",
     "D_mm": 457.2624724758358,
-    "gate": "D_range",
+    "gate": "ok",
     "D_src": "depth",
-    "margin_mm": null
+    "margin_mm": 265.4750550483284
    },
    {
     "image": "datasets_factory_collect/20260903/E25_door_LH_FRT/s_132914/rgb_0041.png",
     "cls": "E25_door_LH_FRT",
-    "pred": null,
+    "pred": "E23_door_LH_FRT",
     "D_mm": 456.03114914950334,
-    "gate": "D_range",
+    "gate": "ok",
     "D_src": "depth",
-    "margin_mm": null
+    "margin_mm": 267.93770170099333
    },
    {
     "image": "datasets_factory_collect/20260903/E25_door_LH_FRT/s_132914/rgb_0045.png",
     "cls": "E25_door_LH_FRT",
-    "pred": null,
+    "pred": "E23_door_LH_FRT",
     "D_mm": 456.82990781169,
-    "gate": "D_range",
+    "gate": "ok",
     "D_src": "depth",
-    "margin_mm": null
+    "margin_mm": 266.34018437661996
    },
    {
     "image": "datasets_factory_collect/20260903/E25_door_LH_FRT/s_132914/rgb_0049.png",
     "cls": "E25_door_LH_FRT",
-    "pred": null,
+    "pred": "E23_door_LH_FRT",
     "D_mm": 457.5164236918629,
-    "gate": "D_range",
+    "gate": "ok",
     "D_src": "depth",
-    "margin_mm": null
+    "margin_mm": 264.96715261627423
    },
    {
     "image": "datasets_factory_collect/20260903/E25_door_LH_FRT/s_132914/rgb_0052.png",
     "cls": "E25_door_LH_FRT",
-    "pred": null,
+    "pred": "E23_door_LH_FRT",
     "D_mm": 457.05986219871363,
-    "gate": "D_range",
+    "gate": "ok",
     "D_src": "depth",
-    "margin_mm": null
+    "margin_mm": 265.88027560257274
    },
    {
     "image": "datasets_factory_collect/20260903/E25_door_LH_FRT/s_132914/rgb_0056.png",
     "cls": "E25_door_LH_FRT",
-    "pred": null,
+    "pred": "E23_door_LH_FRT",
     "D_mm": 455.95562065501326,
-    "gate": "D_range",
+    "gate": "ok",
     "D_src": "depth",
-    "margin_mm": null
+    "margin_mm": 268.0
    },
    {
     "image": "datasets_factory_collect/20260903/E25_door_LH_FRT/s_132914/rgb_0060.png",
     "cls": "E25_door_LH_FRT",
-    "pred": null,
+    "pred": "E23_door_LH_FRT",
     "D_mm": 456.3360805690238,
-    "gate": "D_range",
+    "gate": "ok",
     "D_src": "depth",
-    "margin_mm": null
+    "margin_mm": 267.3278388619524
    },
    {
     "image": "datasets_factory_collect/20260903/E25_door_LH_FRT/s_132914/rgb_0064.png",
     "cls": "E25_door_LH_FRT",
-    "pred": null,
+    "pred": "E23_door_LH_FRT",
     "D_mm": 456.14092472152674,
-    "gate": "D_range",
+    "gate": "ok",
     "D_src": "depth",
-    "margin_mm": null
+    "margin_mm": 267.7181505569465
    },
    {
     "image": "datasets_factory_collect/20260903/E25_door_LH_FRT/s_132914/rgb_0067.png",
     "cls": "E25_door_LH_FRT",
-    "pred": null,
+    "pred": "E23_door_LH_FRT",
     "D_mm": 456.91959768042466,
-    "gate": "D_range",
+    "gate": "ok",
     "D_src": "depth",
-    "margin_mm": null
+    "margin_mm": 266.1608046391507
    },
    {
     "image": "datasets_factory_collect/20260903/E25_door_LH_FRT/s_132914/rgb_0071.png",
     "cls": "E25_door_LH_FRT",
-    "pred": null,
+    "pred": "E23_door_LH_FRT",
     "D_mm": 456.4763552243689,
-    "gate": "D_range",
+    "gate": "ok",
     "D_src": "depth",
-    "margin_mm": null
+    "margin_mm": 267.0472895512622
    },
    {
     "image": "datasets_factory_collect/20260903/E25_door_LH_FRT/s_141947/rgb_0000.png",
     "cls": "E25_door_LH_FRT",
-    "pred": null,
+    "pred": "E23_door_LH_FRT",
     "D_mm": 459.3937490722999,
-    "gate": "D_range",
+    "gate": "ok",
     "D_src": "depth",
-    "margin_mm": null
+    "margin_mm": 261.2125018554002
    },
    {
     "image": "datasets_factory_collect/20260903/E25_door_LH_FRT/s_141947/rgb_0004.png",
     "cls": "E25_door_LH_FRT",
-    "pred": null,
+    "pred": "E23_door_LH_FRT",
     "D_mm": 458.880620897667,
-    "gate": "D_range",
+    "gate": "ok",
     "D_src": "depth",
-    "margin_mm": null
+    "margin_mm": 262.23875820466606
    },
    {
     "image": "datasets_factory_collect/20260903/E25_door_LH_FRT/s_141947/rgb_0007.png",
     "cls": "E25_door_LH_FRT",
-    "pred": null,
+    "pred": "E23_door_LH_FRT",
     "D_mm": 459.6226409946474,
-    "gate": "D_range",
+    "gate": "ok",
     "D_src": "depth",
-    "margin_mm": null
+    "margin_mm": 260.75471801070523
    },
    {
     "image": "datasets_factory_collect/20260903/E25_door_LH_FRT/s_141947/rgb_0011.png",
     "cls": "E25_door_LH_FRT",
-    "pred": null,
+    "pred": "E23_door_LH_FRT",
     "D_mm": 458.73833747104976,
-    "gate": "D_range",
+    "gate": "ok",
     "D_src": "depth",
-    "margin_mm": null
+    "margin_mm": 262.5233250579005
    },
    {
     "image": "datasets_factory_collect/20260903/E25_door_LH_FRT/s_141947/rgb_0014.png",
     "cls": "E25_door_LH_FRT",
-    "pred": null,
+    "pred": "E23_door_LH_FRT",
     "D_mm": 460.11542233385467,
-    "gate": "D_range",
+    "gate": "ok",
     "D_src": "depth",
-    "margin_mm": null
+    "margin_mm": 259.76915533229067
    },
    {
     "image": "datasets_factory_collect/20260903/E25_door_LH_FRT/s_141947/rgb_0018.png",
     "cls": "E25_door_LH_FRT",
-    "pred": null,
+    "pred": "E23_door_LH_FRT",
     "D_mm": 458.68370007852434,
-    "gate": "D_range",
+    "gate": "ok",
     "D_src": "depth",
-    "margin_mm": null
+    "margin_mm": 262.6325998429513
    },
    {
     "image": "datasets_factory_collect/20260903/E25_door_LH_FRT/s_141947/rgb_0021.png",
     "cls": "E25_door_LH_FRT",
-    "pred": null,
+    "pred": "E23_door_LH_FRT",
     "D_mm": 459.12617726915846,
-    "gate": "D_range",
+    "gate": "ok",
     "D_src": "depth",
-    "margin_mm": null
+    "margin_mm": 261.7476454616831
    },
    {
     "image": "datasets_factory_collect/20260903/E25_door_LH_FRT/s_141947/rgb_0025.png",
     "cls": "E25_door_LH_FRT",
-    "pred": null,
+    "pred": "E23_door_LH_FRT",
     "D_mm": 460.24444915999766,
-    "gate": "D_range",
+    "gate": "ok",
     "D_src": "depth",
-    "margin_mm": null
+    "margin_mm": 259.5111016800047
    },
    {
     "image": "datasets_factory_collect/20260903/E25_door_LH_FRT/s_141947/rgb_0029.png",
     "cls": "E25_door_LH_FRT",
-    "pred": null,
+    "pred": "E23_door_LH_FRT",
     "D_mm": 461.20395988175653,
-    "gate": "D_range",
+    "gate": "ok",
     "D_src": "depth",
-    "margin_mm": null
+    "margin_mm": 257.59208023648694
    },
    {
     "image": "datasets_factory_collect/20260903/E25_door_LH_FRT/s_141947/rgb_0032.png",
     "cls": "E25_door_LH_FRT",
-    "pred": null,
+    "pred": "E23_door_LH_FRT",
     "D_mm": 459.46345630142105,
-    "gate": "D_range",
+    "gate": "ok",
     "D_src": "depth",
-    "margin_mm": null
+    "margin_mm": 261.0730873971579
    },
    {
     "image": "datasets_factory_collect/20260903/E25_door_LH_FRT/s_141947/rgb_0036.png",
     "cls": "E25_door_LH_FRT",
-    "pred": null,
+    "pred": "E23_door_LH_FRT",
     "D_mm": 460.1962920316457,
-    "gate": "D_range",
+    "gate": "ok",
     "D_src": "depth",
-    "margin_mm": null
+    "margin_mm": 259.60741593670855
    },
    {
     "image": "datasets_factory_collect/20260903/E25_door_LH_FRT/s_141947/rgb_0039.png",
     "cls": "E25_door_LH_FRT",
-    "pred": null,
+    "pred": "E23_door_LH_FRT",
     "D_mm": 460.38606268373263,
-    "gate": "D_range",
+    "gate": "ok",
     "D_src": "depth",
-    "margin_mm": null
+    "margin_mm": 259.22787463253474
    },
    {
     "image": "datasets_factory_collect/20260903/E25_door_LH_FRT/s_141947/rgb_0043.png",
     "cls": "E25_door_LH_FRT",
-    "pred": null,
+    "pred": "E23_door_LH_FRT",
     "D_mm": 459.60463207124417,
-    "gate": "D_range",
+    "gate": "ok",
     "D_src": "depth",
-    "margin_mm": null
+    "margin_mm": 260.79073585751166
    },
    {
     "image": "datasets_factory_collect/20260903/E25_door_LH_FRT/s_141947/rgb_0047.png",
     "cls": "E25_door_LH_FRT",
-    "pred": null,
+    "pred": "E23_door_LH_FRT",
     "D_mm": 460.38762451840205,
-    "gate": "D_range",
+    "gate": "ok",
     "D_src": "depth",
-    "margin_mm": null
+    "margin_mm": 259.2247509631959
    },
    {
     "image": "datasets_factory_collect/20260903/E25_door_LH_FRT/s_141947/rgb_0050.png",
     "cls": "E25_door_LH_FRT",
-    "pred": null,
+    "pred": "E23_door_LH_FRT",
     "D_mm": 460.15298853122454,
-    "gate": "D_range",
+    "gate": "ok",
     "D_src": "depth",
-    "margin_mm": null
+    "margin_mm": 259.6940229375509
    },
    {
     "image": "datasets_factory_collect/20260903/E25_door_LH_FRT/s_141947/rgb_0054.png",
     "cls": "E25_door_LH_FRT",
-    "pred": null,
+    "pred": "E23_door_LH_FRT",
     "D_mm": 460.82840993856263,
-    "gate": "D_range",
+    "gate": "ok",
     "D_src": "depth",
-    "margin_mm": null
+    "margin_mm": 258.34318012287474
    },
    {
     "image": "datasets_factory_collect/20260903/E25_door_LH_FRT/s_141947/rgb_0057.png",
     "cls": "E25_door_LH_FRT",
-    "pred": null,
+    "pred": "E23_door_LH_FRT",
     "D_mm": 460.9429308525814,
-    "gate": "D_range",
+    "gate": "ok",
     "D_src": "depth",
-    "margin_mm": null
+    "margin_mm": 258.1141382948372
    },
    {
     "image": "datasets_factory_collect/20260903/E25_door_LH_FRT/s_141947/rgb_0061.png",
     "cls": "E25_door_LH_FRT",
-    "pred": null,
+    "pred": "E23_door_LH_FRT",
     "D_mm": 459.8790417293087,
-    "gate": "D_range",
+    "gate": "ok",
     "D_src": "depth",
-    "margin_mm": null
+    "margin_mm": 260.2419165413826
    },
    {
     "image": "datasets_factory_collect/20260903/E25_door_LH_FRT/s_141947/rgb_0064.png",
     "cls": "E25_door_LH_FRT",
-    "pred": null,
+    "pred": "E23_door_LH_FRT",
     "D_mm": 460.1055229700606,
-    "gate": "D_range",
+    "gate": "ok",
     "D_src": "depth",
-    "margin_mm": null
+    "margin_mm": 259.78895405987885
    },
    {
     "image": "datasets_factory_collect/20260903/E25_door_LH_FRT/s_141947/rgb_0068.png",
     "cls": "E25_door_LH_FRT",
-    "pred": null,
+    "pred": "E23_door_LH_FRT",
     "D_mm": 459.25042648636474,
-    "gate": "D_range",
+    "gate": "ok",
     "D_src": "depth",
-    "margin_mm": null
+    "margin_mm": 261.4991470272705
    },
    {
     "image": "datasets_factory_collect/20260903/E25_door_LH_RR/s_073940/rgb_0000.png",
@@ -13846,182 +13846,182 @@
    {
     "image": "datasets_factory_collect/20260905/E25_door_LH_FRT/s_150506/rgb_0000.png",
     "cls": "E25_door_LH_FRT",
-    "pred": null,
+    "pred": "E23_door_LH_FRT",
     "D_mm": 459.308675993412,
-    "gate": "D_range",
+    "gate": "ok",
     "D_src": "depth",
-    "margin_mm": null
+    "margin_mm": 261.382648013176
    },
    {
     "image": "datasets_factory_collect/20260905/E25_door_LH_FRT/s_150506/rgb_0008.png",
     "cls": "E25_door_LH_FRT",
-    "pred": null,
+    "pred": "E23_door_LH_FRT",
     "D_mm": 458.3941390975012,
-    "gate": "D_range",
+    "gate": "ok",
     "D_src": "depth",
-    "margin_mm": null
+    "margin_mm": 263.21172180499764
    },
    {
     "image": "datasets_factory_collect/20260905/E25_door_LH_FRT/s_150506/rgb_0016.png",
     "cls": "E25_door_LH_FRT",
-    "pred": null,
+    "pred": "E23_door_LH_FRT",
     "D_mm": 458.95370957935046,
-    "gate": "D_range",
+    "gate": "ok",
     "D_src": "depth",
-    "margin_mm": null
+    "margin_mm": 262.0925808412991
    },
    {
     "image": "datasets_factory_collect/20260905/E25_door_LH_FRT/s_150506/rgb_0023.png",
     "cls": "E25_door_LH_FRT",
-    "pred": null,
+    "pred": "E23_door_LH_FRT",
     "D_mm": 461.1541992987581,
-    "gate": "D_range",
+    "gate": "ok",
     "D_src": "depth",
-    "margin_mm": null
+    "margin_mm": 257.6916014024838
    },
    {
     "image": "datasets_factory_collect/20260905/E25_door_LH_FRT/s_150506/rgb_0031.png",
     "cls": "E25_door_LH_FRT",
-    "pred": null,
+    "pred": "E23_door_LH_FRT",
     "D_mm": 460.20054345479525,
-    "gate": "D_range",
+    "gate": "ok",
     "D_src": "depth",
-    "margin_mm": null
+    "margin_mm": 259.5989130904095
    },
    {
     "image": "datasets_factory_collect/20260905/E25_door_LH_FRT/s_150506/rgb_0039.png",
     "cls": "E25_door_LH_FRT",
-    "pred": null,
+    "pred": "E23_door_LH_FRT",
     "D_mm": 460.56246789400996,
-    "gate": "D_range",
+    "gate": "ok",
     "D_src": "depth",
-    "margin_mm": null
+    "margin_mm": 258.8750642119801
    },
    {
     "image": "datasets_factory_collect/20260905/E25_door_LH_FRT/s_150506/rgb_0047.png",
     "cls": "E25_door_LH_FRT",
-    "pred": null,
+    "pred": "E23_door_LH_FRT",
     "D_mm": 458.76310395761845,
-    "gate": "D_range",
+    "gate": "ok",
     "D_src": "depth",
-    "margin_mm": null
+    "margin_mm": 262.4737920847631
    },
    {
     "image": "datasets_factory_collect/20260905/E25_door_LH_FRT/s_150506/rgb_0055.png",
     "cls": "E25_door_LH_FRT",
-    "pred": null,
+    "pred": "E23_door_LH_FRT",
     "D_mm": 458.9859623368923,
-    "gate": "D_range",
+    "gate": "ok",
     "D_src": "depth",
-    "margin_mm": null
+    "margin_mm": 262.02807532621534
    },
    {
     "image": "datasets_factory_collect/20260905/E25_door_LH_FRT/s_150506/rgb_0062.png",
     "cls": "E25_door_LH_FRT",
-    "pred": null,
+    "pred": "E23_door_LH_FRT",
     "D_mm": 459.12195354834085,
-    "gate": "D_range",
+    "gate": "ok",
     "D_src": "depth",
-    "margin_mm": null
+    "margin_mm": 261.7560929033183
    },
    {
     "image": "datasets_factory_collect/20260905/E25_door_LH_FRT/s_150506/rgb_0070.png",
     "cls": "E25_door_LH_FRT",
-    "pred": null,
+    "pred": "E23_door_LH_FRT",
     "D_mm": 458.8564576755497,
-    "gate": "D_range",
+    "gate": "ok",
     "D_src": "depth",
-    "margin_mm": null
+    "margin_mm": 262.28708464890065
    },
    {
     "image": "datasets_factory_collect/20260905/E25_door_LH_FRT/s_150506/rgb_0078.png",
     "cls": "E25_door_LH_FRT",
-    "pred": null,
+    "pred": "E23_door_LH_FRT",
     "D_mm": 459.69085079043964,
-    "gate": "D_range",
+    "gate": "ok",
     "D_src": "depth",
-    "margin_mm": null
+    "margin_mm": 260.6182984191207
    },
    {
     "image": "datasets_factory_collect/20260905/E25_door_LH_FRT/s_150506/rgb_0086.png",
     "cls": "E25_door_LH_FRT",
-    "pred": null,
+    "pred": "E23_door_LH_FRT",
     "D_mm": 458.8263559927506,
-    "gate": "D_range",
+    "gate": "ok",
     "D_src": "depth",
-    "margin_mm": null
+    "margin_mm": 262.34728801449876
    },
    {
     "image": "datasets_factory_collect/20260905/E25_door_LH_FRT/s_150506/rgb_0093.png",
     "cls": "E25_door_LH_FRT",
-    "pred": null,
+    "pred": "E23_door_LH_FRT",
     "D_mm": 462.0173892405012,
-    "gate": "D_range",
+    "gate": "ok",
     "D_src": "depth",
-    "margin_mm": null
+    "margin_mm": 255.96522151899762
    },
    {
     "image": "datasets_factory_collect/20260905/E25_door_LH_FRT/s_150506/rgb_0101.png",
     "cls": "E25_door_LH_FRT",
-    "pred": null,
+    "pred": "E23_door_LH_FRT",
     "D_mm": 459.45741066757597,
-    "gate": "D_range",
+    "gate": "ok",
     "D_src": "depth",
-    "margin_mm": null
+    "margin_mm": 261.08517866484806
    },
    {
     "image": "datasets_factory_collect/20260905/E25_door_LH_FRT/s_150506/rgb_0109.png",
     "cls": "E25_door_LH_FRT",
-    "pred": null,
+    "pred": "E23_door_LH_FRT",
     "D_mm": 459.1002563880714,
-    "gate": "D_range",
+    "gate": "ok",
     "D_src": "depth",
-    "margin_mm": null
+    "margin_mm": 261.7994872238572
    },
    {
     "image": "datasets_factory_collect/20260905/E25_door_LH_FRT/s_150506/rgb_0117.png",
     "cls": "E25_door_LH_FRT",
-    "pred": null,
+    "pred": "E23_door_LH_FRT",
     "D_mm": 460.66328380860216,
-    "gate": "D_range",
+    "gate": "ok",
     "D_src": "depth",
-    "margin_mm": null
+    "margin_mm": 258.6734323827957
    },
    {
     "image": "datasets_factory_collect/20260905/E25_door_LH_FRT/s_150506/rgb_0125.png",
     "cls": "E25_door_LH_FRT",
-    "pred": null,
+    "pred": "E23_door_LH_FRT",
     "D_mm": 458.63994322549127,
-    "gate": "D_range",
+    "gate": "ok",
     "D_src": "depth",
-    "margin_mm": null
+    "margin_mm": 262.72011354901747
    },
    {
     "image": "datasets_factory_collect/20260905/E25_door_LH_FRT/s_150506/rgb_0132.png",
     "cls": "E25_door_LH_FRT",
-    "pred": null,
+    "pred": "E23_door_LH_FRT",
     "D_mm": 461.3117755038724,
-    "gate": "D_range",
+    "gate": "ok",
     "D_src": "depth",
-    "margin_mm": null
+    "margin_mm": 257.3764489922552
    },
    {
     "image": "datasets_factory_collect/20260905/E25_door_LH_FRT/s_150506/rgb_0140.png",
     "cls": "E25_door_LH_FRT",
-    "pred": null,
+    "pred": "E23_door_LH_FRT",
     "D_mm": 463.06938508865437,
-    "gate": "D_range",
+    "gate": "ok",
     "D_src": "depth",
-    "margin_mm": null
+    "margin_mm": 253.86122982269126
    },
    {
     "image": "datasets_factory_collect/20260905/E25_door_LH_FRT/s_150506/rgb_0148.png",
     "cls": "E25_door_LH_FRT",
-    "pred": null,
+    "pred": "E23_door_LH_FRT",
     "D_mm": 460.7103438787565,
-    "gate": "D_range",
+    "gate": "ok",
     "D_src": "depth",
-    "margin_mm": null
+    "margin_mm": 258.57931224248705
    },
    {
     "image": "datasets_factory_collect/20260905/E25_door_LH_RR/s_072121/rgb_0000.png",
@@ -15291,20 +15291,1100 @@
     "gate": "ok",
     "D_src": "depth",
     "margin_mm": 193.73524319089938
+   },
+   {
+    "image": "datasets_factory_collect/20260907/E25_door_LH_RR/s_130029/rgb_0000.png",
+    "cls": "E25_door_LH_RR",
+    "pred": "E25_door_LH_RR",
+    "D_mm": 1036.8168880840187,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 50.0
+   },
+   {
+    "image": "datasets_factory_collect/20260907/E25_door_LH_RR/s_130029/rgb_0003.png",
+    "cls": "E25_door_LH_RR",
+    "pred": "E25_door_LH_RR",
+    "D_mm": 1037.5099058312567,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 48.98018833748665
+   },
+   {
+    "image": "datasets_factory_collect/20260907/E25_door_LH_RR/s_130029/rgb_0007.png",
+    "cls": "E25_door_LH_RR",
+    "pred": "E25_door_LH_RR",
+    "D_mm": 1037.8255608705008,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 48.34887825899841
+   },
+   {
+    "image": "datasets_factory_collect/20260907/E25_door_LH_RR/s_130029/rgb_0010.png",
+    "cls": "E25_door_LH_RR",
+    "pred": "E25_door_LH_RR",
+    "D_mm": 1038.0102437798862,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 47.97951244022761
+   },
+   {
+    "image": "datasets_factory_collect/20260907/E25_door_LH_RR/s_130029/rgb_0013.png",
+    "cls": "E25_door_LH_RR",
+    "pred": "E25_door_LH_RR",
+    "D_mm": 1037.628285586674,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 48.74342882665178
+   },
+   {
+    "image": "datasets_factory_collect/20260907/E25_door_LH_RR/s_130029/rgb_0017.png",
+    "cls": "E25_door_LH_RR",
+    "pred": "E25_door_LH_RR",
+    "D_mm": 1038.3108124274336,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 47.37837514513285
+   },
+   {
+    "image": "datasets_factory_collect/20260907/E25_door_LH_RR/s_130029/rgb_0020.png",
+    "cls": "E25_door_LH_RR",
+    "pred": "E25_door_LH_RR",
+    "D_mm": 1037.862692183407,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 48.27461563318593
+   },
+   {
+    "image": "datasets_factory_collect/20260907/E25_door_LH_RR/s_130029/rgb_0023.png",
+    "cls": "E25_door_LH_RR",
+    "pred": "E25_door_LH_RR",
+    "D_mm": 1038.1685578701272,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 47.662884259745624
+   },
+   {
+    "image": "datasets_factory_collect/20260907/E25_door_LH_RR/s_130029/rgb_0027.png",
+    "cls": "E25_door_LH_RR",
+    "pred": "E25_door_LH_RR",
+    "D_mm": 1038.7495649432606,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 46.50087011347887
+   },
+   {
+    "image": "datasets_factory_collect/20260907/E25_door_LH_RR/s_130029/rgb_0030.png",
+    "cls": "E25_door_LH_RR",
+    "pred": "E25_door_LH_RR",
+    "D_mm": 1038.2456676176628,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 47.50866476467445
+   },
+   {
+    "image": "datasets_factory_collect/20260907/E25_door_LH_RR/s_130029/rgb_0033.png",
+    "cls": "E25_door_LH_RR",
+    "pred": "E25_door_LH_RR",
+    "D_mm": 1038.903615999955,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 46.19276800008993
+   },
+   {
+    "image": "datasets_factory_collect/20260907/E25_door_LH_RR/s_130029/rgb_0036.png",
+    "cls": "E25_door_LH_RR",
+    "pred": "E25_door_LH_RR",
+    "D_mm": 1038.5522929923643,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 46.8954140152714
+   },
+   {
+    "image": "datasets_factory_collect/20260907/E25_door_LH_RR/s_130029/rgb_0040.png",
+    "cls": "E25_door_LH_RR",
+    "pred": "E25_door_LH_RR",
+    "D_mm": 1039.8302080470874,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 44.33958390582529
+   },
+   {
+    "image": "datasets_factory_collect/20260907/E25_door_LH_RR/s_130029/rgb_0043.png",
+    "cls": "E25_door_LH_RR",
+    "pred": "E25_door_LH_RR",
+    "D_mm": 1038.4492256569222,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 47.10154868615564
+   },
+   {
+    "image": "datasets_factory_collect/20260907/E25_door_LH_RR/s_130029/rgb_0046.png",
+    "cls": "E25_door_LH_RR",
+    "pred": "E25_door_LH_RR",
+    "D_mm": 1038.5261480463485,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 46.947703907303094
+   },
+   {
+    "image": "datasets_factory_collect/20260907/E25_door_LH_RR/s_130029/rgb_0050.png",
+    "cls": "E25_door_LH_RR",
+    "pred": "E25_door_LH_RR",
+    "D_mm": 1039.7054417927818,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 44.589116414436376
+   },
+   {
+    "image": "datasets_factory_collect/20260907/E25_door_LH_RR/s_130029/rgb_0053.png",
+    "cls": "E25_door_LH_RR",
+    "pred": "E25_door_LH_RR",
+    "D_mm": 1037.1135219832618,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 49.772956033476476
+   },
+   {
+    "image": "datasets_factory_collect/20260907/E25_door_LH_RR/s_130029/rgb_0056.png",
+    "cls": "E25_door_LH_RR",
+    "pred": "E25_door_LH_RR",
+    "D_mm": 1038.2416330470846,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 47.51673390583073
+   },
+   {
+    "image": "datasets_factory_collect/20260907/E25_door_LH_RR/s_130029/rgb_0060.png",
+    "cls": "E25_door_LH_RR",
+    "pred": "E25_door_LH_RR",
+    "D_mm": 1040.5159351202558,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 42.96812975948842
+   },
+   {
+    "image": "datasets_factory_collect/20260907/E25_door_LH_RR/s_130029/rgb_0063.png",
+    "cls": "E25_door_LH_RR",
+    "pred": "E25_door_LH_RR",
+    "D_mm": 1040.130309886006,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 43.73938022798802
+   },
+   {
+    "image": "datasets_factory_collect/20260907/E25_door_RH/s_133914/rgb_0000.png",
+    "cls": "E25_door_RH",
+    "pred": "E25_door_RH",
+    "D_mm": 891.4684717689433,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 74.0
+   },
+   {
+    "image": "datasets_factory_collect/20260907/E25_door_RH/s_133914/rgb_0003.png",
+    "cls": "E25_door_RH",
+    "pred": "E25_door_RH",
+    "D_mm": 893.6882954266983,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 74.0
+   },
+   {
+    "image": "datasets_factory_collect/20260907/E25_door_RH/s_133914/rgb_0006.png",
+    "cls": "E25_door_RH",
+    "pred": "E25_door_RH",
+    "D_mm": 893.010043988721,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 74.0
+   },
+   {
+    "image": "datasets_factory_collect/20260907/E25_door_RH/s_133914/rgb_0009.png",
+    "cls": "E25_door_RH",
+    "pred": "E25_door_RH",
+    "D_mm": 891.0743373727221,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 74.0
+   },
+   {
+    "image": "datasets_factory_collect/20260907/E25_door_RH/s_133914/rgb_0013.png",
+    "cls": "E25_door_RH",
+    "pred": "E25_door_RH",
+    "D_mm": 885.0508127893124,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 72.10162557862486
+   },
+   {
+    "image": "datasets_factory_collect/20260907/E25_door_RH/s_133914/rgb_0016.png",
+    "cls": "E25_door_RH",
+    "pred": "E25_door_RH",
+    "D_mm": 886.9887694956709,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 74.0
+   },
+   {
+    "image": "datasets_factory_collect/20260907/E25_door_RH/s_133914/rgb_0019.png",
+    "cls": "E25_door_RH",
+    "pred": "E25_door_RH",
+    "D_mm": 891.7582312245866,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 74.0
+   },
+   {
+    "image": "datasets_factory_collect/20260907/E25_door_RH/s_133914/rgb_0022.png",
+    "cls": "E25_door_RH",
+    "pred": "E25_door_RH",
+    "D_mm": 893.9929435136687,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 74.0
+   },
+   {
+    "image": "datasets_factory_collect/20260907/E25_door_RH/s_133914/rgb_0025.png",
+    "cls": "E25_door_RH",
+    "pred": "E25_door_RH",
+    "D_mm": 893.0577037009733,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 74.0
+   },
+   {
+    "image": "datasets_factory_collect/20260907/E25_door_RH/s_133914/rgb_0028.png",
+    "cls": "E25_door_RH",
+    "pred": "E25_door_RH",
+    "D_mm": 894.590374287114,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 74.0
+   },
+   {
+    "image": "datasets_factory_collect/20260907/E25_door_RH/s_133914/rgb_0032.png",
+    "cls": "E25_door_RH",
+    "pred": "E25_door_RH",
+    "D_mm": 892.4525360096835,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 74.0
+   },
+   {
+    "image": "datasets_factory_collect/20260907/E25_door_RH/s_133914/rgb_0035.png",
+    "cls": "E25_door_RH",
+    "pred": "E25_door_RH",
+    "D_mm": 887.2150657665178,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 74.0
+   },
+   {
+    "image": "datasets_factory_collect/20260907/E25_door_RH/s_133914/rgb_0038.png",
+    "cls": "E25_door_RH",
+    "pred": "E25_door_RH",
+    "D_mm": 885.6367140131508,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 73.27342802630164
+   },
+   {
+    "image": "datasets_factory_collect/20260907/E25_door_RH/s_133914/rgb_0041.png",
+    "cls": "E25_door_RH",
+    "pred": "E25_door_RH",
+    "D_mm": 885.4305491536107,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 72.86109830722148
+   },
+   {
+    "image": "datasets_factory_collect/20260907/E25_door_RH/s_133914/rgb_0044.png",
+    "cls": "E25_door_RH",
+    "pred": "E25_door_RH",
+    "D_mm": 884.2304954471502,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 70.4609908943005
+   },
+   {
+    "image": "datasets_factory_collect/20260907/E25_door_RH/s_133914/rgb_0047.png",
+    "cls": "E25_door_RH",
+    "pred": "E25_door_RH",
+    "D_mm": 886.103831397607,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 74.0
+   },
+   {
+    "image": "datasets_factory_collect/20260907/E25_door_RH/s_133914/rgb_0051.png",
+    "cls": "E25_door_RH",
+    "pred": "E25_door_RH",
+    "D_mm": 893.4979861984378,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 74.0
+   },
+   {
+    "image": "datasets_factory_collect/20260907/E25_door_RH/s_133914/rgb_0054.png",
+    "cls": "E25_door_RH",
+    "pred": "E25_door_RH",
+    "D_mm": 894.3914061899628,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 74.0
+   },
+   {
+    "image": "datasets_factory_collect/20260907/E25_door_RH/s_133914/rgb_0057.png",
+    "cls": "E25_door_RH",
+    "pred": "E25_door_RH",
+    "D_mm": 886.1631630688203,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 74.0
+   },
+   {
+    "image": "datasets_factory_collect/20260907/E25_door_RH/s_133914/rgb_0060.png",
+    "cls": "E25_door_RH",
+    "pred": "E25_door_RH",
+    "D_mm": 893.0444772042546,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 74.0
+   },
+   {
+    "image": "datasets_factory_collect/20260907/E30_E38_door_RH/s_152807/rgb_0000.png",
+    "cls": "E30_E38_door_RH",
+    "pred": "E30_E38_door_RH",
+    "D_mm": 1094.919605679699,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 50.0
+   },
+   {
+    "image": "datasets_factory_collect/20260907/E30_E38_door_RH/s_152807/rgb_0004.png",
+    "cls": "E30_E38_door_RH",
+    "pred": "E30_E38_door_RH",
+    "D_mm": 1098.562639049108,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 47.87472190178414
+   },
+   {
+    "image": "datasets_factory_collect/20260907/E30_E38_door_RH/s_152807/rgb_0008.png",
+    "cls": "E30_E38_door_RH",
+    "pred": "E30_E38_door_RH",
+    "D_mm": 1099.2260912860304,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 46.54781742793921
+   },
+   {
+    "image": "datasets_factory_collect/20260907/E30_E38_door_RH/s_152807/rgb_0012.png",
+    "cls": "E30_E38_door_RH",
+    "pred": "E30_E38_door_RH",
+    "D_mm": 1093.6006379132134,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 50.0
+   },
+   {
+    "image": "datasets_factory_collect/20260907/E30_E38_door_RH/s_152807/rgb_0015.png",
+    "cls": "E30_E38_door_RH",
+    "pred": "E30_E38_door_RH",
+    "D_mm": 1095.4460313994905,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 50.0
+   },
+   {
+    "image": "datasets_factory_collect/20260907/E30_E38_door_RH/s_152807/rgb_0019.png",
+    "cls": "E30_E38_door_RH",
+    "pred": "E30_E38_door_RH",
+    "D_mm": 1102.984124468305,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 39.03175106338995
+   },
+   {
+    "image": "datasets_factory_collect/20260907/E30_E38_door_RH/s_152807/rgb_0023.png",
+    "cls": "E30_E38_door_RH",
+    "pred": "E30_E38_door_RH",
+    "D_mm": 1094.219920736694,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 50.0
+   },
+   {
+    "image": "datasets_factory_collect/20260907/E30_E38_door_RH/s_152807/rgb_0027.png",
+    "cls": "E30_E38_door_RH",
+    "pred": "E30_E38_door_RH",
+    "D_mm": 1092.8410604535277,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 50.0
+   },
+   {
+    "image": "datasets_factory_collect/20260907/E30_E38_door_RH/s_152807/rgb_0031.png",
+    "cls": "E30_E38_door_RH",
+    "pred": "E30_E38_door_RH",
+    "D_mm": 1099.4657027726985,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 46.068594454603044
+   },
+   {
+    "image": "datasets_factory_collect/20260907/E30_E38_door_RH/s_152807/rgb_0035.png",
+    "cls": "E30_E38_door_RH",
+    "pred": "E30_E38_door_RH",
+    "D_mm": 1102.1657910981894,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 40.668417803621196
+   },
+   {
+    "image": "datasets_factory_collect/20260907/E30_E38_door_RH/s_152807/rgb_0038.png",
+    "cls": "E30_E38_door_RH",
+    "pred": "E30_E38_door_RH",
+    "D_mm": 1095.4486592128123,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 50.0
+   },
+   {
+    "image": "datasets_factory_collect/20260907/E30_E38_door_RH/s_152807/rgb_0042.png",
+    "cls": "E30_E38_door_RH",
+    "pred": "E30_E38_door_RH",
+    "D_mm": 1091.0963979174564,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 50.0
+   },
+   {
+    "image": "datasets_factory_collect/20260907/E30_E38_door_RH/s_152807/rgb_0046.png",
+    "cls": "E30_E38_door_RH",
+    "pred": "E30_E38_door_RH",
+    "D_mm": 1096.345386948908,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 50.0
+   },
+   {
+    "image": "datasets_factory_collect/20260907/E30_E38_door_RH/s_152807/rgb_0050.png",
+    "cls": "E30_E38_door_RH",
+    "pred": "E30_E38_door_RH",
+    "D_mm": 1098.2412752835241,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 48.51744943295171
+   },
+   {
+    "image": "datasets_factory_collect/20260907/E30_E38_door_RH/s_152807/rgb_0054.png",
+    "cls": "E30_E38_door_RH",
+    "pred": "E30_E38_door_RH",
+    "D_mm": 1101.3524848202012,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 42.295030359597604
+   },
+   {
+    "image": "datasets_factory_collect/20260907/E30_E38_door_RH/s_152807/rgb_0058.png",
+    "cls": "E30_E38_door_RH",
+    "pred": "E30_E38_door_RH",
+    "D_mm": 1104.3782557283969,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 36.24348854320624
+   },
+   {
+    "image": "datasets_factory_collect/20260907/E30_E38_door_RH/s_152807/rgb_0061.png",
+    "cls": "E30_E38_door_RH",
+    "pred": "E30_E38_door_RH",
+    "D_mm": 1102.7612087060434,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 39.477582587913275
+   },
+   {
+    "image": "datasets_factory_collect/20260907/E30_E38_door_RH/s_152807/rgb_0065.png",
+    "cls": "E30_E38_door_RH",
+    "pred": "E30_E38_door_RH",
+    "D_mm": 1101.1669754967243,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 42.666049006551475
+   },
+   {
+    "image": "datasets_factory_collect/20260907/E30_E38_door_RH/s_152807/rgb_0069.png",
+    "cls": "E30_E38_door_RH",
+    "pred": "E30_E38_door_RH",
+    "D_mm": 1099.4486104712905,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 46.10277905741896
+   },
+   {
+    "image": "datasets_factory_collect/20260907/E30_E38_door_RH/s_152807/rgb_0073.png",
+    "cls": "E30_E38_door_RH",
+    "pred": "E30_E38_door_RH",
+    "D_mm": 1091.662663463801,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 50.0
+   },
+   {
+    "image": "datasets_factory_collect/20260907/E30_door_LH_FRT/s_155421/rgb_0000.png",
+    "cls": "E30_door_LH_FRT",
+    "pred": "E30_door_LH_FRT",
+    "D_mm": 770.6168533141661,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 35.76629337166787
+   },
+   {
+    "image": "datasets_factory_collect/20260907/E30_door_LH_FRT/s_155421/rgb_0008.png",
+    "cls": "E30_door_LH_FRT",
+    "pred": "E30_door_LH_FRT",
+    "D_mm": 770.8167391688037,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 35.36652166239264
+   },
+   {
+    "image": "datasets_factory_collect/20260907/E30_door_LH_FRT/s_155421/rgb_0016.png",
+    "cls": "E30_door_LH_FRT",
+    "pred": "E30_door_LH_FRT",
+    "D_mm": 773.1178502509184,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 30.764299498163155
+   },
+   {
+    "image": "datasets_factory_collect/20260907/E30_door_LH_FRT/s_155421/rgb_0023.png",
+    "cls": "E30_door_LH_FRT",
+    "pred": "E30_door_LH_FRT",
+    "D_mm": 770.4553797624935,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 36.08924047501296
+   },
+   {
+    "image": "datasets_factory_collect/20260907/E30_door_LH_FRT/s_155421/rgb_0031.png",
+    "cls": "E30_door_LH_FRT",
+    "pred": "E30_door_LH_FRT",
+    "D_mm": 772.0474648128649,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 32.90507037427028
+   },
+   {
+    "image": "datasets_factory_collect/20260907/E30_door_LH_FRT/s_155421/rgb_0039.png",
+    "cls": "E30_door_LH_FRT",
+    "pred": "E30_door_LH_FRT",
+    "D_mm": 773.3775946378014,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 30.24481072439721
+   },
+   {
+    "image": "datasets_factory_collect/20260907/E30_door_LH_FRT/s_155421/rgb_0047.png",
+    "cls": "E30_door_LH_FRT",
+    "pred": "E30_door_LH_FRT",
+    "D_mm": 769.7851597863308,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 37.429680427338326
+   },
+   {
+    "image": "datasets_factory_collect/20260907/E30_door_LH_FRT/s_155421/rgb_0055.png",
+    "cls": "E30_door_LH_FRT",
+    "pred": "E30_door_LH_FRT",
+    "D_mm": 771.5959963452631,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 33.80800730947385
+   },
+   {
+    "image": "datasets_factory_collect/20260907/E30_door_LH_FRT/s_155421/rgb_0062.png",
+    "cls": "E30_door_LH_FRT",
+    "pred": "E30_door_LH_FRT",
+    "D_mm": 772.0213182849573,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 32.95736343008548
+   },
+   {
+    "image": "datasets_factory_collect/20260907/E30_door_LH_FRT/s_155421/rgb_0070.png",
+    "cls": "E30_door_LH_FRT",
+    "pred": "E30_door_LH_FRT",
+    "D_mm": 769.1907879162616,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 38.61842416747686
+   },
+   {
+    "image": "datasets_factory_collect/20260907/E30_door_LH_FRT/s_155421/rgb_0078.png",
+    "cls": "E30_door_LH_FRT",
+    "pred": "E30_door_LH_FRT",
+    "D_mm": 771.073447168872,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 34.853105662255984
+   },
+   {
+    "image": "datasets_factory_collect/20260907/E30_door_LH_FRT/s_155421/rgb_0086.png",
+    "cls": "E30_door_LH_FRT",
+    "pred": "E30_door_LH_FRT",
+    "D_mm": 770.9032363936378,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 35.19352721272435
+   },
+   {
+    "image": "datasets_factory_collect/20260907/E30_door_LH_FRT/s_155421/rgb_0093.png",
+    "cls": "E30_door_LH_FRT",
+    "pred": "E30_door_LH_FRT",
+    "D_mm": 770.3524961149637,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 36.295007770072516
+   },
+   {
+    "image": "datasets_factory_collect/20260907/E30_door_LH_FRT/s_155421/rgb_0101.png",
+    "cls": "E30_door_LH_FRT",
+    "pred": "E30_door_LH_FRT",
+    "D_mm": 770.8563170845858,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 35.28736583082832
+   },
+   {
+    "image": "datasets_factory_collect/20260907/E30_door_LH_FRT/s_155421/rgb_0109.png",
+    "cls": "E30_door_LH_FRT",
+    "pred": "E30_door_LH_FRT",
+    "D_mm": 770.218646778944,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 36.5627064421119
+   },
+   {
+    "image": "datasets_factory_collect/20260907/E30_door_LH_FRT/s_155421/rgb_0117.png",
+    "cls": "E30_door_LH_FRT",
+    "pred": "E30_door_LH_FRT",
+    "D_mm": 771.1302455615835,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 34.73950887683304
+   },
+   {
+    "image": "datasets_factory_collect/20260907/E30_door_LH_FRT/s_155421/rgb_0125.png",
+    "cls": "E30_door_LH_FRT",
+    "pred": "E30_door_LH_FRT",
+    "D_mm": 771.5858952092685,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 33.82820958146294
+   },
+   {
+    "image": "datasets_factory_collect/20260907/E30_door_LH_FRT/s_155421/rgb_0132.png",
+    "cls": "E30_door_LH_FRT",
+    "pred": "E30_door_LH_FRT",
+    "D_mm": 768.9220299169519,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 39.155940166096116
+   },
+   {
+    "image": "datasets_factory_collect/20260907/E30_door_LH_FRT/s_155421/rgb_0140.png",
+    "cls": "E30_door_LH_FRT",
+    "pred": "E30_door_LH_FRT",
+    "D_mm": 770.4828520609223,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 36.03429587815549
+   },
+   {
+    "image": "datasets_factory_collect/20260907/E30_door_LH_FRT/s_155421/rgb_0148.png",
+    "cls": "E30_door_LH_FRT",
+    "pred": "E30_door_LH_FRT",
+    "D_mm": 772.7395509100749,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 31.520898179850292
+   },
+   {
+    "image": "datasets_factory_collect/20260907/E30_door_LH_RR/s_143122/rgb_0000.png",
+    "cls": "E30_door_LH_RR",
+    "pred": "E30_door_LH_RR",
+    "D_mm": 1164.9004129124376,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 71.0
+   },
+   {
+    "image": "datasets_factory_collect/20260907/E30_door_LH_RR/s_143122/rgb_0003.png",
+    "cls": "E30_door_LH_RR",
+    "pred": "E30_door_LH_RR",
+    "D_mm": 1163.6136682305105,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 71.0
+   },
+   {
+    "image": "datasets_factory_collect/20260907/E30_door_LH_RR/s_143122/rgb_0005.png",
+    "cls": "E30_door_LH_RR",
+    "pred": "E30_door_LH_RR",
+    "D_mm": 1163.9566588759797,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 71.0
+   },
+   {
+    "image": "datasets_factory_collect/20260907/E30_door_LH_RR/s_143122/rgb_0008.png",
+    "cls": "E30_door_LH_RR",
+    "pred": "E30_door_LH_RR",
+    "D_mm": 1163.2130330150756,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 71.0
+   },
+   {
+    "image": "datasets_factory_collect/20260907/E30_door_LH_RR/s_143122/rgb_0011.png",
+    "cls": "E30_door_LH_RR",
+    "pred": "E30_door_LH_RR",
+    "D_mm": 1162.1128001924276,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 71.0
+   },
+   {
+    "image": "datasets_factory_collect/20260907/E30_door_LH_RR/s_143122/rgb_0013.png",
+    "cls": "E30_door_LH_RR",
+    "pred": "E30_door_LH_RR",
+    "D_mm": 1163.2200207565672,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 71.0
+   },
+   {
+    "image": "datasets_factory_collect/20260907/E30_door_LH_RR/s_143122/rgb_0016.png",
+    "cls": "E30_door_LH_RR",
+    "pred": "E30_door_LH_RR",
+    "D_mm": 1163.0261236012122,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 71.0
+   },
+   {
+    "image": "datasets_factory_collect/20260907/E30_door_LH_RR/s_143122/rgb_0018.png",
+    "cls": "E30_door_LH_RR",
+    "pred": "E30_door_LH_RR",
+    "D_mm": 1162.8792431732118,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 71.0
+   },
+   {
+    "image": "datasets_factory_collect/20260907/E30_door_LH_RR/s_143122/rgb_0021.png",
+    "cls": "E30_door_LH_RR",
+    "pred": "E30_door_LH_RR",
+    "D_mm": 1161.4277845283286,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 71.0
+   },
+   {
+    "image": "datasets_factory_collect/20260907/E30_door_LH_RR/s_143122/rgb_0024.png",
+    "cls": "E30_door_LH_RR",
+    "pred": "E30_door_LH_RR",
+    "D_mm": 1163.8641229084544,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 71.0
+   },
+   {
+    "image": "datasets_factory_collect/20260907/E30_door_LH_RR/s_143122/rgb_0026.png",
+    "cls": "E30_door_LH_RR",
+    "pred": "E30_door_LH_RR",
+    "D_mm": 1164.7210709964143,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 71.0
+   },
+   {
+    "image": "datasets_factory_collect/20260907/E30_door_LH_RR/s_143122/rgb_0029.png",
+    "cls": "E30_door_LH_RR",
+    "pred": "E30_door_LH_RR",
+    "D_mm": 1163.2427675026586,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 71.0
+   },
+   {
+    "image": "datasets_factory_collect/20260907/E30_door_LH_RR/s_143122/rgb_0032.png",
+    "cls": "E30_door_LH_RR",
+    "pred": "E30_door_LH_RR",
+    "D_mm": 1161.2051281863353,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 71.0
+   },
+   {
+    "image": "datasets_factory_collect/20260907/E30_door_LH_RR/s_143122/rgb_0034.png",
+    "cls": "E30_door_LH_RR",
+    "pred": "E30_door_LH_RR",
+    "D_mm": 1162.6678148539586,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 71.0
+   },
+   {
+    "image": "datasets_factory_collect/20260907/E30_door_LH_RR/s_143122/rgb_0037.png",
+    "cls": "E30_door_LH_RR",
+    "pred": "E30_door_LH_RR",
+    "D_mm": 1163.2168303989451,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 71.0
+   },
+   {
+    "image": "datasets_factory_collect/20260907/E30_door_LH_RR/s_143122/rgb_0039.png",
+    "cls": "E30_door_LH_RR",
+    "pred": "E30_door_LH_RR",
+    "D_mm": 1162.7240528915859,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 71.0
+   },
+   {
+    "image": "datasets_factory_collect/20260907/E30_door_LH_RR/s_143122/rgb_0042.png",
+    "cls": "E30_door_LH_RR",
+    "pred": "E30_door_LH_RR",
+    "D_mm": 1161.8132248125517,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 71.0
+   },
+   {
+    "image": "datasets_factory_collect/20260907/E30_door_LH_RR/s_143122/rgb_0045.png",
+    "cls": "E30_door_LH_RR",
+    "pred": "E30_door_LH_RR",
+    "D_mm": 1163.4309909404622,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 71.0
+   },
+   {
+    "image": "datasets_factory_collect/20260907/E30_door_LH_RR/s_143122/rgb_0047.png",
+    "cls": "E30_door_LH_RR",
+    "pred": "E30_door_LH_RR",
+    "D_mm": 1162.761125345357,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 71.0
+   },
+   {
+    "image": "datasets_factory_collect/20260907/E30_door_LH_RR/s_143122/rgb_0050.png",
+    "cls": "E30_door_LH_RR",
+    "pred": "E30_door_LH_RR",
+    "D_mm": 1162.0541053869886,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 71.0
+   },
+   {
+    "image": "datasets_factory_collect/20260907/E30_door_LH_RR/s_145148/rgb_0000.png",
+    "cls": "E30_door_LH_RR",
+    "pred": "E30_door_LH_RR",
+    "D_mm": 1167.3549135135952,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 71.0
+   },
+   {
+    "image": "datasets_factory_collect/20260907/E30_door_LH_RR/s_145148/rgb_0008.png",
+    "cls": "E30_door_LH_RR",
+    "pred": "E30_door_LH_RR",
+    "D_mm": 1165.7462595250402,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 71.0
+   },
+   {
+    "image": "datasets_factory_collect/20260907/E30_door_LH_RR/s_145148/rgb_0016.png",
+    "cls": "E30_door_LH_RR",
+    "pred": "E30_door_LH_RR",
+    "D_mm": 1166.6021692459976,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 71.0
+   },
+   {
+    "image": "datasets_factory_collect/20260907/E30_door_LH_RR/s_145148/rgb_0024.png",
+    "cls": "E30_door_LH_RR",
+    "pred": "E30_door_LH_RR",
+    "D_mm": 1168.309032171786,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 71.0
+   },
+   {
+    "image": "datasets_factory_collect/20260907/E30_door_LH_RR/s_145148/rgb_0032.png",
+    "cls": "E30_door_LH_RR",
+    "pred": "E30_door_LH_RR",
+    "D_mm": 1166.5979377016288,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 71.0
+   },
+   {
+    "image": "datasets_factory_collect/20260907/E30_door_LH_RR/s_145148/rgb_0040.png",
+    "cls": "E30_door_LH_RR",
+    "pred": "E30_door_LH_RR",
+    "D_mm": 1166.1575789260019,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 71.0
+   },
+   {
+    "image": "datasets_factory_collect/20260907/E30_door_LH_RR/s_145148/rgb_0048.png",
+    "cls": "E30_door_LH_RR",
+    "pred": "E30_door_LH_RR",
+    "D_mm": 1165.9209768207734,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 71.0
+   },
+   {
+    "image": "datasets_factory_collect/20260907/E30_door_LH_RR/s_145148/rgb_0056.png",
+    "cls": "E30_door_LH_RR",
+    "pred": "E30_door_LH_RR",
+    "D_mm": 1166.7388490373426,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 71.0
+   },
+   {
+    "image": "datasets_factory_collect/20260907/E30_door_LH_RR/s_145148/rgb_0063.png",
+    "cls": "E30_door_LH_RR",
+    "pred": "E30_door_LH_RR",
+    "D_mm": 1166.9182489743375,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 71.0
+   },
+   {
+    "image": "datasets_factory_collect/20260907/E30_door_LH_RR/s_145148/rgb_0068.png",
+    "cls": "E30_door_LH_RR",
+    "pred": "E30_door_LH_RR",
+    "D_mm": 1167.120151487457,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 71.0
+   },
+   {
+    "image": "datasets_factory_collect/20260907/E30_door_LH_RR/s_145148/rgb_0076.png",
+    "cls": "E30_door_LH_RR",
+    "pred": "E30_door_LH_RR",
+    "D_mm": 1167.25461408488,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 71.0
+   },
+   {
+    "image": "datasets_factory_collect/20260907/E30_door_LH_RR/s_145148/rgb_0084.png",
+    "cls": "E30_door_LH_RR",
+    "pred": "E30_door_LH_RR",
+    "D_mm": 1165.2452454033769,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 71.0
+   },
+   {
+    "image": "datasets_factory_collect/20260907/E30_door_LH_RR/s_145148/rgb_0092.png",
+    "cls": "E30_door_LH_RR",
+    "pred": "E30_door_LH_RR",
+    "D_mm": 1165.6864905044456,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 71.0
+   },
+   {
+    "image": "datasets_factory_collect/20260907/E30_door_LH_RR/s_145148/rgb_0100.png",
+    "cls": "E30_door_LH_RR",
+    "pred": "E30_door_LH_RR",
+    "D_mm": 1166.5962013544965,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 71.0
+   },
+   {
+    "image": "datasets_factory_collect/20260907/E30_door_LH_RR/s_145148/rgb_0108.png",
+    "cls": "E30_door_LH_RR",
+    "pred": "E30_door_LH_RR",
+    "D_mm": 1165.7795798258478,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 71.0
+   },
+   {
+    "image": "datasets_factory_collect/20260907/E30_door_LH_RR/s_145148/rgb_0116.png",
+    "cls": "E30_door_LH_RR",
+    "pred": "E30_door_LH_RR",
+    "D_mm": 1164.2917632444837,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 71.0
+   },
+   {
+    "image": "datasets_factory_collect/20260907/E30_door_LH_RR/s_145148/rgb_0124.png",
+    "cls": "E30_door_LH_RR",
+    "pred": "E30_door_LH_RR",
+    "D_mm": 1166.399253814617,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 71.0
+   },
+   {
+    "image": "datasets_factory_collect/20260907/E30_door_LH_RR/s_145148/rgb_0132.png",
+    "cls": "E30_door_LH_RR",
+    "pred": "E30_door_LH_RR",
+    "D_mm": 1166.3129121457944,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 71.0
+   },
+   {
+    "image": "datasets_factory_collect/20260907/E30_door_LH_RR/s_145148/rgb_0140.png",
+    "cls": "E30_door_LH_RR",
+    "pred": "E30_door_LH_RR",
+    "D_mm": 1165.7882531921248,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 71.0
+   },
+   {
+    "image": "datasets_factory_collect/20260907/E30_door_LH_RR/s_145148/rgb_0148.png",
+    "cls": "E30_door_LH_RR",
+    "pred": "E30_door_LH_RR",
+    "D_mm": 1164.8526475891283,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 71.0
    }
   ],
-  "n": 1699,
-  "judged": 1594,
-  "correct": 1581,
-  "acc_judged": 99.1844416562108,
-  "group_acc_judged": 99.49811794228356,
+  "n": 1819,
+  "judged": 1793,
+  "correct": 1701,
+  "acc_judged": 94.86893474623535,
+  "group_acc_judged": 99.55382041271612,
   "gates": {
-   "ok": 1594,
+   "ok": 1793,
    "no_frame": 4,
    "no_corner": 10,
    "latch_offset": 1,
    "same_side": 10,
-   "D_range": 80
+   "D_range": 1
   }
  }
 }

@@ -160,17 +160,25 @@ def main():
             "SELECT id FROM capture_sessions WHERE session_dir = ?", (sess_dir,)
         ).fetchone()[0]
 
-        model_name, part_type = parse_class_name(cls)
-        cur.execute(
-            """INSERT OR IGNORE INTO classes
-                 (dataset_id, name, display_name, model_name, part_type)
-               VALUES (?, ?, ?, ?, ?)""",
-            (dataset_id, cls, cls.replace("_", " "), model_name, part_type),
-        )
-        class_id = cur.execute(
-            "SELECT id FROM classes WHERE dataset_id = ? AND name = ?",
-            (dataset_id, cls),
-        ).fetchone()[0]
+        # 기존 세션(--refresh)은 DB에서 정정된 라벨(images.class_id)을 유지한다 — 폴더명(현장 입력)으로 되돌리지 않음.
+        # (2026-09-08: 폴더명 class로 재삽입돼 relabel 세션에 중복 행이 생기던 문제 수정)
+        existing_cls = cur.execute(
+            "SELECT class_id FROM images WHERE session_id = ? LIMIT 1", (session_id,)
+        ).fetchone()
+        if existing_cls:
+            class_id = existing_cls[0]
+        else:
+            model_name, part_type = parse_class_name(cls)
+            cur.execute(
+                """INSERT OR IGNORE INTO classes
+                     (dataset_id, name, display_name, model_name, part_type)
+                   VALUES (?, ?, ?, ?, ?)""",
+                (dataset_id, cls, cls.replace("_", " "), model_name, part_type),
+            )
+            class_id = cur.execute(
+                "SELECT id FROM classes WHERE dataset_id = ? AND name = ?",
+                (dataset_id, cls),
+            ).fetchone()[0]
 
         depth_files = {f for f in info["files"] if f.startswith("depth_")}
         for rgb in sorted(f for f in info["files"] if f.startswith("rgb_")):
