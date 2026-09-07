@@ -12,7 +12,7 @@ DB 기준(synced_local=1, is_valid=1, 클래스 확정, split 지정)으로만 �
   python db/build_dataset.py build                       # 뷰 생성
   python db/build_dataset.py status                      # 클래스·세션별 split 현황
   python db/build_dataset.py split <session_dir> <train|val|test|none>
-  python db/build_dataset.py auto-split [--reset-nontest]   # 세션 단위 70/15/15: 시간순 test=max(1,15%) → val=max(1,15%)(세션≥3) → train
+  python db/build_dataset.py auto-split [--reset-nontest]   # 세션 단위 70/15/15: 시간순 test=max(1,15%) → val=max(1,15%) → train; 세션<3 클래스는 전부 train
   python db/build_dataset.py relabel <session_dir> <class>   # 라벨 정정(Unknown 포함) — 파일 이동 없이 DB만
   python db/build_dataset.py invalidate <session_dir> "<사유>"   # 세션 무효화(시험 촬영·빈 지그) → 뷰 제외. validate 로 복귀
 
@@ -91,6 +91,14 @@ def cmd_auto_split(con, reset_nontest=False):
                 if r["split"] != "test":
                     r["split"] = None
         n = len(ss)
+        if n < 3:   # 세션 3개 미만: test를 떼면 train이 비므로 전부 train(평가 제외). 세션이 쌓이면 --reset-nontest 로 재계산
+            for r in ss:
+                r["split"] = r["split"] or "train"
+                con.execute("UPDATE images SET split = ? WHERE session_id = ?", (r["split"], r["id"]))
+            print(f"  {cls:18s} 세션 {n}개 <3 → 전부 train (평가 제외)")
+            for r in ss:
+                print(f"      {r['session_dir']:40s} {r['split']}")
+            continue
         target = {"test": max(1, round(0.15 * n)), "val": max(1, round(0.15 * n)) if n >= 3 else 0}
         have = {k: sum(r["split"] == k for r in ss) for k in ("test", "val")}
         for r in ss:                      # 시간순: test → val → train 순으로 부족분 채움
