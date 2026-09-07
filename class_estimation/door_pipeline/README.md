@@ -82,7 +82,7 @@ pred_class, group, scores = decide(frames)
 ## C. 홀 랜드마크 판별기 (2026-08-26, 1순위 판정)
 
 모서리 프레임 홀 2개(래치 각공 쪽 변, 실제 장착 기준 바닥 쪽)의 거리 D(=도어 폭−106mm)로 8종을 판정한다. CNN이 홀 6점(래치 볼트홀 4 + 모서리 홀 2)을
-찾고, depth 평면상 거리 × K_DEPTH(카메라 모드별 캘리브레이션) → CAD D 최근접. 속성 파이프라인(통풍구 U-Net)의
+찾고, depth 평면상 거리 × K_DEPTH(카메라 모드별 캘리브레이션) → CAD D 최근접 (2026-09-07부터 E23 포함 9종). 속성 파이프라인(통풍구 U-Net)의
 그룹 판별을 제약으로 써서 그룹 내 최근접을 취하고, 볼트 프레임 기하 게이트에 걸리면 보류한다.
 
 실행 순서 (A/B와 같은 번호 순, 래퍼는 `scripts/hole_*.sh`):
@@ -105,6 +105,7 @@ python scripts/hole_classify_image.py rgb_0003.png    # 단일 이미지
   현장 16/16·**100%**. 보류(~30%)는 힌지측 홀이 프레임 밖/경계 근접 — 사무실 촬영 프레이밍 문제, 현장은 0%.
 - 오판은 검출이 아니라 **거리 측정 오차**(depth 평면, 20~58mm)에서 나온다. 그룹 제약이 RH↔RR 혼동을 막고, FRT 내(41mm 간격)는 N프레임 집계·intrinsics 정밀화로 대응.
 - 중앙 보강대 패드 홀은 옵션/리비전에 따라 달라 사용 금지. 분석 기록: `report/hole_analysis/`.
+- **E23_door_LH_FRT 추가 (2026-09-07)**: 현장에서 E25_LH_FRT로 입력된 9/3·9/5 4세션이 D≈460mm로 일관 보류 → 육안·CAD 확인 결과 E23(폭 562, D=456). `CAD_D`에 9번째 클래스 등록, 유효 D 범위 `D_RANGE`=400~1500mm(게이트·최종 depth D 공통; 종전 게이트 하한 600, depth D 무검사). CAD `cad/door_stp/E23) 110982-02723 LH FRT.stp`는 외판 단일 솔리드(보강재·힌지 없음)라 코너 프레임 홀이 없음 → 속성 템플릿(10) 생성. 자세 추정 `cad_holes.json`은 **잠정 등록**(`01_extract_cad_holes.PROVISIONAL`: 볼트홀·래치 코너는 E25와 동일 좌표, 힌지 코너는 CAD_D 이동 합성; 현장 4세션 80장 정합 잔차 med 3.3mm·max 5.1mm로 8종과 동급). 보강재 포함 어셈블리 STEP 확보 시 정식 추출로 교체. STL 변환은 `gmsh <stp> -2 -format stl`(numpy-stl은 STEP 불가).
 - API `/api/inference_result`에 `source`(hole/attr/conflict)와 `hole{pred, D_mm, n_judged, gate, group_constraint, points}`.
 
 ## 산출물/데이터 위치

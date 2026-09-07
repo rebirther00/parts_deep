@@ -42,9 +42,17 @@ DBG_DIR = os.path.join(BASE, 'artifacts', 'cad_holes_debug')
 # 관측면 정본: cad/door_stp/'cad 설명.txt'의 '카메라가 바라봐야 하는 방향'(STP ±Z).
 # STP Z = -STL Y 매핑(-Z→+Y, +Z→-Y)은 자유 선택이 확신(마진 1.9~32.6mm)인 6클래스에서
 # 전부 일치함을 확인. RH 2종은 코너 행이 볼트 직사각 기준 준대칭이라 이 정본으로 고정.
-VIEW_DESC = {'E25_door_LH_FRT': '+Y', 'E25_door_LH_RR': '+Y', 'E25_door_RH': '+Y',
+# E23_door_LH_FRT(2026-09-07 추가): STP 좌표계가 E25와 동일(Y 두께, Z −47~1093)이라 E25 규칙(-Z→+Y) 적용.
+VIEW_DESC = {'E23_door_LH_FRT': '+Y',
+             'E25_door_LH_FRT': '+Y', 'E25_door_LH_RR': '+Y', 'E25_door_RH': '+Y',
              'E30_E38_door_RH': '+Y', 'E30_door_LH_FRT': '-Y', 'E30_door_LH_RR': '-Y',
              'E38_door_LH_FRT': '-Y', 'E38_door_LH_RR': '-Y'}
+# 잠정 등록(CAD에 코너 홀이 없는 클래스): base 클래스의 확정 홀을 빌려 쓴다.
+#   E23_door_LH_FRT(2026-09-07): STEP이 외판 단일 솔리드라 보강재 코너 홀 없음. 차체 좌표계·래치 볼트홀 4개가 E25와
+#   완전히 동일하고, 현장 검출 특징도 래치측 (ul,wl)=(146.2,185.4) vs E25 (145.1,185.7)로 같은 래치 보강재임을 확인
+#   → 래치 코너 = E25 래치 코너, 힌지 코너 = 래치에서 힌지 방향으로 CAD_D 만큼. 어셈블리 STEP 확보 시 삭제.
+PROVISIONAL = {'E23_door_LH_FRT': dict(base='E25_door_LH_FRT',
+                                       note='외판 단일 솔리드 STEP — 코너 홀은 E25 래치 코너 기준 CAD_D 이동으로 합성(잠정)')}
 RES = 1.0             # 디버그 투영 mm/px
 RECT = (157.0, 96.0)  # 볼트홀 직사각(hole_classifier.bolt_frame과 동일 상수)
 RECT_DIAG = math.hypot(*RECT)
@@ -122,6 +130,28 @@ def find_holes_3d(tris, axes):
 
 def d3(a, b):
     return float(np.linalg.norm(a['c3'] - b['c3']))
+
+
+def synth_hole(c3, r, axes):
+    """잠정 등록용 가상 홀 dict (find_holes_3d 출력과 같은 필드)."""
+    thin, a0, a1 = axes
+    c3 = np.asarray(c3, float)
+    return dict(c3=c3, X=float(c3[a0]), Y3=float(c3[thin]), Z=float(c3[a1]), r=float(r), rms=0.0, cover=12, n=0,
+                ax_extent=0.0, synthetic=True)
+
+
+def provisional_holes(cls, axes):
+    """PROVISIONAL[cls].base 의 확정 항목(cad_holes.json)에서 볼트 4 + 코너 2를 합성. 힌지는 CAD_D[cls] 로 재배치."""
+    base = PROVISIONAL[cls]['base']
+    prev = json.load(open(OUT_JSON))['classes'] if os.path.exists(OUT_JSON) else {}
+    assert base in prev, f'{cls}: 잠정 등록 base {base} 항목이 cad_holes.json 에 없음'
+    hc_, rr = prev[base]['holes_cad'], prev[base]['hole_r_mm']
+    lat = np.asarray(hc_['corner_latch'], float); hin_b = np.asarray(hc_['corner_hinge'], float)
+    u = (hin_b - lat) / np.linalg.norm(hin_b - lat)
+    hin = lat + u * CAD_D[cls]
+    out = [synth_hole(hc_[k], rr[k], axes) for k in BOLT_NAMES]
+    out += [synth_hole(hin, rr['corner_hinge'], axes), synth_hole(lat, rr['corner_latch'], axes)]
+    return out
 
 
 def find_bolt_rect(holes):
@@ -283,9 +313,14 @@ def extract(cls, net, dev):
     holes = find_holes_3d(tris, axes)
 
     rect = find_bolt_rect(holes)
+    cands = rect and find_corners_by_rect(holes, CAD_D[cls], rect[1])
+    if not cands and cls in PROVISIONAL:
+        print(f'{cls:17s} CAD 코너 홀 없음 → 잠정 합성 (base {PROVISIONAL[cls]["base"]})')
+        holes = holes + provisional_holes(cls, axes)
+        rect = find_bolt_rect(holes)
+        cands = rect and find_corners_by_rect(holes, CAD_D[cls], rect[1])
     assert rect, f'{cls}: 볼트 직사각 실패 (원형 홀 {len(holes)}개)'
     rect_err, quad = rect
-    cands = find_corners_by_rect(holes, CAD_D[cls], quad)
     assert cands, f'{cls}: 코너 홀 쌍 후보 없음 (원형 홀 {len(holes)}개)'
     ff, n_field = field_features(cls, net, dev)
     view = VIEW_DESC[cls]
@@ -336,6 +371,9 @@ def extract(cls, net, dev):
         coplanarity_mm=round(max(plane_off.values()) - min(plane_off.values()), 2),
         T_door_to_cad=[[round(v, 6) for v in row] for row in T],
     )
+    if any(named[k].get('synthetic') for k in LM6):
+        info['provisional'] = dict(base=PROVISIONAL[cls]['base'], note=PROVISIONAL[cls]['note'],
+                                   synthetic_landmarks=[k for k in LM6 if named[k].get('synthetic')])
     return info, tris, holes, named, mins, axes
 
 
@@ -380,15 +418,24 @@ if __name__ == '__main__':
     net, dev = hc.load_model()
     print(f"{'클래스':17s} {'D_mm':>7s} {'CAD':>5s} {'차이':>5s} {'실측차':>6s} {'마진mm':>6s} "
           f"{'직사각':>5s} {'래치거리':>7s} {'공면성':>6s} 관측면 라벨검증 실측n")
+    prev = json.load(open(OUT_JSON)).get('classes', {}) if os.path.exists(OUT_JSON) else {}
     for cls in sorted(CAD_D):
-        info, tris, holes, named, mins, axes = extract(cls, net, dev)
+        try:
+            info, tris, holes, named, mins, axes = extract(cls, net, dev)
+        except AssertionError as e:
+            # 예: E23_door_LH_FRT — 외판 단일 솔리드 STEP(보강재·프레임 없음)이라 코너 홀이 CAD에 없음.
+            # 기존 항목이 있으면 유지, 없으면 건너뜀 (자세 추정 미지원 클래스).
+            print(f"{cls:17s} 추출 실패 → {'기존 항목 유지' if cls in prev else '건너뜀(자세 추정 미지원)'}: {e}")
+            if cls in prev:
+                out['classes'][cls] = prev[cls]
+            continue
         debug_png(cls, tris, holes, named, mins, axes, info)
         out['classes'][cls] = info
         print(f"{cls:17s} {info['D_mm']:7.1f} {info['D_cad']:5d} {info['D_mm'] - info['D_cad']:+5.1f} "
               f"{info['field_fit_mm']:6.1f} {info['field_margin_mm']:6.1f} {info['rect_err']:5.2f} "
               f"{info['dist_rect_to_latch']:7.1f} {info['coplanarity_mm']:6.2f} "
               f"{info['view_from']:3s} 자유{'=' if info['view_free'] == info['view_from'] else '≠'} "
-              f"{'라벨일치' if info['chirality_ok'] else '라벨불일치!'}{info['chirality_votes']} "
+              f"{'라벨없음' if info['chirality_ok'] is None else '라벨일치' if info['chirality_ok'] else '라벨불일치!'}{info['chirality_votes']} "
               f"{info['n_field']}")
     json.dump(out, open(OUT_JSON, 'w'), ensure_ascii=False, indent=1)
     print(f"\n→ {OUT_JSON}\n→ {DBG_DIR}/*.png")

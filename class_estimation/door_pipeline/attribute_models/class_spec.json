@@ -8,6 +8,16 @@
     "note": "score(c)=(템플릿IoU+eps)*exp(-|log(aspect/aspect_center)|/sigma)"
   },
   "classes": {
+    "E23_door_LH_FRT": {
+      "group": "FRT",
+      "bbox_mm": [
+        1140,
+        562
+      ],
+      "aspect_cad": 2.0285,
+      "aspect_center": 2.0285,
+      "slot_count_cad": 0
+    },
     "E25_door_LH_FRT": {
       "group": "FRT",
       "bbox_mm": [

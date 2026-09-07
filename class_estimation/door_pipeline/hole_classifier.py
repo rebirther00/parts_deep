@@ -23,8 +23,10 @@ MODEL_PATH = os.path.join(DOOR, 'attribute_models', 'hole_landmarks', 'model.pth
 IN_W, IN_H, STRIDE = 1280, 768, 4
 CH = ['bolt', 'corner_hinge', 'corner_latch']
 K_DEPTH = {1080: 0.8235, 1200: 0.8505}
-CAD_D = {'E25_door_LH_FRT': 724, 'E30_door_LH_FRT': 765, 'E38_door_LH_FRT': 812, 'E25_door_LH_RR': 1037,
-         'E30_door_LH_RR': 1158, 'E38_door_LH_RR': 1352, 'E25_door_RH': 886, 'E30_E38_door_RH': 1087}
+CAD_D = {'E23_door_LH_FRT': 456, 'E25_door_LH_FRT': 724, 'E30_door_LH_FRT': 765, 'E38_door_LH_FRT': 812,
+         'E25_door_LH_RR': 1037, 'E30_door_LH_RR': 1158, 'E38_door_LH_RR': 1352, 'E25_door_RH': 886, 'E30_E38_door_RH': 1087}
+# D = 도어 폭 − 106mm. E23은 2026-09-07 추가(STP 폭 562 → 456, 현장 실측 중앙값 460)
+D_RANGE = (400, 1500)   # 유효 코너 홀 거리(mm) — 게이트(볼트 스케일)와 최종 depth D 공통
 GROUP = {c: ('FRT' if 'FRT' in c else 'RH' if c.endswith('RH') else 'RR') for c in CAD_D}
 MEAN = torch.tensor([0.485, 0.456, 0.406])[None, :, None, None]
 STD = torch.tensor([0.229, 0.224, 0.225])[None, :, None, None]
@@ -134,7 +136,7 @@ def geometry_gate(fr, hinge, latch, shape, margin=20):
         return 'not_collinear'
     if np.sign(uh) == np.sign(ul):
         return 'same_side'
-    if not (600 <= abs(uh - ul) <= 1500):
+    if not (D_RANGE[0] <= abs(uh - ul) <= D_RANGE[1]):
         return 'D_range'
     return 'ok'
 
@@ -189,6 +191,8 @@ def classify(net, dev, rgb, depth=None, group=None):
     if D is None and fr is not None:
         D = math.hypot(hinge[0] - latch[0], hinge[1] - latch[1]) / fr['s']; out['D_src'] = 'bolt'
     out['D_mm'] = D
+    if D is not None and gate == 'ok' and not (D_RANGE[0] <= D <= D_RANGE[1]):
+        gate = out['gate'] = 'D_range'   # depth 평면 피팅 붕괴(예: 작업자 가림) 시 D가 비현실적 → 보류
     if D is not None and gate == 'ok':
         out['pred'] = nearest_class(D, group)
         out['group'] = GROUP[out['pred']]

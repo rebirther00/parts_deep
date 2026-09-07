@@ -21,8 +21,7 @@ IN_W, IN_H, STRIDE = 1280, 768, 4
 CH = ['bolt', 'corner_hinge', 'corner_latch']
 BOLT_KEYS = ['bolt_tl', 'bolt_tr', 'bolt_bl', 'bolt_br']
 K_DEPTH = 0.8235   # depth(근사 intrinsics) mm → 실제 mm 보정 (볼트 피치로 1회 캘리브레이션)
-CAD_D = {'E25_door_LH_FRT': 724, 'E30_door_LH_FRT': 765, 'E38_door_LH_FRT': 812, 'E25_door_LH_RR': 1037,
-         'E30_door_LH_RR': 1158, 'E38_door_LH_RR': 1352, 'E25_door_RH': 886, 'E30_E38_door_RH': 1087}
+from hole_classifier import CAD_D   # 정본은 hole_classifier (E23 포함 9종)
 
 ap = argparse.ArgumentParser()
 ap.add_argument('--epochs', type=int, default=80)

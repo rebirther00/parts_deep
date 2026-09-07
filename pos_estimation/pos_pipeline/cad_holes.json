@@ -14,18 +14,158 @@
   ]
  },
  "classes": {
+  "E23_door_LH_FRT": {
+   "D_mm": 456.0,
+   "D_cad": 456,
+   "field_fit_mm": 3.53,
+   "field_margin_mm": 1000000000.0,
+   "n_field": 24,
+   "field_features": {
+    "ul": 146.3,
+    "wl": 185.2,
+    "uh": -314.2,
+    "wh": 185.3,
+    "D": 460.5
+   },
+   "rect_err": 0.67,
+   "dist_rect_to_latch": 236.1,
+   "view_from": "+Y",
+   "view_free": "+Y",
+   "chirality_ok": null,
+   "chirality_votes": {},
+   "n_circular_holes": 6,
+   "holes_cad": {
+    "bolt_tl": [
+     -947.05,
+     -5.92,
+     193.5
+    ],
+    "bolt_tr": [
+     -791.0,
+     -5.92,
+     193.5
+    ],
+    "bolt_bl": [
+     -947.05,
+     -6.23,
+     290.0
+    ],
+    "bolt_br": [
+     -791.0,
+     -6.23,
+     290.0
+    ],
+    "corner_hinge": [
+     -1177.2,
+     7.42,
+     58.17
+    ],
+    "corner_latch": [
+     -721.2,
+     7.42,
+     58.16
+    ]
+   },
+   "holes_door": {
+    "bolt_tl": [
+     2.15,
+     -135.9,
+     -5.1
+    ],
+    "bolt_tr": [
+     158.2,
+     -135.9,
+     -5.1
+    ],
+    "bolt_bl": [
+     2.15,
+     -232.24,
+     0.45
+    ],
+    "bolt_br": [
+     158.2,
+     -232.24,
+     0.45
+    ],
+    "corner_hinge": [
+     -228.0,
+     -0.0,
+     0.0
+    ],
+    "corner_latch": [
+     228.0,
+     0.0,
+     -0.0
+    ]
+   },
+   "hole_r_mm": {
+    "bolt_tl": 5.0,
+    "bolt_tr": 5.0,
+    "bolt_bl": 5.0,
+    "bolt_br": 5.0,
+    "corner_hinge": 4.75,
+    "corner_latch": 4.75
+   },
+   "plane_offset_mm": {
+    "bolt_tl": -3.64,
+    "bolt_tr": -3.36,
+    "bolt_bl": 1.91,
+    "bolt_br": 2.19,
+    "corner_hinge": 1.04,
+    "corner_latch": 1.87
+   },
+   "coplanarity_mm": 5.83,
+   "T_door_to_cad": [
+    [
+     1.0,
+     -1.4e-05,
+     1e-06,
+     -949.2
+    ],
+    [
+     0.0,
+     0.060713,
+     0.998155,
+     7.42
+    ],
+    [
+     -1.4e-05,
+     -0.998155,
+     0.060713,
+     58.163151
+    ],
+    [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ]
+   ],
+   "provisional": {
+    "base": "E25_door_LH_FRT",
+    "note": "외판 단일 솔리드 STEP — 코너 홀은 E25 래치 코너 기준 CAD_D 이동으로 합성(잠정)",
+    "synthetic_landmarks": [
+     "bolt_tl",
+     "bolt_tr",
+     "bolt_bl",
+     "bolt_br",
+     "corner_hinge",
+     "corner_latch"
+    ]
+   }
+  },
   "E25_door_LH_FRT": {
    "D_mm": 723.6,
    "D_cad": 724,
-   "field_fit_mm": 1.84,
-   "field_margin_mm": 32.64,
-   "n_field": 22,
+   "field_fit_mm": 1.99,
+   "field_margin_mm": 30.75,
+   "n_field": 20,
    "field_features": {
-    "ul": 149.0,
-    "wl": 185.5,
-    "uh": -574.8,
-    "wh": 186.9,
-    "D": 725.5
+    "ul": 145.1,
+    "wl": 185.7,
+    "uh": -578.4,
+    "wh": 182.9,
+    "D": 723.4
    },
    "rect_err": 0.67,
    "dist_rect_to_latch": 236.1,
@@ -148,15 +288,15 @@
   "E25_door_LH_RR": {
    "D_mm": 1036.6,
    "D_cad": 1037,
-   "field_fit_mm": 6.19,
-   "field_margin_mm": 23.41,
+   "field_fit_mm": 4.49,
+   "field_margin_mm": 24.95,
    "n_field": 24,
    "field_features": {
-    "ul": 153.0,
-    "wl": -187.6,
-    "uh": -892.1,
-    "wh": -175.4,
-    "D": 1045.1
+    "ul": 151.3,
+    "wl": -187.5,
+    "uh": -888.6,
+    "wh": -175.5,
+    "D": 1039.8
    },
    "rect_err": 0.7,
    "dist_rect_to_latch": 236.0,
@@ -278,20 +418,20 @@
   "E25_door_RH": {
    "D_mm": 885.61,
    "D_cad": 886,
-   "field_fit_mm": 8.87,
-   "field_margin_mm": 20.6,
+   "field_fit_mm": 6.76,
+   "field_margin_mm": 24.09,
    "n_field": 24,
    "field_features": {
-    "ul": 162.3,
-    "wl": 187.9,
-    "uh": -731.2,
-    "wh": 173.8,
-    "D": 893.4
+    "ul": 163.5,
+    "wl": 187.2,
+    "uh": -728.2,
+    "wh": 177.7,
+    "D": 892.5
    },
    "rect_err": 0.7,
    "dist_rect_to_latch": 249.1,
    "view_from": "+Y",
-   "view_free": "-Y",
+   "view_free": "+Y",
    "chirality_ok": true,
    "chirality_votes": {
     "1": 15
@@ -408,15 +548,15 @@
   "E30_E38_door_RH": {
    "D_mm": 1086.6,
    "D_cad": 1087,
-   "field_fit_mm": 9.21,
-   "field_margin_mm": 20.8,
+   "field_fit_mm": 10.4,
+   "field_margin_mm": 19.86,
    "n_field": 24,
    "field_features": {
     "ul": 163.7,
     "wl": 187.1,
-    "uh": -932.9,
-    "wh": 174.8,
-    "D": 1097.0
+    "uh": -935.2,
+    "wh": 174.6,
+    "D": 1099.0
    },
    "rect_err": 0.7,
    "dist_rect_to_latch": 249.1,
@@ -538,15 +678,15 @@
   "E30_door_LH_FRT": {
    "D_mm": 764.6,
    "D_cad": 765,
-   "field_fit_mm": 6.89,
-   "field_margin_mm": 23.82,
+   "field_fit_mm": 6.08,
+   "field_margin_mm": 26.32,
    "n_field": 24,
    "field_features": {
-    "ul": 145.2,
-    "wl": 189.3,
-    "uh": -626.9,
-    "wh": 177.4,
-    "D": 771.7
+    "ul": 145.5,
+    "wl": 188.8,
+    "uh": -626.4,
+    "wh": 181.3,
+    "D": 771.9
    },
    "rect_err": 0.7,
    "dist_rect_to_latch": 236.0,
@@ -668,15 +808,15 @@
   "E30_door_LH_RR": {
    "D_mm": 1157.61,
    "D_cad": 1158,
-   "field_fit_mm": 5.22,
-   "field_margin_mm": 29.22,
-   "n_field": 22,
+   "field_fit_mm": 4.39,
+   "field_margin_mm": 28.54,
+   "n_field": 24,
    "field_features": {
     "ul": 155.1,
-    "wl": -188.8,
-    "uh": -1002.4,
-    "wh": -186.0,
-    "D": 1157.5
+    "wl": -187.8,
+    "uh": -1005.4,
+    "wh": -182.9,
+    "D": 1160.0
    },
    "rect_err": 0.7,
    "dist_rect_to_latch": 236.1,
@@ -798,15 +938,15 @@
   "E38_door_LH_FRT": {
    "D_mm": 811.6,
    "D_cad": 812,
-   "field_fit_mm": 5.96,
-   "field_margin_mm": 22.29,
-   "n_field": 21,
+   "field_fit_mm": 10.49,
+   "field_margin_mm": 25.11,
+   "n_field": 23,
    "field_features": {
-    "ul": 148.0,
-    "wl": 187.6,
-    "uh": -659.4,
-    "wh": 172.4,
-    "D": 808.7
+    "ul": 144.4,
+    "wl": 186.3,
+    "uh": -682.1,
+    "wh": 186.5,
+    "D": 825.4
    },
    "rect_err": 0.7,
    "dist_rect_to_latch": 236.0,
@@ -928,15 +1068,15 @@
   "E38_door_LH_RR": {
    "D_mm": 1351.6,
    "D_cad": 1352,
-   "field_fit_mm": 5.3,
-   "field_margin_mm": 25.33,
+   "field_fit_mm": 5.85,
+   "field_margin_mm": 25.55,
    "n_field": 24,
    "field_features": {
-    "ul": 153.5,
-    "wl": -185.1,
-    "uh": -1195.9,
-    "wh": -177.5,
-    "D": 1349.2
+    "ul": 157.3,
+    "wl": -187.4,
+    "uh": -1197.6,
+    "wh": -179.0,
+    "D": 1354.8
    },
    "rect_err": 0.7,
    "dist_rect_to_latch": 236.0,
