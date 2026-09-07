@@ -1,0 +1,21 @@
+digraph G { rankdir=LR; graph [fontname="Noto Sans CJK KR", fontsize=14, pad=0.3, nodesep=0.3, ranksep=0.6];
+ node [fontname="Noto Sans CJK KR", fontsize=12, shape=box, style="rounded,filled", fillcolor="#F2F2F2", color="#555555", penwidth=1.2, margin="0.15,0.08"];
+ edge [fontname="Noto Sans CJK KR", fontsize=10, color="#555555", penwidth=1.2, arrowsize=0.8];
+ subgraph cluster_site { label="용접 현장 (협력사)"; style="rounded"; color="#888888"; fontsize=15;
+   cam [label="ZED X Mini\nRGB-D 1920×1200", fillcolor="#DCE9F7"];
+   box [label="엣지 장치(ZED Box) 캡처 UI\n· 작업자 기종 선택 → 세션 시작\n· 2초 간격 RGB+Depth 저장\n· 세션 메타(기종·시각·카메라·intrinsics)"];
+   sess [label="세션 폴더\n날짜/기종/s_HHMMSS/", shape=folder];
+   cam -> box -> sess; }
+ nas [label="NAS 정본\n(전량, 세션 단위)", shape=cylinder, fillcolor="#EFEFEF"];
+ sess -> nas [label="자동 업로드"];
+ subgraph cluster_srv { label="학습 서버"; style="rounded"; color="#2F6FBA"; fontsize=15;
+   db [label="메타 DB (SQLite)\n세션·이미지·split·라벨 정정 이력\n학습·평가 기록", shape=cylinder, fillcolor="#DCE9F7"];
+   mirror [label="세션당 20장 샘플 미러\n→ 학습·평가 뷰(세션 단위 split)"];
+   qa [label="라벨 검증 루프\n기하 판별기 세션 판정 → 육안 확정", fillcolor="#FBE5E4"];
+   web [label="웹 열람 도구\n대시보드·세션·라벨·학습 이력"];
+   models [label="판별기 학습·평가\n기하(홀 거리) / CNN(RGB+E)"];
+   db -> mirror -> models; mirror -> qa -> db [label="정정"]; db -> web; }
+ nas -> db [label="세션 등록"]; nas -> mirror [label="샘플 pull"];
+ edge_auto [label="(로드맵) 엣지 자동 판정\n세션 종료 시 판정 → DB", style="rounded,dashed", fillcolor="#FFFFFF"];
+ models -> edge_auto [style=dashed]; edge_auto -> box [style=dashed, label="배포"];
+}

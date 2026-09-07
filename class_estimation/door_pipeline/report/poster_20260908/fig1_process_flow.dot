@@ -1,0 +1,15 @@
+digraph G { rankdir=TB; graph [fontname="Noto Sans CJK KR", fontsize=14, pad=0.3, nodesep=0.3, ranksep=0.45, compound=true];
+ node [fontname="Noto Sans CJK KR", fontsize=13, shape=box, style="rounded,filled", fillcolor="#F2F2F2", color="#555555", penwidth=1.2, margin="0.18,0.10"];
+ edge [color="#555555", penwidth=1.2, arrowsize=0.8];
+ subgraph cluster_now { label="현재: 수동 공정"; style="rounded"; color="#888888"; fontsize=15;
+   a1 [label="작업자가 도어 기종 판단"]; a2 [label="지그 장착·클램프"]; a3 [label="용접"]; a4 [label="탈거·이송"];
+   {rank=same; a1 -> a2 -> a3 -> a4;} }
+ subgraph cluster_req { label="자동화 전 선행 요건 = 본 연구 범위"; style="rounded,dashed"; color="#C0504D"; fontsize=15;
+   r1 [label="① 현장 조건 데이터 확보\n(수집 체계)", fillcolor="#FBE5E4"]; r2 [label="② 라벨 신뢰성 검증\n(기하 판별기 자동 플래그)", fillcolor="#FBE5E4"]; r3 [label="③ 현장 성능 평가 기준\n(세션 단위 분할·CV)", fillcolor="#FBE5E4"];
+   {rank=same; r1 -> r2 -> r3 [style=invis];} }
+ subgraph cluster_target { label="목표: 자동 공정"; style="rounded"; color="#2F6FBA"; fontsize=15;
+   b1 [label="비전 기종 판별", fillcolor="#DCE9F7"]; b2 [label="6자유도 자세 추정", fillcolor="#DCE9F7"]; b3 [label="로봇 장착·용접", fillcolor="#DCE9F7"]; b4 [label="판정·품질 DB 기록", fillcolor="#DCE9F7"];
+   {rank=same; b1 -> b2 -> b3 -> b4;} }
+ a2 -> r2 [ltail=cluster_now, lhead=cluster_req, style=dashed, color="#C0504D", label="  수동 공정 중 데이터 수집", fontname="Noto Sans CJK KR", fontsize=11];
+ r2 -> b2 [ltail=cluster_req, lhead=cluster_target, style=dashed, color="#2F6FBA", label="  검증된 데이터·기준으로 전환", fontname="Noto Sans CJK KR", fontsize=11];
+}
