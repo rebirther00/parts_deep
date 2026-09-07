@@ -151,6 +151,8 @@ python 02_train.py --model_type rgbe --no_aux --image_size 448 --dataset_dir dat
   auto-split 규칙 추가: 세션<3 클래스는 전부 train(평가 제외), 세션이 쌓이면 `--reset-nontest`로 재계산.
   정식 run 2건(#8 val_acc 선택, #9 `--select val_loss`) 모두 test 87.4%·macro F1 73 — 초기 2세션(8/10 E25_RH, 8/27 E30_LH_RR)이
   통째로 틀려서이며 체크포인트 시점과 무관. webapp의 낮은 F1은 이 때문이고 대표 수치는 CV 96.5%로 표기.
+  → **8/27 이후 데이터만 학습·평가로 확정(사용자, 9/7 밤)**: 8/10 E25_RH 세션은 프로토콜 이전 촬영이라 invalidate.
+  재실행 run #10 test 91.4%(실패는 8/27 E30_LH_RR 한 세션뿐), CV(8/10 제외 재집계) 97.4%. 이전 run은 artifacts/archive_20260907_with0810/.
 - **U-Net 속성 파이프라인의 지위** — 발표 자료에서는 제외했으나 코드에는 하이브리드
   폴백으로 잔존. 유지보수 범위(폴백 유지 vs 정리) 결정.
 - **2차년도 확장 구체화** — 로봇 연계 파이프라인, 도장 라인 확장(R1 공표 항목).
