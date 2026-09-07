@@ -1,0 +1,113 @@
+{
+  "model": "model.pth",
+  "model_dir": "lab_seed42",
+  "dataset_dir": "/tmp/claude-1000/-home-koceti-parts-deep/cd372bfe-ad6a-4178-824e-5abe1e1308d3/scratchpad/factory_sess_split/test",
+  "accuracy": 22.92,
+  "total_samples": 384,
+  "correct_samples": 88,
+  "found_classes": {
+    "E25_door_LH_FRT": 20,
+    "E25_door_LH_RR": 40,
+    "E25_door_RH": 51,
+    "E30_E38_door_RH": 46,
+    "E30_door_LH_FRT": 149,
+    "E30_door_LH_RR": 50,
+    "E38_door_LH_FRT": 20,
+    "E38_door_LH_RR": 8
+  },
+  "class_accuracies": {
+    "E25_door_LH_FRT": 0.0,
+    "E25_door_LH_RR": 0.0,
+    "E25_door_RH": 0.0,
+    "E30_E38_door_RH": 82.61,
+    "E30_door_LH_FRT": 0.0,
+    "E30_door_LH_RR": 100.0,
+    "E38_door_LH_FRT": 0.0,
+    "E38_door_LH_RR": 0.0
+  },
+  "avg_precision": 7.51,
+  "avg_recall": 22.83,
+  "avg_f1": 10.86,
+  "confusion_matrix": [
+    [
+      0,
+      0,
+      0,
+      20,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      40,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      49,
+      0,
+      2,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      38,
+      0,
+      8,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      149,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      50,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      20,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      8,
+      0,
+      0
+    ]
+  ]
+}

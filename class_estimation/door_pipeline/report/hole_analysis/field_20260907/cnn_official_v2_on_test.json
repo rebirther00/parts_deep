@@ -1,0 +1,133 @@
+{
+  "model": "model.pth",
+  "model_dir": "rgbe_noaux_448_seed42_datasets_factory_v2",
+  "dataset_dir": "/home/koceti/parts_deep/class_estimation/door_pipeline/datasets_factory_v2/test",
+  "accuracy": 87.36,
+  "total_samples": 364,
+  "correct_samples": 318,
+  "found_classes": {
+    "E23_door_LH_FRT": 20,
+    "E25_door_LH_RR": 40,
+    "E25_door_RH": 51,
+    "E30_E38_door_RH": 46,
+    "E30_door_LH_FRT": 149,
+    "E30_door_LH_RR": 30,
+    "E38_door_LH_FRT": 20,
+    "E38_door_LH_RR": 8
+  },
+  "class_accuracies": {
+    "E23_door_LH_FRT": 100.0,
+    "E25_door_LH_FRT": null,
+    "E25_door_LH_RR": 100.0,
+    "E25_door_RH": 68.63,
+    "E30_E38_door_RH": 100.0,
+    "E30_door_LH_FRT": 100.0,
+    "E30_door_LH_RR": 0.0,
+    "E38_door_LH_FRT": 100.0,
+    "E38_door_LH_RR": 100.0
+  },
+  "avg_precision": 72.08,
+  "avg_recall": 83.58,
+  "avg_f1": 73.45,
+  "confusion_matrix": [
+    [
+      20,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      40,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      35,
+      0,
+      0,
+      0,
+      16,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      46,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      149,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      30
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      20,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      8
+    ]
+  ]
+}

@@ -1,0 +1,34 @@
+# 2026-09-07 현장 8종(+E23) 수집분 평가 기록
+
+## 데이터
+- NAS 83세션 7,627쌍 등록(9/1~9/5 유입 포함), 로컬 미러 세션당 20장 → 1,699장.
+- 라벨 정정(DB relabel, 사용자 육안 확인): E25_LH_FRT 라벨 9/3 3세션·9/5 1세션 → **E23_door_LH_FRT**(폭 562, D 456; 9번째 클래스),
+  E30_LH_RR 짧은 세션 3개(7~15초 수동종료) → E25_LH_RR 1, E30_E38_RH 2. 대조 시트 `cmp1~3_*.jpg`, 검출 오버레이 `detect_vis.jpg`.
+- 결과 E25_door_LH_FRT 유효 현장 세션은 9/4 s_132137 1개뿐(세션 분할 불가).
+
+## 홀 랜드마크 판별기 (attribute_models/hole_landmarks/eval_classifier_datasets_factory_v2_all.json, DB 기록)
+9종 1,699장: 판정 1,673(98%), 판정 정확도 99.9%, 전체 대비 1,672/1,699. E23 80/80. 오판 1장(8/31 E38_LH_FRT s_183313 용접 중 프레임).
+변경: CAD_D에 E23=456 추가, D_RANGE 400~1500(게이트 하한 600→400, 최종 depth D 검사 신설 — D=35mm 오판 차단).
+
+## CNN(RGBE NoAux 448) 현장 학습 실험 — 세션 단위 70/15/15 (make_session_split.py, DB 미변경)
+| 모델 | 현장 test(세션 격리) | 비고 |
+|---|---|---|
+| 랩 학습 seed42 | 22.9% (88/384, 정정 전 분할) | 6종 0%, E30_E38_RH로 쏠림 |
+| 현장 학습 seed42 | **95.3% (328/344)** | train 1,099/val 176(55/9세션), test 7종 9세션 |
+오답 16장 전부 8/10 E25_RH s_091317(첫 현장 세션, 조건 상이) → E38_LH_FRT. 나머지 9세션 328/328.
+E25_LH_FRT는 train만(1세션), E23는 미포함. 산출물 artifacts/rgbe_noaux_448_seed42_factory_sess_split2/.
+
+## 자세 추정 E23 잠정 등록 (pose_eval_E23_provisional.json)
+E23 STEP은 외판 단일 솔리드(보강재 없음)라 코너 홀 부재 → 01_extract_cad_holes.PROVISIONAL(E25 좌표 차용, 힌지=CAD_D 이동).
+현장 4세션 80장 정합 잔차 med 3.25 / max 5.05mm, 반복 std z 1.96mm·θ 0.10°. 어셈블리 STEP 확보 시 정식 추출로 교체.
+
+## CNN 채택 결정 후 정식 run + 5-fold 세션 CV (2026-09-07 저녁)
+- DB auto-split 적용(세션<3 클래스는 전부 train 규칙 추가) → 9종 뷰 train 1,139 / val 196 / test 364.
+- **정식 run** `rgbe_noaux_448_seed42_datasets_factory_v2` (DB training_sessions #8, evaluation_results 기록): test **87.4% (318/364)**.
+  실험(95.3%)과 차이는 E30_LH_RR 8/27 s_111705 한 세션이 0/30으로 뒤집힌 것(val 출렁임 속 에폭 3 체크포인트). 라벨은 홀 판별기 D 1157.6으로 정상 확인(`cmp4_*.jpg`).
+- **5-fold 세션 그룹 CV** (session_cv.py, DB 미기록, fold당 ~1시간): 합산 **1,620/1,679 = 96.5%**, fold별 91.8 / 97.3 / 97.6 / 100 / 100 (평균 97.3 ± 3.0).
+  78개 test 세션 중 72개 100%. 초기 2세션(8/10 E25_RH, 8/27 E30_LH_RR s_111705) 제외 시 98.8%.
+  오답 세션: 8/10 E25_RH 0/16, 8/27 E30_LH_RR s_111705 6/30(→E38_LH_RR), 8/27 s_122816 0/9(홀 프레임 밖 세션 →E23), 9/5 E30_LH_FRT s_131434 12/20(→E38_LH_FRT), 그 외 2세션 1장씩.
+  클래스별: E23 100, E25_LH_RR 99.6, E25_RH 94.9, E30_E38_RH 100, E30_LH_FRT 97.2, E30_LH_RR 80.9, E38_LH_FRT 99.2, E38_LH_RR 100 (E25_LH_FRT는 항상 train, 평가 없음).
+- 해석: 새 세션 기대 정확도 ~96%, 실패는 초기 촬영 조건 세션과 크기 인접 쌍(E30↔E38 FRT/RR)에 집중. 홀 판별기(같은 세션 100%)가 주, CNN은 보조 폴백 유지.
+- 개선 후보(미실행): 체크포인트 선택 기준(val loss/최근 N에폭 평균), 학습률 하향, 세션당 이미지 수 확대(pull --all).
