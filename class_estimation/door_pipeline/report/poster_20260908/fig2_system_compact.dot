@@ -1,0 +1,19 @@
+digraph G { rankdir=TB; graph [fontname="Noto Sans CJK KR", fontsize=13, pad=0.2, nodesep=0.25, ranksep=0.35, compound=true];
+ node [fontname="Noto Sans CJK KR", fontsize=12, shape=box, style="rounded,filled", fillcolor="#F2F2F2", color="#555555", penwidth=1.2, margin="0.14,0.07"];
+ edge [fontname="Noto Sans CJK KR", fontsize=10, color="#555555", penwidth=1.2, arrowsize=0.8];
+ subgraph cluster_site { label="용접 현장"; style="rounded"; color="#888888";
+   cam [label="ZED X Mini RGB-D\n1920×1200", fillcolor="#DCE9F7"];
+   box [label="엣지 캡처 UI (ZED Box)\n작업자 기종 선택 → 세션 시작 · 2초 간격 저장\n세션 메타(기종·시각·intrinsics·매수·종료사유)"];
+   {rank=same; cam -> box;} }
+ nas [label="NAS 정본 (세션 단위 전량)", shape=cylinder, fillcolor="#EFEFEF"];
+ box -> nas [label=" 자동 업로드"];
+ subgraph cluster_srv { label="학습 서버"; style="rounded"; color="#2F6FBA";
+   db [label="메타 DB (SQLite)\n세션·이미지·split·라벨 정정 이력·학습/평가 기록", shape=cylinder, fillcolor="#DCE9F7"];
+   mirror [label="세션당 20장 균등 샘플 미러\n→ 세션 단위 split 뷰 (train/val/test)"];
+   qa [label="라벨 검증 루프\n기하 판별기(홀 거리 D) 세션 판정 → 육안 확정 → DB 정정", fillcolor="#FBE5E4"];
+   models [label="판별기 학습·평가\n기하 판별기 / 외관 CNN(RGB+Edge) / 자세 추정"];
+   web [label="웹 열람 도구"];
+   {rank=same; db -> web [dir=none, style=dashed];}
+   db -> mirror; mirror -> models; mirror -> qa; qa -> db [label=" 정정"]; }
+ nas -> db [label=" 세션 등록"]; nas -> mirror [label=" 샘플 pull"];
+}
