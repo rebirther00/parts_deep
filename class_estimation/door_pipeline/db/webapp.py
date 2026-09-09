@@ -19,6 +19,7 @@ import ast
 import hmac
 import json
 import os
+import re
 import sqlite3
 import statistics
 import time
@@ -917,14 +918,24 @@ def eval_report_view(con, report_path):
         held.extend(r for r in rows if isinstance(r, dict)
                     and r.get("gate") not in (None, "ok"))
     out_held = []
+    view_re = re.compile(r"rgb_(\d{8})_(s_\d{6})_(\d+)\.png$")   # 링크 뷰(v2·eval20) 파일명 → 미러 세션·파일
     for r in held[:80]:
         img = r.get("image", "")
         first, _, rel = img.partition("/")
-        row = con.execute(
-            """SELECT i.id, i.synced_local FROM images i JOIN classes c ON c.id=i.class_id
-               JOIN datasets d ON d.id=c.dataset_id
-               WHERE i.rgb_path=? AND (d.base_path=? OR d.base_path LIKE 'nas:%')""",
-            (rel, first + "/")).fetchone()
+        if "/datasets/" in img and img.startswith(".."):   # 실험실 평가의 '../door_paper/datasets/<cls>/rgb_*.png' 경로 → door_real
+            first, rel = "datasets", img.split("/datasets/", 1)[1]
+        m = view_re.search(img)
+        if m:   # datasets_factory_v2/all/<cls>/rgb_<날짜>_<세션>_<idx>.png 등 링크 뷰 경로는 세션+파일명으로 DB 조회
+            row = con.execute(
+                """SELECT i.id, i.synced_local FROM images i JOIN capture_sessions s ON s.id=i.session_id
+                   WHERE s.session_dir LIKE ? AND i.rgb_filename=?""",
+                (f"{m.group(1)}/%/{m.group(2)}", f"rgb_{m.group(3)}.png")).fetchone()
+        else:
+            row = con.execute(
+                """SELECT i.id, i.synced_local FROM images i JOIN classes c ON c.id=i.class_id
+                   JOIN datasets d ON d.id=c.dataset_id
+                   WHERE i.rgb_path=? AND (d.base_path=? OR d.base_path LIKE 'nas:%')""",
+                (rel, first + "/")).fetchone()
         parts = img.split("/")
         if len(parts) >= 4 and len(parts[1]) == 8 and parts[1].isdigit():
             label = f"{parts[1]}/{parts[-2]}/{parts[-1]}"   # 날짜/세션/파일 (미러 구조)
