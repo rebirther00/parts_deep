@@ -1,0 +1,194 @@
+{
+ "/tmp/claude-1000/-home-koceti-parts-deep/cd372bfe-ad6a-4178-824e-5abe1e1308d3/scratchpad/eval20/extra": {
+  "rows": [
+   {
+    "image": "../../../../../tmp/claude-1000/-home-koceti-parts-deep/cd372bfe-ad6a-4178-824e-5abe1e1308d3/scratchpad/eval20/extra/E25_door_LH_FRT/rgb_20260904_s_132137_0000.png",
+    "cls": "E25_door_LH_FRT",
+    "pred": "E25_door_LH_FRT",
+    "D_mm": 723.6873397639415,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 41.0
+   },
+   {
+    "image": "../../../../../tmp/claude-1000/-home-koceti-parts-deep/cd372bfe-ad6a-4178-824e-5abe1e1308d3/scratchpad/eval20/extra/E25_door_LH_FRT/rgb_20260904_s_132137_0008.png",
+    "cls": "E25_door_LH_FRT",
+    "pred": "E25_door_LH_FRT",
+    "D_mm": 723.1481024426351,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 41.0
+   },
+   {
+    "image": "../../../../../tmp/claude-1000/-home-koceti-parts-deep/cd372bfe-ad6a-4178-824e-5abe1e1308d3/scratchpad/eval20/extra/E25_door_LH_FRT/rgb_20260904_s_132137_0016.png",
+    "cls": "E25_door_LH_FRT",
+    "pred": "E25_door_LH_FRT",
+    "D_mm": 722.5256709841897,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 41.0
+   },
+   {
+    "image": "../../../../../tmp/claude-1000/-home-koceti-parts-deep/cd372bfe-ad6a-4178-824e-5abe1e1308d3/scratchpad/eval20/extra/E25_door_LH_FRT/rgb_20260904_s_132137_0024.png",
+    "cls": "E25_door_LH_FRT",
+    "pred": "E25_door_LH_FRT",
+    "D_mm": 723.5765214592681,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 41.0
+   },
+   {
+    "image": "../../../../../tmp/claude-1000/-home-koceti-parts-deep/cd372bfe-ad6a-4178-824e-5abe1e1308d3/scratchpad/eval20/extra/E25_door_LH_FRT/rgb_20260904_s_132137_0031.png",
+    "cls": "E25_door_LH_FRT",
+    "pred": "E25_door_LH_FRT",
+    "D_mm": 723.4050009999537,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 41.0
+   },
+   {
+    "image": "../../../../../tmp/claude-1000/-home-koceti-parts-deep/cd372bfe-ad6a-4178-824e-5abe1e1308d3/scratchpad/eval20/extra/E25_door_LH_FRT/rgb_20260904_s_132137_0037.png",
+    "cls": "E25_door_LH_FRT",
+    "pred": "E25_door_LH_FRT",
+    "D_mm": 722.454256592245,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 41.0
+   },
+   {
+    "image": "../../../../../tmp/claude-1000/-home-koceti-parts-deep/cd372bfe-ad6a-4178-824e-5abe1e1308d3/scratchpad/eval20/extra/E25_door_LH_FRT/rgb_20260904_s_132137_0045.png",
+    "cls": "E25_door_LH_FRT",
+    "pred": "E25_door_LH_FRT",
+    "D_mm": 721.9182498391959,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 41.0
+   },
+   {
+    "image": "../../../../../tmp/claude-1000/-home-koceti-parts-deep/cd372bfe-ad6a-4178-824e-5abe1e1308d3/scratchpad/eval20/extra/E25_door_LH_FRT/rgb_20260904_s_132137_0053.png",
+    "cls": "E25_door_LH_FRT",
+    "pred": "E25_door_LH_FRT",
+    "D_mm": 722.734448802079,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 41.0
+   },
+   {
+    "image": "../../../../../tmp/claude-1000/-home-koceti-parts-deep/cd372bfe-ad6a-4178-824e-5abe1e1308d3/scratchpad/eval20/extra/E25_door_LH_FRT/rgb_20260904_s_132137_0061.png",
+    "cls": "E25_door_LH_FRT",
+    "pred": "E25_door_LH_FRT",
+    "D_mm": 722.5756664465517,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 41.0
+   },
+   {
+    "image": "../../../../../tmp/claude-1000/-home-koceti-parts-deep/cd372bfe-ad6a-4178-824e-5abe1e1308d3/scratchpad/eval20/extra/E25_door_LH_FRT/rgb_20260904_s_132137_0069.png",
+    "cls": "E25_door_LH_FRT",
+    "pred": "E25_door_LH_FRT",
+    "D_mm": 723.0484370689137,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 41.0
+   },
+   {
+    "image": "../../../../../tmp/claude-1000/-home-koceti-parts-deep/cd372bfe-ad6a-4178-824e-5abe1e1308d3/scratchpad/eval20/extra/E25_door_LH_FRT/rgb_20260904_s_132137_0076.png",
+    "cls": "E25_door_LH_FRT",
+    "pred": "E25_door_LH_FRT",
+    "D_mm": 722.737511678197,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 41.0
+   },
+   {
+    "image": "../../../../../tmp/claude-1000/-home-koceti-parts-deep/cd372bfe-ad6a-4178-824e-5abe1e1308d3/scratchpad/eval20/extra/E25_door_LH_FRT/rgb_20260904_s_132137_0084.png",
+    "cls": "E25_door_LH_FRT",
+    "pred": "E25_door_LH_FRT",
+    "D_mm": 722.0798834235069,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 41.0
+   },
+   {
+    "image": "../../../../../tmp/claude-1000/-home-koceti-parts-deep/cd372bfe-ad6a-4178-824e-5abe1e1308d3/scratchpad/eval20/extra/E25_door_LH_FRT/rgb_20260904_s_132137_0092.png",
+    "cls": "E25_door_LH_FRT",
+    "pred": "E25_door_LH_FRT",
+    "D_mm": 722.1123326522568,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 41.0
+   },
+   {
+    "image": "../../../../../tmp/claude-1000/-home-koceti-parts-deep/cd372bfe-ad6a-4178-824e-5abe1e1308d3/scratchpad/eval20/extra/E25_door_LH_FRT/rgb_20260904_s_132137_0100.png",
+    "cls": "E25_door_LH_FRT",
+    "pred": "E25_door_LH_FRT",
+    "D_mm": 722.3923024073034,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 41.0
+   },
+   {
+    "image": "../../../../../tmp/claude-1000/-home-koceti-parts-deep/cd372bfe-ad6a-4178-824e-5abe1e1308d3/scratchpad/eval20/extra/E25_door_LH_FRT/rgb_20260904_s_132137_0108.png",
+    "cls": "E25_door_LH_FRT",
+    "pred": "E25_door_LH_FRT",
+    "D_mm": 723.14793992001,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 41.0
+   },
+   {
+    "image": "../../../../../tmp/claude-1000/-home-koceti-parts-deep/cd372bfe-ad6a-4178-824e-5abe1e1308d3/scratchpad/eval20/extra/E25_door_LH_FRT/rgb_20260904_s_132137_0116.png",
+    "cls": "E25_door_LH_FRT",
+    "pred": "E25_door_LH_FRT",
+    "D_mm": 722.2794094530967,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 41.0
+   },
+   {
+    "image": "../../../../../tmp/claude-1000/-home-koceti-parts-deep/cd372bfe-ad6a-4178-824e-5abe1e1308d3/scratchpad/eval20/extra/E25_door_LH_FRT/rgb_20260904_s_132137_0124.png",
+    "cls": "E25_door_LH_FRT",
+    "pred": "E25_door_LH_FRT",
+    "D_mm": 722.1582512287863,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 41.0
+   },
+   {
+    "image": "../../../../../tmp/claude-1000/-home-koceti-parts-deep/cd372bfe-ad6a-4178-824e-5abe1e1308d3/scratchpad/eval20/extra/E25_door_LH_FRT/rgb_20260904_s_132137_0132.png",
+    "cls": "E25_door_LH_FRT",
+    "pred": "E25_door_LH_FRT",
+    "D_mm": 724.5973733122341,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 39.80525337553172
+   },
+   {
+    "image": "../../../../../tmp/claude-1000/-home-koceti-parts-deep/cd372bfe-ad6a-4178-824e-5abe1e1308d3/scratchpad/eval20/extra/E25_door_LH_FRT/rgb_20260904_s_132137_0140.png",
+    "cls": "E25_door_LH_FRT",
+    "pred": "E25_door_LH_FRT",
+    "D_mm": 721.2803371062432,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 41.0
+   },
+   {
+    "image": "../../../../../tmp/claude-1000/-home-koceti-parts-deep/cd372bfe-ad6a-4178-824e-5abe1e1308d3/scratchpad/eval20/extra/E25_door_LH_FRT/rgb_20260904_s_132137_0148.png",
+    "cls": "E25_door_LH_FRT",
+    "pred": "E25_door_LH_FRT",
+    "D_mm": 722.8532324761102,
+    "gate": "ok",
+    "D_src": "depth",
+    "margin_mm": 41.0
+   }
+  ],
+  "n": 20,
+  "judged": 20,
+  "correct": 20,
+  "acc_judged": 100.0,
+  "group_acc_judged": 100.0,
+  "gates": {
+   "ok": 20
+  }
+ }
+}
