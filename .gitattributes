@@ -5,3 +5,5 @@
 *.pt filter=lfs diff=lfs merge=lfs -text
 *.onnx filter=lfs diff=lfs merge=lfs -text
 *.engine filter=lfs diff=lfs merge=lfs -text
+# 발표자료(pptx)는 대용량이라 LFS (report/ 의 기존 pptx는 일반 blob 그대로 둠)
+발표자료/**/*.pptx filter=lfs diff=lfs merge=lfs -text
