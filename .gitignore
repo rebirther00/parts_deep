@@ -72,3 +72,16 @@ class_estimation/door_pipeline/db/.thumb_cache/
 class_estimation/door_pipeline/attribute_models/hole_landmarks/eval_*.jpg
 class_estimation/door_pipeline/attribute_models/hole_landmarks/field_*.jpg
 class_estimation/door_pipeline/attribute_models/hole_landmarks/*.pth
+
+# ── 배포 모델(추론 PC 동기화용) — Gitea LFS 추적 예외 (.gitattributes/.lfsconfig) ──
+# 학습 산출물 pth 는 여전히 미추적. 배포본만 아래에 명시적으로 예외 등록.
+!class_estimation/door_pipeline/attribute_models/hole_landmarks/model.pth
+!class_estimation/door_pipeline/attribute_models/vent_unet.pth
+!class_estimation/door/sam_models/mobile_sam.pt
+!class_estimation/door_pipeline/artifacts/
+class_estimation/door_pipeline/artifacts/*
+!class_estimation/door_pipeline/artifacts/rgbe_noaux_448_seed42_datasets_factory_v2/
+class_estimation/door_pipeline/artifacts/rgbe_noaux_448_seed42_datasets_factory_v2/*
+!class_estimation/door_pipeline/artifacts/rgbe_noaux_448_seed42_datasets_factory_v2/model.pth
+!class_estimation/door_pipeline/artifacts/rgbe_noaux_448_seed42_datasets_factory_v2/split_info.json
+!class_estimation/door_pipeline/artifacts/rgbe_noaux_448_seed42_datasets_factory_v2/factory_eval_results.json

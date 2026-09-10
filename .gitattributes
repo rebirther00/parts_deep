@@ -1,0 +1,7 @@
+# Git LFS 추적 규칙 — 모델 가중치는 Gitea LFS(.lfsconfig)로. (dx300_rl 방식)
+# GitHub에는 포인터 파일만, 실제 바이너리는 Gitea LFS에만 저장된다.
+# ※ *.pth/*.pt 는 .gitignore 로 기본 제외 — 배포 모델만 .gitignore 하단 예외로 추적.
+*.pth filter=lfs diff=lfs merge=lfs -text
+*.pt filter=lfs diff=lfs merge=lfs -text
+*.onnx filter=lfs diff=lfs merge=lfs -text
+*.engine filter=lfs diff=lfs merge=lfs -text
