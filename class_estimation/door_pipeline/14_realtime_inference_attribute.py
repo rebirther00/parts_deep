@@ -19,6 +19,7 @@ import argparse
 import collections
 import glob
 import os
+import signal
 import sys
 import threading
 import time
@@ -87,6 +88,7 @@ inference_result = {
 latest_frame = None
 frame_lock = threading.Lock()
 reset_event = threading.Event()
+stop_event = threading.Event()
 
 
 # ── 프레임 소스 ──────────────────────────────────────────
@@ -118,6 +120,9 @@ class ReplaySource:
         return {'camera': f'Replay ({len(self.pairs)} frames)',
                 'connected': True}
 
+    def close(self):
+        pass
+
 
 class ZedSource:
     """CameraManager 래퍼 (depth 필수 → ZED 전용)."""
@@ -139,6 +144,11 @@ class ZedSource:
         return {'camera': 'ZED' if has_depth else '카메라(depth 없음!)',
                 'connected': self.cam.get_frame() is not None}
 
+    def close(self):
+        # 캡처 스레드 join + zed.close(). 빼먹으면 Ctrl+C 시 ZED SDK 스레드가
+        # 열린 채 인터프리터가 내려가 abort("terminate called ...") 후 수 분간 멈춤.
+        self.cam.stop()
+
 
 # ── 추론 루프 ────────────────────────────────────────────
 
@@ -158,7 +168,7 @@ def inference_loop(source, net, templates, sam, hole=None):
     hole_window = collections.deque(maxlen=args.n_frames)
     cached_mask = None
     frame_i = 0
-    while True:
+    while not stop_event.is_set():
         if reset_event.is_set():
             window.clear()
             hole_window.clear()
@@ -334,8 +344,28 @@ if __name__ == '__main__':
         print(f'홀 랜드마크 판별기: {hole_classifier.MODEL_PATH} (1순위, 속성 파이프라인은 폴백)')
     else:
         print('홀 랜드마크 판별기 비활성 — 속성 파이프라인만 사용')
-    threading.Thread(target=inference_loop,
-                     args=(source, net, templates, sam, hole),
-                     daemon=True).start()
-    print(f'서버 시작: http://0.0.0.0:{args.port}')
-    app.run(host='0.0.0.0', port=args.port, threaded=True)
+    infer_thread = threading.Thread(target=inference_loop,
+                                    args=(source, net, templates, sam, hole),
+                                    daemon=True)
+    infer_thread.start()
+
+    def _on_signal(signum, frame):
+        if stop_event.is_set():
+            print('\n강제 종료', flush=True)
+            os._exit(1)
+        stop_event.set()
+        raise KeyboardInterrupt
+    signal.signal(signal.SIGINT, _on_signal)
+    signal.signal(signal.SIGTERM, _on_signal)
+
+    print(f'서버 시작: http://0.0.0.0:{args.port}  (종료: Ctrl+C)')
+    try:
+        app.run(host='0.0.0.0', port=args.port, threaded=True)
+    except KeyboardInterrupt:
+        pass
+    finally:
+        print('\n종료 중: 추론 스레드 정지 → 카메라 닫기', flush=True)
+        stop_event.set()
+        infer_thread.join(timeout=5)
+        source.close()
+        print('종료 완료', flush=True)

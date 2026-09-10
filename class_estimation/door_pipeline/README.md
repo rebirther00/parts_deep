@@ -4,12 +4,13 @@
 추출·정리**한 폴더 (2026-07-08). 기존 폴더는 이력 보존용으로 그대로 두며,
 신규 작업은 여기서 진행한다.
 
-두 축으로 구성된다:
+세 축으로 구성된다:
 
 | 축 | 스크립트 | 강점 |
 |---|---|---|
 | A. CNN 분류 (RGBE NoAux 448) | `01`~`05` | 실험실 조건 최강 (test 100%) |
 | B. 속성 파이프라인 (CAD+U-Net) | `10`~`13` + `attribute_utils.py` | 현장 강건 (현장 그룹 100%), 리비전 대응 |
+| C. 홀 랜드마크 판별기 | `15`~`18` + `hole_classifier.py` | 1순위 판정 (현장 100%), 실시간은 `18`(전용)·`14`(통합) |
 
 검증 수치·원리·촬영 프로토콜은 `DOC_attribute_pipeline.md` 참조.
 데이터셋은 심볼릭 링크로 `../door/` 원본을 참조한다 (복사본 아님).
@@ -96,10 +97,18 @@ python 16_train_hole_landmarks.py
 python 17_evaluate_hole_classifier.py                 # test 분할 · datasets 전체 · datasets_field
 python 17_evaluate_hole_classifier.py --base datasets_field
 python tools/make_hole_samples.py                     # 성공/오판/보류 샘플 + 학습 곡선
-# ⑭ 실시간 추론 (홀 1순위 + 속성 폴백, 웹 UI :5003)        [scripts/hole_inference.sh]
+# ⑱ 실시간 추론 — 홀 판별기 **전용** (SAM·U-Net 미로드, 웹 UI :5004)  [scripts/hole_only_inference.sh]
+python 18_realtime_inference_hole.py                                   # ZED 카메라
+python 18_realtime_inference_hole.py --replay datasets_field/E25_door_RH_s_091317 --fp16
+# ⑭ 실시간 추론 — 통합 (홀 1순위 + 속성 파이프라인 폴백, 웹 UI :5003)  [scripts/hole_inference.sh]
 python 14_realtime_inference_attribute.py --replay datasets_field/E25_door_RH_s_091317
 python scripts/hole_classify_image.py rgb_0003.png    # 단일 이미지
 ```
+
+- **⑱ vs ⑭**: ⑱은 `hole_classifier` 만 사용하므로 로드가 빠르고(모델 1개, 약 0.5 s) 보류 시 판정 없음("보류")으로 남는다.
+  ⑭는 MobileSAM+U-Net 을 함께 돌려 홀이 보류일 때 속성 파이프라인 결과로 폴백하고, 홀 마진이 작을 때 속성 그룹으로 제약한다.
+  ⑱ API `/api/inference_result`: `class, group, confidence(=판정 프레임 비율), D_mm(윈도 중앙값), margin_mm, n_judged, gate, gate_counts(윈도 게이트 분포),
+  candidates[{class, cad_D_mm, diff_mm}], frame{gate, D_mm, D_src, points}`. `/api/reset` 으로 도어 교체 시 윈도 초기화. depth 없는 리플레이 폴더는 볼트 스케일 D(검증용).
 
 - 평가(라벨 학습분 제외): test 분할 134/189 판정·**100%**, datasets 전체 814/1162 판정·**99.0%**(그룹 제약 시 99.5%),
   현장 16/16·**100%**. 보류(~30%)는 힌지측 홀이 프레임 밖/경계 근접 — 사무실 촬영 프레이밍 문제, 현장은 0%.

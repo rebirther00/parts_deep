@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hole Landmark Door Classification — 실시간 추론</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #0f172a; color: #e2e8f0; min-height: 100vh; }
+
+        .header { background: #1e293b; padding: 10px 24px; display: flex; align-items: center; justify-content: space-between; }
+        .header h1 { font-size: 1.1rem; font-weight: 600; }
+        .badge { font-size: 0.78rem; padding: 4px 14px; border-radius: 12px; background: #475569; }
+        .badge.connected { background: #16a34a; }
+
+        .container { max-width: 1100px; margin: 0 auto; padding: 16px; display: flex; gap: 16px; }
+
+        .video-section { flex: 1; }
+        .stream-box { background: #000; border-radius: 8px; overflow: hidden; position: relative; }
+        .stream-box img { width: 100%; display: block; }
+        .legend { display: flex; gap: 14px; font-size: 0.78rem; color: #94a3b8; margin-top: 8px; }
+        .legend span::before { content: ""; display: inline-block; width: 10px; height: 10px; border-radius: 50%; border: 2px solid; margin-right: 5px; vertical-align: -1px; }
+        .legend .bolt::before { border-color: #0000ff; }
+        .legend .hinge::before { border-color: #ff0000; }
+        .legend .latch::before { border-color: #ff8c00; }
+
+        .sidebar { width: 300px; display: flex; flex-direction: column; gap: 12px; }
+
+        .card { background: #1e293b; border-radius: 8px; padding: 16px; }
+        .card h3 { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.5px; color: #94a3b8; margin-bottom: 12px; }
+
+        .result-class { font-size: 1.3rem; font-weight: 700; color: #22c55e; margin-bottom: 4px; word-break: break-all; }
+        .result-conf { font-size: 1.1rem; color: #94a3b8; }
+
+        .model-tag { display: inline-block; font-size: 0.72rem; padding: 2px 8px; border-radius: 8px; background: #0891b2; color: #fff; margin-bottom: 10px; }
+
+        .cand { margin-bottom: 8px; }
+        .cand .label { display: flex; justify-content: space-between; font-size: 0.82rem; margin-bottom: 3px; }
+        .cand .bar { height: 8px; background: #334155; border-radius: 4px; overflow: hidden; }
+        .cand .fill { height: 100%; border-radius: 4px; transition: width 0.3s; background: #3b82f6; }
+        .cand.best .fill { background: #22c55e; }
+
+        .stat-row { display: flex; justify-content: space-between; padding: 6px 0; font-size: 0.85rem; border-bottom: 1px solid #334155; }
+        .stat-row:last-child { border: none; }
+        .stat-value { font-weight: 600; color: #f8fafc; }
+        .gate-ok { color: #22c55e; }
+        .gate-bad { color: #f59e0b; }
+
+        button { width: 100%; padding: 8px; border: none; border-radius: 6px; background: #334155; color: #e2e8f0; font-size: 0.85rem; cursor: pointer; }
+        button:hover { background: #475569; }
+
+        @media (max-width: 768px) {
+            .container { flex-direction: column; }
+            .sidebar { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <h1>Hole Landmark Door Classification — 실시간 추론</h1>
+    <span class="badge" id="cameraBadge">연결 중...</span>
+</div>
+
+<div class="container">
+    <div class="video-section">
+        <div class="stream-box">
+            <img id="videoStream" src="/video_feed" alt="Camera Stream">
+        </div>
+        <div class="legend">
+            <span class="bolt">볼트홀 ×4</span>
+            <span class="hinge">힌지측 모서리 홀</span>
+            <span class="latch">래치측 모서리 홀</span>
+        </div>
+    </div>
+
+    <div class="sidebar">
+        <div class="card">
+            <h3>판정 결과</h3>
+            <span class="model-tag">Hole Landmark</span>
+            <div class="result-class" id="resultClass">대기 중</div>
+            <div class="result-conf" id="resultConf">—</div>
+        </div>
+
+        <div class="card">
+            <h3>거리 D (윈도 중앙값)</h3>
+            <div class="stat-row"><span>D</span><span class="stat-value" id="dMm">—</span></div>
+            <div class="stat-row"><span>이웃 클래스 마진</span><span class="stat-value" id="marginMm">—</span></div>
+            <div class="stat-row"><span>판정 프레임</span><span class="stat-value" id="judged">0 / {{ n_frames }} (확정 ≥{{ min_judged }})</span></div>
+            <div class="stat-row"><span>현재 프레임 게이트</span><span class="stat-value" id="gate">—</span></div>
+            <div class="stat-row"><span>윈도 게이트 분포</span><span class="stat-value" id="gateCounts" style="font-weight:400;font-size:0.75rem">—</span></div>
+        </div>
+
+        <div class="card">
+            <h3>CAD D 근접 후보 (mm 차이)</h3>
+            <div id="candBars"><div style="font-size:0.8rem;color:#64748b">판정 프레임 없음</div></div>
+        </div>
+
+        <div class="card">
+            <h3>성능</h3>
+            <div class="stat-row"><span>추론 시간</span><span class="stat-value" id="inferMs">—</span></div>
+            <div class="stat-row"><span>엔진</span><span class="stat-value" id="engineInfo">PyTorch</span></div>
+            <div class="stat-row"><span>모델</span><span class="stat-value" id="modelInfo" style="font-size:0.72rem;font-weight:400">—</span></div>
+        </div>
+
+        <div class="card">
+            <button id="resetBtn">윈도 초기화 (도어 교체)</button>
+        </div>
+    </div>
+</div>
+
+<script>
+async function loadCameraInfo() {
+    try {
+        const res = await fetch("/api/camera_info");
+        const data = await res.json();
+        const badge = document.getElementById("cameraBadge");
+        badge.textContent = data.camera;
+        if (data.connected) badge.classList.add("connected");
+        if (data.engine) document.getElementById("engineInfo").textContent = data.engine;
+        if (data.model) document.getElementById("modelInfo").textContent = data.model;
+    } catch {}
+}
+
+async function pollResult() {
+    try {
+        const res = await fetch("/api/inference_result");
+        const r = await res.json();
+
+        const cls = document.getElementById("resultClass");
+        cls.textContent = r.class;
+        cls.style.color = r.confidence > 60 ? "#22c55e" : "#f59e0b";
+        document.getElementById("resultConf").textContent =
+            (r.group && r.group !== "-" ? "그룹 " + r.group + " · " : "") +
+            (r.confidence > 0 ? r.confidence.toFixed(0) + "%" : "—");
+
+        document.getElementById("dMm").textContent = r.D_mm ? r.D_mm.toFixed(1) + " mm" : "—";
+        document.getElementById("marginMm").textContent =
+            r.margin_mm != null ? r.margin_mm.toFixed(1) + " mm" : "—";
+        document.getElementById("judged").textContent =
+            r.n_judged + " / " + r.window + " (확정 ≥{{ min_judged }})";
+        const g = document.getElementById("gate");
+        g.textContent = r.gate || "—";
+        g.className = "stat-value " + (r.gate === "ok" ? "gate-ok" : "gate-bad");
+        const gc = r.gate_counts || {};
+        document.getElementById("gateCounts").textContent =
+            Object.keys(gc).length ? Object.entries(gc).map(([k, v]) => k + ":" + v).join(" ") : "—";
+        document.getElementById("inferMs").textContent =
+            r.inference_ms > 0 ? r.inference_ms.toFixed(1) + " ms" : "—";
+
+        if (r.candidates && r.candidates.length > 0) {
+            const maxDiff = Math.max(60, r.candidates[r.candidates.length - 1].diff_mm);
+            let html = "";
+            r.candidates.forEach((c, i) => {
+                const pct = Math.max(2, 100 - 100 * c.diff_mm / maxDiff);
+                html +=
+                    '<div class="cand' + (i === 0 ? ' best' : '') + '">' +
+                    '<div class="label"><span>' + c.class + ' <span style="color:#64748b">(' + c.cad_D_mm + ')</span></span>' +
+                    '<span>' + (i === 0 ? '' : '+') + c.diff_mm.toFixed(1) + ' mm</span></div>' +
+                    '<div class="bar"><div class="fill" style="width:' + pct + '%"></div></div>' +
+                    '</div>';
+            });
+            document.getElementById("candBars").innerHTML = html;
+        }
+    } catch {}
+}
+
+document.getElementById("resetBtn").onclick = async () => { try { await fetch("/api/reset"); } catch {} };
+
+loadCameraInfo();
+setInterval(pollResult, 500);
+pollResult();
+</script>
+
+</body>
+</html>

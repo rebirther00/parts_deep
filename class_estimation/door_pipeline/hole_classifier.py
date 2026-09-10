@@ -69,37 +69,82 @@ def _apply(M, p):
     return np.array([M[0, 0] * p[0] + M[0, 1] * p[1] + M[0, 2], M[1, 0] * p[0] + M[1, 1] * p[1] + M[1, 2]])
 
 
+_dev_cache = {}
+
+
+def _dev_buffers(dev):
+    """디바이스별 정규화 상수 + 고정(pinned) 업로드 버퍼 (1회 생성, 재사용)."""
+    key = str(dev)
+    if key not in _dev_cache:
+        pin = (torch.empty((IN_H, IN_W, 3), dtype=torch.uint8).pin_memory()
+               if dev.type == 'cuda' else torch.empty((IN_H, IN_W, 3), dtype=torch.uint8))
+        _dev_cache[key] = dict(mean=MEAN.to(dev), std=STD.to(dev), pin=pin)
+    return _dev_cache[key]
+
+
+@torch.no_grad()
+def _peaks_gpu(hm, ks, thr=0.15, nms=5):
+    """GPU 피크 탐색. hm: (C,H,W) float 텐서, ks: 채널별 최대 개수.
+    → 채널별 [(x, y, score)] (히트맵 픽셀 좌표, 서브픽셀 보정). 결과는 이전 CPU 버전(_peaks)과 동일.
+    D2H 전송은 채널 전체를 합쳐 1회만 한다."""
+    C, H, W = hm.shape
+    mx = F.max_pool2d(hm[None], nms * 2 + 1, stride=1, padding=nms)[0]
+    cand = (hm == mx) & (hm > thr)
+    rows, counts = [], []
+    for c, k in enumerate(ks):
+        idx = cand[c].nonzero()                      # (n, 2) = (y, x)
+        n = idx.shape[0]
+        if n == 0:
+            counts.append(0)
+            continue
+        y, x = idx[:, 0], idx[:, 1]
+        sc = hm[c, y, x]
+        if n > k:
+            sc, o = torch.topk(sc, k)
+        else:
+            sc, o = torch.sort(sc, descending=True)
+        y, x = y[o], x[o]
+        v = hm[c, y, x]
+        l = hm[c, y, (x - 1).clamp(0, W - 1)]; r = hm[c, y, (x + 1).clamp(0, W - 1)]
+        u = hm[c, (y - 1).clamp(0, H - 1), x]; d = hm[c, (y + 1).clamp(0, H - 1), x]
+        dx = (0.5 * (r - l) / torch.clamp(2 * v - r - l, min=1e-6)).clamp(-1, 1)
+        dy = (0.5 * (d - u) / torch.clamp(2 * v - d - u, min=1e-6)).clamp(-1, 1)
+        dx = torch.where((x > 0) & (x < W - 1), dx, torch.zeros_like(dx))
+        dy = torch.where((y > 0) & (y < H - 1), dy, torch.zeros_like(dy))
+        rows.append(torch.stack([x.float() + dx, y.float() + dy, v], 1))
+        counts.append(len(o))
+    flat = torch.cat(rows, 0).cpu().numpy() if rows else np.zeros((0, 3), np.float32)
+    out, i = [], 0
+    for n in counts:
+        out.append([(float(a), float(b), float(c_)) for a, b, c_ in flat[i:i + n]])
+        i += n
+    return out
+
+
 def _peaks(hm, k, thr=0.15, nms=5):
-    h = torch.from_numpy(hm)[None, None]
-    mx = F.max_pool2d(h, nms * 2 + 1, stride=1, padding=nms)
-    cand = ((h == mx) & (h > thr))[0, 0].nonzero().numpy()
-    out = []
-    for y, x in cand:
-        dx = dy = 0.0
-        if 0 < x < hm.shape[1] - 1:
-            dx = 0.5 * (hm[y, x + 1] - hm[y, x - 1]) / max(1e-6, (2 * hm[y, x] - hm[y, x + 1] - hm[y, x - 1]))
-        if 0 < y < hm.shape[0] - 1:
-            dy = 0.5 * (hm[y + 1, x] - hm[y - 1, x]) / max(1e-6, (2 * hm[y, x] - hm[y + 1, x] - hm[y - 1, x]))
-        out.append((float(x + np.clip(dx, -1, 1)), float(y + np.clip(dy, -1, 1)), float(hm[y, x])))
-    out.sort(key=lambda t: -t[2])
-    return out[:k]
+    """(호환용) 단일 채널 numpy 히트맵 CPU 피크 탐색. 실시간 경로는 _peaks_gpu 사용."""
+    return _peaks_gpu(torch.from_numpy(np.ascontiguousarray(hm))[None], [k], thr, nms)[0]
 
 
 @torch.no_grad()
 def detect(net, dev, rgb):
-    """원본 BGR → {'bolt': [(x,y,score)×≤4], 'corner_hinge': [...≤1], 'corner_latch': [...≤1]} (원본 픽셀)."""
+    """원본 BGR → {'bolt': [(x,y,score)×≤4], 'corner_hinge': [...≤1], 'corner_latch': [...≤1]} (원본 픽셀).
+
+    letterbox(warpAffine)만 CPU, 이후 BGR→RGB·정규화·forward·피크 탐색은 모두 GPU에서 수행."""
     h, w = rgb.shape[:2]
     M = _letterbox(h, w)
     x = cv2.warpAffine(rgb, M, (IN_W, IN_H), borderValue=(114, 114, 114))
-    t = torch.from_numpy(x[:, :, ::-1].copy()).permute(2, 0, 1).float()[None] / 255.
-    t = ((t - MEAN) / STD).to(dev)
-    hm = net(t)[0].float().cpu().numpy()
+    buf = _dev_buffers(dev)
+    buf['pin'].numpy()[:] = x                                   # pinned 버퍼로 memcpy
+    t = buf['pin'].to(dev, non_blocking=True)                   # uint8 H2D (3MB)
+    t = t.permute(2, 0, 1)[[2, 1, 0]].float()[None] / 255.      # BGR→RGB, GPU
+    t = (t - buf['mean']) / buf['std']
+    hm = net(t)[0].float()
+    ks = [4 if c == 'bolt' else 1 for c in CH]
+    pk = _peaks_gpu(hm, ks)
     Mi = cv2.invertAffineTransform(M)
-    out = {}
-    for ci, c in enumerate(CH):
-        pk = _peaks(hm[ci], 4 if c == 'bolt' else 1)
-        out[c] = [(*_apply(Mi, (px * STRIDE, py * STRIDE)), sc) for px, py, sc in pk]
-    return out
+    return {c: [(*_apply(Mi, (px * STRIDE, py * STRIDE)), sc) for px, py, sc in pk[ci]]
+            for ci, c in enumerate(CH)}
 
 
 def bolt_frame(bolts):
