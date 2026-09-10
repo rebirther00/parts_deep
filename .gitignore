@@ -85,3 +85,6 @@ class_estimation/door_pipeline/artifacts/rgbe_noaux_448_seed42_datasets_factory_
 !class_estimation/door_pipeline/artifacts/rgbe_noaux_448_seed42_datasets_factory_v2/model.pth
 !class_estimation/door_pipeline/artifacts/rgbe_noaux_448_seed42_datasets_factory_v2/split_info.json
 !class_estimation/door_pipeline/artifacts/rgbe_noaux_448_seed42_datasets_factory_v2/factory_eval_results.json
+
+# 발표자료(pptx)는 git 미추적 (사용자 지시 2026-09-10)
+발표자료/
