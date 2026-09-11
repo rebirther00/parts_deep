@@ -55,8 +55,8 @@ pipx run sqlite-web db/door_pipeline.db     # 또는: pipx run datasette db/door
 | `02_train.py` | models, training_sessions, training_metrics(에폭별) | status: running→completed/stopped(Ctrl+C)/failed |
 | `03_evaluate.py` | evaluation_results | original→`in_domain`(door_real), aug/aug2→`cross_domain` |
 | `04_evaluate_factory.py` | evaluation_results | `cross_domain`(door_factory) |
-| `12_train_vent_unet.py` | models, training_sessions, training_metrics | `val_accuracy` 컬럼 = val IoU(%) |
-| `13_evaluate_attribute_pipeline.py` | evaluation_results | `inference_pipeline`, accuracy=class_acc, per_class_results에 group_acc |
+| ~~`12_train_vent_unet.py`~~ (아카이브) | models, training_sessions, training_metrics | `val_accuracy` 컬럼 = val IoU(%). 2026-09-11 U-Net 아카이빙 — 기존 DB 기록은 유지 |
+| ~~`13_evaluate_attribute_pipeline.py`~~ (아카이브) | evaluation_results | `inference_pipeline`, accuracy=class_acc, per_class_results에 group_acc |
 
 - 정확도류는 JSON 산출물과 같은 백분율(0~100).
 - 평가 행의 `session_id`는 같은 모델의 최신 training_sessions에 자동 연결
@@ -156,8 +156,8 @@ python 02_train.py --model_type rgbe --no_aux --image_size 448 --dataset_dir dat
   통째로 틀려서이며 체크포인트 시점과 무관. webapp의 낮은 F1은 이 때문이고 대표 수치는 CV 96.5%로 표기.
   → **8/27 이후 데이터만 학습·평가로 확정(사용자, 9/7 밤)**: 8/10 E25_RH 세션은 프로토콜 이전 촬영이라 invalidate.
   재실행 run #10 test 91.4%(실패는 8/27 E30_LH_RR 한 세션뿐), CV(8/10 제외 재집계) 97.4%. 이전 run은 artifacts/archive_20260907_with0810/.
-- **U-Net 속성 파이프라인의 지위** — 발표 자료에서는 제외했으나 코드에는 하이브리드
-  폴백으로 잔존. 유지보수 범위(폴백 유지 vs 정리) 결정.
+- ~~U-Net 속성 파이프라인의 지위~~ → **폐기·아카이빙 (2026-09-11 사용자 결정)**. 홀 판별기 대비 이점 없음
+  (그룹 제약 기여 datasets +0.5%p, 현장 0). `door_pipeline/archive_attribute_unet_20260911/`. 폴백 역할은 CNN 정식 run이 승계(18 통합은 미구현).
 - **2차년도 확장 구체화** — 로봇 연계 파이프라인, 도장 라인 확장(R1 공표 항목).
 
 메모: 2026-09-07 9/1~9/5 유입 세션 전량 pull·평가·라벨 정정(E23 4세션·E30_LH_RR 짧은 세션 3개) 후 auto-split 적용 완료.

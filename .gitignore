@@ -76,8 +76,8 @@ class_estimation/door_pipeline/attribute_models/hole_landmarks/*.pth
 # ── 배포 모델(추론 PC 동기화용) — Gitea LFS 추적 예외 (.gitattributes/.lfsconfig) ──
 # 학습 산출물 pth 는 여전히 미추적. 배포본만 아래에 명시적으로 예외 등록.
 !class_estimation/door_pipeline/attribute_models/hole_landmarks/model.pth
-!class_estimation/door_pipeline/attribute_models/vent_unet.pth
-!class_estimation/door/sam_models/mobile_sam.pt
+# vent_unet.pth(U-Net)는 2026-09-11 door_pipeline/archive_attribute_unet_20260911/ 로 이동 (배포 제외, git 추적은 유지)
+# mobile_sam.pt(MobileSAM)도 2026-09-11 속성 파이프라인 아카이빙으로 배포 제외 (아카이브 스크립트만 사용, git 추적 유지)
 !class_estimation/door_pipeline/artifacts/
 class_estimation/door_pipeline/artifacts/*
 !class_estimation/door_pipeline/artifacts/rgbe_noaux_448_seed42_datasets_factory_v2/

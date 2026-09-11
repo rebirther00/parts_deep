@@ -6,6 +6,7 @@
 """
 import glob, json, os, sys, time
 import cv2, numpy as np
+sys.path.insert(0, '/home/koceti/parts_deep/class_estimation/door_pipeline/archive_attribute_unet_20260911')  # attribute_utils 아카이브(2026-09-11)
 sys.path.insert(0, '/home/koceti/parts_deep/class_estimation/door_pipeline')
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from attribute_utils import axis_align, load_templates
@@ -14,7 +15,7 @@ SCR = os.path.dirname(os.path.abspath(__file__))
 LATCH = json.load(open(f'{SCR}/holes/holes.json'))
 DOOR = '/home/koceti/parts_deep/class_estimation/door_pipeline'
 BASE = f'{DOOR}/datasets'
-META = json.load(open(f'{DOOR}/vent_labels/datasets/meta.json'))
+META = json.load(open(f'{DOOR}/archive_attribute_unet_20260911/vent_labels/datasets/meta.json'))
 T = load_templates()
 OUT = sys.argv[1] if len(sys.argv) > 1 else 'hole_measure3.json'
 LIMIT = int(sys.argv[2]) if len(sys.argv) > 2 else 10 ** 9

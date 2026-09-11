@@ -2,7 +2,7 @@
 
 16_train_hole_landmarks.py 로 학습한 attribute_models/hole_landmarks/model.pth 만
 사용한다. MobileSAM·U-Net·CAD 템플릿(속성 파이프라인)은 로드하지 않는다.
-속성 폴백까지 함께 쓰는 통합 서버는 14_realtime_inference_attribute.py.
+속성(U-Net) 폴백을 쓰던 통합 서버 14는 2026-09-11 archive_attribute_unet_20260911/ 로 아카이빙 (홀 보류 시 폴백은 현장 재학습 CNN으로 대체 예정).
 
 파이프라인(프레임마다):
     RGB(+Depth) → ResNet18-FPN 히트맵 → 볼트홀 4 + 모서리 홀 2 검출
