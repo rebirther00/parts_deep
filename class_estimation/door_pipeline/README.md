@@ -58,10 +58,11 @@ python 05_realtime_inference.py --port 5001
 python 15_label_holes.py --per-class 15 --extra datasets_field
 # ⑯ 학습 → attribute_models/hole_landmarks/model.pth (+DB)  [scripts/hole_train.sh]
 python 16_train_hole_landmarks.py
-# ⑰ 평가 → eval_classifier.json, report/hole_analysis/samples/ (+DB)  [scripts/hole_evaluate.sh]
+# ⑰ 평가 → eval_classifier[_<base>].json + 혼동행렬 png(보류 열 포함) (+DB)  [scripts/hole_evaluate.sh [<base>]]
 python 17_evaluate_hole_classifier.py                 # test 분할 · datasets 전체 · datasets_field
-python 17_evaluate_hole_classifier.py --base datasets_field
-python tools/make_hole_samples.py                     # 성공/오판/보류 샘플 + 학습 곡선
+python 17_evaluate_hole_classifier.py --base datasets_factory_v2/test   # 현장 test 분할 (CNN 04와 동일 대상)
+python tools/make_hole_samples.py                     # 성공/오판/보류 샘플 + 학습 곡선 → report/hole_analysis/samples/
+python tools/make_hole_samples.py --base datasets_factory_v2/test       # → report/hole_analysis/samples_<base>/ (git 미추적)
 # ⑱ 실시간 추론 — 홀 판별기 (모델 1개, 로드 약 0.5 s, 웹 UI :5004)  [scripts/hole_only_inference.sh]
 python 18_realtime_inference_hole.py                                   # ZED 카메라
 python 18_realtime_inference_hole.py --replay datasets_field/E25_door_RH_s_091317 --fp16

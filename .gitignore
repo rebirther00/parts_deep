@@ -71,6 +71,8 @@ class_estimation/door_pipeline/db/door_pipeline.db-wal
 class_estimation/door_pipeline/db/.thumb_cache/
 class_estimation/door_pipeline/attribute_models/hole_landmarks/eval_*.jpg
 class_estimation/door_pipeline/attribute_models/hole_landmarks/field_*.jpg
+class_estimation/door_pipeline/attribute_models/hole_landmarks/*_confusion_matrix.png
+class_estimation/door_pipeline/report/hole_analysis/samples_*/
 class_estimation/door_pipeline/attribute_models/hole_landmarks/*.pth
 
 # ── 배포 모델(추론 PC 동기화용) — Gitea LFS 추적 예외 (.gitattributes/.lfsconfig) ──

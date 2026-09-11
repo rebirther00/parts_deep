@@ -1,18 +1,25 @@
 """홀 판별기 결과 샘플 이미지 생성 (성공 / 오판 / 보류) + 학습 곡선.
 
 입력: attribute_models/hole_landmarks/eval_classifier.json (17_evaluate_hole_classifier.py 출력)
+      --base <base> 지정 시 17 을 --base 로 돌린 eval_classifier_<base>.json 을 읽는다 (예: --base datasets_factory_v2/test)
 출력: report/hole_analysis/samples/{success,failure,abstain}_*.jpg, montage_*.png, training_curve.png
+      --base 시 report/hole_analysis/samples_<base>/ (학습 곡선은 기본 실행에서만)
 """
-import json, os, sqlite3, sys, collections
+import argparse, json, os, sqlite3, sys, collections
 import cv2, numpy as np
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from hole_classifier import load_model, classify, CAD_D
 
+ap = argparse.ArgumentParser()
+ap.add_argument('--base', default=None, help='17 --base 와 같은 값. 미지정 시 기본 실행 결과(datasets 전체 + datasets_field)')
+ap.add_argument('--max_fail', type=int, default=40, help='오판 샘플 최대 장수 (마진 작은 순)')
+args = ap.parse_args()
 DOOR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-OUT = os.path.join(DOOR, 'report', 'hole_analysis', 'samples')
+tag = args.base.strip('/').replace('/', '_') if args.base else None
+OUT = os.path.join(DOOR, 'report', 'hole_analysis', 'samples' + (f'_{tag}' if tag else ''))
 os.makedirs(OUT, exist_ok=True)
-E = json.load(open(os.path.join(DOOR, 'attribute_models', 'hole_landmarks', 'eval_classifier.json')))
-rows = E['datasets_all']['rows'] + E.get('datasets_field', {}).get('rows', [])
+E = json.load(open(os.path.join(DOOR, 'attribute_models', 'hole_landmarks', f'eval_classifier_{tag}.json' if tag else 'eval_classifier.json')))
+rows = sum((v['rows'] for v in E.values()), []) if tag else E['datasets_all']['rows'] + E.get('datasets_field', {}).get('rows', [])
 COL = {'bolt': (255, 0, 0), 'corner_hinge': (0, 0, 255), 'corner_latch': (0, 140, 255)}
 
 
@@ -54,8 +61,9 @@ if __name__ == '__main__':
     S = [max(v, key=lambda r: r.get('margin_mm') or 0) for c, v in sorted(by.items())]
     S_img = [draw(net, dev, r, f'SUCCESS {r["cls"]}') for r in S]
     for r, im in zip(S, S_img): cv2.imwrite(os.path.join(OUT, f"success_{r['cls']}.jpg"), im, [cv2.IMWRITE_JPEG_QUALITY, 80])
-    montage(S_img, 4, os.path.join(OUT, 'montage_success.png'))
-    # 오판: 전부
+    if S_img: montage(S_img, 4, os.path.join(OUT, 'montage_success.png'))
+    # 오판: 마진 작은 순 최대 --max_fail 장
+    fail = sorted(fail, key=lambda r: r.get('margin_mm') or 0)[:args.max_fail]
     F_img = [draw(net, dev, r, f'FAILURE {r["cls"]} -> {r["pred"]}') for r in fail]
     for r, im in zip(fail, F_img): cv2.imwrite(os.path.join(OUT, f"failure_{os.path.basename(os.path.dirname(r['image']))}_{os.path.basename(r['image'])[4:8]}.jpg"), im, [cv2.IMWRITE_JPEG_QUALITY, 80])
     if F_img: montage(F_img, 4, os.path.join(OUT, 'montage_failure.png'))
@@ -64,8 +72,10 @@ if __name__ == '__main__':
     for r in abst: byg.setdefault(r['gate'], r)
     A = list(byg.values()); A_img = [draw(net, dev, r, f'ABSTAIN [{r["gate"]}] {r["cls"]}') for r in A]
     for r, im in zip(A, A_img): cv2.imwrite(os.path.join(OUT, f"abstain_{r['gate']}.jpg"), im, [cv2.IMWRITE_JPEG_QUALITY, 80])
-    montage(A_img, 3, os.path.join(OUT, 'montage_abstain.png'))
-    # 학습 곡선 (DB training_metrics, 최신 hole_landmarks 세션)
+    if A_img: montage(A_img, 3, os.path.join(OUT, 'montage_abstain.png'))
+    # 학습 곡선 (DB training_metrics, 최신 hole_landmarks 세션) — 기본 실행에서만
+    if tag:
+        print(f'success {len(succ)} / failure {len(fail)} / abstain {len(abst)}  → {os.path.relpath(OUT, DOOR)}/'); sys.exit(0)
     try:
         import matplotlib; matplotlib.use('Agg'); import matplotlib.pyplot as plt
         from matplotlib import font_manager as fm

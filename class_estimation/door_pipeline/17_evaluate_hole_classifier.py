@@ -5,6 +5,8 @@
   python 17_evaluate_hole_classifier.py --base datasets_factory_collect   # 06 수집분(<date>/<class>/s_*/rgb_*.png)
 
 출력: attribute_models/hole_landmarks/eval_classifier.json (--base 시 eval_classifier_<base>.json) + DB evaluation_results(inference_pipeline)
+      + 혼동행렬 png: eval_classifier[_<base>]_<set>_confusion_matrix.png (보류 열 포함, git 미추적). --no_png 로 생략
+      오판·보류 샘플 jpg 는 tools/make_hole_samples.py [--base <base>] 로 별도 생성
 """
 import argparse, glob, json, os, time, collections
 import cv2, numpy as np
@@ -17,7 +19,38 @@ ap.add_argument('--base', default=None, help='평가 디렉터리 (기본: test�
 ap.add_argument('--split_info', default=os.path.join(DOOR, 'artifacts', 'rgbe_noaux_448_seed42', 'split_info.json'))
 ap.add_argument('--no_db', action='store_true')
 ap.add_argument('--oracle_group', action='store_true', help='정답 그룹을 제약으로 사용 (그룹 선판별 상한 평가)')
+ap.add_argument('--no_png', action='store_true', help='혼동행렬 png 저장 생략')
 args = ap.parse_args()
+
+
+def save_confusion(rows, path, title):
+    """GT(행) × 예측(열, 보류 포함) 혼동행렬 png. 셀 색은 행 기준 비율, 숫자는 장수."""
+    import matplotlib; matplotlib.use('Agg'); import matplotlib.pyplot as plt
+    from matplotlib import font_manager as fm
+    fp = '/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc'
+    if os.path.exists(fp): fm.fontManager.addfont(fp); plt.rcParams['font.family'] = fm.FontProperties(fname=fp).get_name()
+    valid = [r for r in rows if r['cls'] in CAD_D]
+    if not valid: return None
+    gts = [c for c in sorted(CAD_D) if any(r['cls'] == c for r in valid)]
+    preds = [c for c in sorted(CAD_D) if any(r['pred'] == c for r in valid)]
+    cols = sorted(set(gts) | set(preds), key=sorted(CAD_D).index) + ['보류']
+    M = np.zeros((len(gts), len(cols)), dtype=int)
+    for r in valid:
+        M[gts.index(r['cls']), cols.index(r['pred'] if r['pred'] else '보류')] += 1
+    frac = M / np.maximum(M.sum(1, keepdims=True), 1)
+    fig, ax = plt.subplots(figsize=(1.0 + 0.95 * len(cols), 1.2 + 0.6 * len(gts)), dpi=150)
+    ax.imshow(frac, cmap='Blues', vmin=0, vmax=1)
+    for i in range(len(gts)):
+        for j in range(len(cols)):
+            if M[i, j]:
+                ax.text(j, i, str(M[i, j]), ha='center', va='center', fontsize=9,
+                        color='white' if frac[i, j] > 0.5 else 'black',
+                        fontweight='bold' if (cols[j] == gts[i]) else 'normal')
+    ax.set_xticks(range(len(cols))); ax.set_xticklabels(cols, rotation=45, ha='right', fontsize=8)
+    ax.set_yticks(range(len(gts))); ax.set_yticklabels(gts, fontsize=8)
+    ax.set_xlabel('예측 (보류 = 게이트 미통과)'); ax.set_ylabel('정답')
+    ax.set_title(title, fontsize=10); plt.tight_layout(); plt.savefig(path); plt.close(fig)
+    return path
 
 
 def train_label_keys():
@@ -95,6 +128,13 @@ if __name__ == '__main__':
             results['datasets_field'] = run_set(net, dev, 'datasets_field(현장)', files, lambda f: os.path.basename(os.path.dirname(f)).split('_s_')[0])
     out_name = 'eval_classifier.json' if not args.base else 'eval_classifier_' + args.base.strip('/').replace('/', '_') + '.json'
     json.dump(results, open(os.path.join(OUT, out_name), 'w'), ensure_ascii=False, indent=1, default=float)
+    print(f"저장: attribute_models/hole_landmarks/{out_name}")
+    if not args.no_png:
+        for k, v in results.items():
+            stem = out_name[:-5] + ('' if args.base else '_' + k)
+            png = save_confusion(v['rows'], os.path.join(OUT, stem + '_confusion_matrix.png'),
+                                 f"홀 판별기 혼동행렬 — {k}  (판정 {v['judged']}/{v['n']}, 판정 정확도 {v['acc_judged']:.1f}%)")
+            if png: print(f"저장: attribute_models/hole_landmarks/{os.path.basename(png)}")
     if not args.no_db:
         from db.db_log import DBLog
         db = DBLog(); mid = db.find_model(weights_path='attribute_models/hole_landmarks/model.pth', name='hole_landmarks_resnet18')
