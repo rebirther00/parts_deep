@@ -29,9 +29,9 @@ from torchvision import models
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DOOR_DIR = os.path.join(os.path.dirname(BASE_DIR), "door")
-sys.path.insert(0, DOOR_DIR)
+sys.path.append(DOOR_DIR)          # door_pipeline 모듈 우선(camera_utils: intrinsics·렌즈 정합), door 는 폴백
 
-from camera_utils import CameraManager
+from camera_utils import CameraManager, FX_REF, emulate_fx, lens_scale
 from rgbe_utils import RGBETransform, RGBE_IN_CHANNELS, CANNY_LOW, CANNY_HIGH
 
 ARTIFACTS_DIR = os.path.join(BASE_DIR, "artifacts")
@@ -100,6 +100,11 @@ parser.add_argument(
     help="클래스명 JSON 파일 경로 (미지정 시 split_info.json에서 추출)",
 )
 parser.add_argument(
+    "--fov_match", choices=["auto", "on", "off"], default="auto",
+    help="렌즈 화각 정합: 카메라 fx 를 학습 카메라(협각, FX_REF≈1274)에 맞춰 주점 중심 "
+         "확대 후 추론. auto=fx 차이 5%% 초과 시만(기본), off=원본 프레임",
+)
+parser.add_argument(
     "--port", type=int, default=5001,
     help="웹 서버 포트 (기본: 5001)",
 )
@@ -138,6 +143,33 @@ CLASS_NAMES = _load_class_names(args.model, args.class_names)
 
 app = Flask(__name__)
 camera: CameraManager = None  # type: ignore[assignment]
+LENS = {"scale": 1.0, "match": False, "label": "렌즈 미상"}
+
+
+def setup_lens(cam):
+    """카메라 intrinsics 로 학습 카메라 대비 배율을 정하고 화각 정합 여부를 결정한다."""
+    calib = cam.calib
+    s = lens_scale(calib)
+    match = args.fov_match == "on" or (args.fov_match == "auto" and abs(s - 1.0) > 0.05)
+    if match and not calib:
+        print("경고: intrinsics 없음 → 화각 정합 불가, 원본 프레임 사용")
+        match = False
+    label = ("렌즈 미상" if not calib else "협각(학습 카메라와 동일)" if abs(s - 1.0) <= 0.05
+             else "광각" if s > 1 else "협각(학습 카메라보다 좁음)")
+    en = ("lens ?" if not calib else "narrow(=train)" if abs(s - 1.0) <= 0.05
+          else "wide" if s > 1 else "narrow")
+    LENS.update(scale=s, match=match, label=label, label_en=en, calib=calib)
+    if calib:
+        print(f"  intrinsics fx={calib['fx']:.1f} hfov={calib['h_fov']:.1f}° → {label} "
+              f"(학습 카메라 fx={FX_REF:.0f}, 배율 {s:.2f}, 화각 정합 {'ON' if match else 'OFF'})")
+
+
+def get_view_frame():
+    """추론·표시에 쓰는 프레임 (화각 정합 시 에뮬레이션 프레임)."""
+    frame = camera.get_frame()
+    if frame is None or not LENS["match"]:
+        return frame
+    return emulate_fx(frame, None, LENS["calib"])[0]
 
 
 # ── 추론 엔진 ──────────────────────────────────────────────
@@ -235,7 +267,7 @@ engine: RGBEInferenceEngine = None  # type: ignore[assignment]
 def inference_loop():
     global inference_result
     while True:
-        frame = camera.get_frame()
+        frame = get_view_frame()
         if frame is None or engine is None:
             time.sleep(0.1)
             continue
@@ -260,7 +292,7 @@ def inference_loop():
 
 def generate_mjpeg():
     while True:
-        frame = camera.get_frame()
+        frame = get_view_frame()
         if frame is None:
             time.sleep(0.01)
             continue
@@ -280,9 +312,12 @@ def generate_mjpeg():
         color = (0, 255, 0) if r["confidence"] > 70 else (0, 200, 255)
         cv2.putText(frame, r["class"], (10, 42),
                     cv2.FONT_HERSHEY_SIMPLEX, 1.2, color, 2)
+        # cv2.putText 는 한글을 못 그리므로 오버레이는 영문 라벨
+        lens_txt = (f"  |  {LENS.get('label_en', 'lens ?')}"
+                    + (f" x{LENS['scale']:.2f}" if LENS["match"] else ""))
         cv2.putText(
             frame,
-            f"{r['confidence']:.1f}%  |  {r['inference_ms']:.0f}ms",
+            f"{r['confidence']:.1f}%  |  {r['inference_ms']:.0f}ms{lens_txt}",
             (10, 85), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (200, 200, 200), 1,
         )
 
@@ -318,11 +353,16 @@ def api_inference_result():
 
 @app.route("/api/camera_info")
 def api_camera_info():
-    return jsonify({
+    info = {
         "camera_type": camera.camera_type,
         "connected": camera.running,
         "engine": f"RGBE NoAux PyTorch FP32 ({engine.device})",
-    })
+        "lens": LENS["label"], "fov_match": LENS["match"], "fx_scale": round(LENS["scale"], 3),
+    }
+    if LENS.get("calib"):
+        info.update(fx=round(LENS["calib"]["fx"], 1), h_fov=round(LENS["calib"]["h_fov"], 1),
+                    serial=LENS["calib"]["serial"])
+    return jsonify(info)
 
 
 # ── 엔트리포인트 ────────────────────────────────────────
@@ -336,9 +376,11 @@ if __name__ == "__main__":
     engine = RGBEInferenceEngine(args.model, CLASS_NAMES)
     print(f"RGBE NoAux 엔진 준비 완료 (디바이스: {engine.device})")
 
-    camera = CameraManager()
+    # 실험실 datasets 수집 조건(1080p)과 동일하게 고정. 렌즈가 다르면(광각) setup_lens 가 화각 정합.
+    camera = CameraManager(resolutions=("HD1080", "AUTO"))
     camera.start()
     print(f"카메라: {camera.camera_type}")
+    setup_lens(camera)
 
     infer_thread = threading.Thread(target=inference_loop, daemon=True)
     infer_thread.start()

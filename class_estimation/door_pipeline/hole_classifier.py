@@ -31,7 +31,7 @@ IN_W, IN_H, STRIDE = 1280, 768, 4
 CH = ['bolt', 'corner_hinge', 'corner_latch']
 K_DEPTH = {1080: 0.8235, 1200: 0.8505}
 FX_APPROX = 1065.0                        # intrinsics 없을 때 쓰는 근사 fx (K_DEPTH 의 기준)
-FX_REF = 1274.16                          # 수집(학습) 카메라 실제 fx @1920x1200 — 협각 ZED X Mini
+from camera_utils import FX_REF, emulate_fx   # noqa: E402  수집(학습) 카메라 fx 추정·화각 정합 (공용)
 K_METRIC = {h: k * FX_REF / FX_APPROX for h, k in K_DEPTH.items()}   # 실제 intrinsics 사용 시 잔차
 # 카메라(시리얼)별 실측 잔차 K — 19_checker_scale_calib.py 로 25mm 체커 측정 (depth 절대 스케일 편향).
 # intrinsics 에 serial 이 있고 여기 등록돼 있으면 K_METRIC 대신 사용. 없으면 K_METRIC[세로해상도].
@@ -210,29 +210,6 @@ def geometry_gate(fr, hinge, latch, shape, margin=20):
     if not (D_RANGE[0] <= abs(uh - ul) <= D_RANGE[1]):
         return 'D_range'
     return 'ok'
-
-
-def emulate_fx(rgb, depth, K, fx_target=FX_REF, tol=0.05):
-    """주점 중심 affine 확대/축소로 fx_target 화각을 에뮬레이션 (광각↔협각 렌즈 정합).
-
-    핀홀 모델에서 배율 s = fx_target/fx 의 중심 확대는 fx' = s·fx 인 카메라와 동일한
-    영상이므로, 학습 카메라(FX_REF)와 같은 픽셀 스케일로 검출망에 넣을 수 있다.
-    depth 는 Z 값이라 최근접 리샘플만 하면 되고, 빈 영역은 0(무효).
-    반환: (rgb', depth', K')  — |s-1| ≤ tol 이면 입력 그대로."""
-    if K is None:
-        return rgb, depth, None
-    s = fx_target / K['fx']
-    if abs(s - 1.0) <= tol:
-        return rgb, depth, K
-    h, w = rgb.shape[:2]
-    M = np.array([[s, 0.0, w / 2.0 - s * K['cx']],
-                  [0.0, s, h / 2.0 - s * K['cy']]], np.float64)
-    interp = cv2.INTER_LINEAR if s > 1 else cv2.INTER_AREA
-    rgb2 = cv2.warpAffine(rgb, M, (w, h), flags=interp, borderValue=0)
-    depth2 = None if depth is None else cv2.warpAffine(
-        depth, M, (w, h), flags=cv2.INTER_NEAREST, borderValue=0)
-    K2 = dict(K, fx=K['fx'] * s, fy=K['fy'] * s, cx=w / 2.0, cy=h / 2.0)
-    return rgb2, depth2, K2
 
 
 BOLT_PITCH = (157.0, 96.0)   # 볼트홀 4개 직사각형 CAD 피치(mm): 장변, 단변

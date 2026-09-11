@@ -18,6 +18,41 @@ except ImportError:
     HAS_ZED = False
 
 
+# ── 렌즈 화각 정합 ─────────────────────────────────────────
+# 학습 데이터(실험실 datasets 1080p·현장 datasets_factory 1200p)는 협각 4mm 렌즈 카메라로 수집됨
+# (K_DEPTH 역산 fx≈1250~1290, 1차년도 depth_utils 가정 fx≈1144). FX_REF 는 그 카메라의 실제 fx 추정치.
+# 광각(2.2mm, fx≈723) 카메라에서는 주점 중심 확대로 같은 화각을 에뮬레이션해야 학습 분포와 맞는다.
+FX_REF = 1274.16
+
+
+def lens_scale(calib, fx_ref=FX_REF):
+    """calib(fx) → 학습 카메라 대비 배율 s=fx_ref/fx. calib 없으면 1.0."""
+    return fx_ref / calib['fx'] if calib and calib.get('fx') else 1.0
+
+
+def emulate_fx(rgb, depth, K, fx_target=FX_REF, tol=0.05):
+    """주점 중심 affine 확대/축소로 fx_target 화각을 에뮬레이션 (광각↔협각 렌즈 정합).
+
+    핀홀 모델에서 배율 s = fx_target/fx 의 중심 확대는 fx' = s·fx 인 카메라와 동일한
+    영상이므로, 학습 카메라(FX_REF)와 같은 픽셀 스케일로 모델에 넣을 수 있다.
+    depth 는 Z 값이라 최근접 리샘플만 하면 되고, 빈 영역은 0(무효). depth=None 허용.
+    반환: (rgb', depth', K')  — |s-1| ≤ tol 이면 입력 그대로."""
+    if K is None:
+        return rgb, depth, None
+    s = fx_target / K['fx']
+    if abs(s - 1.0) <= tol:
+        return rgb, depth, K
+    h, w = rgb.shape[:2]
+    M = np.array([[s, 0.0, w / 2.0 - s * K['cx']],
+                  [0.0, s, h / 2.0 - s * K['cy']]], np.float64)
+    interp = cv2.INTER_LINEAR if s > 1 else cv2.INTER_AREA
+    rgb2 = cv2.warpAffine(rgb, M, (w, h), flags=interp, borderValue=0)
+    depth2 = None if depth is None else cv2.warpAffine(
+        depth, M, (w, h), flags=cv2.INTER_NEAREST, borderValue=0)
+    K2 = dict(K, fx=K['fx'] * s, fy=K['fy'] * s, cx=w / 2.0, cy=h / 2.0)
+    return rgb2, depth2, K2
+
+
 class CameraManager:
     """카메라 캡처, 녹화, 프레임 추출, 블러 필터링을 관리한다."""
 

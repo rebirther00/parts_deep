@@ -241,7 +241,7 @@ def serve_temp_frame(filename):
 
 if __name__ == "__main__":
     init_directories()
-    camera = CameraManager()
+    camera = CameraManager(resolutions=("HD1080", "AUTO"))   # 실험실 datasets 와 동일(1080p)
     camera.start()
     print(f"카메라 타입: {camera.camera_type}")
     print("서버 시작: http://0.0.0.0:5000")
