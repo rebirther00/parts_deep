@@ -7,6 +7,13 @@ classify(rgb, depth) → dict(pred, D_mm, gate, points, scores, ...)
 
 스케일 상수 K_DEPTH는 근사 intrinsics(fx=1065) 편향 보정값 — 이미지 세로 해상도(카메라 모드)별로 GT 캘리브레이션:
   1080p(사무실 datasets) 0.8235, 1200p(현장 ZED X Mini HD1200) 0.8505
+
+렌즈 독립 추론 (광각/협각 카메라 공용):
+  K_DEPTH ≈ FX_APPROX / fx_true 이므로(0.8505 → fx≈1252, 0.8235 → fx≈1293) 수집 카메라는
+  협각 4mm 렌즈(공장 캘리브 fx≈1274 @1200p)로 판단. 카메라의 실제 intrinsics 가 주어지면
+  그것으로 역투영하고 잔차 K_METRIC = K_DEPTH × FX_REF / FX_APPROX 만 곱한다
+  (수집 카메라에서는 기존 결과와 동일, 다른 렌즈에서는 fx 오차가 사라짐).
+  검출망 입력 스케일까지 맞추려면 emulate_fx()로 FX_REF 화각을 에뮬레이션한다.
 """
 import math
 import os
@@ -23,6 +30,25 @@ MODEL_PATH = os.path.join(DOOR, 'attribute_models', 'hole_landmarks', 'model.pth
 IN_W, IN_H, STRIDE = 1280, 768, 4
 CH = ['bolt', 'corner_hinge', 'corner_latch']
 K_DEPTH = {1080: 0.8235, 1200: 0.8505}
+FX_APPROX = 1065.0                        # intrinsics 없을 때 쓰는 근사 fx (K_DEPTH 의 기준)
+FX_REF = 1274.16                          # 수집(학습) 카메라 실제 fx @1920x1200 — 협각 ZED X Mini
+K_METRIC = {h: k * FX_REF / FX_APPROX for h, k in K_DEPTH.items()}   # 실제 intrinsics 사용 시 잔차
+# 카메라(시리얼)별 실측 잔차 K — 19_checker_scale_calib.py 로 25mm 체커 측정 (depth 절대 스케일 편향).
+# intrinsics 에 serial 이 있고 여기 등록돼 있으면 K_METRIC 대신 사용. 없으면 K_METRIC[세로해상도].
+K_CAMERA = {
+    57497357: 0.9797,   # 사무실 ZED X Mini 광각(fx 723), 2026-09-11 체커 1.28m 측정 (가로 +1.58%/세로 +2.57%) — 검증 중
+}
+
+
+def active_k(intrinsics):
+    """intrinsics 에 대해 실제 적용되는 잔차 K 와 출처 ('camera' | 'metric' | 'depth')."""
+    if intrinsics:
+        sn = intrinsics.get('serial')
+        if sn in K_CAMERA:
+            return K_CAMERA[sn], 'camera'
+        h = intrinsics.get('height', 1080)
+        return K_METRIC.get(h, K_METRIC[1080]), 'metric'
+    return None, 'depth'
 CAD_D = {'E23_door_LH_FRT': 456, 'E25_door_LH_FRT': 724, 'E30_door_LH_FRT': 765, 'E38_door_LH_FRT': 812,
          'E25_door_LH_RR': 1037, 'E30_door_LH_RR': 1158, 'E38_door_LH_RR': 1352, 'E25_door_RH': 886, 'E30_E38_door_RH': 1087}
 # D = 도어 폭 − 106mm. E23은 2026-09-07 추가(STP 폭 562 → 456, 현장 실측 중앙값 460)
@@ -186,10 +212,50 @@ def geometry_gate(fr, hinge, latch, shape, margin=20):
     return 'ok'
 
 
-def depth_distance_mm(depth, pts_all, pa, pb, intrinsics=None):
-    """검출점 볼록껍질 내부 depth로 평면 피팅 → 두 점의 평면상 거리(mm, K_DEPTH 보정)."""
+def emulate_fx(rgb, depth, K, fx_target=FX_REF, tol=0.05):
+    """주점 중심 affine 확대/축소로 fx_target 화각을 에뮬레이션 (광각↔협각 렌즈 정합).
+
+    핀홀 모델에서 배율 s = fx_target/fx 의 중심 확대는 fx' = s·fx 인 카메라와 동일한
+    영상이므로, 학습 카메라(FX_REF)와 같은 픽셀 스케일로 검출망에 넣을 수 있다.
+    depth 는 Z 값이라 최근접 리샘플만 하면 되고, 빈 영역은 0(무효).
+    반환: (rgb', depth', K')  — |s-1| ≤ tol 이면 입력 그대로."""
+    if K is None:
+        return rgb, depth, None
+    s = fx_target / K['fx']
+    if abs(s - 1.0) <= tol:
+        return rgb, depth, K
+    h, w = rgb.shape[:2]
+    M = np.array([[s, 0.0, w / 2.0 - s * K['cx']],
+                  [0.0, s, h / 2.0 - s * K['cy']]], np.float64)
+    interp = cv2.INTER_LINEAR if s > 1 else cv2.INTER_AREA
+    rgb2 = cv2.warpAffine(rgb, M, (w, h), flags=interp, borderValue=0)
+    depth2 = None if depth is None else cv2.warpAffine(
+        depth, M, (w, h), flags=cv2.INTER_NEAREST, borderValue=0)
+    K2 = dict(K, fx=K['fx'] * s, fy=K['fy'] * s, cx=w / 2.0, cy=h / 2.0)
+    return rgb2, depth2, K2
+
+
+BOLT_PITCH = (157.0, 96.0)   # 볼트홀 4개 직사각형 CAD 피치(mm): 장변, 단변
+# 볼트 정규화: D 를 (CAD 장변 / depth 로 잰 장변) 배 보정. 볼트 직사각형은 코너 홀과 같은 평면 위의
+# 기지 치수이므로 depth 스케일 편향·잔차 K·렌즈 차이가 모두 상쇄된다 (K_DEPTH 자체가 볼트 피치로
+# 1회 캘리브레이션한 값 → 이를 프레임마다 수행하는 셈). 장변만 쓰는 이유: D 와 같은 축(ex, 157 축)이라
+# 평면 기울기 오차 방향이 같고, 픽셀 국소화 오차의 상대 비율이 단변보다 작다.
+BOLT_NORM_RANGE = (0.85, 1.15)   # 이 범위 밖의 보정 배율은 볼트 오검출로 보고 정규화 생략
+
+
+def plane_from_depth(depth, pts_all, intrinsics=None):
+    """검출점 볼록껍질 내부 depth 로 평면 피팅.
+
+    반환 (to3d, k): to3d(p)=픽셀→평면상 3D(mm), k=스케일 잔차. 실패 시 None.
+    intrinsics 가 있으면 실제 fx/fy/cx/cy 로 역투영 후 K_METRIC 잔차, 없으면
+    근사 fx=FX_APPROX 로 역투영 후 K_DEPTH(수집 카메라 전용 보정)."""
     h, w = depth.shape
-    K = intrinsics or dict(fx=1065.0, fy=1065.0, cx=w / 2.0, cy=h / 2.0)
+    if intrinsics:
+        K = intrinsics
+        KTAB = ({h: K_CAMERA[intrinsics['serial']] for h in K_METRIC}
+                if intrinsics.get('serial') in K_CAMERA else K_METRIC)
+    else:
+        K = dict(fx=FX_APPROX, fy=FX_APPROX, cx=w / 2.0, cy=h / 2.0); KTAB = K_DEPTH
     P = np.array([(p[0], p[1]) for p in pts_all], np.float32)
     if len(P) < 3:
         return None
@@ -210,8 +276,29 @@ def depth_distance_mm(depth, pts_all, pa, pb, intrinsics=None):
     def to3d(p):
         r = np.array([(p[0] - K['cx']) / K['fx'], (p[1] - K['cy']) / K['fy'], 1.0])
         return r * (np.dot(c, n) / np.dot(r, n))
-    k = K_DEPTH.get(h, K_DEPTH[1080])
+    k = KTAB.get(h, KTAB[1080])
+    return to3d, k
+
+
+def depth_distance_mm(depth, pts_all, pa, pb, intrinsics=None):
+    """두 점의 depth 평면상 거리(mm). 평면 피팅 실패 시 None."""
+    pf = plane_from_depth(depth, pts_all, intrinsics)
+    if pf is None:
+        return None
+    to3d, k = pf
     return float(np.linalg.norm(to3d(pa) - to3d(pb))) * k
+
+
+def bolt_pitch_mm(pf, bolts):
+    """볼트 4점의 depth 평면상 직사각형 피치(mm): dict(long, short) — CAD BOLT_PITCH 와 비교용.
+
+    6개 쌍거리 정렬 → 최소 2개 평균=단변, 다음 2개 평균=장변 (나머지 2개는 대각선)."""
+    if pf is None or len(bolts) < 4:
+        return None
+    to3d, k = pf
+    P = [to3d(b) for b in bolts[:4]]
+    d = sorted(float(np.linalg.norm(P[a] - P[b])) * k for a in range(4) for b in range(a + 1, 4))
+    return dict(long=(d[2] + d[3]) / 2, short=(d[0] + d[1]) / 2)
 
 
 def nearest_class(D, group=None):
@@ -220,19 +307,34 @@ def nearest_class(D, group=None):
     return min(cands, key=lambda k: abs(CAD_D[k] - D))
 
 
-def classify(net, dev, rgb, depth=None, group=None):
-    """단일 프레임 판정. depth 없으면 볼트 피치 스케일 사용. group 지정 시 그룹 내 최근접."""
+def classify(net, dev, rgb, depth=None, group=None, intrinsics=None, bolt_norm=False):
+    """단일 프레임 판정. depth 없으면 볼트 피치 스케일 사용. group 지정 시 그룹 내 최근접.
+
+    intrinsics: dict(fx, fy, cx, cy) — 카메라 실제 값(렌즈 무관 D). None 이면 수집 카메라 가정.
+    bolt_norm: depth D 를 볼트 장변 CAD/실측 비율로 정규화 (D_src='depth+bolt', D_raw_mm 보존).
+        기본 꺼짐 — 볼트 국소화 오차(-7% 관측)가 D 에 그대로 증폭되므로 실험용으로만."""
     det = detect(net, dev, rgb)
     hinge = det['corner_hinge'][0] if det['corner_hinge'] else None
     latch = det['corner_latch'][0] if det['corner_latch'] else None
     fr = bolt_frame(det['bolt'])
     gate = geometry_gate(fr, hinge, latch, rgb.shape)
-    out = dict(points=det, gate=gate, pred=None, D_mm=None, D_src=None, group=None)
+    out = dict(points=det, gate=gate, pred=None, D_mm=None, D_src=None, group=None, bolt_mm=None,
+               D_raw_mm=None, k_bolt=None)
+    corners = [p for p in (hinge, latch) if p is not None]
+    pf = None
+    if depth is not None and len(det['bolt']) + len(corners) >= 3:
+        pf = plane_from_depth(depth, det['bolt'] + corners, intrinsics)
+        out['bolt_mm'] = bolt_pitch_mm(pf, det['bolt'])   # 스케일 체인(depth·intrinsics) 진단용
     if hinge is None or latch is None:
         return out
     D = None
-    if depth is not None:
-        D = depth_distance_mm(depth, det['bolt'] + [hinge, latch], hinge, latch); out['D_src'] = 'depth'
+    if pf is not None:
+        D = float(np.linalg.norm(pf[0](hinge) - pf[0](latch))) * pf[1]; out['D_src'] = 'depth'
+        if D is not None and bolt_norm and out['bolt_mm'] and out['bolt_mm']['long'] > 0:
+            kb = BOLT_PITCH[0] / out['bolt_mm']['long']
+            if BOLT_NORM_RANGE[0] <= kb <= BOLT_NORM_RANGE[1]:
+                out['D_raw_mm'], out['k_bolt'] = D, kb
+                D *= kb; out['D_src'] = 'depth+bolt'
     if D is None and fr is not None:
         D = math.hypot(hinge[0] - latch[0], hinge[1] - latch[1]) / fr['s']; out['D_src'] = 'bolt'
     out['D_mm'] = D

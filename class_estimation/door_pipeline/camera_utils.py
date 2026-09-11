@@ -21,8 +21,16 @@ except ImportError:
 class CameraManager:
     """카메라 캡처, 녹화, 프레임 추출, 블러 필터링을 관리한다."""
 
-    def __init__(self, fps=30):
+    # 06_factory_capture.py(현장 수집)와 동일한 해상도 우선순위.
+    # 추론 카메라는 수집 카메라와 같은 설정이어야 프레임 기하(화각·세로
+    # 해상도 → hole_classifier K_DEPTH 키)가 일치한다.
+    DEFAULT_RESOLUTIONS = ("HD1200", "HD1080", "AUTO")
+
+    def __init__(self, fps=30, resolutions=None):
         self.fps = fps
+        self.resolutions = tuple(resolutions or self.DEFAULT_RESOLUTIONS)
+        self.resolution = None          # (width, height) — open 후 채워짐
+        self.calib = None               # 좌안 rectified intrinsics (ZED만)
         self.latest_rgb = None
         self.latest_depth = None
         self.camera_type = "unknown"
@@ -43,19 +51,52 @@ class CameraManager:
 
     def _init_zed(self):
         self._zed = sl.Camera()
-        params = sl.InitParameters()
-        params.camera_resolution = sl.RESOLUTION.HD1080
-        params.camera_fps = self.fps
-        params.depth_mode = sl.DEPTH_MODE.NEURAL
-        params.coordinate_units = sl.UNIT.MILLIMETER
-        err = self._zed.open(params)
-        if err != sl.ERROR_CODE.SUCCESS:
-            raise RuntimeError(f"ZED 카메라 초기화 실패: {err}")
+        last_err = None
+        for name in self.resolutions:
+            params = sl.InitParameters()
+            params.camera_resolution = getattr(sl.RESOLUTION, name)
+            params.camera_fps = self.fps
+            params.depth_mode = sl.DEPTH_MODE.NEURAL
+            params.coordinate_units = sl.UNIT.MILLIMETER
+            err = self._zed.open(params)
+            if err == sl.ERROR_CODE.SUCCESS:
+                break
+            last_err = err
+        else:
+            raise RuntimeError(f"ZED 카메라 초기화 실패: {last_err}")
         self._zed_image = sl.Mat()
         self._zed_depth = sl.Mat()
         self._zed_runtime = sl.RuntimeParameters()
-        model = self._zed.get_camera_information().camera_model
-        self.camera_type = f"ZED {str(model).split('.')[-1]}"
+        info = self._zed.get_camera_information()
+        cc = info.camera_configuration
+        self.resolution = (int(cc.resolution.width), int(cc.resolution.height))
+        self.camera_type = (
+            f"ZED {str(info.camera_model).split('.')[-1]} "
+            f"{self.resolution[0]}x{self.resolution[1]}@{int(cc.fps)}fps "
+            f"SN{info.serial_number}"
+        )
+        self.calib = self._read_calib(info)
+
+    @staticmethod
+    def _read_calib(info):
+        """좌안(rectified, retrieve_image LEFT 와 동일 기하) intrinsics.
+
+        렌즈(광각/협각)별로 fx 가 크게 다르므로 depth 역투영에는 반드시
+        이 값을 써야 한다. 실패해도 캡처에는 영향 없음(None)."""
+        try:
+            cc = info.camera_configuration
+            cam = cc.calibration_parameters.left_cam
+            return {
+                "serial": int(info.serial_number),
+                "width": int(cc.resolution.width),
+                "height": int(cc.resolution.height),
+                "fx": float(cam.fx), "fy": float(cam.fy),
+                "cx": float(cam.cx), "cy": float(cam.cy),
+                "h_fov": float(cam.h_fov), "v_fov": float(cam.v_fov),
+            }
+        except Exception as e:                      # noqa: BLE001
+            print(f"intrinsics 읽기 실패(캡처 영향 없음): {e}")
+            return None
 
     def _init_opencv(self):
         self._cap = cv2.VideoCapture(0)

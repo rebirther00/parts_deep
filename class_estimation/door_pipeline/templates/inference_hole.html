@@ -100,6 +100,7 @@
             <h3>성능</h3>
             <div class="stat-row"><span>추론 시간</span><span class="stat-value" id="inferMs">—</span></div>
             <div class="stat-row"><span>엔진</span><span class="stat-value" id="engineInfo">PyTorch</span></div>
+            <div class="stat-row"><span>렌즈</span><span class="stat-value" id="lensInfo">-</span></div>
             <div class="stat-row"><span>모델</span><span class="stat-value" id="modelInfo" style="font-size:0.72rem;font-weight:400">—</span></div>
         </div>
 
@@ -118,6 +119,13 @@ async function loadCameraInfo() {
         badge.textContent = data.camera;
         if (data.connected) badge.classList.add("connected");
         if (data.engine) document.getElementById("engineInfo").textContent = data.engine;
+        if (data.lens) {
+            let t = data.lens;
+            if (data.fx) t += ` fx${data.fx}`;
+            if (data.h_fov) t += ` ${data.h_fov}°`;
+            t += data.fov_match ? ` · 화각정합 ×${data.fx_scale}` : " · 원본";
+            document.getElementById("lensInfo").textContent = t;
+        }
         if (data.model) document.getElementById("modelInfo").textContent = data.model;
     } catch {}
 }

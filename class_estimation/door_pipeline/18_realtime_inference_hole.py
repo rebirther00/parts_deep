@@ -33,7 +33,7 @@ import numpy as np
 from flask import Flask, Response, jsonify, render_template
 
 import hole_classifier
-from hole_classifier import CAD_D, GROUP
+from hole_classifier import BOLT_PITCH, CAD_D, GROUP
 
 DOOR_DIR = os.path.dirname(os.path.abspath(__file__))
 REPO_DIR = os.path.dirname(os.path.dirname(DOOR_DIR))
@@ -53,6 +53,16 @@ parser.add_argument('--port', type=int, default=5004,
                     help='웹 UI 포트 (기본 5004; 14번 통합 서버는 5003)')
 parser.add_argument('--replay', type=str, default=None,
                     help='카메라 대신 rgb_*.png(+depth_*.png) 폴더 재생 (검증용)')
+parser.add_argument('--fov_match', choices=['auto', 'on', 'off'], default='auto',
+                    help='렌즈 화각 정합: 카메라 fx 를 학습 카메라(FX_REF≈1274, 협각)에 맞춰 '
+                         '주점 중심 확대/축소 후 추론. auto=fx 차이 5%% 초과 시만 (기본), '
+                         'off=원본 프레임 + 실제 intrinsics 로 D 만 보정')
+parser.add_argument('--no_k_camera', action='store_true',
+                    help='시리얼별 체커 실측 잔차 K(hole_classifier.K_CAMERA) 를 무시하고 '
+                         '역산값 K_METRIC 사용 (A/B 비교용)')
+parser.add_argument('--bolt_norm', action='store_true',
+                    help='[실험] 볼트 장변(CAD 157mm) 비율로 D 를 정규화 (기본 꺼짐: '
+                         '볼트 국소화 오차가 D 에 증폭됨). 볼트 mm 표시는 항상 됨')
 parser.add_argument('--fp16', action='store_true',
                     help='FP16 autocast (Jetson GPU 가속)')
 parser.add_argument('--device', type=str, default='cuda')
@@ -92,13 +102,14 @@ class ReplaySource:
               f'depth {self.n_depth}장)')
 
     def get(self):
+        """(rgb, depth, intrinsics). 저장 영상은 수집 카메라 가정 → intrinsics None."""
         rp, dp = self.pairs[self.i % len(self.pairs)]
         self.i += 1
         rgb = cv2.imread(rp)
         depth = None
         if dp:
             depth = cv2.imread(dp, cv2.IMREAD_UNCHANGED).astype(np.float32)
-        return rgb, depth
+        return rgb, depth, None
 
     def info(self):
         return {'camera': f'Replay ({len(self.pairs)} frames, '
@@ -114,20 +125,69 @@ class ZedSource:
 
     def __init__(self):
         from camera_utils import CameraManager
-        self.cam = CameraManager()
+        # 수집(06_factory_capture.py)과 동일 설정: HD1200 우선, 15 fps
+        self.cam = CameraManager(fps=15)
         self.cam.start()
+        self.calib = self.cam.calib
+        # 렌즈 화각 정합 — 학습 카메라(협각, FX_REF)와 fx 가 다르면(광각 등)
+        # 주점 중심 확대로 같은 화각을 에뮬레이션. 협각 카메라에서는 no-op.
+        self.fx_scale = 1.0
+        if self.calib:
+            self.fx_scale = hole_classifier.FX_REF / self.calib['fx']
+        self.fov_match = (args.fov_match == 'on' or
+                          (args.fov_match == 'auto' and
+                           abs(self.fx_scale - 1.0) > 0.05))
+        if self.fov_match and not self.calib:
+            print('경고: intrinsics 없음 → 화각 정합 불가, 원본 프레임 사용')
+            self.fov_match = False
+        if args.no_k_camera:
+            hole_classifier.K_CAMERA.clear()
+        self.k, self.k_src = hole_classifier.active_k(self.calib)
+        print(f"카메라: {self.cam.camera_type}")
+        print(f"  잔차 K = {self.k} ({self.k_src}: "
+              f"{'체커 실측' if self.k_src == 'camera' else '현장 역산 K_METRIC'}), "
+              f"볼트 정규화 {'ON' if args.bolt_norm else 'OFF'}")
+        if self.calib:
+            print(f"  intrinsics fx={self.calib['fx']:.1f} cx={self.calib['cx']:.1f} "
+                  f"cy={self.calib['cy']:.1f} hfov={self.calib['h_fov']:.1f}° "
+                  f"→ {self.lens_label()} (학습 카메라 fx={hole_classifier.FX_REF:.0f}, "
+                  f"배율 {self.fx_scale:.2f}, 화각 정합 {'ON' if self.fov_match else 'OFF'})")
+        else:
+            print('  경고: intrinsics 없음 → 수집 카메라(협각) 가정으로 D 계산')
+
+    def lens_label(self):
+        if not self.calib:
+            return '렌즈 미상'
+        if abs(self.fx_scale - 1.0) <= 0.05:
+            return '협각(학습 카메라와 동일)'
+        return '광각' if self.fx_scale > 1 else '협각(학습 카메라보다 좁음)'
 
     def get(self):
+        """(rgb, depth, intrinsics). 화각 정합 시 세 값 모두 에뮬레이션 프레임 기준."""
         rgb = self.cam.get_frame()
         if rgb is None:
-            return None, None
-        return rgb, self.cam.get_depth()
+            return None, None, None
+        depth = self.cam.get_depth()
+        if self.fov_match:
+            return hole_classifier.emulate_fx(rgb, depth, self.calib)
+        return rgb, depth, self.calib
 
     def info(self):
         has_depth = self.cam.get_depth() is not None
-        return {'camera': 'ZED' if has_depth else '카메라(depth 없음!)',
+        info = {'camera': (self.cam.camera_type if has_depth
+                           else '카메라(depth 없음!)'),
                 'connected': self.cam.get_frame() is not None,
-                'depth': has_depth}
+                'depth': has_depth,
+                'lens': self.lens_label(),
+                'fov_match': self.fov_match,
+                'fx_scale': round(self.fx_scale, 3),
+                'k': round(self.k, 4) if self.k else None, 'k_src': self.k_src,
+                'bolt_norm': args.bolt_norm}
+        if self.calib:
+            info.update(fx=round(self.calib['fx'], 1),
+                        h_fov=round(self.calib['h_fov'], 1),
+                        serial=self.calib['serial'])
+        return info
 
     def close(self):
         # 캡처 스레드 join + zed.close(). 이걸 빼먹으면 Ctrl+C 시 ZED SDK의
@@ -155,7 +215,7 @@ def inference_loop(source, net, dev):
         if reset_event.is_set():
             window.clear()
             reset_event.clear()
-        rgb, depth = source.get()
+        rgb, depth, intr = source.get()
         if rgb is None:
             time.sleep(0.1)
             continue
@@ -165,7 +225,9 @@ def inference_loop(source, net, dev):
         try:
             with torch.autocast(device_type='cuda', dtype=torch.float16,
                                 enabled=args.fp16):
-                hr = hole_classifier.classify(net, dev, rgb, depth)
+                hr = hole_classifier.classify(net, dev, rgb, depth,
+                                              intrinsics=intr,
+                                              bolt_norm=args.bolt_norm)
             window.append(hr)
             agg = hole_classifier.aggregate(list(window))
             gate_counts = dict(collections.Counter(
@@ -178,11 +240,24 @@ def inference_loop(source, net, dev):
                 conf = 0.0
             else:
                 pred, grp, conf = '보류', '-', 0.0
+            # 볼트 피치(depth·mm) 윈도 중앙값 — CAD 157×96 대비 오차 = 스케일 체인 진단
+            bl = [r['bolt_mm']['long'] for r in window if r.get('bolt_mm')]
+            bs = [r['bolt_mm']['short'] for r in window if r.get('bolt_mm')]
+            bolt_agg = None
+            if bl:
+                L, S = float(np.median(bl)), float(np.median(bs))
+                bolt_agg = {'long': round(L, 1), 'short': round(S, 1), 'n': len(bl),
+                            'long_err_pct': round(100 * (L / BOLT_PITCH[0] - 1), 1),
+                            'short_err_pct': round(100 * (S / BOLT_PITCH[1] - 1), 1)}
             frame_info = {
                 'gate': hr['gate'],
+                'bolt_mm': ({k: round(v, 1) for k, v in hr['bolt_mm'].items()}
+                            if hr.get('bolt_mm') else None),
                 'pred': hr['pred'],
                 'D_mm': round(hr['D_mm'], 1) if hr['D_mm'] else None,
                 'D_src': hr['D_src'],
+                'D_raw_mm': round(hr['D_raw_mm'], 1) if hr.get('D_raw_mm') else None,
+                'k_bolt': round(hr['k_bolt'], 4) if hr.get('k_bolt') else None,
                 'points': {c: [[round(float(p[0]), 1), round(float(p[1]), 1),
                                 round(float(p[2]), 2)] for p in v]
                            for c, v in hr['points'].items()},
@@ -195,6 +270,7 @@ def inference_loop(source, net, dev):
                 'n_judged': agg['n_judged'], 'window': len(window),
                 'gate': hr['gate'], 'gate_counts': gate_counts,
                 'candidates': candidates_from_D(agg['D_mm'])[:4],
+                'bolt_mm': bolt_agg,
                 'frame': frame_info,
             }
         except Exception as e:
@@ -237,7 +313,7 @@ def generate_mjpeg():
             cv2.line(frame, (int(a[0] * sc), int(a[1] * sc)),
                      (int(b[0] * sc), int(b[1] * sc)), (0, 200, 255), 1)
         overlay = frame.copy()
-        cv2.rectangle(overlay, (0, 0), (520, 130), (0, 0, 0), -1)
+        cv2.rectangle(overlay, (0, 0), (520, 155), (0, 0, 0), -1)
         cv2.addWeighted(overlay, 0.6, frame, 0.4, 0, frame)
         color = (0, 255, 0) if r['confidence'] > 60 else (0, 200, 255)
         cv2.putText(frame, f"{r['class']}", (10, 42),
@@ -250,10 +326,20 @@ def generate_mjpeg():
                     f"judged {r['n_judged']}/{r['window']}",
                     (10, 80), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (200, 200, 200), 1)
         f_d = f"{fi['D_mm']:.0f}mm/{fi.get('D_src')}" if fi.get('D_mm') else '-'
+        if fi.get('D_raw_mm'):
+            f_d += f" (raw {fi['D_raw_mm']:.0f} x{fi['k_bolt']:.3f})"
         cv2.putText(frame,
                     f"frame gate [{fi.get('gate')}] D {f_d} | "
                     f"{r['inference_ms']:.0f}ms",
                     (10, 110), cv2.FONT_HERSHEY_SIMPLEX, 0.55, (0, 200, 255), 1)
+        b = r.get('bolt_mm')
+        b_txt = (f"bolt {b['long']:.0f}x{b['short']:.0f}mm "
+                 f"({b['long_err_pct']:+.1f}%/{b['short_err_pct']:+.1f}%, n={b['n']})"
+                 if b else 'bolt -')
+        k_txt = (f" | K {source.k:.4f}/{source.k_src}" if getattr(source, 'k', None) else '')
+        b_txt += k_txt + (' +boltnorm' if args.bolt_norm else '')
+        cv2.putText(frame, f"{b_txt} | CAD {BOLT_PITCH[0]:.0f}x{BOLT_PITCH[1]:.0f}",
+                    (10, 138), cv2.FONT_HERSHEY_SIMPLEX, 0.55, (0, 200, 255), 1)
         ok, buf = cv2.imencode('.jpg', frame, [cv2.IMWRITE_JPEG_QUALITY, 75])
         if ok:
             yield (b'--frame\r\n'
