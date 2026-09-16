@@ -167,6 +167,21 @@ DASH = """
   <div class="card"><div class="num">{{ c.evals }}</div><div class="lbl">평가 기록</div></div>
 </div>
 
+<h2>최신 벤치마크 <span class="muted small">(현장 test 분할 = 클래스별 첫 세션 고정 + 15%, 세션 단위)</span></h2>
+<div class="cards">
+  <div class="card"><div class="num {{ 'ok' if b.hole and b.hole.acc >= 99 }}">{{ '%.1f%%' % b.hole.acc if b.hole else '—' }}</div>
+    <div class="lbl">홀 판별기 판정 정확도 (test {{ b.hole.n if b.hole else '' }}장, 판정률 {{ '%.0f%%' % b.hole.judged if b.hole else '' }}) · {{ b.hole.at if b.hole else '' }}</div></div>
+  <div class="card"><div class="num">{{ '%.1f%%' % b.cnn.acc if b.cnn else '—' }}</div>
+    <div class="lbl">CNN 폴백 정확도 (test {{ b.cnn.n if b.cnn else '' }}장, {{ b.cnn.model if b.cnn else '' }}) · {{ b.cnn.at if b.cnn else '' }}</div></div>
+  <div class="card"><div class="num">{{ '%.1f mm' % b.pose.rms if b.pose else '—' }}</div>
+    <div class="lbl">자세 CAD 정합 잔차 RMS 중앙값 (6홀, {{ b.pose.sessions if b.pose else '' }}세션 {{ b.pose.n if b.pose else '' }}프레임, 판정률 {{ '%.1f%%' % b.pose.used if b.pose else '' }}) · {{ b.pose.at if b.pose else '' }}</div></div>
+  <div class="card"><div class="num">{{ ('%.2f° / %.2f°' % (b.pose.theta_std, b.pose.tilt_std)) if b.pose else '—' }}</div>
+    <div class="lbl">자세 반복 정밀도 std 중앙값 θ / tilt (세션 내; z std {{ '%.1f mm' % b.pose.z_std if b.pose else '' }})</div></div>
+  <div class="card"><div class="num {{ 'warn' if b.drift and b.drift.warn else '' }}">{{ '%.4f' % b.drift.k if b.drift else '—' }}</div>
+    <div class="lbl">최근 7세션 K_session 중앙값 (기준 {{ '%.4f' % b.drift.kref if b.drift else '' }}, 경보 {{ b.drift.warn if b.drift else '' }}/7) · <a href="{{ url_for('drift') }}">드리프트</a></div></div>
+</div>
+<p class="muted small">정확도 = 판정 프레임 중 정답 비율. 자세 잔차 = 측정 홀 6점을 CAD 홀 패턴에 강체 정합한 뒤 남는 홀별 거리 오차 RMS(GT 아님, 형상 일치도). 절대 정확도는 레이저 트래커 GT 몫.</p>
+
 <h2>데이터셋</h2>
 <div class="tbl"><table>
 <tr><th>이름</th><th>설명</th><th class="n">클래스</th><th class="n">이미지</th><th class="n">로컬</th><th>저장 위치</th></tr>
@@ -278,7 +293,7 @@ def dashboard():
         """SELECT m.name model, d.name dataset, e.* FROM evaluation_results e
            JOIN models m ON m.id=e.model_id JOIN datasets d ON d.id=e.dataset_id
            ORDER BY e.evaluated_at DESC LIMIT 6""").fetchall()
-    return page("대시보드", "dashboard", DASH, c=type("C", (), c), datasets=datasets,
+    return page("대시보드", "dashboard", DASH, c=type("C", (), c), datasets=datasets, b=latest_benchmarks(con),
                 field_rows=field_rows, field_total=field_total,
                 recent_sessions=recent_sessions, recent_evals=recent_evals)
 
@@ -317,6 +332,40 @@ SESSIONS = """
 </form></p>
 {% endif %}
 """
+
+
+def latest_benchmarks(con):
+    """대시보드 카드용 최신 벤치마크: 홀 판별기 test, CNN test, 자세(pose_pipeline), 드리프트 최근 7세션."""
+    N = lambda **kw: type("B", (), kw)
+    out = {"hole": None, "cnn": None, "pose": None, "drift": None}
+    try:
+        r = con.execute("""SELECT e.*, m.name model FROM evaluation_results e JOIN models m ON m.id=e.model_id
+                           WHERE e.eval_type='inference_pipeline' AND e.report_path LIKE '%v2_test%' ORDER BY e.id DESC LIMIT 1""").fetchone()
+        if r:
+            pcr = json.loads(r["per_class_results"] or "{}")
+            out["hole"] = N(acc=pcr.get("acc_judged", r["accuracy"]), n=r["total_samples"],
+                            judged=100.0 * pcr.get("judged", r["total_samples"]) / max(1, r["total_samples"]), at=r["evaluated_at"][:10])
+        r = con.execute("""SELECT e.*, m.name model FROM evaluation_results e JOIN models m ON m.id=e.model_id
+                           WHERE e.eval_type='cross_domain' AND m.name LIKE 'rgbe%' AND e.report_path LIKE '%factory_v2%' ORDER BY e.id DESC LIMIT 1""").fetchone()
+        if r:
+            out["cnn"] = N(acc=r["accuracy"], n=r["total_samples"], model=r["model"].replace("rgbe_noaux_448_seed42_", "run "), at=r["evaluated_at"][:10])
+        r = con.execute("SELECT * FROM evaluation_results WHERE eval_type='pose_pipeline' ORDER BY id DESC LIMIT 1").fetchone()
+        if r:
+            sm = (json.loads(r["per_class_results"] or "{}")).get("summary", {})
+            vals = [v for v in sm.values() if isinstance(v, dict) and v.get("rms_med") is not None]
+            med = lambda k: statistics.median([v["std_med"][k] for v in vals if v.get("std_med")]) if vals else 0.0
+            out["pose"] = N(rms=statistics.median([v["rms_med"] for v in vals]) if vals else 0.0,
+                            sessions=sum(v.get("sessions", 0) for v in vals), n=r["total_samples"],
+                            used=100.0 * r["correct"] / max(1, r["total_samples"]),
+                            theta_std=med("theta"), tilt_std=med("tilt"), z_std=med("z"), at=r["evaluated_at"][:10])
+        rows = con.execute("""SELECT m.k_session, m.k_applied, m.dev_mm FROM session_hole_metrics m JOIN capture_sessions s ON s.id=m.session_id
+                              WHERE m.k_session IS NOT NULL ORDER BY s.started_at DESC LIMIT 7""").fetchall()
+        if rows:
+            out["drift"] = N(k=statistics.median([x["k_session"] for x in rows]), kref=rows[0]["k_applied"] or 0.0,
+                             warn=sum(1 for x in rows if abs(x["dev_mm"] or 0) > DRIFT_DEV_WARN or (x["k_applied"] and abs(x["k_session"] / x["k_applied"] - 1) > DRIFT_K_WARN)))
+    except (sqlite3.OperationalError, ValueError, TypeError, KeyError):
+        pass
+    return type("BM", (), out)
 
 
 def session_list_rows(con, order="desc"):
