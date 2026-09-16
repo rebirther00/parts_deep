@@ -38,3 +38,17 @@
 - `attribute_models/hole_landmarks/eval_classifier_datasets_factory_v2_test.json`(+혼동행렬 png), `eval_classifier_datasets_factory_collect.json`
 - `artifacts/rgbe_noaux_448_seed42_datasets_factory_v2/factory_eval_results.json`
 - `../../pos_estimation/pos_pipeline/artifacts/eval_field_datasets_factory_v2_all.json`(git 미추적), DB evaluation_results·session_hole_metrics, webapp `/drift`
+
+## 추가: CNN 재학습 실험 (seed 916, 현재 train 분할 103세션)
+
+질문: "전체 세션으로 다시 학습하면 E30_LH_RR 도 떨어지나?" → **아니다.**
+
+| run | 학습 데이터 | test 596장 | E30_LH_RR (59장) |
+|---|---|---|---|
+| #10 (seed42, 9/7 학습) | 8/27~9/7 train 세션 | 93.3% | 19/59 — 3세션 모두 혼동 |
+| **seed916 (9/16 학습)** | 8/27~9/16 train 103세션 | **99.8% (595/596)** | **59/59** |
+
+- 원인 진단: run #10 은 **자기 학습 세션의 E30_LH_RR 도 못 맞춤**(8/28 두 세션 0/14) — 학습 도중 val loss 폭발(8~9에폭) 후 초반 체크포인트가 선택돼 이 클래스를 배우지 못한 채 저장됨. 데이터 한계가 아니라 학습 불안정 + 세션 부족.
+- Grad-CAM: FRT·RH 는 도어 윤곽(상단 가장자리)을 보고 폭을 읽지만, RR 은 지그 폭을 꽉 채워 좌우 가장자리가 클램프·측판에 가려짐 → 더 어려운 클래스. 세션이 6→11개로 늘자 학습됨.
+- seed916 학습 곡선: 5에폭 val 97.9% best, 15에폭 조기 종료, val loss 단조 감소(0.12→0.09). 남은 오답 1장 = 9/10 E30_LH_FRT s_144140 → E38_LH_FRT.
+- **채택 여부는 사용자 결정 대기**: 채택 시 `cnn_classifier.DEFAULT_RUN`·18 기본값·Gitea LFS 배포 목록(`scripts/model_sync.sh`)을 seed916 으로 교체. 5-fold 세션 CV 재실행은 선택.
