@@ -128,7 +128,7 @@ python 02_train.py --model_type rgbe --no_aux --image_size 448 --dataset_dir dat
 
 ### 단기 (수집 유입·일정에 의존)
 
-5. **E25_door_LH_FRT 정상 세션 재수집(최소 2세션)** — 9/3·9/5 수집분은 E23으로 판명(2026-09-07). 현재 유효 세션 9/4 1개뿐이라
+5. **E25_door_LH_FRT 정상 세션 재수집(최소 2세션)** — 9/3·9/5 수집분은 E23으로 판명(2026-09-07), **9/12 2세션도 또 E23**(2026-09-16 정정) → 현장에 E23/E25_LH_FRT 구분 안내 필요. 현재 유효 세션 9/4 1개뿐이라
    test 불가. 재수집 후 `auto-split --reset-nontest`로 분할 재계산 → 8종(+E23) 현장 공식 인식률 완결.
    **E23 어셈블리 STEP 확보** — 자세 추정은 잠정 등록 상태(`pos_pipeline/01_extract_cad_holes.PROVISIONAL`).
 6. **Unknown 4세션 61쌍 라벨 확정** — 홀 판별기 판정 참조로 빠르게 정리 가능. (2026-09-07: 이 4세션은 is_valid=0 무효 처리 상태라 뷰 제외)
@@ -173,5 +173,6 @@ python 02_train.py --model_type rgbe --no_aux --image_size 448 --dataset_dir dat
 
 메모: 2026-09-07 9/1~9/5 유입 세션 전량 pull·평가·라벨 정정(E23 4세션·E30_LH_RR 짧은 세션 3개) 후 auto-split 적용 완료.
 이후 유입 세션은 pull → 17 평가 → `auto-split`(미지정만 채움) → `build` → **`20_session_drift.py`(드리프트 지표 기록, 미기록 세션만)** 순으로 처리.
+- **2026-09-16 전체 재평가**(`report/hole_analysis/full_eval_20260916/`): 유효 151세션, test 596장 홀 100%·CNN 93.3%(E30_LH_RR 혼동). **9/9 이후 depth 스케일 계단 변화(K 1.0065→1.0132, dev −7mm, 경보 20/68)** → K 운영 규칙(이동 중앙값 or 볼트 피치 자기보정) 결정 필요.
 - **드리프트 시계열 (2026-09-16 추가)**: `session_hole_metrics`(세션×모델 1행). K_session=CAD_D/median(D_raw)이 depth 스케일 지표(기준 K_CAMERA ±1% 경보),
   dev=median(D)−CAD(±15mm 경보), z·tilt 병기. webapp `/drift` 에서 산점 시계열·경보 표. K_CAMERA 를 바꾸면 `--recompute`.
