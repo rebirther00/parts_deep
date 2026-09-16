@@ -115,8 +115,10 @@ python 02_train.py --model_type rgbe --no_aux --image_size 448 --dataset_dir dat
 
 ### 바로 실행 가능 (막힌 데 없음)
 
-1. **E38_LH_FRT 현장 자세 평가** — 8/31 저녁 5세션 648쌍 수집 완료로 차단 해제됨
-   (기존 "수집 대기" 문구는 낡음). `pos_pipeline/03_evaluate_field` 실행 → 자세 평가 7종으로 확대.
+1. ~~**E38_LH_FRT 현장 자세 평가**~~ → **완료 (2026-09-16)**: `03_evaluate_field --base datasets_factory_v2/all` 83세션·9종(E23 잠정 CAD 포함) 재평가, DB 기록.
+   클래스 잔차 med 2.8~6.9mm, 세션 내 std x/y ≤0.9·z ≤3.7mm·θ ≤0.13°·tilt ≤0.32°.
+   **대차 위 도어 위치 변동 통계**(`pos_pipeline/tools/analyze_cart_placement.py` → `pos_pipeline/CART_PLACEMENT_20260916.md`): 세션 간 면내 x p95 2.1·y 4.3mm·θ 0.30°,
+   z p95 11.8mm 는 드리프트 표의 고 K 세션과 일치 → depth 편향. 로봇 보정 범위 제안: 면내 ±5mm, θ ±0.5°, tilt ±1.5°, z ±15mm.
 2. **05_evaluate_tracker_gt.py에 db_log 연동** — 레이저 트래커 실측 전에 필수.
    03처럼 eval_type='pose_pipeline'으로 기록 (04 합성 검증은 일회성이라 생략 가능).
 3. ~~**라벨 검수**~~ → **완료 (2026-09-16)**: `E25_door_LH_FRT__0000` 힌지/래치 스왑 정정(볼트 4개 쪽=래치측, 검출기 예측과 일치, 학습분이라 재학습 시 반영).
