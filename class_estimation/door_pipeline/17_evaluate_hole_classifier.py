@@ -4,13 +4,15 @@
   python 17_evaluate_hole_classifier.py --base datasets_factory   # 임의 디렉터리(<class>/rgb_*.png)
   python 17_evaluate_hole_classifier.py --base datasets_factory_collect   # 06 수집분(<date>/<class>/s_*/rgb_*.png)
 
+pred='unknown'(최근접 CAD D 편차 > UNKNOWN_MM, 미등록 도어 판정)은 판정(judged)에 포함되고 정답 클래스가 있는 행에서는 오판으로 집계된다.
+  --unknown_mm 0 으로 미등록 판정을 끄면 이전 동작(최근접 강제 배정)과 비교할 수 있다.
 출력: attribute_models/hole_landmarks/eval_classifier.json (--base 시 eval_classifier_<base>.json) + DB evaluation_results(inference_pipeline)
       + 혼동행렬 png: eval_classifier[_<base>]_<set>_confusion_matrix.png (보류 열 포함, git 미추적). --no_png 로 생략
       오판·보류 샘플 jpg 는 tools/make_hole_samples.py [--base <base>] 로 별도 생성
 """
 import argparse, glob, json, os, time, collections
 import cv2, numpy as np
-from hole_classifier import load_model, classify, CAD_D, GROUP
+from hole_classifier import load_model, classify, CAD_D, GROUP, UNKNOWN, UNKNOWN_MM
 
 DOOR = os.path.dirname(os.path.abspath(__file__))
 OUT = os.path.join(DOOR, 'attribute_models', 'hole_landmarks')
@@ -20,6 +22,7 @@ ap.add_argument('--split_info', default=os.path.join(DOOR, 'artifacts', 'rgbe_no
 ap.add_argument('--no_db', action='store_true')
 ap.add_argument('--oracle_group', action='store_true', help='정답 그룹을 제약으로 사용 (그룹 선판별 상한 평가)')
 ap.add_argument('--no_png', action='store_true', help='혼동행렬 png 저장 생략')
+ap.add_argument('--unknown_mm', type=float, default=UNKNOWN_MM, help=f'미등록(unknown) 판정 편차 임계값 mm (기본 {UNKNOWN_MM:g}, 0=끔)')
 args = ap.parse_args()
 
 
@@ -33,7 +36,9 @@ def save_confusion(rows, path, title):
     if not valid: return None
     gts = [c for c in sorted(CAD_D) if any(r['cls'] == c for r in valid)]
     preds = [c for c in sorted(CAD_D) if any(r['pred'] == c for r in valid)]
-    cols = sorted(set(gts) | set(preds), key=sorted(CAD_D).index) + ['보류']
+    cols = sorted(set(gts) | set(preds), key=sorted(CAD_D).index)
+    if any(r['pred'] == UNKNOWN for r in valid): cols.append(UNKNOWN)
+    cols.append('보류')
     M = np.zeros((len(gts), len(cols)), dtype=int)
     for r in valid:
         M[gts.index(r['cls']), cols.index(r['pred'] if r['pred'] else '보류')] += 1
@@ -71,17 +76,20 @@ def run_set(net, dev, name, files, cls_of):
         if rgb is None:
             continue
         c0 = cls_of(f)
-        r = classify(net, dev, rgb, depth, group=(GROUP.get(c0) if args.oracle_group else None))
+        r = classify(net, dev, rgb, depth, group=(GROUP.get(c0) if args.oracle_group else None),
+                     unknown_mm=(args.unknown_mm or None))
         rows.append(dict(image=os.path.relpath(f, DOOR), cls=cls_of(f), pred=r['pred'], D_mm=r['D_mm'], gate=r['gate'],
-                         D_src=r['D_src'], margin_mm=r.get('margin_mm')))
+                         D_src=r['D_src'], margin_mm=r.get('margin_mm'), nearest_mm=r.get('nearest_mm')))
     # 집계
     valid = [r for r in rows if r['cls'] in CAD_D]; judged = [r for r in valid if r['pred']]
     acc = np.mean([r['pred'] == r['cls'] for r in judged]) * 100 if judged else 0
-    gacc = np.mean([GROUP[r['pred']] == GROUP[r['cls']] for r in judged]) * 100 if judged else 0
+    gacc = np.mean([GROUP.get(r['pred']) == GROUP[r['cls']] for r in judged]) * 100 if judged else 0
     gates = collections.Counter(r['gate'] for r in valid)
+    n_unk = sum(r['pred'] == UNKNOWN for r in judged)
     print(f"\n[{name}] {len(rows)}장  ({time.time() - t0:.0f}s)")
     print(f"  판정 {len(judged)}/{len(valid)} ({100 * len(judged) / max(1, len(valid)):.0f}%)  판정 정확도 클래스 {acc:.1f}% / 그룹 {gacc:.1f}%  "
-          f"전체 대비 정답 {sum(r['pred'] == r['cls'] for r in judged)}/{len(valid)}   보류 사유 {dict(gates)}")
+          f"전체 대비 정답 {sum(r['pred'] == r['cls'] for r in judged)}/{len(valid)}   보류 사유 {dict(gates)}   "
+          f"unknown {n_unk} (임계 {args.unknown_mm:g}mm)")
     print(f"  {'클래스':16s} {'n':>4s} {'판정':>4s} {'정답':>4s} {'정확도':>6s} | {'D med':>7s} {'CAD':>5s} {'차이':>5s} | 오판 내역")
     cm = collections.Counter()
     for c in sorted(CAD_D):
@@ -92,7 +100,7 @@ def run_set(net, dev, name, files, cls_of):
         for r in jj: cm[(c, r['pred'])] += 1
         print(f"  {c:16s} {len(rr):4d} {len(jj):4d} {ok:4d} {100 * ok / max(1, len(jj)):5.1f}% | {np.median(d) if d.size else 0:7.1f} {CAD_D[c]:5d} {np.median(d) - CAD_D[c] if d.size else 0:+5.0f} | {dict(wrong) if wrong else ''}")
     return dict(rows=rows, n=len(valid), judged=len(judged), correct=int(sum(r['pred'] == r['cls'] for r in judged)),
-                acc_judged=acc, group_acc_judged=gacc, gates=dict(gates))
+                acc_judged=acc, group_acc_judged=gacc, gates=dict(gates), unknown=n_unk, unknown_mm=args.unknown_mm)
 
 
 if __name__ == '__main__':
@@ -142,6 +150,7 @@ if __name__ == '__main__':
         for k, v in results.items():
             db.log_evaluation(model_id=mid, dataset_name=dsmap.get(k, k), eval_type='inference_pipeline', total_samples=v['n'],
                               correct=v['correct'], accuracy=100.0 * v['correct'] / max(1, v['n']),
-                              per_class_results=dict(set=k, judged=v['judged'], acc_judged=v['acc_judged'], group_acc_judged=v['group_acc_judged'], gates=v['gates']),
+                              per_class_results=dict(set=k, judged=v['judged'], acc_judged=v['acc_judged'], group_acc_judged=v['group_acc_judged'], gates=v['gates'],
+                                                     unknown=v['unknown'], unknown_mm=v['unknown_mm']),
                               inference_device=str(dev), report_path='attribute_models/hole_landmarks/' + out_name)
         db.close()

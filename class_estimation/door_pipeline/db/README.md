@@ -160,7 +160,11 @@ python 02_train.py --model_type rgbe --no_aux --image_size 448 --dataset_dir dat
   run #10 재평가 **97.4%**(368/378, macro F1 91.2) — 남은 오답 10장은 전부 9/7 E30_LH_RR s_143122(20장 중 10장, E38_LH_RR·E25_LH_RR로 혼동).
   홀 판별기는 같은 test 378/378 100%. (test 세션 수 자체는 변동 없음: E30_LH_RR test = 9/7 s_143122 한 세션)
 - ~~U-Net 속성 파이프라인의 지위~~ → **폐기·아카이빙 (2026-09-11 사용자 결정)**. 홀 판별기 대비 이점 없음
-  (그룹 제약 기여 datasets +0.5%p, 현장 0). `door_pipeline/archive_attribute_unet_20260911/`. 폴백 역할은 CNN 정식 run이 승계(18 통합은 미구현).
+  (그룹 제약 기여 datasets +0.5%p, 현장 0). `door_pipeline/archive_attribute_unet_20260911/`. 폴백 역할은 CNN 정식 run이 승계(**18 통합 완료 2026-09-16**: `cnn_classifier.py` 모듈, 보류 프레임만 CNN 투표·홀 우선·conflict 표시, `--no_cnn`/`--cnn_every`).
+- **미등록 도어(unknown) 판정 추가 (2026-09-16)** — `hole_classifier.judge()`: 최근접 CAD D 편차 > `UNKNOWN_MM`(30mm)이면 pred='unknown'
+  (E23 등록 전 사고 재발 방지). 전 평가 집합 재평가: 현장 test 378/378·수집분 1,793판정 모두 판정 불변, 사무실 datasets 오판 1장만 unknown 으로 이동.
+  한계: 등록 클래스 간 간격(FRT 최소 41mm) 안에 끼는 새 도어는 못 잡음. 17번 `--unknown_mm 0` 으로 끔.
+  **주의**: CNN 폴백은 '도어 없음'을 낼 수 없어 빈 지그(8/27 s_122816) 리플레이에서 E38_LH_RR p=0.999 로 오판 → 도어 유무 게이트(또는 '빈 지그' 클래스) 필요.
 - **2차년도 확장 구체화** — 로봇 연계 파이프라인, 도장 라인 확장(R1 공표 항목).
 
 메모: 2026-09-07 9/1~9/5 유입 세션 전량 pull·평가·라벨 정정(E23 4세션·E30_LH_RR 짧은 세션 3개) 후 auto-split 적용 완료.

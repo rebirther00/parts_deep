@@ -4,6 +4,7 @@ classify(rgb, depth) → dict(pred, D_mm, gate, points, scores, ...)
   1) ResNet18-FPN 히트맵(16_train_hole_landmarks.py 학습)으로 볼트홀 4 + 상단 모서리 홀 2 검출
   2) depth 평면상 두 모서리 홀 거리(mm) × K_DEPTH[카메라 모드] → D
   3) 볼트 프레임 기하 게이트 통과 시 CAD D 최근접 클래스, 아니면 pred=None(보류)
+     최근접 CAD D 와도 UNKNOWN_MM 이상 벌어지면 pred='unknown'(미등록 도어) — 억지 배정 금지
 
 스케일 상수 K_DEPTH는 근사 intrinsics(fx=1065) 편향 보정값 — 이미지 세로 해상도(카메라 모드)별로 GT 캘리브레이션:
   1080p(사무실 datasets) 0.8235, 1200p(현장 ZED X Mini HD1200) 0.8505
@@ -53,6 +54,12 @@ CAD_D = {'E23_door_LH_FRT': 456, 'E25_door_LH_FRT': 724, 'E30_door_LH_FRT': 765,
          'E25_door_LH_RR': 1037, 'E30_door_LH_RR': 1158, 'E38_door_LH_RR': 1352, 'E25_door_RH': 886, 'E30_E38_door_RH': 1087}
 # D = 도어 폭 − 106mm. E23은 2026-09-07 추가(STP 폭 562 → 456, 현장 실측 중앙값 460)
 D_RANGE = (400, 1500)   # 유효 코너 홀 거리(mm) — 게이트(볼트 스케일)와 최종 depth D 공통
+# 미등록 도어 판정: 최근접 CAD D 와의 절대 편차가 이 값을 넘으면 pred='unknown'.
+# 근거(2026-09-16, 기존 평가 json 재집계): 정상 판정 프레임의 최근접 편차 최대 = 현장 27.0mm(1,777장)·사무실 32.9mm(814장, 그 1장은 오판),
+# 미등록 사례(E23 등록 전 D≈460 → 최근접 E25_LH_FRT 724)는 264mm. 30mm 면 현장 판정은 한 장도 안 바뀌고 E23 류는 전부 잡힘.
+# 한계: 등록 클래스 간 간격(FRT 최소 41mm) 안에 끼는 새 도어는 측정 잡음(p95 ~17mm)과 구분 불가 → 이 임계값으로 못 잡음.
+UNKNOWN_MM = 30.0
+UNKNOWN = 'unknown'
 GROUP = {c: ('FRT' if 'FRT' in c else 'RH' if c.endswith('RH') else 'RR') for c in CAD_D}
 MEAN = torch.tensor([0.485, 0.456, 0.406])[None, :, None, None]
 STD = torch.tensor([0.229, 0.224, 0.225])[None, :, None, None]
@@ -284,19 +291,31 @@ def nearest_class(D, group=None):
     return min(cands, key=lambda k: abs(CAD_D[k] - D))
 
 
-def classify(net, dev, rgb, depth=None, group=None, intrinsics=None, bolt_norm=False):
+def judge(D, group=None, unknown_mm=UNKNOWN_MM):
+    """D → (pred, nearest_mm, margin_mm). 최근접 CAD 편차(nearest_mm)가 unknown_mm 초과면 pred=UNKNOWN.
+    margin_mm = 2위 후보 편차 − 1위 편차 (후보 1개면 1e9). unknown_mm=None 이면 미등록 판정 끔(기존 동작)."""
+    cands = [k for k in CAD_D if group is None or GROUP[k] == group]
+    ds = sorted((abs(CAD_D[k] - D), k) for k in cands)
+    nearest, margin = ds[0][0], (ds[1][0] if len(ds) > 1 else 1e9) - ds[0][0]
+    pred = UNKNOWN if (unknown_mm is not None and nearest > unknown_mm) else ds[0][1]
+    return pred, float(nearest), float(margin)
+
+
+def classify(net, dev, rgb, depth=None, group=None, intrinsics=None, bolt_norm=False, unknown_mm=UNKNOWN_MM):
     """단일 프레임 판정. depth 없으면 볼트 피치 스케일 사용. group 지정 시 그룹 내 최근접.
 
     intrinsics: dict(fx, fy, cx, cy) — 카메라 실제 값(렌즈 무관 D). None 이면 수집 카메라 가정.
     bolt_norm: depth D 를 볼트 장변 CAD/실측 비율로 정규화 (D_src='depth+bolt', D_raw_mm 보존).
-        기본 꺼짐 — 볼트 국소화 오차(-7% 관측)가 D 에 그대로 증폭되므로 실험용으로만."""
+        기본 꺼짐 — 볼트 국소화 오차(-7% 관측)가 D 에 그대로 증폭되므로 실험용으로만.
+    unknown_mm: 최근접 CAD D 편차가 이 값을 넘으면 pred='unknown'(미등록 도어, gate 는 'ok' 유지). None 이면 끔.
+    반환 nearest_mm = 최근접 CAD D 와의 절대 편차, margin_mm = 2위 편차 − 1위 편차."""
     det = detect(net, dev, rgb)
     hinge = det['corner_hinge'][0] if det['corner_hinge'] else None
     latch = det['corner_latch'][0] if det['corner_latch'] else None
     fr = bolt_frame(det['bolt'])
     gate = geometry_gate(fr, hinge, latch, rgb.shape)
     out = dict(points=det, gate=gate, pred=None, D_mm=None, D_src=None, group=None, bolt_mm=None,
-               D_raw_mm=None, k_bolt=None)
+               D_raw_mm=None, k_bolt=None, nearest_mm=None, margin_mm=None)
     corners = [p for p in (hinge, latch) if p is not None]
     pf = None
     if depth is not None and len(det['bolt']) + len(corners) >= 3:
@@ -318,21 +337,17 @@ def classify(net, dev, rgb, depth=None, group=None, intrinsics=None, bolt_norm=F
     if D is not None and gate == 'ok' and not (D_RANGE[0] <= D <= D_RANGE[1]):
         gate = out['gate'] = 'D_range'   # depth 평면 피팅 붕괴(예: 작업자 가림) 시 D가 비현실적 → 보류
     if D is not None and gate == 'ok':
-        out['pred'] = nearest_class(D, group)
-        out['group'] = GROUP[out['pred']]
-        cands = [k for k in CAD_D if group is None or GROUP[k] == group]
-        ds = sorted(abs(CAD_D[k] - D) for k in cands)
-        out['margin_mm'] = float((ds[1] if len(ds) > 1 else 1e9) - ds[0])
+        out['pred'], out['nearest_mm'], out['margin_mm'] = judge(D, group, unknown_mm)
+        out['group'] = GROUP.get(out['pred'])   # unknown → None
     return out
 
 
-def aggregate(results, group=None):
-    """N프레임 집계: 게이트 통과 프레임의 D 중앙값 → 클래스(group 지정 시 그룹 내). 판정 프레임이 없으면 None."""
+def aggregate(results, group=None, unknown_mm=UNKNOWN_MM):
+    """N프레임 집계: 게이트 통과 프레임의 D 중앙값 → 클래스(group 지정 시 그룹 내). 판정 프레임이 없으면 None.
+    중앙값 D 가 최근접 CAD 와 unknown_mm 이상 벌어지면 pred='unknown', group=None (프레임별 unknown 도 D 는 집계에 포함)."""
     Ds = [r['D_mm'] for r in results if r.get('gate') == 'ok' and r.get('D_mm')]
     if not Ds:
-        return dict(pred=None, D_mm=None, n_judged=0, n=len(results))
-    D = float(np.median(Ds)); pred = nearest_class(D, group)
-    cands = [k for k in CAD_D if group is None or GROUP[k] == group]
-    ds = sorted(abs(CAD_D[k] - D) for k in cands)
-    return dict(pred=pred, group=GROUP[pred], D_mm=D, n_judged=len(Ds), n=len(results),
-                margin_mm=float((ds[1] if len(ds) > 1 else 1e9) - ds[0]))
+        return dict(pred=None, group=None, D_mm=None, n_judged=0, n=len(results), nearest_mm=None, margin_mm=None)
+    D = float(np.median(Ds)); pred, nearest, margin = judge(D, group, unknown_mm)
+    return dict(pred=pred, group=GROUP.get(pred), D_mm=D, n_judged=len(Ds), n=len(results),
+                nearest_mm=nearest, margin_mm=margin)

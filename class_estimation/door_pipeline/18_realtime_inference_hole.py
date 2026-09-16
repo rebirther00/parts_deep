@@ -1,13 +1,18 @@
-"""홀 랜드마크 판별기 전용 실시간 추론 서버 (ZED 호환, 웹 UI).
+"""홀 랜드마크 판별기 실시간 추론 서버 + CNN 폴백 (ZED 호환, 웹 UI).
 
-16_train_hole_landmarks.py 로 학습한 attribute_models/hole_landmarks/model.pth 만
-사용한다. MobileSAM·U-Net·CAD 템플릿(속성 파이프라인)은 로드하지 않는다.
-속성(U-Net) 폴백을 쓰던 통합 서버 14는 2026-09-11 archive_attribute_unet_20260911/ 로 아카이빙 (홀 보류 시 폴백은 현장 재학습 CNN으로 대체 예정).
+주 판별기 = 16_train_hole_landmarks.py 로 학습한 attribute_models/hole_landmarks/model.pth.
+보조(폴백) = 현장 재학습 CNN(cnn_classifier.py, 정식 run #10) — 홀 판별기가 보류한 프레임에서만 실행.
+MobileSAM·U-Net·CAD 템플릿(속성 파이프라인)은 로드하지 않는다
+(U-Net 폴백을 쓰던 통합 서버 14는 2026-09-11 archive_attribute_unet_20260911/ 로 아카이빙, 폴백 역할은 CNN 승계 — 2026-09-16 구현).
 
 파이프라인(프레임마다):
     RGB(+Depth) → ResNet18-FPN 히트맵 → 볼트홀 4 + 모서리 홀 2 검출
     → 기하 게이트 → depth 평면상 모서리 홀 거리 D(mm)
     → 슬라이딩 윈도(기본 10프레임) D 중앙값 → CAD D 최근접 클래스
+      (최근접 CAD 와 UNKNOWN_MM 이상 벌어지면 '미등록 도어(unknown)' — 폴백하지 않음, 판정임)
+    → 게이트 미통과(보류) 프레임은 CNN 으로 분류해 같은 윈도에 투표 축적
+    → 판정 우선순위: 홀 확정(source=hole) > 홀 수집 중 > CNN 투표 ≥ min_judged & 평균 확률 ≥ cnn_min_prob(source=cnn) > 보류
+      홀 확정과 CNN 다수결이 다르면 conflict=True 로 표시만 함(판정은 홀 우선).
 
 depth 가 없으면(리플레이 폴더에 depth_*.png 없음) 볼트 피치 스케일로 D 를
 추정한다(정밀도 낮음, 검증용).
@@ -18,6 +23,8 @@ depth 가 없으면(리플레이 폴더에 depth_*.png 없음) 볼트 피치 스
     python 18_realtime_inference_hole.py \
         --replay datasets_field/E25_door_RH_s_091317         # 리플레이 검증
     python 18_realtime_inference_hole.py --fp16              # Jetson 가속
+    python 18_realtime_inference_hole.py --no_cnn            # 홀 판별기만 (폴백 끔)
+    python 18_realtime_inference_hole.py --cnn_every         # CNN 을 매 프레임 실행 (홀 판정과 교차 검증용, +~70ms)
 """
 import argparse
 import collections
@@ -33,7 +40,8 @@ import numpy as np
 from flask import Flask, Response, jsonify, render_template
 
 import hole_classifier
-from hole_classifier import BOLT_PITCH, CAD_D, GROUP
+from hole_classifier import BOLT_PITCH, CAD_D, GROUP, UNKNOWN
+import cnn_classifier
 
 DOOR_DIR = os.path.dirname(os.path.abspath(__file__))
 REPO_DIR = os.path.dirname(os.path.dirname(DOOR_DIR))
@@ -65,17 +73,26 @@ parser.add_argument('--bolt_norm', action='store_true',
                          '볼트 국소화 오차가 D 에 증폭됨). 볼트 mm 표시는 항상 됨')
 parser.add_argument('--fp16', action='store_true',
                     help='FP16 autocast (Jetson GPU 가속)')
+parser.add_argument('--cnn_model', type=str, default=cnn_classifier.MODEL_PATH,
+                    help='폴백 CNN 모델 경로 (기본: artifacts/rgbe_noaux_448_seed42_datasets_factory_v2/model.pth, '
+                         '같은 폴더 split_info.json 에서 클래스명)')
+parser.add_argument('--no_cnn', action='store_true', help='CNN 폴백 끔 (홀 판별기만)')
+parser.add_argument('--cnn_every', action='store_true',
+                    help='CNN 을 보류 프레임뿐 아니라 매 프레임 실행 (홀 판정과 교차 검증, 프레임당 +~70ms)')
+parser.add_argument('--cnn_min_prob', type=float, default=0.5,
+                    help='CNN 폴백 판정에 필요한 다수결 클래스의 평균 softmax 확률 (기본 0.5)')
 parser.add_argument('--device', type=str, default='cuda')
 args = parser.parse_args()
 
 app = Flask(__name__)
 result_lock = threading.Lock()
 inference_result = {
-    'class': '대기 중', 'group': '-', 'confidence': 0.0,
-    'D_mm': None, 'margin_mm': None, 'n_judged': 0, 'window': 0,
-    'gate': None, 'gate_counts': {}, 'candidates': [],
+    'class': '대기 중', 'group': '-', 'confidence': 0.0, 'source': None, 'conflict': False,
+    'D_mm': None, 'margin_mm': None, 'nearest_mm': None, 'n_judged': 0, 'window': 0,
+    'gate': None, 'gate_counts': {}, 'candidates': [], 'cnn': None,
     'frame': None, 'inference_ms': 0.0, 'timestamp': 0.0,
 }
+UNKNOWN_LABEL = '미등록 도어 (unknown)'
 latest_frame = None
 frame_lock = threading.Lock()
 reset_event = threading.Event()
@@ -207,13 +224,27 @@ def candidates_from_D(D):
                   key=lambda x: x['diff_mm'])
 
 
-def inference_loop(source, net, dev):
+def cnn_vote(cnn_window):
+    """CNN 윈도(프레임별 (pred, prob) 또는 None) → 다수결 클래스·평균 확률·투표 수. 투표 없으면 None."""
+    votes = [v for v in cnn_window if v]
+    if not votes:
+        return None
+    cnt = collections.Counter(p for p, _ in votes)
+    pred, n = cnt.most_common(1)[0]
+    prob = float(np.mean([q for p, q in votes if p == pred]))
+    top = [{'class': c, 'n': k} for c, k in cnt.most_common(3)]
+    return {'pred': pred, 'prob': round(prob, 3), 'n': n, 'n_total': len(votes), 'top': top}
+
+
+def inference_loop(source, net, dev, cnn=None):
     global inference_result, latest_frame
     import torch
     window = collections.deque(maxlen=args.n_frames)
+    cnn_window = collections.deque(maxlen=args.n_frames)   # 홀 윈도와 같은 길이로 프레임마다 추가 (미실행 프레임 = None)
     while not stop_event.is_set():
         if reset_event.is_set():
             window.clear()
+            cnn_window.clear()
             reset_event.clear()
         rgb, depth, intr = source.get()
         if rgb is None:
@@ -229,14 +260,32 @@ def inference_loop(source, net, dev):
                                               intrinsics=intr,
                                               bolt_norm=args.bolt_norm)
             window.append(hr)
+            # CNN 폴백: 홀 게이트 미통과(보류) 프레임만 분류 (--cnn_every 면 매 프레임)
+            cv = None
+            if cnn is not None and (args.cnn_every or hr['gate'] != 'ok'):
+                c_pred, c_prob, _ = cnn.predict(rgb)
+                cv = (c_pred, c_prob)
+            cnn_window.append(cv)
             agg = hole_classifier.aggregate(list(window))
+            vote = cnn_vote(cnn_window)
             gate_counts = dict(collections.Counter(
                 r['gate'] for r in window))
+            src, conflict = None, False
             if agg['pred'] and agg['n_judged'] >= args.min_judged:
-                pred, grp = agg['pred'], agg['group']
+                pred, grp, src = agg['pred'], agg['group'] or '-', 'hole'
                 conf = min(100.0, 100.0 * agg['n_judged'] / args.n_frames)
+                if pred == UNKNOWN:
+                    pred = UNKNOWN_LABEL          # 판정임 — CNN 폴백 안 함(CNN 은 등록 클래스만 낼 수 있음)
+                elif vote and vote['pred'] != pred:
+                    conflict = True               # 표시만, 판정은 홀 우선
             elif agg['pred']:
-                pred, grp = f'수집 중 ({agg["n_judged"]}/{args.min_judged})', agg['group']
+                pred, grp, src = f'수집 중 ({agg["n_judged"]}/{args.min_judged})', agg['group'] or '-', 'hole'
+                conf = 0.0
+            elif vote and vote['n'] >= args.min_judged and vote['prob'] >= args.cnn_min_prob:
+                pred, grp, src = vote['pred'], GROUP.get(vote['pred'], '-'), 'cnn'
+                conf = round(100.0 * vote['prob'], 1)
+            elif vote:
+                pred, grp, src = f'CNN 수집 중 ({vote["n"]}/{args.min_judged}, p={vote["prob"]:.2f})', '-', 'cnn'
                 conf = 0.0
             else:
                 pred, grp, conf = '보류', '-', 0.0
@@ -262,22 +311,28 @@ def inference_loop(source, net, dev):
                                 round(float(p[2]), 2)] for p in v]
                            for c, v in hr['points'].items()},
             }
+            frame_info['cnn'] = ({'pred': cv[0], 'prob': round(cv[1], 3)} if cv else None)
             result = {
                 'class': pred, 'group': grp, 'confidence': round(conf, 1),
+                'source': src, 'conflict': conflict,
                 'D_mm': round(agg['D_mm'], 1) if agg['D_mm'] else None,
                 'margin_mm': (round(agg['margin_mm'], 1)
                               if agg.get('margin_mm') is not None else None),
+                'nearest_mm': (round(agg['nearest_mm'], 1)
+                               if agg.get('nearest_mm') is not None else None),
                 'n_judged': agg['n_judged'], 'window': len(window),
                 'gate': hr['gate'], 'gate_counts': gate_counts,
                 'candidates': candidates_from_D(agg['D_mm'])[:4],
+                'cnn': vote,
                 'bolt_mm': bolt_agg,
                 'frame': frame_info,
             }
         except Exception as e:
             result = {'class': f'오류: {e}', 'group': '-', 'confidence': 0.0,
-                      'D_mm': None, 'margin_mm': None, 'n_judged': 0,
+                      'source': None, 'conflict': False,
+                      'D_mm': None, 'margin_mm': None, 'nearest_mm': None, 'n_judged': 0,
                       'window': len(window), 'gate': None, 'gate_counts': {},
-                      'candidates': [], 'frame': None}
+                      'candidates': [], 'cnn': None, 'frame': None}
         result['inference_ms'] = round((time.time() - t0) * 1000, 1)
         result['timestamp'] = time.time()
         with result_lock:
@@ -316,8 +371,13 @@ def generate_mjpeg():
         cv2.rectangle(overlay, (0, 0), (520, 155), (0, 0, 0), -1)
         cv2.addWeighted(overlay, 0.6, frame, 0.4, 0, frame)
         color = (0, 255, 0) if r['confidence'] > 60 else (0, 200, 255)
-        cv2.putText(frame, f"{r['class']}", (10, 42),
-                    cv2.FONT_HERSHEY_SIMPLEX, 1.1, color, 2)
+        if r.get('source') == 'cnn':
+            color = (255, 200, 0)                      # CNN 폴백 = 하늘색 계열로 구분
+        src_tag = {'hole': '[HOLE]', 'cnn': '[CNN]'}.get(r.get('source'), '')
+        if r.get('conflict'):
+            src_tag += ' !CNN differs'
+        cv2.putText(frame, f"{src_tag} {r['class']}", (10, 42),
+                    cv2.FONT_HERSHEY_SIMPLEX, 1.0, color, 2)
         d_txt = f"D={r['D_mm']:.0f}mm" if r.get('D_mm') else 'D=-'
         m_txt = (f" margin {r['margin_mm']:.0f}mm"
                  if r.get('margin_mm') is not None else '')
@@ -338,7 +398,9 @@ def generate_mjpeg():
                  if b else 'bolt -')
         k_txt = (f" | K {source.k:.4f}/{source.k_src}" if getattr(source, 'k', None) else '')
         b_txt += k_txt + (' +boltnorm' if args.bolt_norm else '')
-        cv2.putText(frame, f"{b_txt} | CAD {BOLT_PITCH[0]:.0f}x{BOLT_PITCH[1]:.0f}",
+        cv = r.get('cnn')
+        c_txt = (f" | cnn {cv['pred']} p={cv['prob']:.2f} ({cv['n']}/{cv['n_total']})" if cv else '')
+        cv2.putText(frame, f"{b_txt} | CAD {BOLT_PITCH[0]:.0f}x{BOLT_PITCH[1]:.0f}{c_txt}",
                     (10, 138), cv2.FONT_HERSHEY_SIMPLEX, 0.55, (0, 200, 255), 1)
         ok, buf = cv2.imencode('.jpg', frame, [cv2.IMWRITE_JPEG_QUALITY, 75])
         if ok:
@@ -374,6 +436,8 @@ def api_camera_info():
     info = source.info()
     info['engine'] = 'PyTorch' + (' FP16' if args.fp16 else '')
     info['model'] = os.path.relpath(args.model, DOOR_DIR)
+    info['cnn_model'] = (os.path.relpath(args.cnn_model, DOOR_DIR) if cnn is not None else None)
+    info['cnn_mode'] = ('off' if cnn is None else 'every' if args.cnn_every else 'fallback')
     return jsonify(info)
 
 
@@ -391,9 +455,19 @@ if __name__ == '__main__':
                          f'scripts/model_sync.sh 로 받아오세요')
     print(f'홀 랜드마크 모델: {args.model}')
     net, dev = hole_classifier.load_model(args.model, device=args.device)
+    cnn = None
+    if not args.no_cnn:
+        if os.path.exists(args.cnn_model):
+            cnn = cnn_classifier.CNNClassifier(args.cnn_model, device=args.device)
+            print(f'CNN 폴백 모델: {args.cnn_model} ({len(cnn.class_names)}클래스, '
+                  f"{'매 프레임' if args.cnn_every else '보류 프레임만'}, min_prob {args.cnn_min_prob})")
+        else:
+            print(f'경고: CNN 폴백 모델 없음 → 홀 판별기만 사용: {args.cnn_model}')
+    else:
+        print('CNN 폴백 끔 (--no_cnn)')
     source = ReplaySource(args.replay) if args.replay else ZedSource()
     infer_thread = threading.Thread(target=inference_loop,
-                                    args=(source, net, dev), daemon=True)
+                                    args=(source, net, dev, cnn), daemon=True)
     infer_thread.start()
 
     def _on_signal(signum, frame):
