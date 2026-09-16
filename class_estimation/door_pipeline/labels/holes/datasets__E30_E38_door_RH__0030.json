@@ -11,16 +11,17 @@
   "corner_latch": null
  },
  "visible": {
-  "bolt_bl": true,
-  "bolt_br": true,
-  "bolt_tl": true,
-  "bolt_tr": true,
+  "bolt_bl": false,
+  "bolt_br": false,
+  "bolt_tl": false,
+  "bolt_tr": false,
   "corner_hinge": true,
-  "corner_latch": true
+  "corner_latch": false
  },
  "image": "datasets/E30_E38_door_RH/rgb_0030.png",
  "cls": "E30_E38_door_RH",
  "idx": "0030",
  "src": "datasets",
- "labeled_at": "2026-08-26 13:00:32"
+ "labeled_at": "2026-08-26 13:00:32",
+ "review": "2026-09-16 11:05:01 검수: 도어 하단이 프레임 밖: 볼트 4·래치 홀 화면 밖 → visible=false (라벨 유지, 검출기도 미검출)"
 }
