@@ -267,6 +267,21 @@ def plane_from_depth(depth, pts_all, intrinsics=None):
     return to3d, k
 
 
+def measure_D(depth, pts_all, hinge, latch, intrinsics=None):
+    """드리프트 지표용 프레임 측정: dict(D_raw=역투영 원거리(mm, K 미적용), k=적용 잔차 K, D_mm=D_raw×k,
+    z=코너 홀 중점의 평면 깊이(mm), tilt=평면 법선 vs 광축(deg)). 평면 피팅 실패 시 None.
+    세션 K = CAD_D/median(D_raw) 가 depth 스케일 드리프트 지표(20_session_drift.py)."""
+    pf = plane_from_depth(depth, pts_all, intrinsics)
+    if pf is None:
+        return None
+    to3d, k = pf
+    H, L = to3d(hinge), to3d(latch)
+    B = to3d(pts_all[0]); n = np.cross(L - H, B - H); n /= (np.linalg.norm(n) + 1e-9)
+    D_raw = float(np.linalg.norm(H - L))
+    return dict(D_raw=D_raw, k=float(k), D_mm=D_raw * k, z=float((H + L)[2] / 2),
+                tilt=float(np.degrees(np.arccos(min(1.0, abs(n[2]))))))
+
+
 def depth_distance_mm(depth, pts_all, pa, pb, intrinsics=None):
     """두 점의 depth 평면상 거리(mm). 평면 피팅 실패 시 None."""
     pf = plane_from_depth(depth, pts_all, intrinsics)

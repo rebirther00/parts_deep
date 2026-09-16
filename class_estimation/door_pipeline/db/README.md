@@ -14,7 +14,8 @@
 | `ingest_local.py` | 로컬 `datasets*/` 스캔 → datasets/classes/images 등록 |
 | `ingest_nas.py` | NAS 세션 트리 스캔 → capture_sessions/images 등록 (`synced_local=FALSE`) |
 | `db_log.py` | 학습·평가 스크립트 → DB 자동 기록 헬퍼 (3단계) |
-| `webapp.py` | 열람·관리 웹 도구 — 대시보드/세션/이미지 썸네일/홀 라벨 뷰(점 오버레이)/학습 이력 + 라벨정정·split·무효화 버튼 |
+| `webapp.py` | 열람·관리 웹 도구 — 대시보드/세션/이미지 썸네일/홀 라벨 뷰(점 오버레이)/학습 이력/**드리프트 시계열** + 라벨정정·split·무효화 버튼 |
+| `migrate_session_metrics.py` | `session_hole_metrics` 테이블 생성(멱등, 2026-09-16) — `../20_session_drift.py` 가 세션별 K_session·dev·z·tilt 기록, webapp `/drift` 열람 |
 | `door_pipeline.db` | SQLite DB 본체 (git 미추적) |
 
 ## 사용
@@ -170,4 +171,6 @@ python 02_train.py --model_type rgbe --no_aux --image_size 448 --dataset_dir dat
 - **2차년도 확장 구체화** — 로봇 연계 파이프라인, 도장 라인 확장(R1 공표 항목).
 
 메모: 2026-09-07 9/1~9/5 유입 세션 전량 pull·평가·라벨 정정(E23 4세션·E30_LH_RR 짧은 세션 3개) 후 auto-split 적용 완료.
-이후 유입 세션은 pull → 17 평가 → `auto-split`(미지정만 채움) → `build` 순으로 처리.
+이후 유입 세션은 pull → 17 평가 → `auto-split`(미지정만 채움) → `build` → **`20_session_drift.py`(드리프트 지표 기록, 미기록 세션만)** 순으로 처리.
+- **드리프트 시계열 (2026-09-16 추가)**: `session_hole_metrics`(세션×모델 1행). K_session=CAD_D/median(D_raw)이 depth 스케일 지표(기준 K_CAMERA ±1% 경보),
+  dev=median(D)−CAD(±15mm 경보), z·tilt 병기. webapp `/drift` 에서 산점 시계열·경보 표. K_CAMERA 를 바꾸면 `--recompute`.

@@ -69,9 +69,14 @@ python 18_realtime_inference_hole.py --replay datasets_field/E25_door_RH_s_09131
 python scripts/hole_classify_image.py rgb_0003.png    # 단일 이미지
 # ⑲ 체커보드 스케일 캘리브 (K_DEPTH)
 python 19_checker_scale_calib.py
+# ⑳ 세션별 드리프트 지표 (K_session·dev·z·tilt) → DB session_hole_metrics, webapp /drift 시계열
+python 20_session_drift.py                            # 미기록 세션만 (pull·build 뒤 루틴)
+python 20_session_drift.py --recompute                # K_CAMERA·모델 교체 후 전부 재계산
+python 20_session_drift.py --print                    # 표만
 ```
 
-- ⑱은 보류 시 판정 없음("보류")으로 남긴다. 홀 보류 시 CNN 정식 run 폴백 통합은 **미구현 과제**(아래 유의사항).
+- ⑱은 홀 판별기 우선, 보류 프레임은 **CNN 정식 run(cnn_classifier.py) 폴백**으로 투표한다(2026-09-16, `--no_cnn` 으로 끔).
+  최근접 CAD D 와 30mm 넘게 벌어지면 '미등록 도어(unknown)' 판정(폴백 없음). 빈 지그는 CNN 이 도어로 오판하므로 도어 유무 게이트가 남은 과제.
   종전 통합 서버 ⑭(홀 1순위 + U-Net 속성 폴백, :5003)는 아카이브에 있다.
   ⑱ API `/api/inference_result`: `class, group, confidence(=판정 프레임 비율), D_mm(윈도 중앙값), margin_mm, n_judged, gate, gate_counts(윈도 게이트 분포),
   candidates[{class, cad_D_mm, diff_mm}], frame{gate, D_mm, D_src, points}`. `/api/reset` 으로 도어 교체 시 윈도 초기화. depth 없는 리플레이 폴더는 볼트 스케일 D(검증용).

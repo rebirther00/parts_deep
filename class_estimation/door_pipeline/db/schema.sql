@@ -188,3 +188,32 @@ CREATE INDEX IF NOT EXISTS idx_sessions_class   ON capture_sessions(class_name);
 
 -- 2026-09-08: 같은 세션·파일의 이미지 행 중복 방지 (relabel 후 --refresh 재삽입 사고 재발 방지)
 CREATE UNIQUE INDEX IF NOT EXISTS ux_images_session_file ON images(session_id, rgb_filename);
+
+-- 2026-09-16: 세션별 홀 판별기 드리프트 지표 (20_session_drift.py 기록, webapp /drift 열람)
+--   k_session = CAD_D / median(D_raw): 카메라 depth 스케일 드리프트 지표 (클래스 무관, 기준 k_applied ±1% 밖이면 경보)
+--   dev_mm    = median(D_mm) − CAD_D: 판정 마진 소모량 (|dev| > 15mm 경보)
+CREATE TABLE IF NOT EXISTS session_hole_metrics (
+    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    session_id      INTEGER NOT NULL REFERENCES capture_sessions(id) ON DELETE CASCADE,
+    model_id        INTEGER NOT NULL REFERENCES models(id),
+    class_name      VARCHAR(100) NOT NULL,        -- 정정 라벨(classes.name)
+    serial          INTEGER,                      -- 카메라 시리얼 (intrinsics 출처)
+    k_src           VARCHAR(10),                  -- camera | metric | depth
+    k_applied       REAL,                         -- 판정에 쓴 잔차 K
+    n_frames        INTEGER NOT NULL,
+    n_judged        INTEGER NOT NULL,
+    n_wrong         INTEGER,
+    n_unknown       INTEGER,
+    d_raw_med       REAL,                         -- 역투영 원거리 중앙값(mm, K 미적용)
+    d_med           REAL,                         -- 판정 D 중앙값(mm)
+    cad_d           REAL,
+    dev_mm          REAL,
+    k_session       REAL,
+    z_med           REAL,
+    tilt_med        REAL,
+    margin_min      REAL,
+    evaluated_at    TIMESTAMP NOT NULL DEFAULT (datetime('now','localtime')),
+    UNIQUE(session_id, model_id)
+);
+CREATE INDEX IF NOT EXISTS idx_shm_session ON session_hole_metrics(session_id);
+

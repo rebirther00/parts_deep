@@ -135,7 +135,7 @@ svg text { fill:var(--muted); font-size:10px; }
 </style></head><body>
 <nav>
   <span class="brand">🗄️ door_pipeline DB</span>
-  {% for ep, label in [('dashboard','대시보드'), ('sessions','세션'), ('images','이미지'), ('labels','라벨'), ('training','학습·평가')] %}
+  {% for ep, label in [('dashboard','대시보드'), ('sessions','세션'), ('images','이미지'), ('labels','라벨'), ('training','학습·평가'), ('drift','드리프트')] %}
     <a class="tab {{ 'on' if active == ep }}" href="{{ url_for(ep) }}">{{ label }}</a>
   {% endfor %}
   {% if readonly %}<span class="ro">열람 전용 모드</span>{% endif %}
@@ -1004,6 +1004,122 @@ def training():
         held[e["id"]] = eval_report_view(con, e["report_path"])
     return page("학습·평가", "training", TRAINING, trains=trains, charts=charts,
                 evals=evals, details=details, rpt=held)
+
+
+# ── 드리프트 (세션별 홀 판별기 지표 시계열) ─────────────────
+
+CLASS_COLORS = {"E23_door_LH_FRT": "#7c3aed", "E25_door_LH_FRT": "#2563eb", "E30_door_LH_FRT": "#0891b2", "E38_door_LH_FRT": "#059669",
+                "E25_door_LH_RR": "#d97706", "E30_door_LH_RR": "#dc2626", "E38_door_LH_RR": "#db2777",
+                "E25_door_RH": "#65a30d", "E30_E38_door_RH": "#6b7280"}
+DRIFT_DEV_WARN, DRIFT_K_WARN = 15.0, 0.01
+
+
+def _ts(s):
+    return time.mktime(time.strptime(s[:19], "%Y-%m-%d %H:%M:%S"))
+
+
+def drift_svg(rows, key, title, band=None, fmt="{:.1f}", ref=None):
+    """세션 시각(x) × 지표(y) 산점 SVG. band=(lo,hi) 음영, ref=기준선. 클래스별 색."""
+    pts = [(r, r[key]) for r in rows if r[key] is not None]
+    if not pts:
+        return f'<div class="box"><span class="muted small">{title}: 기록 없음</span></div>'
+    W, H, L, B, T = 1120, 220, 54, 30, 22
+    xs = [_ts(r["started_at"]) for r, _ in pts]; ys = [v for _, v in pts]
+    x0, x1 = min(xs), max(xs); x1 = x1 if x1 > x0 else x0 + 1
+    lo, hi = min(ys + ([band[0]] if band else [])), max(ys + ([band[1]] if band else []))
+    pad = (hi - lo) * 0.12 or 1; lo, hi = lo - pad, hi + pad
+    X = lambda t: L + (W - L - 10) * (t - x0) / (x1 - x0)
+    Y = lambda v: T + (H - T - B) * (hi - v) / (hi - lo)
+    out = [f'<svg width="{W}" height="{H}" role="img" aria-label="{title}" style="max-width:100%">',
+           f'<text x="{L}" y="12" style="fill:var(--ink);font-size:12px">{title}</text>']
+    if band:
+        out.append(f'<rect x="{L}" y="{Y(band[1]):.1f}" width="{W-L-10}" height="{max(1,Y(band[0])-Y(band[1])):.1f}" fill="var(--good)" opacity="0.10"/>')
+    if ref is not None:
+        out.append(f'<line x1="{L}" x2="{W-10}" y1="{Y(ref):.1f}" y2="{Y(ref):.1f}" stroke="var(--muted)" stroke-dasharray="4 3"/>')
+    for v in (lo + pad, hi - pad, (lo + hi) / 2):
+        out.append(f'<text x="2" y="{Y(v)+3:.1f}">{fmt.format(v)}</text>')
+    days = sorted({r["started_at"][:10] for r, _ in pts})
+    for d in days:
+        t = _ts(d + " 00:00:00")
+        if x0 <= t <= x1:
+            out.append(f'<line x1="{X(t):.1f}" x2="{X(t):.1f}" y1="{T}" y2="{H-B}" stroke="var(--line)"/>')
+        out.append(f'<text x="{X(max(x0, t)):.1f}" y="{H-8}">{d[5:]}</text>')
+    for r, v in pts:
+        c = CLASS_COLORS.get(r["class_name"], "#999")
+        warn = (key == "dev_mm" and abs(v) > DRIFT_DEV_WARN) or (key == "k_session" and ref and abs(v / ref - 1) > DRIFT_K_WARN)
+        out.append(f'<circle cx="{X(_ts(r["started_at"])):.1f}" cy="{Y(v):.1f}" r="{5 if warn else 3.5}" fill="{c}" '
+                   f'{"stroke=var(--flag) stroke-width=2" if warn else ""}><title>{r["session_dir"]} {r["class_name"]} {fmt.format(v)}</title></circle>')
+    out.append("</svg>")
+    return "".join(out)
+
+
+DRIFT = """
+<h1>드리프트 — 세션별 홀 판별기 지표</h1>
+<p class="muted small">20_session_drift.py 가 세션마다 기록. <b>K_session</b> = CAD_D / median(역투영 원거리) — 카메라 depth 스케일(클래스 무관), 기준 K {{ kref }} 대비 ±1% 밖이면 경보.
+<b>dev</b> = median(D) − CAD_D — 판정 마진 소모, |dev| &gt; 15mm 경보. z·tilt 는 도어 평면 깊이·기울기(원인 추적용). 점 색 = 클래스, 굵은 테두리 = 경보.</p>
+<div class="cards">
+  <div class="card"><div class="num">{{ n }}</div><div class="lbl">세션</div></div>
+  <div class="card"><div class="num">{{ '%.4f' % kmed if kmed else '—' }}</div><div class="lbl">K_session 중앙값 (std {{ '%.2f' % (100*kstd) if kstd is not none else '—' }}%)</div></div>
+  <div class="card"><div class="num">{{ '%+.1f' % devmed if devmed is not none else '—' }}</div><div class="lbl">dev 중앙값 mm</div></div>
+  <div class="card"><div class="num {{ 'warn' if nwarn else 'ok' }}">{{ nwarn }}</div><div class="lbl">경보 세션</div></div>
+  <div class="card"><div class="num">{{ latest }}</div><div class="lbl">최근 세션</div></div>
+</div>
+<div class="box" style="margin-bottom:12px">{{ svg_k|safe }}</div>
+<div class="box" style="margin-bottom:12px">{{ svg_dev|safe }}</div>
+<div class="box" style="margin-bottom:12px">{{ svg_z|safe }}</div>
+<p class="small">{% for c, col in colors.items() %}<span style="display:inline-block;width:10px;height:10px;background:{{ col }};border-radius:50%;margin:0 4px 0 10px"></span>{{ c }}{% endfor %}</p>
+<h2>세션 표 (최근순)</h2>
+<div class="tbl tall"><table>
+<tr><th>세션</th><th>클래스</th><th class="n">n</th><th class="n">판정</th><th class="n">D med</th><th class="n">CAD</th><th class="n">dev</th><th class="n">K_session</th><th class="n">z</th><th class="n">tilt</th><th class="n">마진 min</th><th>경보</th><th>기록</th></tr>
+{% for m in rows %}
+<tr class="click" onclick="location='{{ url_for('session_detail', sid=m['session_id']) }}'">
+  <td>{{ m['session_dir'] }}</td><td>{{ m['class_name'] }}</td>
+  <td class="n">{{ m['n_frames'] }}</td><td class="n">{{ m['n_judged'] }}</td>
+  <td class="n">{{ '%.1f' % m['d_med'] if m['d_med'] else '—' }}</td><td class="n">{{ m['cad_d'] or '—' }}</td>
+  <td class="n {{ 'warn' if m['dev_mm'] is not none and m['dev_mm']|abs > 15 }}">{{ '%+.1f' % m['dev_mm'] if m['dev_mm'] is not none else '—' }}</td>
+  <td class="n {{ 'warn' if m['kwarn'] }}">{{ '%.4f' % m['k_session'] if m['k_session'] else '—' }}</td>
+  <td class="n">{{ '%.0f' % m['z_med'] if m['z_med'] else '—' }}</td><td class="n">{{ '%.1f' % m['tilt_med'] if m['tilt_med'] else '—' }}</td>
+  <td class="n">{{ '%.1f' % m['margin_min'] if m['margin_min'] is not none else '—' }}</td>
+  <td class="warn">{{ m['flags'] }}</td><td class="muted small">{{ m['evaluated_at'][:16] }}</td>
+</tr>
+{% endfor %}
+</table></div>
+"""
+
+
+@app.route("/drift")
+def drift():
+    con = db()
+    try:
+        raw = con.execute(
+            """SELECT m.*, s.session_dir, s.started_at FROM session_hole_metrics m
+               JOIN capture_sessions s ON s.id=m.session_id ORDER BY s.started_at""").fetchall()
+    except sqlite3.OperationalError:
+        raw = []
+    rows = []
+    for r in raw:
+        m = dict(r)
+        m["kwarn"] = bool(m["k_session"] and m["k_applied"] and abs(m["k_session"] / m["k_applied"] - 1) > DRIFT_K_WARN)
+        flags = []
+        if m["dev_mm"] is not None and abs(m["dev_mm"]) > DRIFT_DEV_WARN: flags.append("dev")
+        if m["kwarn"]: flags.append("K %+.1f%%" % (100 * (m["k_session"] / m["k_applied"] - 1)))
+        if m["n_wrong"]: flags.append("오판 %d" % m["n_wrong"])
+        if m["n_unknown"]: flags.append("unknown %d" % m["n_unknown"])
+        if m["n_judged"] < 3: flags.append("판정<3")
+        m["flags"] = " · ".join(flags)
+        rows.append(m)
+    ks = [m["k_session"] for m in rows if m["k_session"]]
+    devs = [m["dev_mm"] for m in rows if m["dev_mm"] is not None]
+    kref = rows[-1]["k_applied"] if rows and rows[-1]["k_applied"] else None
+    band = (kref * (1 - DRIFT_K_WARN), kref * (1 + DRIFT_K_WARN)) if kref else None
+    return page("드리프트", "drift", DRIFT, rows=list(reversed(rows)), n=len(rows),
+                kmed=statistics.median(ks) if ks else None, kstd=statistics.pstdev(ks) if len(ks) > 1 else None,
+                devmed=statistics.median(devs) if devs else None, nwarn=sum(1 for m in rows if m["flags"]),
+                latest=rows[-1]["started_at"][:10] if rows else "—", kref=("%.4f" % kref) if kref else "—",
+                colors={c: col for c, col in CLASS_COLORS.items() if any(m["class_name"] == c for m in rows)},
+                svg_k=drift_svg(rows, "k_session", "K_session (depth 스케일) — 음영 = 기준 ±1%", band=band, fmt="{:.4f}", ref=kref),
+                svg_dev=drift_svg(rows, "dev_mm", "dev = median(D) − CAD_D (mm) — 점선 0, 경보 ±15", band=(-DRIFT_DEV_WARN, DRIFT_DEV_WARN), fmt="{:+.0f}", ref=0.0),
+                svg_z=drift_svg(rows, "z_med", "z_med — 코너 홀 평면 깊이 (mm)", fmt="{:.0f}"))
 
 
 # ── 이미지 서빙 ──────────────────────────────────────────
