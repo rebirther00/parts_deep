@@ -38,6 +38,9 @@ K_METRIC = {h: k * FX_REF / FX_APPROX for h, k in K_DEPTH.items()}   # 실제 in
 # intrinsics 에 serial 이 있고 여기 등록돼 있으면 K_METRIC 대신 사용. 없으면 K_METRIC[세로해상도].
 K_CAMERA = {
     57497357: 0.9797,   # 사무실 ZED X Mini 광각(fx 723), 2026-09-11 체커 1.28m 측정 (가로 +1.58%/세로 +2.57%) — 검증 중
+    54910212: 1.0064,   # 현장 ZED X Mini 협각(fx 1269.7), 2026-09-16 현장 83세션 CAD D 재적합(세션 K 중앙값; 이전 환산값 1.0140 은 +6.6mm 편향)
+                        #   → 판정 정확도 동일(1746/1748), |편차| p95 18.3→11.8mm, 최소 마진 p5 29→35mm. 세션 간 K std 0.63%(depth z 와 −0.95 상관).
+                        #   근거: report/hole_analysis/k_depth_20260916/. K_DEPTH[1200] 은 자세(pose_utils depth_scale)가 쓰므로 유지.
 }
 
 

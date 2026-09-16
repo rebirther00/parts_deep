@@ -130,8 +130,10 @@ python 02_train.py --model_type rgbe --no_aux --image_size 448 --dataset_dir dat
    test 불가. 재수집 후 `auto-split --reset-nontest`로 분할 재계산 → 8종(+E23) 현장 공식 인식률 완결.
    **E23 어셈블리 STEP 확보** — 자세 추정은 잠정 등록 상태(`pos_pipeline/01_extract_cad_holes.PROVISIONAL`).
 6. **Unknown 4세션 61쌍 라벨 확정** — 홀 판별기 판정 참조로 빠르게 정리 가능. (2026-09-07: 이 4세션은 is_valid=0 무효 처리 상태라 뷰 제외)
-7. **홀 판별기 거리 정밀화** — K_DEPTH 상수를 실측 intrinsics 기반으로 재유도(자세 쪽은 반영 완료).
-   FRT 3종 간 마진 41~47mm 대비 오차 20~58mm 구간의 오판 여지 축소가 목적.
+7. ~~**홀 판별기 거리 정밀화** — K_DEPTH 상수를 실측 intrinsics 기반으로 재유도~~ → **완료 (2026-09-16)**, `report/hole_analysis/k_depth_20260916/`.
+   실측 intrinsics 자체는 D 를 +1mm 만 바꿈. 효과는 잔차 K 를 현장 83세션으로 재적합한 것: `K_CAMERA[54910212]=1.0064`(이전 환산 1.0140 은 +6.6mm 전역 편향).
+   test 378장 |편차| p95 15.9→11.2mm, 최소 마진 24.9→31.3mm, 판정 변경 0. 17번 `--intrinsics auto`(기본)로 평가도 18 과 같은 경로.
+   **남은 오차 = 세션별 depth 스케일 요동 ±0.6%(측정 z 와 −0.95 상관)** → 세션 K 를 드리프트 지표로(TODO 4). 자세 depth_scale(1.0140, PnP 일치)과 0.75% 불일치는 트래커 GT 로 판가름.
 8. **레이저 트래커 실측 일정·장비 수배** — 프로토콜·양식·selftest 준비 완료
    (`pos_pipeline/GT_TRACKER_PROTOCOL.md`). KPI(위치 3mm) 최종 입증 수단으로 최중요 미결.
    9/3 현장 방문 때 측정 여건(도어 고정·공간) 확인.

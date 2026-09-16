@@ -5,3781 +5,4537 @@
     "image": "datasets_factory_v2/test/E23_door_LH_FRT/rgb_20260903_s_124446_0000.png",
     "cls": "E23_door_LH_FRT",
     "pred": "E23_door_LH_FRT",
-    "D_mm": 460.314365733656,
+    "D_mm": 457.48896979779477,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 259.37126853268796,
-    "nearest_mm": 4.314365733656018
+    "margin_mm": 265.02206040441047,
+    "nearest_mm": 1.4889697977947662,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E23_door_LH_FRT/rgb_20260903_s_124446_0003.png",
     "cls": "E23_door_LH_FRT",
     "pred": "E23_door_LH_FRT",
-    "D_mm": 461.17271840519004,
+    "D_mm": 458.3730820733664,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 257.6545631896199,
-    "nearest_mm": 5.1727184051900394
+    "margin_mm": 263.2538358532672,
+    "nearest_mm": 2.3730820733663904,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E23_door_LH_FRT/rgb_20260903_s_124446_0006.png",
     "cls": "E23_door_LH_FRT",
     "pred": "E23_door_LH_FRT",
-    "D_mm": 462.5010519916311,
+    "D_mm": 459.7260978863799,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 254.99789601673785,
-    "nearest_mm": 6.501051991631073
+    "margin_mm": 260.54780422724025,
+    "nearest_mm": 3.7260978863798755,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E23_door_LH_FRT/rgb_20260903_s_124446_0009.png",
     "cls": "E23_door_LH_FRT",
     "pred": "E23_door_LH_FRT",
-    "D_mm": 462.4986668453185,
+    "D_mm": 459.80909555854566,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 255.002666309363,
-    "nearest_mm": 6.498666845318496
+    "margin_mm": 260.3818088829087,
+    "nearest_mm": 3.809095558545664,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E23_door_LH_FRT/rgb_20260903_s_124446_0013.png",
     "cls": "E23_door_LH_FRT",
     "pred": "E23_door_LH_FRT",
-    "D_mm": 462.9585417728964,
+    "D_mm": 460.2802225493345,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 254.08291645420718,
-    "nearest_mm": 6.95854177289641
+    "margin_mm": 259.439554901331,
+    "nearest_mm": 4.280222549334496,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E23_door_LH_FRT/rgb_20260903_s_124446_0016.png",
     "cls": "E23_door_LH_FRT",
     "pred": "E23_door_LH_FRT",
-    "D_mm": 463.08058393085736,
+    "D_mm": 460.4319873636692,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 253.83883213828528,
-    "nearest_mm": 7.080583930857358
+    "margin_mm": 259.13602527266164,
+    "nearest_mm": 4.43198736366918,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E23_door_LH_FRT/rgb_20260903_s_124446_0019.png",
     "cls": "E23_door_LH_FRT",
     "pred": "E23_door_LH_FRT",
-    "D_mm": 462.80215663547057,
+    "D_mm": 460.15074629201524,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 254.39568672905887,
-    "nearest_mm": 6.802156635470567
+    "margin_mm": 259.6985074159695,
+    "nearest_mm": 4.150746292015242,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E23_door_LH_FRT/rgb_20260903_s_124446_0022.png",
     "cls": "E23_door_LH_FRT",
     "pred": "E23_door_LH_FRT",
-    "D_mm": 461.92574164626257,
+    "D_mm": 459.1701887034253,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 256.14851670747487,
-    "nearest_mm": 5.925741646262566
+    "margin_mm": 261.6596225931494,
+    "nearest_mm": 3.1701887034253105,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E23_door_LH_FRT/rgb_20260903_s_124446_0025.png",
     "cls": "E23_door_LH_FRT",
     "pred": "E23_door_LH_FRT",
-    "D_mm": 461.40253307307535,
+    "D_mm": 458.64384110236233,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 257.1949338538493,
-    "nearest_mm": 5.402533073075347
+    "margin_mm": 262.71231779527534,
+    "nearest_mm": 2.6438411023623303,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E23_door_LH_FRT/rgb_20260903_s_124446_0028.png",
     "cls": "E23_door_LH_FRT",
     "pred": "E23_door_LH_FRT",
-    "D_mm": 460.2234526076454,
+    "D_mm": 457.46568808547255,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 259.5530947847092,
-    "nearest_mm": 4.223452607645413
+    "margin_mm": 265.0686238290549,
+    "nearest_mm": 1.46568808547255,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E23_door_LH_FRT/rgb_20260903_s_124446_0032.png",
     "cls": "E23_door_LH_FRT",
     "pred": "E23_door_LH_FRT",
-    "D_mm": 461.00241072797337,
+    "D_mm": 458.22270689588123,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 257.99517854405326,
-    "nearest_mm": 5.00241072797337
+    "margin_mm": 263.55458620823754,
+    "nearest_mm": 2.222706895881231,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E23_door_LH_FRT/rgb_20260903_s_124446_0035.png",
     "cls": "E23_door_LH_FRT",
     "pred": "E23_door_LH_FRT",
-    "D_mm": 461.9044635954718,
+    "D_mm": 459.2178188339922,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 256.19107280905644,
-    "nearest_mm": 5.904463595471782
+    "margin_mm": 261.56436233201555,
+    "nearest_mm": 3.217818833992226,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E23_door_LH_FRT/rgb_20260903_s_124446_0038.png",
     "cls": "E23_door_LH_FRT",
     "pred": "E23_door_LH_FRT",
-    "D_mm": 462.36045459862424,
+    "D_mm": 459.66468975858567,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 255.2790908027515,
-    "nearest_mm": 6.360454598624244
+    "margin_mm": 260.67062048282867,
+    "nearest_mm": 3.6646897585856664,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E23_door_LH_FRT/rgb_20260903_s_124446_0041.png",
     "cls": "E23_door_LH_FRT",
     "pred": "E23_door_LH_FRT",
-    "D_mm": 462.4656881871112,
+    "D_mm": 459.8199275148148,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 255.0686236257776,
-    "nearest_mm": 6.465688187111198
+    "margin_mm": 260.36014497037036,
+    "nearest_mm": 3.8199275148148217,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E23_door_LH_FRT/rgb_20260903_s_124446_0044.png",
     "cls": "E23_door_LH_FRT",
     "pred": "E23_door_LH_FRT",
-    "D_mm": 461.44705671022444,
+    "D_mm": 458.683152753145,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 257.1058865795511,
-    "nearest_mm": 5.4470567102244445
+    "margin_mm": 262.63369449371,
+    "nearest_mm": 2.6831527531450092,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E23_door_LH_FRT/rgb_20260903_s_124446_0047.png",
     "cls": "E23_door_LH_FRT",
     "pred": "E23_door_LH_FRT",
-    "D_mm": 460.4388215536211,
+    "D_mm": 457.7446639062199,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 259.1223568927578,
-    "nearest_mm": 4.438821553621096
+    "margin_mm": 264.5106721875602,
+    "nearest_mm": 1.7446639062198983,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E23_door_LH_FRT/rgb_20260903_s_124446_0051.png",
     "cls": "E23_door_LH_FRT",
     "pred": "E23_door_LH_FRT",
-    "D_mm": 460.30294264511514,
+    "D_mm": 457.4864660324652,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 259.3941147097697,
-    "nearest_mm": 4.302942645115138
+    "margin_mm": 265.02706793506957,
+    "nearest_mm": 1.4864660324652164,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E23_door_LH_FRT/rgb_20260903_s_124446_0054.png",
     "cls": "E23_door_LH_FRT",
     "pred": "E23_door_LH_FRT",
-    "D_mm": 462.2076763395925,
+    "D_mm": 459.4838627254939,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 255.58464732081495,
-    "nearest_mm": 6.207676339592524
+    "margin_mm": 261.0322745490122,
+    "nearest_mm": 3.483862725493907,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E23_door_LH_FRT/rgb_20260903_s_124446_0057.png",
     "cls": "E23_door_LH_FRT",
     "pred": "E23_door_LH_FRT",
-    "D_mm": 462.46961552976654,
+    "D_mm": 459.7781625015474,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 255.06076894046691,
-    "nearest_mm": 6.469615529766543
+    "margin_mm": 260.4436749969052,
+    "nearest_mm": 3.778162501547399,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E23_door_LH_FRT/rgb_20260903_s_124446_0060.png",
     "cls": "E23_door_LH_FRT",
     "pred": "E23_door_LH_FRT",
-    "D_mm": 461.7545624315429,
+    "D_mm": 459.04141835640377,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 256.49087513691416,
-    "nearest_mm": 5.754562431542922
+    "margin_mm": 261.91716328719247,
+    "nearest_mm": 3.041418356403767,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E25_door_LH_RR/rgb_20260827_s_134623_0000.png",
     "cls": "E25_door_LH_RR",
     "pred": "E25_door_LH_RR",
-    "D_mm": 1045.2432069473361,
+    "D_mm": 1038.6933088963463,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 33.513586105327704,
-    "nearest_mm": 8.243206947336148
+    "margin_mm": 46.613382207307495,
+    "nearest_mm": 1.6933088963462524,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E25_door_LH_RR/rgb_20260827_s_134623_0004.png",
     "cls": "E25_door_LH_RR",
     "pred": "E25_door_LH_RR",
-    "D_mm": 1046.1620227618646,
+    "D_mm": 1039.6254531735742,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 31.675954476270817,
-    "nearest_mm": 9.162022761864591
+    "margin_mm": 44.74909365285157,
+    "nearest_mm": 2.625453173574215,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E25_door_LH_RR/rgb_20260827_s_134623_0009.png",
     "cls": "E25_door_LH_RR",
     "pred": "E25_door_LH_RR",
-    "D_mm": 1045.1034080090537,
+    "D_mm": 1038.6073482105708,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 33.793183981892525,
-    "nearest_mm": 8.103408009053737
+    "margin_mm": 46.785303578858475,
+    "nearest_mm": 1.6073482105707626,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E25_door_LH_RR/rgb_20260827_s_134623_0013.png",
     "cls": "E25_door_LH_RR",
     "pred": "E25_door_LH_RR",
-    "D_mm": 1045.2026090612892,
+    "D_mm": 1038.6809351207664,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 33.59478187742161,
-    "nearest_mm": 8.202609061289195
+    "margin_mm": 46.63812975846713,
+    "nearest_mm": 1.680935120766435,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E25_door_LH_RR/rgb_20260827_s_134623_0018.png",
     "cls": "E25_door_LH_RR",
     "pred": "E25_door_LH_RR",
-    "D_mm": 1044.052861592384,
+    "D_mm": 1037.4984295905238,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 35.89427681523193,
-    "nearest_mm": 7.052861592384033
+    "margin_mm": 49.00314081895249,
+    "nearest_mm": 0.4984295905237559,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E25_door_LH_RR/rgb_20260827_s_134623_0022.png",
     "cls": "E25_door_LH_RR",
     "pred": "E25_door_LH_RR",
-    "D_mm": 1044.0481488096373,
+    "D_mm": 1037.4648425742578,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 35.90370238072546,
-    "nearest_mm": 7.048148809637269
+    "margin_mm": 49.070314851484454,
+    "nearest_mm": 0.46484257425777287,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E25_door_LH_RR/rgb_20260827_s_134623_0027.png",
     "cls": "E25_door_LH_RR",
     "pred": "E25_door_LH_RR",
-    "D_mm": 1046.351933359767,
+    "D_mm": 1039.778245851591,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 31.296133280466165,
-    "nearest_mm": 9.351933359766917
+    "margin_mm": 44.44350829681798,
+    "nearest_mm": 2.7782458515910093,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E25_door_LH_RR/rgb_20260827_s_134623_0031.png",
     "cls": "E25_door_LH_RR",
     "pred": "E25_door_LH_RR",
-    "D_mm": 1045.950275794838,
+    "D_mm": 1039.4033090240112,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 32.09944841032393,
-    "nearest_mm": 8.950275794838035
+    "margin_mm": 45.1933819519777,
+    "nearest_mm": 2.4033090240111505,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E25_door_LH_RR/rgb_20260827_s_134623_0036.png",
     "cls": "E25_door_LH_RR",
     "pred": "E25_door_LH_RR",
-    "D_mm": 1044.4847990394023,
+    "D_mm": 1037.946241371302,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 35.030401921195335,
-    "nearest_mm": 7.484799039402333
+    "margin_mm": 48.10751725739601,
+    "nearest_mm": 0.9462413713019941,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E25_door_LH_RR/rgb_20260827_s_134623_0040.png",
     "cls": "E25_door_LH_RR",
     "pred": "E25_door_LH_RR",
-    "D_mm": 1043.9439211158583,
+    "D_mm": 1037.37171587166,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 36.112157768283396,
-    "nearest_mm": 6.943921115858302
+    "margin_mm": 49.25656825668011,
+    "nearest_mm": 0.37171587165994424,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E25_door_LH_RR/rgb_20260827_s_134623_0045.png",
     "cls": "E25_door_LH_RR",
     "pred": "E25_door_LH_RR",
-    "D_mm": 1045.9880723746016,
+    "D_mm": 1039.4164290136491,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 32.023855250796714,
-    "nearest_mm": 8.988072374601643
+    "margin_mm": 45.16714197270176,
+    "nearest_mm": 2.4164290136491218,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E25_door_LH_RR/rgb_20260827_s_134623_0049.png",
     "cls": "E25_door_LH_RR",
     "pred": "E25_door_LH_RR",
-    "D_mm": 1045.8241511699991,
+    "D_mm": 1039.2718820329114,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 32.35169766000172,
-    "nearest_mm": 8.82415116999914
+    "margin_mm": 45.45623593417713,
+    "nearest_mm": 2.271882032911435,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E25_door_LH_RR/rgb_20260827_s_134623_0054.png",
     "cls": "E25_door_LH_RR",
     "pred": "E25_door_LH_RR",
-    "D_mm": 1045.3183047826587,
+    "D_mm": 1038.777551233395,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 33.363390434682515,
-    "nearest_mm": 8.318304782658743
+    "margin_mm": 46.444897533210224,
+    "nearest_mm": 1.7775512333948882,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E25_door_LH_RR/rgb_20260827_s_134623_0058.png",
     "cls": "E25_door_LH_RR",
     "pred": "E25_door_LH_RR",
-    "D_mm": 1044.5198328656231,
+    "D_mm": 1037.9471031998935,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 34.96033426875374,
-    "nearest_mm": 7.51983286562313
+    "margin_mm": 48.10579360021302,
+    "nearest_mm": 0.9471031998934905,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E25_door_LH_RR/rgb_20260827_s_134623_0063.png",
     "cls": "E25_door_LH_RR",
     "pred": "E25_door_LH_RR",
-    "D_mm": 1043.6464529467255,
+    "D_mm": 1037.0545734396321,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 36.70709410654899,
-    "nearest_mm": 6.646452946725503
+    "margin_mm": 49.890853120735756,
+    "nearest_mm": 0.054573439632122245,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E25_door_LH_RR/rgb_20260827_s_134623_0067.png",
     "cls": "E25_door_LH_RR",
     "pred": "E25_door_LH_RR",
-    "D_mm": 1046.0037080391046,
+    "D_mm": 1039.4055957567894,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 31.99258392179081,
-    "nearest_mm": 9.003708039104595
+    "margin_mm": 45.188808486421294,
+    "nearest_mm": 2.405595756789353,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E25_door_LH_RR/rgb_20260827_s_134623_0072.png",
     "cls": "E25_door_LH_RR",
     "pred": "E25_door_LH_RR",
-    "D_mm": 1045.8927705408753,
+    "D_mm": 1039.3402452617145,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 32.21445891824942,
-    "nearest_mm": 8.89277054087529
+    "margin_mm": 45.319509476571056,
+    "nearest_mm": 2.340245261714472,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E25_door_LH_RR/rgb_20260827_s_134623_0076.png",
     "cls": "E25_door_LH_RR",
     "pred": "E25_door_LH_RR",
-    "D_mm": 1044.7344342648496,
+    "D_mm": 1038.1448892292606,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 34.53113147030081,
-    "nearest_mm": 7.734434264849597
+    "margin_mm": 47.71022154147886,
+    "nearest_mm": 1.1448892292605706,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E25_door_LH_RR/rgb_20260827_s_134623_0081.png",
     "cls": "E25_door_LH_RR",
     "pred": "E25_door_LH_RR",
-    "D_mm": 1045.3916322362072,
+    "D_mm": 1038.809479981051,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 33.21673552758557,
-    "nearest_mm": 8.391632236207215
+    "margin_mm": 46.38104003789795,
+    "nearest_mm": 1.8094799810510267,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E25_door_LH_RR/rgb_20260827_s_134623_0085.png",
     "cls": "E25_door_LH_RR",
     "pred": "E25_door_LH_RR",
-    "D_mm": 1045.1412943689475,
+    "D_mm": 1038.5875442855936,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 33.71741126210509,
-    "nearest_mm": 8.141294368947456
+    "margin_mm": 46.82491142881281,
+    "nearest_mm": 1.5875442855935944,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E25_door_LH_RR/rgb_20260828_s_171240_0000.png",
     "cls": "E25_door_LH_RR",
     "pred": "E25_door_LH_RR",
-    "D_mm": 1040.377767841492,
+    "D_mm": 1033.773819312653,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 43.24446431701608,
-    "nearest_mm": 3.377767841491959
+    "margin_mm": 50.0,
+    "nearest_mm": 3.226180687347096,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E25_door_LH_RR/rgb_20260828_s_171240_0003.png",
     "cls": "E25_door_LH_RR",
     "pred": "E25_door_LH_RR",
-    "D_mm": 1040.5182646416772,
+    "D_mm": 1034.1078483539552,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 42.96347071664559,
-    "nearest_mm": 3.518264641677206
+    "margin_mm": 50.0,
+    "nearest_mm": 2.8921516460447947,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E25_door_LH_RR/rgb_20260828_s_171240_0005.png",
     "cls": "E25_door_LH_RR",
     "pred": "E25_door_LH_RR",
-    "D_mm": 1040.7962651855337,
+    "D_mm": 1034.3244686932778,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 42.40746962893263,
-    "nearest_mm": 3.7962651855336844
+    "margin_mm": 50.0,
+    "nearest_mm": 2.6755313067221778,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E25_door_LH_RR/rgb_20260828_s_171240_0008.png",
     "cls": "E25_door_LH_RR",
     "pred": "E25_door_LH_RR",
-    "D_mm": 1041.098992224721,
+    "D_mm": 1034.599539053798,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 41.802015550557826,
-    "nearest_mm": 4.098992224721087
+    "margin_mm": 50.0,
+    "nearest_mm": 2.4004609462019744,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E25_door_LH_RR/rgb_20260828_s_171240_0010.png",
     "cls": "E25_door_LH_RR",
     "pred": "E25_door_LH_RR",
-    "D_mm": 1039.6565676460225,
+    "D_mm": 1033.1081937214167,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 44.68686470795501,
-    "nearest_mm": 2.656567646022495
+    "margin_mm": 50.0,
+    "nearest_mm": 3.891806278583317,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E25_door_LH_RR/rgb_20260828_s_171240_0013.png",
     "cls": "E25_door_LH_RR",
     "pred": "E25_door_LH_RR",
-    "D_mm": 1039.9394969430405,
+    "D_mm": 1033.3035941747771,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 44.121006113919066,
-    "nearest_mm": 2.939496943040467
+    "margin_mm": 50.0,
+    "nearest_mm": 3.6964058252228824,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E25_door_LH_RR/rgb_20260828_s_171240_0015.png",
     "cls": "E25_door_LH_RR",
     "pred": "E25_door_LH_RR",
-    "D_mm": 1040.8502383324703,
+    "D_mm": 1034.253424667746,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 42.29952333505935,
-    "nearest_mm": 3.850238332470326
+    "margin_mm": 50.0,
+    "nearest_mm": 2.7465753322539967,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E25_door_LH_RR/rgb_20260828_s_171240_0018.png",
     "cls": "E25_door_LH_RR",
     "pred": "E25_door_LH_RR",
-    "D_mm": 1040.650442963099,
+    "D_mm": 1034.1730476157697,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 42.699114073801866,
-    "nearest_mm": 3.650442963099067
+    "margin_mm": 50.0,
+    "nearest_mm": 2.8269523842302533,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E25_door_LH_RR/rgb_20260828_s_171240_0021.png",
     "cls": "E25_door_LH_RR",
     "pred": "E25_door_LH_RR",
-    "D_mm": 1041.3851067372566,
+    "D_mm": 1034.9243772630612,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 41.229786525486816,
-    "nearest_mm": 4.385106737256592
+    "margin_mm": 50.0,
+    "nearest_mm": 2.07562273693884,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E25_door_LH_RR/rgb_20260828_s_171240_0023.png",
     "cls": "E25_door_LH_RR",
     "pred": "E25_door_LH_RR",
-    "D_mm": 1040.9289640461986,
+    "D_mm": 1034.496742876195,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 42.14207190760271,
-    "nearest_mm": 3.9289640461986437
+    "margin_mm": 50.0,
+    "nearest_mm": 2.5032571238050423,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E25_door_LH_RR/rgb_20260828_s_171240_0026.png",
     "cls": "E25_door_LH_RR",
     "pred": "E25_door_LH_RR",
-    "D_mm": 1038.7464708666034,
+    "D_mm": 1032.2263604515658,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 46.50705826679314,
-    "nearest_mm": 1.7464708666034312
+    "margin_mm": 50.0,
+    "nearest_mm": 4.773639548434176,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E25_door_LH_RR/rgb_20260828_s_171240_0028.png",
     "cls": "E25_door_LH_RR",
     "pred": "E25_door_LH_RR",
-    "D_mm": 1038.671669080231,
+    "D_mm": 1032.0973113466866,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 46.656661839538174,
-    "nearest_mm": 1.671669080230913
+    "margin_mm": 50.0,
+    "nearest_mm": 4.902688653313362,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E25_door_LH_RR/rgb_20260828_s_171240_0031.png",
     "cls": "E25_door_LH_RR",
     "pred": "E25_door_LH_RR",
-    "D_mm": 1040.5217532322854,
+    "D_mm": 1034.055183932849,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 42.95649353542922,
-    "nearest_mm": 3.5217532322853913
+    "margin_mm": 50.0,
+    "nearest_mm": 2.944816067150896,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E25_door_LH_RR/rgb_20260828_s_171240_0034.png",
     "cls": "E25_door_LH_RR",
     "pred": "E25_door_LH_RR",
-    "D_mm": 1040.8306823520986,
+    "D_mm": 1034.3974326876862,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 42.33863529580276,
-    "nearest_mm": 3.83068235209862
+    "margin_mm": 50.0,
+    "nearest_mm": 2.602567312313795,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E25_door_LH_RR/rgb_20260828_s_171240_0036.png",
     "cls": "E25_door_LH_RR",
     "pred": "E25_door_LH_RR",
-    "D_mm": 1040.9321467446355,
+    "D_mm": 1034.5388844936028,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 42.13570651072905,
-    "nearest_mm": 3.9321467446354745
+    "margin_mm": 50.0,
+    "nearest_mm": 2.4611155063971637,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E25_door_LH_RR/rgb_20260828_s_171240_0039.png",
     "cls": "E25_door_LH_RR",
     "pred": "E25_door_LH_RR",
-    "D_mm": 1039.4534413569056,
+    "D_mm": 1033.0148541791343,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 45.09311728618877,
-    "nearest_mm": 2.453441356905614
+    "margin_mm": 50.0,
+    "nearest_mm": 3.9851458208656823,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E25_door_LH_RR/rgb_20260828_s_171240_0041.png",
     "cls": "E25_door_LH_RR",
     "pred": "E25_door_LH_RR",
-    "D_mm": 1038.9697742175829,
+    "D_mm": 1032.4962578282004,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 46.06045156483424,
-    "nearest_mm": 1.9697742175828807
+    "margin_mm": 50.0,
+    "nearest_mm": 4.5037421717995585,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E25_door_LH_RR/rgb_20260828_s_171240_0044.png",
     "cls": "E25_door_LH_RR",
     "pred": "E25_door_LH_RR",
-    "D_mm": 1040.0695205246068,
+    "D_mm": 1033.6518648930642,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 43.860958950786426,
-    "nearest_mm": 3.069520524606787
+    "margin_mm": 50.0,
+    "nearest_mm": 3.3481351069358425,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E25_door_LH_RR/rgb_20260828_s_171240_0046.png",
     "cls": "E25_door_LH_RR",
     "pred": "E25_door_LH_RR",
-    "D_mm": 1040.5029408073658,
+    "D_mm": 1034.1165741855043,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 42.99411838526839,
-    "nearest_mm": 3.5029408073658033
+    "margin_mm": 50.0,
+    "nearest_mm": 2.883425814495695,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E25_door_LH_RR/rgb_20260828_s_171240_0049.png",
     "cls": "E25_door_LH_RR",
     "pred": "E25_door_LH_RR",
-    "D_mm": 1039.4099527148155,
+    "D_mm": 1032.9912593847464,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 45.180094570368965,
-    "nearest_mm": 2.4099527148155175
+    "margin_mm": 50.0,
+    "nearest_mm": 4.0087406152536005,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E25_door_RH/rgb_20260828_s_191838_0000.png",
     "cls": "E25_door_RH",
     "pred": "E25_door_RH",
-    "D_mm": 890.7514800221059,
+    "D_mm": 885.1022577625963,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 74.0,
-    "nearest_mm": 4.751480022105852
+    "margin_mm": 72.20451552519262,
+    "nearest_mm": 0.8977422374036905,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E25_door_RH/rgb_20260828_s_191838_0007.png",
     "cls": "E25_door_RH",
     "pred": "E25_door_RH",
-    "D_mm": 891.6025168170243,
+    "D_mm": 885.9634914834537,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 74.0,
-    "nearest_mm": 5.602516817024252
+    "margin_mm": 73.92698296690742,
+    "nearest_mm": 0.0365085165462915,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E25_door_RH/rgb_20260828_s_191838_0008.png",
     "cls": "E25_door_RH",
     "pred": "E25_door_RH",
-    "D_mm": 890.1041744828095,
+    "D_mm": 884.4607611592587,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 74.0,
-    "nearest_mm": 4.104174482809526
+    "margin_mm": 70.92152231851742,
+    "nearest_mm": 1.539238840741291,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E25_door_RH/rgb_20260828_s_191838_0014.png",
     "cls": "E25_door_RH",
     "pred": "E25_door_RH",
-    "D_mm": 891.4836573345282,
+    "D_mm": 885.9124339759585,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 74.0,
-    "nearest_mm": 5.483657334528175
+    "margin_mm": 73.82486795191699,
+    "nearest_mm": 0.08756602404150726,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E25_door_RH/rgb_20260828_s_191838_0016.png",
     "cls": "E25_door_RH",
     "pred": "E25_door_RH",
-    "D_mm": 891.7389855547068,
+    "D_mm": 886.1788936135907,
     "gate": "ok",
     "D_src": "depth",
     "margin_mm": 74.0,
-    "nearest_mm": 5.738985554706801
+    "nearest_mm": 0.17889361359073064,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E25_door_RH/rgb_20260828_s_191838_0021.png",
     "cls": "E25_door_RH",
     "pred": "E25_door_RH",
-    "D_mm": 893.0050152690229,
+    "D_mm": 887.4772894914436,
     "gate": "ok",
     "D_src": "depth",
     "margin_mm": 74.0,
-    "nearest_mm": 7.00501526902292
+    "nearest_mm": 1.477289491443571,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E25_door_RH/rgb_20260828_s_191838_0024.png",
     "cls": "E25_door_RH",
     "pred": "E25_door_RH",
-    "D_mm": 891.809978353136,
+    "D_mm": 886.2323938135207,
     "gate": "ok",
     "D_src": "depth",
     "margin_mm": 74.0,
-    "nearest_mm": 5.809978353135989
+    "nearest_mm": 0.23239381352072996,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E25_door_RH/rgb_20260828_s_191838_0028.png",
     "cls": "E25_door_RH",
     "pred": "E25_door_RH",
-    "D_mm": 892.1666175244432,
+    "D_mm": 886.5578422005208,
     "gate": "ok",
     "D_src": "depth",
     "margin_mm": 74.0,
-    "nearest_mm": 6.166617524443154
+    "nearest_mm": 0.5578422005207813,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E25_door_RH/rgb_20260828_s_191838_0032.png",
     "cls": "E25_door_RH",
     "pred": "E25_door_RH",
-    "D_mm": 892.1911199015199,
+    "D_mm": 886.6370176122442,
     "gate": "ok",
     "D_src": "depth",
     "margin_mm": 74.0,
-    "nearest_mm": 6.191119901519869
+    "nearest_mm": 0.6370176122442217,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E25_door_RH/rgb_20260828_s_191838_0035.png",
     "cls": "E25_door_RH",
     "pred": "E25_door_RH",
-    "D_mm": 893.4434621955927,
+    "D_mm": 887.9089912164628,
     "gate": "ok",
     "D_src": "depth",
     "margin_mm": 74.0,
-    "nearest_mm": 7.443462195592701
+    "nearest_mm": 1.908991216462823,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E25_door_RH/rgb_20260828_s_191838_0040.png",
     "cls": "E25_door_RH",
     "pred": "E25_door_RH",
-    "D_mm": 892.752642360387,
+    "D_mm": 887.2221031601231,
     "gate": "ok",
     "D_src": "depth",
     "margin_mm": 74.0,
-    "nearest_mm": 6.752642360386972
+    "nearest_mm": 1.2221031601230834,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E25_door_RH/rgb_20260828_s_191838_0042.png",
     "cls": "E25_door_RH",
     "pred": "E25_door_RH",
-    "D_mm": 891.7492577158231,
+    "D_mm": 886.1614024730086,
     "gate": "ok",
     "D_src": "depth",
     "margin_mm": 74.0,
-    "nearest_mm": 5.7492577158230915
+    "nearest_mm": 0.161402473008593,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E25_door_RH/rgb_20260828_s_191838_0048.png",
     "cls": "E25_door_RH",
     "pred": "E25_door_RH",
-    "D_mm": 891.3617628385545,
+    "D_mm": 885.8204208575034,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 74.0,
-    "nearest_mm": 5.361762838554455
+    "margin_mm": 73.6408417150069,
+    "nearest_mm": 0.17957914249655005,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E25_door_RH/rgb_20260828_s_191838_0049.png",
     "cls": "E25_door_RH",
     "pred": "E25_door_RH",
-    "D_mm": 891.8512675869334,
+    "D_mm": 886.2886350462495,
     "gate": "ok",
     "D_src": "depth",
     "margin_mm": 74.0,
-    "nearest_mm": 5.851267586933432
+    "nearest_mm": 0.2886350462495102,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E25_door_RH/rgb_20260828_s_191838_0056.png",
     "cls": "E25_door_RH",
     "pred": "E25_door_RH",
-    "D_mm": 892.5138411524878,
+    "D_mm": 886.961248684533,
     "gate": "ok",
     "D_src": "depth",
     "margin_mm": 74.0,
-    "nearest_mm": 6.513841152487771
+    "nearest_mm": 0.9612486845329613,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E25_door_RH/rgb_20260828_s_191838_0063.png",
     "cls": "E25_door_RH",
     "pred": "E25_door_RH",
-    "D_mm": 893.3548052226782,
+    "D_mm": 887.8811928092612,
     "gate": "ok",
     "D_src": "depth",
     "margin_mm": 74.0,
-    "nearest_mm": 7.354805222678237
+    "nearest_mm": 1.8811928092611652,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E25_door_RH/rgb_20260828_s_191838_0064.png",
     "cls": "E25_door_RH",
     "pred": "E25_door_RH",
-    "D_mm": 893.5755669184717,
+    "D_mm": 888.0953833045186,
     "gate": "ok",
     "D_src": "depth",
     "margin_mm": 74.0,
-    "nearest_mm": 7.575566918471736
+    "nearest_mm": 2.0953833045185775,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E25_door_RH/rgb_20260828_s_191838_0071.png",
     "cls": "E25_door_RH",
     "pred": "E25_door_RH",
-    "D_mm": 892.1947918937223,
+    "D_mm": 886.6419584093878,
     "gate": "ok",
     "D_src": "depth",
     "margin_mm": 74.0,
-    "nearest_mm": 6.194791893722254
+    "nearest_mm": 0.6419584093878257,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E25_door_RH/rgb_20260828_s_191838_0072.png",
     "cls": "E25_door_RH",
     "pred": "E25_door_RH",
-    "D_mm": 892.8320175509386,
+    "D_mm": 887.2773948633115,
     "gate": "ok",
     "D_src": "depth",
     "margin_mm": 74.0,
-    "nearest_mm": 6.8320175509386445
+    "nearest_mm": 1.2773948633115424,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E25_door_RH/rgb_20260828_s_191838_0078.png",
     "cls": "E25_door_RH",
     "pred": "E25_door_RH",
-    "D_mm": 890.599160443286,
+    "D_mm": 884.8645309474574,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 74.0,
-    "nearest_mm": 4.599160443285996
+    "margin_mm": 71.72906189491482,
+    "nearest_mm": 1.1354690525425895,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E25_door_RH/rgb_20260828_s_191838_0079.png",
     "cls": "E25_door_RH",
     "pred": "E25_door_RH",
-    "D_mm": 890.423555408268,
+    "D_mm": 884.7032408938837,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 74.0,
-    "nearest_mm": 4.423555408268044
+    "margin_mm": 71.40648178776746,
+    "nearest_mm": 1.2967591061162693,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E25_door_RH/rgb_20260828_s_191838_0085.png",
     "cls": "E25_door_RH",
     "pred": "E25_door_RH",
-    "D_mm": 891.963011688384,
+    "D_mm": 886.2066020635868,
     "gate": "ok",
     "D_src": "depth",
     "margin_mm": 74.0,
-    "nearest_mm": 5.963011688383972
+    "nearest_mm": 0.20660206358684263,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E25_door_RH/rgb_20260828_s_191838_0087.png",
     "cls": "E25_door_RH",
     "pred": "E25_door_RH",
-    "D_mm": 893.3671523212113,
+    "D_mm": 887.637696938084,
     "gate": "ok",
     "D_src": "depth",
     "margin_mm": 74.0,
-    "nearest_mm": 7.367152321211279
+    "nearest_mm": 1.637696938083991,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E25_door_RH/rgb_20260828_s_191838_0092.png",
     "cls": "E25_door_RH",
     "pred": "E25_door_RH",
-    "D_mm": 890.9142674105882,
+    "D_mm": 885.1935133150341,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 74.0,
-    "nearest_mm": 4.914267410588195
+    "margin_mm": 72.38702663006825,
+    "nearest_mm": 0.8064866849658756,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E25_door_RH/rgb_20260828_s_191838_0095.png",
     "cls": "E25_door_RH",
     "pred": "E25_door_RH",
-    "D_mm": 890.7398267445782,
+    "D_mm": 885.0342196499779,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 74.0,
-    "nearest_mm": 4.739826744578181
+    "margin_mm": 72.0684392999558,
+    "nearest_mm": 0.9657803500221007,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E25_door_RH/rgb_20260828_s_191838_0099.png",
     "cls": "E25_door_RH",
     "pred": "E25_door_RH",
-    "D_mm": 891.7002475127127,
+    "D_mm": 885.9731422277484,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 74.0,
-    "nearest_mm": 5.700247512712735
+    "margin_mm": 73.94628445549688,
+    "nearest_mm": 0.026857772251560164,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E25_door_RH/rgb_20260828_s_191838_0103.png",
     "cls": "E25_door_RH",
     "pred": "E25_door_RH",
-    "D_mm": 893.0742686820284,
+    "D_mm": 887.4793422087574,
     "gate": "ok",
     "D_src": "depth",
     "margin_mm": 74.0,
-    "nearest_mm": 7.074268682028446
+    "nearest_mm": 1.47934220875743,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E25_door_RH/rgb_20260828_s_191838_0106.png",
     "cls": "E25_door_RH",
     "pred": "E25_door_RH",
-    "D_mm": 893.383417683844,
+    "D_mm": 887.7727977943472,
     "gate": "ok",
     "D_src": "depth",
     "margin_mm": 74.0,
-    "nearest_mm": 7.383417683843959
+    "nearest_mm": 1.7727977943471842,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E25_door_RH/rgb_20260828_s_191838_0111.png",
     "cls": "E25_door_RH",
     "pred": "E25_door_RH",
-    "D_mm": 891.562931731193,
+    "D_mm": 885.8233601695141,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 74.0,
-    "nearest_mm": 5.562931731192975
+    "margin_mm": 73.6467203390282,
+    "nearest_mm": 0.1766398304858967,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E25_door_RH/rgb_20260828_s_191838_0113.png",
     "cls": "E25_door_RH",
     "pred": "E25_door_RH",
-    "D_mm": 891.0869532712445,
+    "D_mm": 885.3046794818933,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 74.0,
-    "nearest_mm": 5.086953271244511
+    "margin_mm": 72.60935896378669,
+    "nearest_mm": 0.6953205181066551,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E25_door_RH/rgb_20260828_s_191838_0119.png",
     "cls": "E25_door_RH",
     "pred": "E25_door_RH",
-    "D_mm": 891.043255607311,
+    "D_mm": 885.3339704896124,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 74.0,
-    "nearest_mm": 5.043255607311039
+    "margin_mm": 72.6679409792248,
+    "nearest_mm": 0.6660295103876024,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E25_door_RH/rgb_20260828_s_191838_0120.png",
     "cls": "E25_door_RH",
     "pred": "E25_door_RH",
-    "D_mm": 891.4461118643246,
+    "D_mm": 885.7314040433802,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 74.0,
-    "nearest_mm": 5.446111864324621
+    "margin_mm": 73.46280808676033,
+    "nearest_mm": 0.2685959566198335,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E25_door_RH/rgb_20260828_s_191838_0127.png",
     "cls": "E25_door_RH",
     "pred": "E25_door_RH",
-    "D_mm": 892.7726280016262,
+    "D_mm": 887.1644328605578,
     "gate": "ok",
     "D_src": "depth",
     "margin_mm": 74.0,
-    "nearest_mm": 6.772628001626231
+    "nearest_mm": 1.1644328605577812,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E25_door_RH/rgb_20260828_s_191838_0140.png",
     "cls": "E25_door_RH",
     "pred": "E25_door_RH",
-    "D_mm": 891.7410293704827,
+    "D_mm": 886.1763951833627,
     "gate": "ok",
     "D_src": "depth",
     "margin_mm": 74.0,
-    "nearest_mm": 5.741029370482693
+    "nearest_mm": 0.17639518336272886,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E25_door_RH/rgb_20260828_s_191838_0148.png",
     "cls": "E25_door_RH",
     "pred": "E25_door_RH",
-    "D_mm": 891.475109287533,
+    "D_mm": 885.7519321197886,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 74.0,
-    "nearest_mm": 5.475109287532973
+    "margin_mm": 73.5038642395773,
+    "nearest_mm": 0.24806788021135162,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E25_door_RH/rgb_20260907_s_133914_0000.png",
     "cls": "E25_door_RH",
     "pred": "E25_door_RH",
-    "D_mm": 891.466899249219,
+    "D_mm": 885.6758440809542,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 74.0,
-    "nearest_mm": 5.4668992492189545
+    "margin_mm": 73.35168816190844,
+    "nearest_mm": 0.32415591904577923,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E25_door_RH/rgb_20260907_s_133914_0003.png",
     "cls": "E25_door_RH",
     "pred": "E25_door_RH",
-    "D_mm": 893.6904181627266,
+    "D_mm": 888.0355006834671,
     "gate": "ok",
     "D_src": "depth",
     "margin_mm": 74.0,
-    "nearest_mm": 7.690418162726587
+    "nearest_mm": 2.0355006834671485,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E25_door_RH/rgb_20260907_s_133914_0006.png",
     "cls": "E25_door_RH",
     "pred": "E25_door_RH",
-    "D_mm": 893.0110920104877,
+    "D_mm": 887.2994369597685,
     "gate": "ok",
     "D_src": "depth",
     "margin_mm": 74.0,
-    "nearest_mm": 7.011092010487687
+    "nearest_mm": 1.2994369597685136,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E25_door_RH/rgb_20260907_s_133914_0009.png",
     "cls": "E25_door_RH",
     "pred": "E25_door_RH",
-    "D_mm": 891.0783754640092,
+    "D_mm": 885.2692258414837,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 74.0,
-    "nearest_mm": 5.078375464009241
+    "margin_mm": 72.53845168296743,
+    "nearest_mm": 0.730774158516283,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E25_door_RH/rgb_20260907_s_133914_0013.png",
     "cls": "E25_door_RH",
     "pred": "E25_door_RH",
-    "D_mm": 885.0461020876171,
+    "D_mm": 878.93903734081,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 72.0922041752342,
-    "nearest_mm": 0.9538979123828994
+    "margin_mm": 59.87807468162009,
+    "nearest_mm": 7.060962659189954,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E25_door_RH/rgb_20260907_s_133914_0016.png",
     "cls": "E25_door_RH",
     "pred": "E25_door_RH",
-    "D_mm": 886.9824630909123,
+    "D_mm": 880.9806265524514,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 74.0,
-    "nearest_mm": 0.9824630909123471
+    "margin_mm": 63.96125310490288,
+    "nearest_mm": 5.01937344754856,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E25_door_RH/rgb_20260907_s_133914_0019.png",
     "cls": "E25_door_RH",
     "pred": "E25_door_RH",
-    "D_mm": 891.7570926884649,
+    "D_mm": 886.0334733453869,
     "gate": "ok",
     "D_src": "depth",
     "margin_mm": 74.0,
-    "nearest_mm": 5.7570926884649225
+    "nearest_mm": 0.03347334538693758,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E25_door_RH/rgb_20260907_s_133914_0022.png",
     "cls": "E25_door_RH",
     "pred": "E25_door_RH",
-    "D_mm": 893.9873297019325,
+    "D_mm": 888.263174365222,
     "gate": "ok",
     "D_src": "depth",
     "margin_mm": 74.0,
-    "nearest_mm": 7.987329701932481
+    "nearest_mm": 2.263174365221971,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E25_door_RH/rgb_20260907_s_133914_0025.png",
     "cls": "E25_door_RH",
     "pred": "E25_door_RH",
-    "D_mm": 893.0525708535924,
+    "D_mm": 887.370497161097,
     "gate": "ok",
     "D_src": "depth",
     "margin_mm": 74.0,
-    "nearest_mm": 7.052570853592442
+    "nearest_mm": 1.3704971610969778,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E25_door_RH/rgb_20260907_s_133914_0028.png",
     "cls": "E25_door_RH",
     "pred": "E25_door_RH",
-    "D_mm": 894.5865741379072,
+    "D_mm": 888.8965583595051,
     "gate": "ok",
     "D_src": "depth",
     "margin_mm": 74.0,
-    "nearest_mm": 8.586574137907178
+    "nearest_mm": 2.896558359505093,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E25_door_RH/rgb_20260907_s_133914_0032.png",
     "cls": "E25_door_RH",
     "pred": "E25_door_RH",
-    "D_mm": 892.4537739055954,
+    "D_mm": 886.6888604533938,
     "gate": "ok",
     "D_src": "depth",
     "margin_mm": 74.0,
-    "nearest_mm": 6.453773905595426
+    "nearest_mm": 0.6888604533937723,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E25_door_RH/rgb_20260907_s_133914_0035.png",
     "cls": "E25_door_RH",
     "pred": "E25_door_RH",
-    "D_mm": 887.2109552172695,
+    "D_mm": 881.2764868484988,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 74.0,
-    "nearest_mm": 1.210955217269543
+    "margin_mm": 64.5529736969977,
+    "nearest_mm": 4.723513151501152,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E25_door_RH/rgb_20260907_s_133914_0038.png",
     "cls": "E25_door_RH",
     "pred": "E25_door_RH",
-    "D_mm": 885.6399516709904,
+    "D_mm": 879.5971121646629,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 73.2799033419808,
-    "nearest_mm": 0.3600483290096008
+    "margin_mm": 61.194224329325834,
+    "nearest_mm": 6.402887835337083,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E25_door_RH/rgb_20260907_s_133914_0041.png",
     "cls": "E25_door_RH",
     "pred": "E25_door_RH",
-    "D_mm": 885.4348799228251,
+    "D_mm": 879.4209324343274,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 72.86975984565015,
-    "nearest_mm": 0.5651200771749245
+    "margin_mm": 60.84186486865474,
+    "nearest_mm": 6.579067565672631,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E25_door_RH/rgb_20260907_s_133914_0044.png",
     "cls": "E25_door_RH",
     "pred": "E25_door_RH",
-    "D_mm": 884.2320076365537,
+    "D_mm": 878.1898159498926,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 70.4640152731074,
-    "nearest_mm": 1.7679923634462966
+    "margin_mm": 58.37963189978518,
+    "nearest_mm": 7.810184050107409,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E25_door_RH/rgb_20260907_s_133914_0047.png",
     "cls": "E25_door_RH",
     "pred": "E25_door_RH",
-    "D_mm": 886.097255817157,
+    "D_mm": 880.1722730346233,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 74.0,
-    "nearest_mm": 0.09725581715701992
+    "margin_mm": 62.34454606924669,
+    "nearest_mm": 5.827726965376655,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E25_door_RH/rgb_20260907_s_133914_0051.png",
     "cls": "E25_door_RH",
     "pred": "E25_door_RH",
-    "D_mm": 893.4999316255091,
+    "D_mm": 887.8458152889873,
     "gate": "ok",
     "D_src": "depth",
     "margin_mm": 74.0,
-    "nearest_mm": 7.499931625509134
+    "nearest_mm": 1.8458152889872963,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E25_door_RH/rgb_20260907_s_133914_0054.png",
     "cls": "E25_door_RH",
     "pred": "E25_door_RH",
-    "D_mm": 894.3929312470401,
+    "D_mm": 888.7364865830571,
     "gate": "ok",
     "D_src": "depth",
     "margin_mm": 74.0,
-    "nearest_mm": 8.39293124704011
+    "nearest_mm": 2.736486583057058,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E25_door_RH/rgb_20260907_s_133914_0057.png",
     "cls": "E25_door_RH",
     "pred": "E25_door_RH",
-    "D_mm": 886.1652857341137,
+    "D_mm": 880.1763617563267,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 74.0,
-    "nearest_mm": 0.16528573411369507
+    "margin_mm": 62.35272351265348,
+    "nearest_mm": 5.823638243673258,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E25_door_RH/rgb_20260907_s_133914_0060.png",
     "cls": "E25_door_RH",
     "pred": "E25_door_RH",
-    "D_mm": 893.0453048742029,
+    "D_mm": 887.3296558770362,
     "gate": "ok",
     "D_src": "depth",
     "margin_mm": 74.0,
-    "nearest_mm": 7.045304874202884
+    "nearest_mm": 1.3296558770362026,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_E38_door_RH/rgb_20260828_s_143127_0000.png",
     "cls": "E30_E38_door_RH",
     "pred": "E30_E38_door_RH",
-    "D_mm": 1092.2638969266952,
+    "D_mm": 1084.9485236942041,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 50.0,
-    "nearest_mm": 5.2638969266952245
+    "margin_mm": 45.89704738840828,
+    "nearest_mm": 2.051476305795859,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_E38_door_RH/rgb_20260828_s_143127_0004.png",
     "cls": "E30_E38_door_RH",
     "pred": "E30_E38_door_RH",
-    "D_mm": 1096.1305135659934,
+    "D_mm": 1088.9077038212977,
     "gate": "ok",
     "D_src": "depth",
     "margin_mm": 50.0,
-    "nearest_mm": 9.130513565993397
+    "nearest_mm": 1.9077038212976731,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_E38_door_RH/rgb_20260828_s_143127_0007.png",
     "cls": "E30_E38_door_RH",
     "pred": "E30_E38_door_RH",
-    "D_mm": 1097.1560883185725,
+    "D_mm": 1089.9737621236216,
     "gate": "ok",
     "D_src": "depth",
     "margin_mm": 50.0,
-    "nearest_mm": 10.156088318572529
+    "nearest_mm": 2.9737621236215546,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_E38_door_RH/rgb_20260828_s_143127_0011.png",
     "cls": "E30_E38_door_RH",
     "pred": "E30_E38_door_RH",
-    "D_mm": 1096.982999725826,
+    "D_mm": 1089.8292640789218,
     "gate": "ok",
     "D_src": "depth",
     "margin_mm": 50.0,
-    "nearest_mm": 9.982999725825948
+    "nearest_mm": 2.829264078921824,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_E38_door_RH/rgb_20260828_s_143127_0014.png",
     "cls": "E30_E38_door_RH",
     "pred": "E30_E38_door_RH",
-    "D_mm": 1097.2874703284197,
+    "D_mm": 1090.1264257284395,
     "gate": "ok",
     "D_src": "depth",
     "margin_mm": 50.0,
-    "nearest_mm": 10.287470328419658
+    "nearest_mm": 3.1264257284394716,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_E38_door_RH/rgb_20260828_s_143127_0015.png",
     "cls": "E30_E38_door_RH",
     "pred": "E30_E38_door_RH",
-    "D_mm": 1094.7573492457452,
+    "D_mm": 1087.6293720636752,
     "gate": "ok",
     "D_src": "depth",
     "margin_mm": 50.0,
-    "nearest_mm": 7.757349245745218
+    "nearest_mm": 0.6293720636751914,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_E38_door_RH/rgb_20260828_s_143127_0018.png",
     "cls": "E30_E38_door_RH",
     "pred": "E30_E38_door_RH",
-    "D_mm": 1097.7582158020318,
+    "D_mm": 1090.6384679711346,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 49.483568395936345,
-    "nearest_mm": 10.758215802031827
+    "margin_mm": 50.0,
+    "nearest_mm": 3.6384679711345598,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_E38_door_RH/rgb_20260828_s_143127_0021.png",
     "cls": "E30_E38_door_RH",
     "pred": "E30_E38_door_RH",
-    "D_mm": 1096.3231587362975,
+    "D_mm": 1089.2449578352998,
     "gate": "ok",
     "D_src": "depth",
     "margin_mm": 50.0,
-    "nearest_mm": 9.3231587362975
+    "nearest_mm": 2.2449578352998287,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_E38_door_RH/rgb_20260828_s_143127_0022.png",
     "cls": "E30_E38_door_RH",
     "pred": "E30_E38_door_RH",
-    "D_mm": 1097.6273393614697,
+    "D_mm": 1090.4997522671824,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 49.74532127706061,
-    "nearest_mm": 10.627339361469694
+    "margin_mm": 50.0,
+    "nearest_mm": 3.49975226718243,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_E38_door_RH/rgb_20260828_s_143127_0025.png",
     "cls": "E30_E38_door_RH",
     "pred": "E30_E38_door_RH",
-    "D_mm": 1098.1442991439308,
+    "D_mm": 1091.0334639606324,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 48.71140171213847,
-    "nearest_mm": 11.144299143930766
+    "margin_mm": 50.0,
+    "nearest_mm": 4.033463960632389,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_E38_door_RH/rgb_20260828_s_143127_0028.png",
     "cls": "E30_E38_door_RH",
     "pred": "E30_E38_door_RH",
-    "D_mm": 1096.9736718815989,
+    "D_mm": 1089.8661263378133,
     "gate": "ok",
     "D_src": "depth",
     "margin_mm": 50.0,
-    "nearest_mm": 9.973671881598875
+    "nearest_mm": 2.8661263378132844,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_E38_door_RH/rgb_20260828_s_143127_0030.png",
     "cls": "E30_E38_door_RH",
     "pred": "E30_E38_door_RH",
-    "D_mm": 1097.1804441348218,
+    "D_mm": 1090.02222857477,
     "gate": "ok",
     "D_src": "depth",
     "margin_mm": 50.0,
-    "nearest_mm": 10.180444134821755
+    "nearest_mm": 3.022228574769997,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_E38_door_RH/rgb_20260828_s_143127_0032.png",
     "cls": "E30_E38_door_RH",
     "pred": "E30_E38_door_RH",
-    "D_mm": 1094.3989350704035,
+    "D_mm": 1087.118038936634,
     "gate": "ok",
     "D_src": "depth",
     "margin_mm": 50.0,
-    "nearest_mm": 7.398935070403468
+    "nearest_mm": 0.11803893663409326,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_E38_door_RH/rgb_20260828_s_143127_0035.png",
     "cls": "E30_E38_door_RH",
     "pred": "E30_E38_door_RH",
-    "D_mm": 1103.0664203624522,
+    "D_mm": 1096.0002511027967,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 38.86715927509567,
-    "nearest_mm": 16.066420362452163
+    "margin_mm": 50.0,
+    "nearest_mm": 9.00025110279671,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_E38_door_RH/rgb_20260828_s_143127_0037.png",
     "cls": "E30_E38_door_RH",
     "pred": "E30_E38_door_RH",
-    "D_mm": 1095.521286883181,
+    "D_mm": 1088.3136399180892,
     "gate": "ok",
     "D_src": "depth",
     "margin_mm": 50.0,
-    "nearest_mm": 8.521286883180892
+    "nearest_mm": 1.3136399180891658,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_E38_door_RH/rgb_20260828_s_143127_0039.png",
     "cls": "E30_E38_door_RH",
     "pred": "E30_E38_door_RH",
-    "D_mm": 1091.9548527951313,
+    "D_mm": 1084.554255222963,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 50.0,
-    "nearest_mm": 4.9548527951312735
+    "margin_mm": 45.108510445926186,
+    "nearest_mm": 2.445744777036907,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_E38_door_RH/rgb_20260828_s_143127_0042.png",
     "cls": "E30_E38_door_RH",
     "pred": "E30_E38_door_RH",
-    "D_mm": 1089.3823037603004,
+    "D_mm": 1081.9902835480186,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 50.0,
-    "nearest_mm": 2.382303760300374
+    "margin_mm": 39.98056709603725,
+    "nearest_mm": 5.009716451981376,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_E38_door_RH/rgb_20260828_s_143127_0045.png",
     "cls": "E30_E38_door_RH",
     "pred": "E30_E38_door_RH",
-    "D_mm": 1085.1685559369187,
+    "D_mm": 1077.6309287370154,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 46.33711187383733,
-    "nearest_mm": 1.8314440630813351
+    "margin_mm": 31.261857474030876,
+    "nearest_mm": 9.369071262984562,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_E38_door_RH/rgb_20260828_s_143127_0046.png",
     "cls": "E30_E38_door_RH",
     "pred": "E30_E38_door_RH",
-    "D_mm": 1085.648948725298,
+    "D_mm": 1078.1358290653106,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 47.29789745059588,
-    "nearest_mm": 1.3510512747020584
+    "margin_mm": 32.27165813062129,
+    "nearest_mm": 8.864170934689355,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_E38_door_RH/rgb_20260828_s_143127_0049.png",
     "cls": "E30_E38_door_RH",
     "pred": "E30_E38_door_RH",
-    "D_mm": 1087.7139701270787,
+    "D_mm": 1080.3576578230475,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 50.0,
-    "nearest_mm": 0.71397012707871
+    "margin_mm": 36.71531564609495,
+    "nearest_mm": 6.642342176952525,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_E38_door_RH/rgb_20260828_s_143127_0052.png",
     "cls": "E30_E38_door_RH",
     "pred": "E30_E38_door_RH",
-    "D_mm": 1088.9897262609652,
+    "D_mm": 1081.654569331786,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 50.0,
-    "nearest_mm": 1.989726260965199
+    "margin_mm": 39.30913866357196,
+    "nearest_mm": 5.345430668214021,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_E38_door_RH/rgb_20260828_s_143127_0053.png",
     "cls": "E30_E38_door_RH",
     "pred": "E30_E38_door_RH",
-    "D_mm": 1090.6379476161146,
+    "D_mm": 1083.3244750737279,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 50.0,
-    "nearest_mm": 3.637947616114616
+    "margin_mm": 42.64895014745571,
+    "nearest_mm": 3.6755249262721463,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_E38_door_RH/rgb_20260828_s_143127_0056.png",
     "cls": "E30_E38_door_RH",
     "pred": "E30_E38_door_RH",
-    "D_mm": 1093.9616580924978,
+    "D_mm": 1086.785707693951,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 50.0,
-    "nearest_mm": 6.961658092497828
+    "margin_mm": 49.57141538790211,
+    "nearest_mm": 0.21429230604894656,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_E38_door_RH/rgb_20260828_s_143127_0060.png",
     "cls": "E30_E38_door_RH",
     "pred": "E30_E38_door_RH",
-    "D_mm": 1095.1842121743089,
+    "D_mm": 1088.1016993031446,
     "gate": "ok",
     "D_src": "depth",
     "margin_mm": 50.0,
-    "nearest_mm": 8.184212174308868
+    "nearest_mm": 1.1016993031446418,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_E38_door_RH/rgb_20260828_s_143127_0063.png",
     "cls": "E30_E38_door_RH",
     "pred": "E30_E38_door_RH",
-    "D_mm": 1095.0728673280103,
+    "D_mm": 1087.9641093554085,
     "gate": "ok",
     "D_src": "depth",
     "margin_mm": 50.0,
-    "nearest_mm": 8.072867328010261
+    "nearest_mm": 0.9641093554084819,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_E38_door_RH/rgb_20260828_s_143127_0067.png",
     "cls": "E30_E38_door_RH",
     "pred": "E30_E38_door_RH",
-    "D_mm": 1096.0148397510468,
+    "D_mm": 1088.8377160623986,
     "gate": "ok",
     "D_src": "depth",
     "margin_mm": 50.0,
-    "nearest_mm": 9.014839751046793
+    "nearest_mm": 1.8377160623986128,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_E38_door_RH/rgb_20260831_s_125509_0000.png",
     "cls": "E30_E38_door_RH",
     "pred": "E30_E38_door_RH",
-    "D_mm": 1097.019562305999,
+    "D_mm": 1090.0771781088122,
     "gate": "ok",
     "D_src": "depth",
     "margin_mm": 50.0,
-    "nearest_mm": 10.019562305998988
+    "nearest_mm": 3.077178108812177,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_E38_door_RH/rgb_20260831_s_125509_0008.png",
     "cls": "E30_E38_door_RH",
     "pred": "E30_E38_door_RH",
-    "D_mm": 1095.7671975905776,
+    "D_mm": 1088.54719535615,
     "gate": "ok",
     "D_src": "depth",
     "margin_mm": 50.0,
-    "nearest_mm": 8.767197590577553
+    "nearest_mm": 1.5471953561500413,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_E38_door_RH/rgb_20260831_s_125509_0016.png",
     "cls": "E30_E38_door_RH",
     "pred": "E30_E38_door_RH",
-    "D_mm": 1107.9590474338434,
+    "D_mm": 1101.5949617228264,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 29.081905132313295,
-    "nearest_mm": 20.959047433843352
+    "margin_mm": 41.81007655434723,
+    "nearest_mm": 14.594961722826383,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_E38_door_RH/rgb_20260831_s_125509_0023.png",
     "cls": "E30_E38_door_RH",
     "pred": "E30_E38_door_RH",
-    "D_mm": 1098.3623478707311,
+    "D_mm": 1091.322648182631,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 48.275304258537744,
-    "nearest_mm": 11.362347870731128
+    "margin_mm": 50.0,
+    "nearest_mm": 4.322648182630928,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_E38_door_RH/rgb_20260831_s_125509_0031.png",
     "cls": "E30_E38_door_RH",
     "pred": "E30_E38_door_RH",
-    "D_mm": 1094.1507973265416,
+    "D_mm": 1087.0488292171055,
     "gate": "ok",
     "D_src": "depth",
     "margin_mm": 50.0,
-    "nearest_mm": 7.1507973265415785
+    "nearest_mm": 0.048829217105549105,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_E38_door_RH/rgb_20260831_s_125509_0039.png",
     "cls": "E30_E38_door_RH",
     "pred": "E30_E38_door_RH",
-    "D_mm": 1102.4147098791839,
+    "D_mm": 1095.9184824720421,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 40.17058024163225,
-    "nearest_mm": 15.414709879183874
+    "margin_mm": 50.0,
+    "nearest_mm": 8.918482472042115,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_E38_door_RH/rgb_20260831_s_125509_0047.png",
     "cls": "E30_E38_door_RH",
     "pred": "E30_E38_door_RH",
-    "D_mm": 1104.3334707794502,
+    "D_mm": 1097.711320920661,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 36.33305844109964,
-    "nearest_mm": 17.33347077945018
+    "margin_mm": 49.57735815867818,
+    "nearest_mm": 10.71132092066091,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_E38_door_RH/rgb_20260831_s_125509_0055.png",
     "cls": "E30_E38_door_RH",
     "pred": "E30_E38_door_RH",
-    "D_mm": 1094.8681275285858,
+    "D_mm": 1087.7260233399722,
     "gate": "ok",
     "D_src": "depth",
     "margin_mm": 50.0,
-    "nearest_mm": 7.868127528585774
+    "nearest_mm": 0.7260233399722438,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_E38_door_RH/rgb_20260831_s_125509_0062.png",
     "cls": "E30_E38_door_RH",
     "pred": "E30_E38_door_RH",
-    "D_mm": 1104.981305255421,
+    "D_mm": 1098.4864363272366,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 35.03738948915816,
-    "nearest_mm": 17.98130525542092
+    "margin_mm": 48.02712734552688,
+    "nearest_mm": 11.48643632723656,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_E38_door_RH/rgb_20260831_s_125509_0070.png",
     "cls": "E30_E38_door_RH",
     "pred": "E30_E38_door_RH",
-    "D_mm": 1100.5514720346453,
+    "D_mm": 1093.9377559892341,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 43.897055930709485,
-    "nearest_mm": 13.551472034645258
+    "margin_mm": 50.0,
+    "nearest_mm": 6.93775598923412,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_E38_door_RH/rgb_20260831_s_125509_0078.png",
     "cls": "E30_E38_door_RH",
     "pred": "E30_E38_door_RH",
-    "D_mm": 1096.6502734680623,
+    "D_mm": 1089.7860407320493,
     "gate": "ok",
     "D_src": "depth",
     "margin_mm": 50.0,
-    "nearest_mm": 9.650273468062323
+    "nearest_mm": 2.786040732049287,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_E38_door_RH/rgb_20260831_s_125509_0086.png",
     "cls": "E30_E38_door_RH",
     "pred": "E30_E38_door_RH",
-    "D_mm": 1093.8289599215998,
+    "D_mm": 1086.5674621771873,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 50.0,
-    "nearest_mm": 6.82895992159979
+    "margin_mm": 49.13492435437456,
+    "nearest_mm": 0.43253782281271924,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_E38_door_RH/rgb_20260831_s_125509_0093.png",
     "cls": "E30_E38_door_RH",
     "pred": "E30_E38_door_RH",
-    "D_mm": 1092.1809264482438,
+    "D_mm": 1084.7797860032279,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 50.0,
-    "nearest_mm": 5.180926448243781
+    "margin_mm": 45.55957200645571,
+    "nearest_mm": 2.220213996772145,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_E38_door_RH/rgb_20260831_s_125509_0101.png",
     "cls": "E30_E38_door_RH",
     "pred": "E30_E38_door_RH",
-    "D_mm": 1101.1671756198778,
+    "D_mm": 1094.3138702153203,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 42.665648760244494,
-    "nearest_mm": 14.167175619877753
+    "margin_mm": 50.0,
+    "nearest_mm": 7.313870215320321,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_E38_door_RH/rgb_20260831_s_125509_0109.png",
     "cls": "E30_E38_door_RH",
     "pred": "E30_E38_door_RH",
-    "D_mm": 1092.5244329320656,
+    "D_mm": 1085.2203069183554,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 50.0,
-    "nearest_mm": 5.524432932065565
+    "margin_mm": 46.44061383671078,
+    "nearest_mm": 1.7796930816446093,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_E38_door_RH/rgb_20260831_s_125509_0117.png",
     "cls": "E30_E38_door_RH",
     "pred": "E30_E38_door_RH",
-    "D_mm": 1105.1233400223095,
+    "D_mm": 1098.648552897424,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 34.7533199553809,
-    "nearest_mm": 18.12334002230955
+    "margin_mm": 47.702894205152006,
+    "nearest_mm": 11.648552897423997,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_E38_door_RH/rgb_20260831_s_125509_0125.png",
     "cls": "E30_E38_door_RH",
     "pred": "E30_E38_door_RH",
-    "D_mm": 1098.1774267160904,
+    "D_mm": 1091.4175049151481,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 48.64514656781921,
-    "nearest_mm": 11.177426716090395
+    "margin_mm": 50.0,
+    "nearest_mm": 4.417504915148129,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_E38_door_RH/rgb_20260831_s_125509_0132.png",
     "cls": "E30_E38_door_RH",
     "pred": "E30_E38_door_RH",
-    "D_mm": 1093.571577412876,
+    "D_mm": 1086.357369494769,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 50.0,
-    "nearest_mm": 6.571577412875968
+    "margin_mm": 48.71473898953809,
+    "nearest_mm": 0.6426305052309544,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_E38_door_RH/rgb_20260831_s_125509_0140.png",
     "cls": "E30_E38_door_RH",
     "pred": "E30_E38_door_RH",
-    "D_mm": 1105.4025535466915,
+    "D_mm": 1098.904013438949,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 34.19489290661704,
-    "nearest_mm": 18.40255354669148
+    "margin_mm": 47.1919731221019,
+    "nearest_mm": 11.90401343894905,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_E38_door_RH/rgb_20260831_s_125509_0148.png",
     "cls": "E30_E38_door_RH",
     "pred": "E30_E38_door_RH",
-    "D_mm": 1093.7865692240212,
+    "D_mm": 1086.561713736933,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 50.0,
-    "nearest_mm": 6.78656922402115
+    "margin_mm": 49.12342747386583,
+    "nearest_mm": 0.4382862630670843,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_E38_door_RH/rgb_20260907_s_152807_0000.png",
     "cls": "E30_E38_door_RH",
     "pred": "E30_E38_door_RH",
-    "D_mm": 1094.9179696465287,
+    "D_mm": 1088.031639244877,
     "gate": "ok",
     "D_src": "depth",
     "margin_mm": 50.0,
-    "nearest_mm": 7.917969646528718
+    "nearest_mm": 1.031639244876942,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_E38_door_RH/rgb_20260907_s_152807_0004.png",
     "cls": "E30_E38_door_RH",
     "pred": "E30_E38_door_RH",
-    "D_mm": 1098.5676174015034,
+    "D_mm": 1091.931473094902,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 47.864765196993176,
-    "nearest_mm": 11.567617401503412
+    "margin_mm": 50.0,
+    "nearest_mm": 4.931473094902003,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_E38_door_RH/rgb_20260907_s_152807_0008.png",
     "cls": "E30_E38_door_RH",
     "pred": "E30_E38_door_RH",
-    "D_mm": 1099.222778371135,
+    "D_mm": 1092.6102885984678,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 46.55444325772987,
-    "nearest_mm": 12.222778371135064
+    "margin_mm": 50.0,
+    "nearest_mm": 5.610288598467832,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_E38_door_RH/rgb_20260907_s_152807_0012.png",
     "cls": "E30_E38_door_RH",
     "pred": "E30_E38_door_RH",
-    "D_mm": 1093.6052495274369,
+    "D_mm": 1086.5747362020527,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 50.0,
-    "nearest_mm": 6.605249527436854
+    "margin_mm": 49.14947240410538,
+    "nearest_mm": 0.4252637979473093,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_E38_door_RH/rgb_20260907_s_152807_0015.png",
     "cls": "E30_E38_door_RH",
     "pred": "E30_E38_door_RH",
-    "D_mm": 1095.455121612673,
+    "D_mm": 1088.4441644332805,
     "gate": "ok",
     "D_src": "depth",
     "margin_mm": 50.0,
-    "nearest_mm": 8.45512161267311
+    "nearest_mm": 1.444164433280548,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_E38_door_RH/rgb_20260907_s_152807_0019.png",
     "cls": "E30_E38_door_RH",
     "pred": "E30_E38_door_RH",
-    "D_mm": 1102.9901321825982,
+    "D_mm": 1096.5564270418076,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 39.01973563480351,
-    "nearest_mm": 15.990132182598245
+    "margin_mm": 50.0,
+    "nearest_mm": 9.556427041807638,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_E38_door_RH/rgb_20260907_s_152807_0023.png",
     "cls": "E30_E38_door_RH",
     "pred": "E30_E38_door_RH",
-    "D_mm": 1094.2158366924775,
+    "D_mm": 1087.3528494038326,
     "gate": "ok",
     "D_src": "depth",
     "margin_mm": 50.0,
-    "nearest_mm": 7.215836692477524
+    "nearest_mm": 0.3528494038325789,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_E38_door_RH/rgb_20260907_s_152807_0027.png",
     "cls": "E30_E38_door_RH",
     "pred": "E30_E38_door_RH",
-    "D_mm": 1092.8564165307855,
+    "D_mm": 1085.8057051604253,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 50.0,
-    "nearest_mm": 5.856416530785509
+    "margin_mm": 47.61141032085061,
+    "nearest_mm": 1.1942948395746953,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_E38_door_RH/rgb_20260907_s_152807_0031.png",
     "cls": "E30_E38_door_RH",
     "pred": "E30_E38_door_RH",
-    "D_mm": 1099.464854641291,
+    "D_mm": 1092.7873149565003,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 46.070290717418175,
-    "nearest_mm": 12.464854641290913
+    "margin_mm": 50.0,
+    "nearest_mm": 5.787314956500268,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_E38_door_RH/rgb_20260907_s_152807_0035.png",
     "cls": "E30_E38_door_RH",
     "pred": "E30_E38_door_RH",
-    "D_mm": 1102.1779212179163,
+    "D_mm": 1095.7055878813048,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 40.64415756416747,
-    "nearest_mm": 15.177921217916264
+    "margin_mm": 50.0,
+    "nearest_mm": 8.705587881304837,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_E38_door_RH/rgb_20260907_s_152807_0038.png",
     "cls": "E30_E38_door_RH",
     "pred": "E30_E38_door_RH",
-    "D_mm": 1095.4542102403036,
+    "D_mm": 1088.691230153454,
     "gate": "ok",
     "D_src": "depth",
     "margin_mm": 50.0,
-    "nearest_mm": 8.45421024030361
+    "nearest_mm": 1.6912301534539438,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_E38_door_RH/rgb_20260907_s_152807_0042.png",
     "cls": "E30_E38_door_RH",
     "pred": "E30_E38_door_RH",
-    "D_mm": 1091.08623686387,
+    "D_mm": 1083.971708291521,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 50.0,
-    "nearest_mm": 4.086236863869999
+    "margin_mm": 43.94341658304211,
+    "nearest_mm": 3.028291708478946,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_E38_door_RH/rgb_20260907_s_152807_0046.png",
     "cls": "E30_E38_door_RH",
     "pred": "E30_E38_door_RH",
-    "D_mm": 1096.3405902505522,
+    "D_mm": 1089.3987389194635,
     "gate": "ok",
     "D_src": "depth",
     "margin_mm": 50.0,
-    "nearest_mm": 9.340590250552168
+    "nearest_mm": 2.39873891946354,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_E38_door_RH/rgb_20260907_s_152807_0050.png",
     "cls": "E30_E38_door_RH",
     "pred": "E30_E38_door_RH",
-    "D_mm": 1098.2424303481623,
+    "D_mm": 1091.6240728972048,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 48.51513930367537,
-    "nearest_mm": 11.242430348162316
+    "margin_mm": 50.0,
+    "nearest_mm": 4.624072897204769,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_E38_door_RH/rgb_20260907_s_152807_0054.png",
     "cls": "E30_E38_door_RH",
     "pred": "E30_E38_door_RH",
-    "D_mm": 1101.3518374653308,
+    "D_mm": 1094.8178292054968,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 42.29632506933831,
-    "nearest_mm": 14.351837465330846
+    "margin_mm": 50.0,
+    "nearest_mm": 7.817829205496764,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_E38_door_RH/rgb_20260907_s_152807_0058.png",
     "cls": "E30_E38_door_RH",
     "pred": "E30_E38_door_RH",
-    "D_mm": 1104.38142645276,
+    "D_mm": 1098.0223086335384,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 36.23714709447995,
-    "nearest_mm": 17.381426452760024
+    "margin_mm": 48.955382732923226,
+    "nearest_mm": 11.022308633538387,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_E38_door_RH/rgb_20260907_s_152807_0061.png",
     "cls": "E30_E38_door_RH",
     "pred": "E30_E38_door_RH",
-    "D_mm": 1102.7521517651567,
+    "D_mm": 1096.4254998638492,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 39.49569646968666,
-    "nearest_mm": 15.752151765156668
+    "margin_mm": 50.0,
+    "nearest_mm": 9.425499863849154,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_E38_door_RH/rgb_20260907_s_152807_0065.png",
     "cls": "E30_E38_door_RH",
     "pred": "E30_E38_door_RH",
-    "D_mm": 1101.1676052746213,
+    "D_mm": 1094.8563528682876,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 42.664789450757326,
-    "nearest_mm": 14.167605274621337
+    "margin_mm": 50.0,
+    "nearest_mm": 7.8563528682875585,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_E38_door_RH/rgb_20260907_s_152807_0069.png",
     "cls": "E30_E38_door_RH",
     "pred": "E30_E38_door_RH",
-    "D_mm": 1099.4483608315284,
+    "D_mm": 1092.992275461342,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 46.103278336943276,
-    "nearest_mm": 12.448360831528362
+    "margin_mm": 50.0,
+    "nearest_mm": 5.992275461341933,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_E38_door_RH/rgb_20260907_s_152807_0073.png",
     "cls": "E30_E38_door_RH",
     "pred": "E30_E38_door_RH",
-    "D_mm": 1091.660455326104,
+    "D_mm": 1084.6149065773482,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 50.0,
-    "nearest_mm": 4.660455326104056
+    "margin_mm": 45.22981315469633,
+    "nearest_mm": 2.3850934226518348,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0000.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 773.5053128622693,
+    "D_mm": 768.4490723767177,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 29.989374275461387,
-    "nearest_mm": 8.505312862269307
+    "margin_mm": 40.10185524656458,
+    "nearest_mm": 3.4490723767177087,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0001.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 773.3261269298777,
+    "D_mm": 768.2520358897724,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 30.34774614024468,
-    "nearest_mm": 8.32612692987766
+    "margin_mm": 40.4959282204552,
+    "nearest_mm": 3.252035889772401,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0002.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 774.9525329755019,
+    "D_mm": 769.912147333255,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 27.094934048996265,
-    "nearest_mm": 9.952532975501867
+    "margin_mm": 37.17570533348999,
+    "nearest_mm": 4.912147333255007,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0003.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 773.7536503233728,
+    "D_mm": 768.6590518834892,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 29.492699353254466,
-    "nearest_mm": 8.753650323372767
+    "margin_mm": 39.68189623302169,
+    "nearest_mm": 3.6590518834891554,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0004.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 775.4244269144289,
+    "D_mm": 770.3379703956762,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 26.151146171142273,
-    "nearest_mm": 10.424426914428864
+    "margin_mm": 36.32405920864767,
+    "nearest_mm": 5.337970395676166,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0005.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 774.3637029359074,
+    "D_mm": 769.3405419800906,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 28.27259412818512,
-    "nearest_mm": 9.36370293590744
+    "margin_mm": 38.31891603981876,
+    "nearest_mm": 4.34054198009062,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0006.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 774.0001369379543,
+    "D_mm": 768.9412300729747,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 28.999726124091467,
-    "nearest_mm": 9.000136937954267
+    "margin_mm": 39.11753985405062,
+    "nearest_mm": 3.9412300729746903,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0007.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 774.0910931893009,
+    "D_mm": 769.0140192611935,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 28.817813621398273,
-    "nearest_mm": 9.091093189300864
+    "margin_mm": 38.97196147761292,
+    "nearest_mm": 4.014019261193539,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0008.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 773.5317562440393,
+    "D_mm": 768.4673405288767,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 29.936487511921314,
-    "nearest_mm": 8.531756244039343
+    "margin_mm": 40.06531894224668,
+    "nearest_mm": 3.4673405288766617,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0009.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 774.0728909398024,
+    "D_mm": 769.0262483494831,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 28.854218120395217,
-    "nearest_mm": 9.072890939802392
+    "margin_mm": 38.94750330103375,
+    "nearest_mm": 4.026248349483126,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0010.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 774.3128712484894,
+    "D_mm": 769.2502255501342,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 28.374257503021227,
-    "nearest_mm": 9.312871248489387
+    "margin_mm": 38.49954889973151,
+    "nearest_mm": 4.250225550134246,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0011.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 774.7664682661394,
+    "D_mm": 769.7462514796466,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 27.46706346772112,
-    "nearest_mm": 9.76646826613944
+    "margin_mm": 37.50749704070677,
+    "nearest_mm": 4.746251479646617,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0012.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 774.438993843422,
+    "D_mm": 769.4299633531416,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 28.122012313155892,
-    "nearest_mm": 9.438993843422054
+    "margin_mm": 38.140073293716796,
+    "nearest_mm": 4.429963353141602,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0013.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 776.0532475888833,
+    "D_mm": 771.1203599920348,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 24.893504822233353,
-    "nearest_mm": 11.053247588883323
+    "margin_mm": 34.75928001593047,
+    "nearest_mm": 6.120359992034764,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0014.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 774.553066355922,
+    "D_mm": 769.6197302847602,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 27.89386728815589,
-    "nearest_mm": 9.553066355922056
+    "margin_mm": 37.76053943047964,
+    "nearest_mm": 4.61973028476018,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0015.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 774.8525389340878,
+    "D_mm": 769.9256268969867,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 27.294922131824478,
-    "nearest_mm": 9.852538934087761
+    "margin_mm": 37.148746206026544,
+    "nearest_mm": 4.925626896986728,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0016.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 772.1899213449062,
+    "D_mm": 767.1563748973172,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 32.62015731018755,
-    "nearest_mm": 7.1899213449062245
+    "margin_mm": 41.0,
+    "nearest_mm": 2.156374897317164,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0017.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 771.435111091191,
+    "D_mm": 766.3833443015485,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 34.129777817618105,
-    "nearest_mm": 6.435111091190947
+    "margin_mm": 41.0,
+    "nearest_mm": 1.3833443015485045,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0018.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 772.1115191700314,
+    "D_mm": 767.0899854132832,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 32.776961659937115,
-    "nearest_mm": 7.111519170031443
+    "margin_mm": 41.0,
+    "nearest_mm": 2.089985413283216,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0019.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 771.8047435970316,
+    "D_mm": 766.7476871725355,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 33.39051280593685,
-    "nearest_mm": 6.804743597031575
+    "margin_mm": 41.0,
+    "nearest_mm": 1.7476871725355068,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0020.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 771.7911626912394,
+    "D_mm": 766.710565422459,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 33.41767461752124,
-    "nearest_mm": 6.7911626912393785
+    "margin_mm": 41.0,
+    "nearest_mm": 1.7105654224590126,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0021.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 771.3653005393319,
+    "D_mm": 766.2724415921894,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 34.26939892133623,
-    "nearest_mm": 6.3653005393318836
+    "margin_mm": 41.0,
+    "nearest_mm": 1.2724415921893524,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0022.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 770.3962072933465,
+    "D_mm": 765.2660392262422,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 36.207585413307015,
-    "nearest_mm": 5.396207293346492
+    "margin_mm": 41.0,
+    "nearest_mm": 0.26603922624224197,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0023.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 769.823519047556,
+    "D_mm": 764.6663050391387,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 37.352961904887934,
-    "nearest_mm": 4.823519047556033
+    "margin_mm": 40.33261007827741,
+    "nearest_mm": 0.333694960861294,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0024.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 769.9911111936433,
+    "D_mm": 764.8553009913221,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 37.01777761271342,
-    "nearest_mm": 4.991111193643292
+    "margin_mm": 40.71060198264422,
+    "nearest_mm": 0.14469900867788965,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0025.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 772.4411725735986,
+    "D_mm": 767.3425350879974,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 32.11765485280284,
-    "nearest_mm": 7.441172573598578
+    "margin_mm": 41.0,
+    "nearest_mm": 2.342535087997362,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0026.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 773.1723695970512,
+    "D_mm": 768.0994178673584,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 30.65526080589757,
-    "nearest_mm": 8.172369597051215
+    "margin_mm": 40.801164265283205,
+    "nearest_mm": 3.0994178673583974,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0027.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 773.7747135641787,
+    "D_mm": 768.6890408970353,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 29.450572871642635,
-    "nearest_mm": 8.774713564178683
+    "margin_mm": 39.62191820592943,
+    "nearest_mm": 3.6890408970352837,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0028.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 773.9493743347551,
+    "D_mm": 768.9197794452263,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 29.10125133048973,
-    "nearest_mm": 8.949374334755134
+    "margin_mm": 39.16044110954749,
+    "nearest_mm": 3.919779445226254,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0029.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 774.5739331614986,
+    "D_mm": 769.5960942850681,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 27.852133677002712,
-    "nearest_mm": 9.573933161498644
+    "margin_mm": 37.807811429863705,
+    "nearest_mm": 4.596094285068148,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0030.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 774.7103402030887,
+    "D_mm": 769.7783041248445,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 27.579319593822675,
-    "nearest_mm": 9.710340203088663
+    "margin_mm": 37.44339175031109,
+    "nearest_mm": 4.778304124844453,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0031.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 774.5591552014878,
+    "D_mm": 769.6245582763494,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 27.881689597024433,
-    "nearest_mm": 9.559155201487783
+    "margin_mm": 37.75088344730125,
+    "nearest_mm": 4.624558276349376,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0032.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 774.3523494570695,
+    "D_mm": 769.4153301527938,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 28.295301085860956,
-    "nearest_mm": 9.352349457069522
+    "margin_mm": 38.16933969441243,
+    "nearest_mm": 4.415330152793786,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0033.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 773.5790232845444,
+    "D_mm": 768.6185098550103,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 29.84195343091119,
-    "nearest_mm": 8.579023284544405
+    "margin_mm": 39.762980289979396,
+    "nearest_mm": 3.618509855010302,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0034.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 771.5880132970441,
+    "D_mm": 766.5393682774816,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 33.82397340591183,
-    "nearest_mm": 6.5880132970440854
+    "margin_mm": 41.0,
+    "nearest_mm": 1.5393682774815716,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0035.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 771.8729034996393,
+    "D_mm": 766.852419811765,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 33.25419300072144,
-    "nearest_mm": 6.872903499639278
+    "margin_mm": 41.0,
+    "nearest_mm": 1.852419811765003,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0036.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 771.3287646941186,
+    "D_mm": 766.2982150378414,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 34.34247061176279,
-    "nearest_mm": 6.328764694118604
+    "margin_mm": 41.0,
+    "nearest_mm": 1.2982150378413735,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0037.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 771.5041965149932,
+    "D_mm": 766.4756149281593,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 33.99160697001366,
-    "nearest_mm": 6.504196514993168
+    "margin_mm": 41.0,
+    "nearest_mm": 1.4756149281593025,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0038.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 771.3541394858999,
+    "D_mm": 766.3122634634744,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 34.2917210282003,
-    "nearest_mm": 6.35413948589985
+    "margin_mm": 41.0,
+    "nearest_mm": 1.3122634634744372,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0039.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 771.5283674675704,
+    "D_mm": 766.4409639187483,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 33.94326506485913,
-    "nearest_mm": 6.528367467570433
+    "margin_mm": 41.0,
+    "nearest_mm": 1.4409639187482526,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0040.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 771.2400811600663,
+    "D_mm": 766.1639219669735,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 34.51983767986735,
-    "nearest_mm": 6.240081160066325
+    "margin_mm": 41.0,
+    "nearest_mm": 1.1639219669734757,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0041.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 771.1941048208188,
+    "D_mm": 766.1563024612523,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 34.61179035836244,
-    "nearest_mm": 6.1941048208187794
+    "margin_mm": 41.0,
+    "nearest_mm": 1.1563024612522668,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0042.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 771.2913391930736,
+    "D_mm": 766.2861061578807,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 34.41732161385289,
-    "nearest_mm": 6.291339193073554
+    "margin_mm": 41.0,
+    "nearest_mm": 1.2861061578806812,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0043.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 772.0112706155722,
+    "D_mm": 767.0324163733668,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 32.97745876885551,
-    "nearest_mm": 7.0112706155722435
+    "margin_mm": 41.0,
+    "nearest_mm": 2.0324163733668,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0044.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 772.3347986992296,
+    "D_mm": 767.3606079857434,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 32.330402601540754,
-    "nearest_mm": 7.334798699229623
+    "margin_mm": 41.0,
+    "nearest_mm": 2.3606079857433997,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0045.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 774.5941397810842,
+    "D_mm": 769.6711859753375,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 27.811720437831582,
-    "nearest_mm": 9.594139781084209
+    "margin_mm": 37.65762804932501,
+    "nearest_mm": 4.671185975337494,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0046.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 775.3681850480682,
+    "D_mm": 770.4227762087518,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 26.263629903863603,
-    "nearest_mm": 10.368185048068199
+    "margin_mm": 36.15444758249646,
+    "nearest_mm": 5.42277620875177,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0047.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 774.2892078681878,
+    "D_mm": 769.3325424645136,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 28.42158426362448,
-    "nearest_mm": 9.28920786818776
+    "margin_mm": 38.334915070972784,
+    "nearest_mm": 4.332542464513608,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0048.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 774.8393429548972,
+    "D_mm": 769.8714975266236,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 27.321314090205533,
-    "nearest_mm": 9.839342954897234
+    "margin_mm": 37.257004946752886,
+    "nearest_mm": 4.871497526623557,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0049.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 773.6801486423624,
+    "D_mm": 768.6178472056555,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 29.639702715275234,
-    "nearest_mm": 8.680148642362383
+    "margin_mm": 39.76430558868901,
+    "nearest_mm": 3.617847205655494,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0050.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 772.6691209595728,
+    "D_mm": 767.5792175349486,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 31.661758080854497,
-    "nearest_mm": 7.669120959572751
+    "margin_mm": 41.0,
+    "nearest_mm": 2.5792175349486115,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0051.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 772.0478112269282,
+    "D_mm": 766.8956124718799,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 32.90437754614368,
-    "nearest_mm": 7.047811226928161
+    "margin_mm": 41.0,
+    "nearest_mm": 1.895612471879872,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0052.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 770.3272319875946,
+    "D_mm": 765.1299301320903,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 36.345536024810826,
-    "nearest_mm": 5.327231987594587
+    "margin_mm": 41.0,
+    "nearest_mm": 0.12993013209029414,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0053.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 770.2884045015056,
+    "D_mm": 765.0671801587026,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 36.42319099698875,
-    "nearest_mm": 5.2884045015056245
+    "margin_mm": 41.0,
+    "nearest_mm": 0.06718015870262661,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0054.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 769.7857108766236,
+    "D_mm": 764.5437179718824,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 37.42857824675275,
-    "nearest_mm": 4.785710876623625
+    "margin_mm": 40.08743594376483,
+    "nearest_mm": 0.45628202811758456,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0055.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 769.8569005089971,
+    "D_mm": 764.6168096680017,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 37.28619898200577,
-    "nearest_mm": 4.856900508997114
+    "margin_mm": 40.23361933600336,
+    "nearest_mm": 0.3831903319983212,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0056.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 769.9929494450283,
+    "D_mm": 764.7605955495907,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 37.01410110994334,
-    "nearest_mm": 4.99294944502833
+    "margin_mm": 40.52119109918135,
+    "nearest_mm": 0.23940445040932445,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0057.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 769.8571712216316,
+    "D_mm": 764.662201388533,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 37.28565755673685,
-    "nearest_mm": 4.8571712216315746
+    "margin_mm": 40.3244027770661,
+    "nearest_mm": 0.3377986114669511,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0058.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 769.9139470218928,
+    "D_mm": 764.7282902762163,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 37.17210595621441,
-    "nearest_mm": 4.913947021892795
+    "margin_mm": 40.45658055243257,
+    "nearest_mm": 0.27170972378371516,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0059.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 770.3836072542028,
+    "D_mm": 765.1787975019809,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 36.23278549159431,
-    "nearest_mm": 5.383607254202843
+    "margin_mm": 41.0,
+    "nearest_mm": 0.17879750198085276,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0060.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 770.1279112404161,
+    "D_mm": 764.9374793910687,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 36.744177519167806,
-    "nearest_mm": 5.127911240416097
+    "margin_mm": 40.874958782137355,
+    "nearest_mm": 0.06252060893132239,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0061.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 770.1151245943905,
+    "D_mm": 764.95156598083,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 36.769750811218955,
-    "nearest_mm": 5.115124594390522
+    "margin_mm": 40.90313196165994,
+    "nearest_mm": 0.048434019170031206,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0062.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 770.1071908684066,
+    "D_mm": 764.9715799131521,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 36.785618263186734,
-    "nearest_mm": 5.107190868406633
+    "margin_mm": 40.94315982630428,
+    "nearest_mm": 0.02842008684785924,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0063.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 770.8823174185476,
+    "D_mm": 765.7876662999898,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 35.23536516290483,
-    "nearest_mm": 5.882317418547586
+    "margin_mm": 41.0,
+    "nearest_mm": 0.7876662999898372,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0064.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 771.2246709240209,
+    "D_mm": 766.1339454934457,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 34.55065815195826,
-    "nearest_mm": 6.22467092402087
+    "margin_mm": 41.0,
+    "nearest_mm": 1.133945493445708,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0065.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 770.871510639061,
+    "D_mm": 765.8119343060793,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 35.25697872187811,
-    "nearest_mm": 5.8715106390609435
+    "margin_mm": 41.0,
+    "nearest_mm": 0.8119343060792517,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0066.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 770.3692943701946,
+    "D_mm": 765.3311167740362,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 36.261411259610895,
-    "nearest_mm": 5.369294370194552
+    "margin_mm": 41.0,
+    "nearest_mm": 0.331116774036218,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0067.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 771.8236187363062,
+    "D_mm": 766.8066387688367,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 33.35276252738754,
-    "nearest_mm": 6.82361873630623
+    "margin_mm": 41.0,
+    "nearest_mm": 1.8066387688367058,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0068.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 772.4450426420751,
+    "D_mm": 767.4097304910338,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 32.109914715849754,
-    "nearest_mm": 7.445042642075123
+    "margin_mm": 41.0,
+    "nearest_mm": 2.40973049103377,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0069.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 774.1531490533205,
+    "D_mm": 769.2304915868299,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 28.693701893359048,
-    "nearest_mm": 9.153149053320476
+    "margin_mm": 38.53901682634023,
+    "nearest_mm": 4.230491586829885,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0070.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 774.6197697938508,
+    "D_mm": 769.686935374196,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 27.76046041229847,
-    "nearest_mm": 9.619769793850764
+    "margin_mm": 37.62612925160806,
+    "nearest_mm": 4.6869353741959685,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0071.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 775.2199026338782,
+    "D_mm": 770.2662225603278,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 26.560194732243644,
-    "nearest_mm": 10.219902633878178
+    "margin_mm": 36.467554879344334,
+    "nearest_mm": 5.266222560327833,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0072.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 774.8698990093925,
+    "D_mm": 769.9047651082943,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 27.260201981215005,
-    "nearest_mm": 9.869899009392498
+    "margin_mm": 37.190469783411345,
+    "nearest_mm": 4.9047651082943275,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0073.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 774.7821379765287,
+    "D_mm": 769.7569501922933,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 27.435724046942596,
-    "nearest_mm": 9.782137976528702
+    "margin_mm": 37.48609961541342,
+    "nearest_mm": 4.756950192293289,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0074.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 774.7629215516962,
+    "D_mm": 769.68250646772,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 27.47415689660761,
-    "nearest_mm": 9.762921551696195
+    "margin_mm": 37.63498706455994,
+    "nearest_mm": 4.682506467720032,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0075.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 773.8471405356387,
+    "D_mm": 768.7663832364001,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 29.305718928722627,
-    "nearest_mm": 8.847140535638687
+    "margin_mm": 39.467233527199824,
+    "nearest_mm": 3.766383236400088,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0076.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 774.8275816231031,
+    "D_mm": 769.7346337664272,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 27.344836753793743,
-    "nearest_mm": 9.827581623103129
+    "margin_mm": 37.530732467145526,
+    "nearest_mm": 4.734633766427237,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0077.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 773.6718077054799,
+    "D_mm": 768.6217961682165,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 29.65638458904027,
-    "nearest_mm": 8.671807705479864
+    "margin_mm": 39.75640766356696,
+    "nearest_mm": 3.6217961682165196,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0078.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 773.6275018884471,
+    "D_mm": 768.5746477714162,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 29.744996223105773,
-    "nearest_mm": 8.627501888447114
+    "margin_mm": 39.850704457167694,
+    "nearest_mm": 3.574647771416153,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0079.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 773.6844169726619,
+    "D_mm": 768.6125049480792,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 29.631166054676214,
-    "nearest_mm": 8.684416972661893
+    "margin_mm": 39.774990103841674,
+    "nearest_mm": 3.612504948079163,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0080.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 774.7294360883033,
+    "D_mm": 769.7076095924365,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 27.54112782339348,
-    "nearest_mm": 9.72943608830326
+    "margin_mm": 37.58478081512703,
+    "nearest_mm": 4.707609592436484,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0081.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 775.3288526333021,
+    "D_mm": 770.4196139925592,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 26.342294733395875,
-    "nearest_mm": 10.328852633302063
+    "margin_mm": 36.16077201488156,
+    "nearest_mm": 5.419613992559221,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0082.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 775.0159363116687,
+    "D_mm": 770.1061252122909,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 26.96812737666255,
-    "nearest_mm": 10.015936311668725
+    "margin_mm": 36.787749575418275,
+    "nearest_mm": 5.106125212290863,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0083.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 774.6263218303544,
+    "D_mm": 769.6809663802462,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 27.747356339291173,
-    "nearest_mm": 9.626321830354414
+    "margin_mm": 37.63806723950756,
+    "nearest_mm": 4.680966380246218,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0084.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 773.8196403982489,
+    "D_mm": 768.8586918966212,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 29.360719203502185,
-    "nearest_mm": 8.819640398248907
+    "margin_mm": 39.282616206757666,
+    "nearest_mm": 3.858691896621167,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0085.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 772.5968497061496,
+    "D_mm": 767.6329906892717,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 31.80630058770089,
-    "nearest_mm": 7.5968497061495555
+    "margin_mm": 41.0,
+    "nearest_mm": 2.632990689271651,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0086.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 771.8572119322744,
+    "D_mm": 766.8563318563281,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 33.285576135451265,
-    "nearest_mm": 6.857211932274367
+    "margin_mm": 41.0,
+    "nearest_mm": 1.8563318563280973,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0087.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 771.4777030031604,
+    "D_mm": 766.4531275723352,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 34.0445939936792,
-    "nearest_mm": 6.4777030031604
+    "margin_mm": 41.0,
+    "nearest_mm": 1.4531275723352337,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0088.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 771.4157988551508,
+    "D_mm": 766.3695650602828,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 34.168402289698406,
-    "nearest_mm": 6.415798855150797
+    "margin_mm": 41.0,
+    "nearest_mm": 1.3695650602827527,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0089.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 771.0720138009596,
+    "D_mm": 766.0092405182312,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 34.855972398080894,
-    "nearest_mm": 6.072013800959553
+    "margin_mm": 41.0,
+    "nearest_mm": 1.009240518231195,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0090.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 771.2653887509852,
+    "D_mm": 766.2092104336621,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 34.469222498029694,
-    "nearest_mm": 6.265388750985153
+    "margin_mm": 41.0,
+    "nearest_mm": 1.209210433662065,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0091.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 770.6958706240096,
+    "D_mm": 765.6134438656246,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 35.608258751980884,
-    "nearest_mm": 5.695870624009558
+    "margin_mm": 41.0,
+    "nearest_mm": 0.6134438656246175,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0092.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 770.6405265093567,
+    "D_mm": 765.5237287944508,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 35.718946981286535,
-    "nearest_mm": 5.640526509356732
+    "margin_mm": 41.0,
+    "nearest_mm": 0.5237287944507898,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0093.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 770.4211138904327,
+    "D_mm": 765.2657596136044,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 36.157772219134586,
-    "nearest_mm": 5.421113890432707
+    "margin_mm": 41.0,
+    "nearest_mm": 0.2657596136043594,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0094.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 770.4583227213947,
+    "D_mm": 765.2979395150813,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 36.08335455721067,
-    "nearest_mm": 5.458322721394666
+    "margin_mm": 41.0,
+    "nearest_mm": 0.29793951508133887,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0095.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 770.0975512882314,
+    "D_mm": 764.9116875007833,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 36.80489742353711,
-    "nearest_mm": 5.097551288231443
+    "margin_mm": 40.823375001566546,
+    "nearest_mm": 0.08831249921672679,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0096.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 769.933258640888,
+    "D_mm": 764.7518722250318,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 37.13348271822406,
-    "nearest_mm": 4.933258640887971
+    "margin_mm": 40.50374445006355,
+    "nearest_mm": 0.2481277749682249,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0097.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 769.6239919853244,
+    "D_mm": 764.429622889752,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 37.752016029351125,
-    "nearest_mm": 4.623991985324437
+    "margin_mm": 39.85924577950391,
+    "nearest_mm": 0.5703771102480459,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0098.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 769.6136755984867,
+    "D_mm": 764.4232027250686,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 37.77264880302664,
-    "nearest_mm": 4.6136755984866795
+    "margin_mm": 39.84640545013713,
+    "nearest_mm": 0.5767972749314367,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0099.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 770.4677914422354,
+    "D_mm": 765.2814831519645,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 36.064417115529295,
-    "nearest_mm": 5.467791442235352
+    "margin_mm": 41.0,
+    "nearest_mm": 0.281483151964494,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0100.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 770.0906821208089,
+    "D_mm": 764.9172874566972,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 36.81863575838224,
-    "nearest_mm": 5.090682120808879
+    "margin_mm": 40.83457491339436,
+    "nearest_mm": 0.08271254330281863,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0101.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 770.0433467372995,
+    "D_mm": 764.8750025881918,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 36.91330652540091,
-    "nearest_mm": 5.043346737299544
+    "margin_mm": 40.75000517638364,
+    "nearest_mm": 0.12499741180818091,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0102.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 770.8762696093543,
+    "D_mm": 765.7369249844392,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 35.247460781291466,
-    "nearest_mm": 5.876269609354267
+    "margin_mm": 41.0,
+    "nearest_mm": 0.7369249844391561,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0103.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 771.4630626305008,
+    "D_mm": 766.3707084413609,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 34.073874738998484,
-    "nearest_mm": 6.463062630500758
+    "margin_mm": 41.0,
+    "nearest_mm": 1.3707084413608754,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0104.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 770.9349821645417,
+    "D_mm": 765.8595325981586,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 35.13003567091664,
-    "nearest_mm": 5.93498216454168
+    "margin_mm": 41.0,
+    "nearest_mm": 0.8595325981585802,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0105.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 771.2361136804603,
+    "D_mm": 766.1736310038136,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 34.52777263907933,
-    "nearest_mm": 6.236113680460335
+    "margin_mm": 41.0,
+    "nearest_mm": 1.1736310038136253,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0106.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 771.4842778982379,
+    "D_mm": 766.4450428198925,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 34.03144420352419,
-    "nearest_mm": 6.484277898237906
+    "margin_mm": 41.0,
+    "nearest_mm": 1.4450428198924783,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0107.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 772.8439788279892,
+    "D_mm": 767.8558302920911,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 31.31204234402162,
-    "nearest_mm": 7.84397882798919
+    "margin_mm": 41.0,
+    "nearest_mm": 2.8558302920911274,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0108.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 773.7865211256759,
+    "D_mm": 768.8495623617141,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 29.426957748648192,
-    "nearest_mm": 8.786521125675904
+    "margin_mm": 39.30087527657179,
+    "nearest_mm": 3.8495623617141064,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0109.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 772.9531836718697,
+    "D_mm": 768.0274861928725,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 31.093632656260525,
-    "nearest_mm": 7.953183671869738
+    "margin_mm": 40.94502761425497,
+    "nearest_mm": 3.027486192872516,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0110.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 773.9939363686908,
+    "D_mm": 769.0390412908575,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 29.012127262618378,
-    "nearest_mm": 8.993936368690811
+    "margin_mm": 38.92191741828492,
+    "nearest_mm": 4.03904129085754,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0111.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 773.2856826440457,
+    "D_mm": 768.3155715726386,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 30.42863471190867,
-    "nearest_mm": 8.285682644045664
+    "margin_mm": 40.36885685472271,
+    "nearest_mm": 3.315571572638646,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0112.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 774.5691053212377,
+    "D_mm": 769.556580877904,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 27.861789357524685,
-    "nearest_mm": 9.569105321237657
+    "margin_mm": 37.88683824419195,
+    "nearest_mm": 4.556580877904025,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0113.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 775.2229246306392,
+    "D_mm": 770.2039115420886,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 26.554150738721546,
-    "nearest_mm": 10.222924630639227
+    "margin_mm": 36.59217691582285,
+    "nearest_mm": 5.203911542088576,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0114.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 772.9188858183919,
+    "D_mm": 767.846285544263,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 31.162228363216173,
-    "nearest_mm": 7.918885818391914
+    "margin_mm": 41.0,
+    "nearest_mm": 2.846285544262969,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0115.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 772.7216355456956,
+    "D_mm": 767.6027721730942,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 31.556728908608875,
-    "nearest_mm": 7.7216355456955625
+    "margin_mm": 41.0,
+    "nearest_mm": 2.602772173094195,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0116.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 772.5094931086942,
+    "D_mm": 767.3521690948538,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 31.981013782611626,
-    "nearest_mm": 7.509493108694187
+    "margin_mm": 41.0,
+    "nearest_mm": 2.3521690948538208,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0117.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 770.4590431935533,
+    "D_mm": 765.2640456237326,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 36.08191361289346,
-    "nearest_mm": 5.459043193553271
+    "margin_mm": 41.0,
+    "nearest_mm": 0.2640456237326134,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0118.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 770.2885926543114,
+    "D_mm": 765.0858394578704,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 36.4228146913772,
-    "nearest_mm": 5.288592654311401
+    "margin_mm": 41.0,
+    "nearest_mm": 0.08583945787040648,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0119.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 769.8788417666801,
+    "D_mm": 764.6903384273826,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 37.24231646663975,
-    "nearest_mm": 4.878841766680125
+    "margin_mm": 40.38067685476517,
+    "nearest_mm": 0.309661572617415,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0120.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 770.4904632389361,
+    "D_mm": 765.3146542723944,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 36.01907352212788,
-    "nearest_mm": 5.490463238936059
+    "margin_mm": 41.0,
+    "nearest_mm": 0.31465427239436394,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0121.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 770.5436415312405,
+    "D_mm": 765.3854375856173,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 35.91271693751901,
-    "nearest_mm": 5.543641531240496
+    "margin_mm": 41.0,
+    "nearest_mm": 0.38543758561729646,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0122.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 770.2160155489515,
+    "D_mm": 765.0891179346597,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 36.567968902096936,
-    "nearest_mm": 5.216015548951532
+    "margin_mm": 41.0,
+    "nearest_mm": 0.0891179346597255,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0123.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 770.5981202795408,
+    "D_mm": 765.4971111696216,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 35.803759440918384,
-    "nearest_mm": 5.598120279540808
+    "margin_mm": 41.0,
+    "nearest_mm": 0.49711116962157575,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0124.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 770.4404835278029,
+    "D_mm": 765.3742460907994,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 36.11903294439412,
-    "nearest_mm": 5.4404835278029395
+    "margin_mm": 41.0,
+    "nearest_mm": 0.37424609079937454,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0125.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 770.894398421396,
+    "D_mm": 765.856702514206,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 35.21120315720805,
-    "nearest_mm": 5.894398421395977
+    "margin_mm": 41.0,
+    "nearest_mm": 0.8567025142059492,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0126.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 771.0715913198371,
+    "D_mm": 766.0919691821618,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 34.85681736032575,
-    "nearest_mm": 6.071591319837125
+    "margin_mm": 41.0,
+    "nearest_mm": 1.0919691821618471,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0127.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 771.6108116744313,
+    "D_mm": 766.6307025817491,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 33.77837665113748,
-    "nearest_mm": 6.610811674431261
+    "margin_mm": 41.0,
+    "nearest_mm": 1.6307025817491194,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0128.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 774.6812185068362,
+    "D_mm": 769.7756034052002,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 27.637562986327566,
-    "nearest_mm": 9.681218506836217
+    "margin_mm": 37.448793189599655,
+    "nearest_mm": 4.775603405200172,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0129.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 773.8275463600286,
+    "D_mm": 768.920844330146,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 29.344907279942845,
-    "nearest_mm": 8.827546360028578
+    "margin_mm": 39.15831133970801,
+    "nearest_mm": 3.9208443301459965,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0130.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 773.1721219929923,
+    "D_mm": 768.2183337270615,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 30.655756014015424,
-    "nearest_mm": 8.172121992992288
+    "margin_mm": 40.563332545877074,
+    "nearest_mm": 3.218333727061463,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0131.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 774.0058053004858,
+    "D_mm": 769.0641699164665,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 28.988389399028392,
-    "nearest_mm": 9.005805300485804
+    "margin_mm": 38.87166016706692,
+    "nearest_mm": 4.06416991646654,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0132.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 774.9992363087761,
+    "D_mm": 770.0207696027521,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 27.001527382447875,
-    "nearest_mm": 9.999236308776062
+    "margin_mm": 36.95846079449575,
+    "nearest_mm": 5.020769602752125,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0133.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 773.6143828226418,
+    "D_mm": 768.5976383271499,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 29.7712343547164,
-    "nearest_mm": 8.6143828226418
+    "margin_mm": 39.80472334570027,
+    "nearest_mm": 3.597638327149866,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0134.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 772.5001769205666,
+    "D_mm": 767.412947766124,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 31.99964615886688,
-    "nearest_mm": 7.50017692056656
+    "margin_mm": 41.0,
+    "nearest_mm": 2.4129477661240344,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0135.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 770.8101859826168,
+    "D_mm": 765.6376196251904,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 35.37962803476648,
-    "nearest_mm": 5.810185982616758
+    "margin_mm": 41.0,
+    "nearest_mm": 0.6376196251903821,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0136.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 770.6780618329745,
+    "D_mm": 765.500775899212,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 35.6438763340509,
-    "nearest_mm": 5.678061832974549
+    "margin_mm": 41.0,
+    "nearest_mm": 0.5007758992120444,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0137.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 770.7861259456657,
+    "D_mm": 765.6078224417203,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 35.42774810866854,
-    "nearest_mm": 5.786125945665731
+    "margin_mm": 41.0,
+    "nearest_mm": 0.6078224417202591,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0138.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 769.8610321196677,
+    "D_mm": 764.696187294396,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 37.277935760664604,
-    "nearest_mm": 4.861032119667698
+    "margin_mm": 40.39237458879211,
+    "nearest_mm": 0.3038127056039457,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0139.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 770.0879725193226,
+    "D_mm": 764.9365566335431,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 36.824054961354705,
-    "nearest_mm": 5.087972519322648
+    "margin_mm": 40.87311326708618,
+    "nearest_mm": 0.06344336645690873,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0140.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 770.7514103452364,
+    "D_mm": 765.6511472145766,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 35.497179309527155,
-    "nearest_mm": 5.7514103452364225
+    "margin_mm": 41.0,
+    "nearest_mm": 0.6511472145765538,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0141.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 771.0499598685897,
+    "D_mm": 766.0518652996204,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 34.900080262820666,
-    "nearest_mm": 6.049959868589667
+    "margin_mm": 41.0,
+    "nearest_mm": 1.051865299620431,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0142.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 772.1834837931005,
+    "D_mm": 767.2450318355291,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 32.6330324137989,
-    "nearest_mm": 7.1834837931005495
+    "margin_mm": 41.0,
+    "nearest_mm": 2.245031835529062,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0143.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 773.3482436965404,
+    "D_mm": 768.4578974746131,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 30.303512606919185,
-    "nearest_mm": 8.348243696540408
+    "margin_mm": 40.08420505077379,
+    "nearest_mm": 3.4578974746131053,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0144.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 773.4389686985187,
+    "D_mm": 768.5854984344322,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 30.122062602962615,
-    "nearest_mm": 8.438968698518693
+    "margin_mm": 39.82900313113555,
+    "nearest_mm": 3.5854984344322247,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0145.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 774.793649413337,
+    "D_mm": 769.9785185007053,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 27.412701173326013,
-    "nearest_mm": 9.793649413336993
+    "margin_mm": 37.04296299858947,
+    "nearest_mm": 4.978518500705263,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0146.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 774.8991975282772,
+    "D_mm": 770.1178284008413,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 27.201604943445545,
-    "nearest_mm": 9.899197528277227
+    "margin_mm": 36.76434319831742,
+    "nearest_mm": 5.11782840084129,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0147.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 775.4019580239363,
+    "D_mm": 770.6124345712594,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 26.19608395212731,
-    "nearest_mm": 10.401958023936345
+    "margin_mm": 35.775130857481145,
+    "nearest_mm": 5.612434571259428,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_FRT/rgb_20260827_s_123607_0148.png",
     "cls": "E30_door_LH_FRT",
     "pred": "E30_door_LH_FRT",
-    "D_mm": 775.2564473355598,
+    "D_mm": 770.5384309674553,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 26.48710532888049,
-    "nearest_mm": 10.256447335559756
+    "margin_mm": 35.92313806508946,
+    "nearest_mm": 5.53843096745527,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_RR/rgb_20260907_s_143122_0000.png",
     "cls": "E30_door_LH_RR",
     "pred": "E30_door_LH_RR",
-    "D_mm": 1164.8972715072962,
+    "D_mm": 1157.6278184165062,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 71.0,
-    "nearest_mm": 6.897271507296182
+    "margin_mm": 70.25563683301243,
+    "nearest_mm": 0.3721815834937843,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_RR/rgb_20260907_s_143122_0003.png",
     "cls": "E30_door_LH_RR",
     "pred": "E30_door_LH_RR",
-    "D_mm": 1163.612242064801,
+    "D_mm": 1156.467701499076,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 71.0,
-    "nearest_mm": 5.6122420648009665
+    "margin_mm": 67.93540299815186,
+    "nearest_mm": 1.532298500924071,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_RR/rgb_20260907_s_143122_0005.png",
     "cls": "E30_door_LH_RR",
     "pred": "E30_door_LH_RR",
-    "D_mm": 1163.9574363032439,
+    "D_mm": 1156.6572136401307,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 71.0,
-    "nearest_mm": 5.957436303243867
+    "margin_mm": 68.3144272802615,
+    "nearest_mm": 1.342786359869251,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_RR/rgb_20260907_s_143122_0008.png",
     "cls": "E30_door_LH_RR",
     "pred": "E30_door_LH_RR",
-    "D_mm": 1163.2162040549044,
+    "D_mm": 1155.9657183969641,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 71.0,
-    "nearest_mm": 5.216204054904438
+    "margin_mm": 66.93143679392824,
+    "nearest_mm": 2.034281603035879,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_RR/rgb_20260907_s_143122_0011.png",
     "cls": "E30_door_LH_RR",
     "pred": "E30_door_LH_RR",
-    "D_mm": 1162.1181692716943,
+    "D_mm": 1154.9603591187183,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 71.0,
-    "nearest_mm": 4.118169271694342
+    "margin_mm": 64.92071823743663,
+    "nearest_mm": 3.0396408812816844,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_RR/rgb_20260907_s_143122_0013.png",
     "cls": "E30_door_LH_RR",
     "pred": "E30_door_LH_RR",
-    "D_mm": 1163.215387941348,
+    "D_mm": 1155.9619366157556,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 71.0,
-    "nearest_mm": 5.215387941347899
+    "margin_mm": 66.92387323151115,
+    "nearest_mm": 2.038063384244424,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_RR/rgb_20260907_s_143122_0016.png",
     "cls": "E30_door_LH_RR",
     "pred": "E30_door_LH_RR",
-    "D_mm": 1163.031459020768,
+    "D_mm": 1155.6840834181376,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 71.0,
-    "nearest_mm": 5.0314590207678975
+    "margin_mm": 66.36816683627512,
+    "nearest_mm": 2.3159165818624388,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_RR/rgb_20260907_s_143122_0018.png",
     "cls": "E30_door_LH_RR",
     "pred": "E30_door_LH_RR",
-    "D_mm": 1162.8774129855155,
+    "D_mm": 1155.6681479643378,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 71.0,
-    "nearest_mm": 4.877412985515548
+    "margin_mm": 66.33629592867555,
+    "nearest_mm": 2.331852035662223,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_RR/rgb_20260907_s_143122_0021.png",
     "cls": "E30_door_LH_RR",
     "pred": "E30_door_LH_RR",
-    "D_mm": 1161.4259057646539,
+    "D_mm": 1154.3525213179607,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 71.0,
-    "nearest_mm": 3.425905764653862
+    "margin_mm": 63.70504263592147,
+    "nearest_mm": 3.6474786820392637,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_RR/rgb_20260907_s_143122_0024.png",
     "cls": "E30_door_LH_RR",
     "pred": "E30_door_LH_RR",
-    "D_mm": 1163.8623484235252,
+    "D_mm": 1156.5509086697286,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 71.0,
-    "nearest_mm": 5.862348423525191
+    "margin_mm": 68.10181733945728,
+    "nearest_mm": 1.449091330271358,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_RR/rgb_20260907_s_143122_0026.png",
     "cls": "E30_door_LH_RR",
     "pred": "E30_door_LH_RR",
-    "D_mm": 1164.725426931508,
+    "D_mm": 1157.379696072563,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 71.0,
-    "nearest_mm": 6.725426931508082
+    "margin_mm": 69.75939214512618,
+    "nearest_mm": 0.6203039274369075,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_RR/rgb_20260907_s_143122_0029.png",
     "cls": "E30_door_LH_RR",
     "pred": "E30_door_LH_RR",
-    "D_mm": 1163.2400025198988,
+    "D_mm": 1155.996829765705,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 71.0,
-    "nearest_mm": 5.2400025198987805
+    "margin_mm": 66.99365953140978,
+    "nearest_mm": 2.003170234295112,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_RR/rgb_20260907_s_143122_0032.png",
     "cls": "E30_door_LH_RR",
     "pred": "E30_door_LH_RR",
-    "D_mm": 1161.203907465442,
+    "D_mm": 1154.191054712882,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 71.0,
-    "nearest_mm": 3.2039074654419437
+    "margin_mm": 63.382109425764156,
+    "nearest_mm": 3.808945287117922,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_RR/rgb_20260907_s_143122_0034.png",
     "cls": "E30_door_LH_RR",
     "pred": "E30_door_LH_RR",
-    "D_mm": 1162.677752169526,
+    "D_mm": 1155.6383953511972,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 71.0,
-    "nearest_mm": 4.677752169526002
+    "margin_mm": 66.27679070239446,
+    "nearest_mm": 2.3616046488027678,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_RR/rgb_20260907_s_143122_0037.png",
     "cls": "E30_door_LH_RR",
     "pred": "E30_door_LH_RR",
-    "D_mm": 1163.2160938824347,
+    "D_mm": 1155.9250748043837,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 71.0,
-    "nearest_mm": 5.216093882434734
+    "margin_mm": 66.85014960876742,
+    "nearest_mm": 2.074925195616288,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_RR/rgb_20260907_s_143122_0039.png",
     "cls": "E30_door_LH_RR",
     "pred": "E30_door_LH_RR",
-    "D_mm": 1162.7301604119132,
+    "D_mm": 1155.5847610432536,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 71.0,
-    "nearest_mm": 4.730160411913175
+    "margin_mm": 66.16952208650719,
+    "nearest_mm": 2.415238956746407,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_RR/rgb_20260907_s_143122_0042.png",
     "cls": "E30_door_LH_RR",
     "pred": "E30_door_LH_RR",
-    "D_mm": 1161.812774433794,
+    "D_mm": 1154.794396092882,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 71.0,
-    "nearest_mm": 3.8127744337939475
+    "margin_mm": 64.58879218576385,
+    "nearest_mm": 3.205603907118075,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_RR/rgb_20260907_s_143122_0045.png",
     "cls": "E30_door_LH_RR",
     "pred": "E30_door_LH_RR",
-    "D_mm": 1163.435819394432,
+    "D_mm": 1156.1475654640249,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 71.0,
-    "nearest_mm": 5.435819394431974
+    "margin_mm": 67.29513092804973,
+    "nearest_mm": 1.852434535975135,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_RR/rgb_20260907_s_143122_0047.png",
     "cls": "E30_door_LH_RR",
     "pred": "E30_door_LH_RR",
-    "D_mm": 1162.7601547785773,
+    "D_mm": 1155.4484099900408,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 71.0,
-    "nearest_mm": 4.760154778577316
+    "margin_mm": 65.89681998008155,
+    "nearest_mm": 2.5515900099592272,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E30_door_LH_RR/rgb_20260907_s_143122_0050.png",
     "cls": "E30_door_LH_RR",
     "pred": "E30_door_LH_RR",
-    "D_mm": 1162.048699751829,
+    "D_mm": 1154.8472850175315,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 71.0,
-    "nearest_mm": 4.048699751828963
+    "margin_mm": 64.69457003506295,
+    "nearest_mm": 3.152714982468524,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E38_door_LH_FRT/rgb_20260831_s_164555_0000.png",
     "cls": "E38_door_LH_FRT",
     "pred": "E38_door_LH_FRT",
-    "D_mm": 823.4833108685278,
+    "D_mm": 818.5148122969201,
     "gate": "ok",
     "D_src": "depth",
     "margin_mm": 47.0,
-    "nearest_mm": 11.483310868527838
+    "nearest_mm": 6.514812296920127,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E38_door_LH_FRT/rgb_20260831_s_164555_0003.png",
     "cls": "E38_door_LH_FRT",
     "pred": "E38_door_LH_FRT",
-    "D_mm": 827.970982391736,
+    "D_mm": 823.3099990744166,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 42.05803521652797,
-    "nearest_mm": 15.970982391736015
+    "margin_mm": 47.0,
+    "nearest_mm": 11.309999074416623,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E38_door_LH_FRT/rgb_20260831_s_164555_0005.png",
     "cls": "E38_door_LH_FRT",
     "pred": "E38_door_LH_FRT",
-    "D_mm": 827.8720408963668,
+    "D_mm": 823.1911427843264,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 42.255918207266404,
-    "nearest_mm": 15.872040896366798
+    "margin_mm": 47.0,
+    "nearest_mm": 11.191142784326416,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E38_door_LH_FRT/rgb_20260831_s_164555_0008.png",
     "cls": "E38_door_LH_FRT",
     "pred": "E38_door_LH_FRT",
-    "D_mm": 827.7919117826291,
+    "D_mm": 823.0727297693599,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 42.41617643474183,
-    "nearest_mm": 15.791911782629086
+    "margin_mm": 47.0,
+    "nearest_mm": 11.072729769359853,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E38_door_LH_FRT/rgb_20260831_s_164555_0011.png",
     "cls": "E38_door_LH_FRT",
     "pred": "E38_door_LH_FRT",
-    "D_mm": 828.9619575075143,
+    "D_mm": 824.4152633621003,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 40.07608498497143,
-    "nearest_mm": 16.961957507514285
+    "margin_mm": 47.0,
+    "nearest_mm": 12.41526336210029,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E38_door_LH_FRT/rgb_20260831_s_164555_0013.png",
     "cls": "E38_door_LH_FRT",
     "pred": "E38_door_LH_FRT",
-    "D_mm": 828.155343229096,
+    "D_mm": 823.6129418981608,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 41.689313541807905,
-    "nearest_mm": 16.155343229096047
+    "margin_mm": 47.0,
+    "nearest_mm": 11.612941898160784,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E38_door_LH_FRT/rgb_20260831_s_164555_0016.png",
     "cls": "E38_door_LH_FRT",
     "pred": "E38_door_LH_FRT",
-    "D_mm": 828.6985723462755,
+    "D_mm": 823.9802867214754,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 40.60285530744909,
-    "nearest_mm": 16.698572346275455
+    "margin_mm": 47.0,
+    "nearest_mm": 11.980286721475409,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E38_door_LH_FRT/rgb_20260831_s_164555_0019.png",
     "cls": "E38_door_LH_FRT",
     "pred": "E38_door_LH_FRT",
-    "D_mm": 827.5092464689708,
+    "D_mm": 822.7076749241978,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 42.98150706205843,
-    "nearest_mm": 15.509246468970787
+    "margin_mm": 47.0,
+    "nearest_mm": 10.707674924197818,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E38_door_LH_FRT/rgb_20260831_s_164555_0021.png",
     "cls": "E38_door_LH_FRT",
     "pred": "E38_door_LH_FRT",
-    "D_mm": 828.2044355623517,
+    "D_mm": 823.4694272934022,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 41.59112887529659,
-    "nearest_mm": 16.204435562351705
+    "margin_mm": 47.0,
+    "nearest_mm": 11.469427293402191,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E38_door_LH_FRT/rgb_20260831_s_164555_0024.png",
     "cls": "E38_door_LH_FRT",
     "pred": "E38_door_LH_FRT",
-    "D_mm": 826.1089373064456,
+    "D_mm": 821.2119792587177,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 45.78212538710886,
-    "nearest_mm": 14.108937306445569
+    "margin_mm": 47.0,
+    "nearest_mm": 9.211979258717747,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E38_door_LH_FRT/rgb_20260831_s_164555_0027.png",
     "cls": "E38_door_LH_FRT",
     "pred": "E38_door_LH_FRT",
-    "D_mm": 825.0231711013361,
+    "D_mm": 820.0432127142095,
     "gate": "ok",
     "D_src": "depth",
     "margin_mm": 47.0,
-    "nearest_mm": 13.023171101336061
+    "nearest_mm": 8.043212714209517,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E38_door_LH_FRT/rgb_20260831_s_164555_0030.png",
     "cls": "E38_door_LH_FRT",
     "pred": "E38_door_LH_FRT",
-    "D_mm": 825.8228526120689,
+    "D_mm": 821.0166049149743,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 46.35429477586217,
-    "nearest_mm": 13.822852612068914
+    "margin_mm": 47.0,
+    "nearest_mm": 9.016604914974323,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E38_door_LH_FRT/rgb_20260831_s_164555_0032.png",
     "cls": "E38_door_LH_FRT",
     "pred": "E38_door_LH_FRT",
-    "D_mm": 828.725140851867,
+    "D_mm": 824.0477772088013,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 40.549718296266064,
-    "nearest_mm": 16.725140851866968
+    "margin_mm": 47.0,
+    "nearest_mm": 12.047777208801335,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E38_door_LH_FRT/rgb_20260831_s_164555_0035.png",
     "cls": "E38_door_LH_FRT",
     "pred": "E38_door_LH_FRT",
-    "D_mm": 827.3570695738142,
+    "D_mm": 822.6219033171541,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 43.28586085237157,
-    "nearest_mm": 15.357069573814215
+    "margin_mm": 47.0,
+    "nearest_mm": 10.621903317154079,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E38_door_LH_FRT/rgb_20260831_s_164555_0038.png",
     "cls": "E38_door_LH_FRT",
     "pred": "E38_door_LH_FRT",
-    "D_mm": 825.8224985404319,
+    "D_mm": 821.1005467094352,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 46.35500291913627,
-    "nearest_mm": 13.822498540431866
+    "margin_mm": 47.0,
+    "nearest_mm": 9.100546709435207,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E38_door_LH_FRT/rgb_20260831_s_164555_0040.png",
     "cls": "E38_door_LH_FRT",
     "pred": "E38_door_LH_FRT",
-    "D_mm": 828.6570799323118,
+    "D_mm": 824.0383675597673,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 40.68584013537634,
-    "nearest_mm": 16.65707993231183
+    "margin_mm": 47.0,
+    "nearest_mm": 12.038367559767266,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E38_door_LH_FRT/rgb_20260831_s_164555_0043.png",
     "cls": "E38_door_LH_FRT",
     "pred": "E38_door_LH_FRT",
-    "D_mm": 828.6548372713831,
+    "D_mm": 823.9877271716155,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 40.69032545723371,
-    "nearest_mm": 16.654837271383144
+    "margin_mm": 47.0,
+    "nearest_mm": 11.987727171615461,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E38_door_LH_FRT/rgb_20260831_s_164555_0046.png",
     "cls": "E38_door_LH_FRT",
     "pred": "E38_door_LH_FRT",
-    "D_mm": 828.0838662227878,
+    "D_mm": 823.4895887728326,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 41.832267554424334,
-    "nearest_mm": 16.083866222787833
+    "margin_mm": 47.0,
+    "nearest_mm": 11.489588772832576,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E38_door_LH_FRT/rgb_20260831_s_164555_0048.png",
     "cls": "E38_door_LH_FRT",
     "pred": "E38_door_LH_FRT",
-    "D_mm": 828.434373937684,
+    "D_mm": 823.8570227120279,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 41.131252124632056,
-    "nearest_mm": 16.434373937683972
+    "margin_mm": 47.0,
+    "nearest_mm": 11.857022712027856,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E38_door_LH_FRT/rgb_20260831_s_164555_0051.png",
     "cls": "E38_door_LH_FRT",
     "pred": "E38_door_LH_FRT",
-    "D_mm": 828.8873327632683,
+    "D_mm": 824.2169552793896,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 40.22533447346336,
-    "nearest_mm": 16.88733276326832
+    "margin_mm": 47.0,
+    "nearest_mm": 12.216955279389595,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E38_door_LH_RR/rgb_20260828_s_122530_0000.png",
     "cls": "E38_door_LH_RR",
     "pred": "E38_door_LH_RR",
-    "D_mm": 1348.384106352066,
+    "D_mm": 1339.4835482333901,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 186.7682127041321,
-    "nearest_mm": 3.6158936479339445
+    "margin_mm": 168.96709646678028,
+    "nearest_mm": 12.516451766609862,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E38_door_LH_RR/rgb_20260828_s_122530_0001.png",
     "cls": "E38_door_LH_RR",
     "pred": "E38_door_LH_RR",
-    "D_mm": 1349.2331971488886,
+    "D_mm": 1340.300542259716,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 188.46639429777724,
-    "nearest_mm": 2.766802851111379
+    "margin_mm": 170.60108451943188,
+    "nearest_mm": 11.69945774028406,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E38_door_LH_RR/rgb_20260828_s_122530_0002.png",
     "cls": "E38_door_LH_RR",
     "pred": "E38_door_LH_RR",
-    "D_mm": 1350.429325142727,
+    "D_mm": 1341.4814899378985,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 190.85865028545413,
-    "nearest_mm": 1.5706748572729339
+    "margin_mm": 172.96297987579692,
+    "nearest_mm": 10.51851006210154,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E38_door_LH_RR/rgb_20260828_s_122530_0003.png",
     "cls": "E38_door_LH_RR",
     "pred": "E38_door_LH_RR",
-    "D_mm": 1349.1788177573821,
+    "D_mm": 1340.2151785161504,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 188.3576355147643,
-    "nearest_mm": 2.8211822426178514
+    "margin_mm": 170.4303570323009,
+    "nearest_mm": 11.784821483849555,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E38_door_LH_RR/rgb_20260828_s_122530_0004.png",
     "cls": "E38_door_LH_RR",
     "pred": "E38_door_LH_RR",
-    "D_mm": 1349.8223749207566,
+    "D_mm": 1340.838163460933,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 189.6447498415132,
-    "nearest_mm": 2.1776250792433984
+    "margin_mm": 171.6763269218659,
+    "nearest_mm": 11.161836539067053,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E38_door_LH_RR/rgb_20260828_s_122530_0005.png",
     "cls": "E38_door_LH_RR",
     "pred": "E38_door_LH_RR",
-    "D_mm": 1349.8819245294892,
+    "D_mm": 1340.904642708348,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 189.7638490589784,
-    "nearest_mm": 2.118075470510803
+    "margin_mm": 171.80928541669618,
+    "nearest_mm": 11.095357291651908,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E38_door_LH_RR/rgb_20260828_s_122530_0006.png",
     "cls": "E38_door_LH_RR",
     "pred": "E38_door_LH_RR",
-    "D_mm": 1350.0748799497292,
+    "D_mm": 1341.0831049042245,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 190.14975989945833,
-    "nearest_mm": 1.9251200502708343
+    "margin_mm": 172.1662098084489,
+    "nearest_mm": 10.916895095775544,
+    "k_src": "camera",
+    "serial": 54910212
    },
    {
     "image": "datasets_factory_v2/test/E38_door_LH_RR/rgb_20260828_s_122530_0007.png",
     "cls": "E38_door_LH_RR",
     "pred": "E38_door_LH_RR",
-    "D_mm": 1349.0679556879031,
+    "D_mm": 1340.0963827211008,
     "gate": "ok",
     "D_src": "depth",
-    "margin_mm": 188.13591137580624,
-    "nearest_mm": 2.9320443120968775
+    "margin_mm": 170.19276544220156,
+    "nearest_mm": 11.903617278899219,
+    "k_src": "camera",
+    "serial": 54910212
    }
   ],
   "n": 378,
@@ -3791,6 +4547,10 @@
    "ok": 378
   },
   "unknown": 0,
-  "unknown_mm": 30.0
+  "unknown_mm": 30.0,
+  "intrinsics": "auto",
+  "k_src": {
+   "camera": 378
+  }
  }
 }

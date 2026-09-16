@@ -22,17 +22,14 @@ DOOR = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)),
 if DOOR not in sys.path:
     sys.path.insert(0, DOOR)
 from hole_classifier import K_DEPTH  # 해상도(세로)별 근사 intrinsics 편향 보정
+from camera_utils import KNOWN_CAMERAS  # 실측 캘리브레이션(시리얼 키) — 2026-09-16 camera_utils 로 공용화  # noqa: F401
 
 
-# 실측 캘리브레이션 (SDK rectified, 세션 meta.json 'intrinsics'와 동일 형식).
 # depth_scale 유도: K_DEPTH는 '근사 fx=1065 역투영 × K_DEPTH = CAD 실거리'로 현장 캘리브레이션
 # 되었으므로 z_true = z_meas × K_DEPTH[h]·fx_real/1065. 좌우(상대) 거리는 legacy 경로와 동일,
 # 절대 위치 t만 물리 스케일로 복원된다 (legacy 경로의 t는 K_DEPTH배 압축 — 상대 기하 전용).
-KNOWN_CAMERAS = {
-    54910212: dict(width=1920, height=1200, fx=1269.746, fy=1269.746,
-                   cx=961.669, cy=598.594,
-                   note='현장 ZED X Mini, SDK rectified, 2026-08-31 확보'),
-}
+# 주의(2026-09-16): 판별기 D 로 83세션에서 재적합한 현장 카메라 잔차는 1.0064(hole_classifier.K_CAMERA)로 이 값(1.0140)보다 0.75% 작다.
+# PnP 대조(Δz +1.3mm)는 1.0140 과 일치했으므로 자세 쪽 depth_scale 은 트래커 GT 전까지 유지 — 두 경로의 불일치는 미해결.
 
 
 def intrinsics_for(shape, calib=None):

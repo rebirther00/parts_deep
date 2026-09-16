@@ -4,6 +4,7 @@ RGB + Depth 프레임을 동시에 캡처·저장한다.
 ZED 카메라가 없으면 OpenCV 폴백으로 RGB만 반환(Depth=None).
 """
 
+import os
 import threading
 import time
 from pathlib import Path
@@ -23,6 +24,34 @@ except ImportError:
 # (K_DEPTH 역산 fx≈1250~1290, 1차년도 depth_utils 가정 fx≈1144). FX_REF 는 그 카메라의 실제 fx 추정치.
 # 광각(2.2mm, fx≈723) 카메라에서는 주점 중심 확대로 같은 화각을 에뮬레이션해야 학습 분포와 맞는다.
 FX_REF = 1274.16
+
+# 실측 캘리브레이션(시리얼 키, SDK rectified 좌안; 06 수집 세션 meta.json 'intrinsics' 와 동일 형식).
+# 잔차 depth 스케일 K 는 hole_classifier.K_CAMERA(시리얼 키)에서 따로 관리한다 — intrinsics(렌즈)와 depth 편향은 별개 상수.
+KNOWN_CAMERAS = {
+    54910212: dict(serial=54910212, width=1920, height=1200, fx=1269.746, fy=1269.746,
+                   cx=961.669, cy=598.594,
+                   note='현장 ZED X Mini 협각, SDK rectified, 2026-08-31 확보'),
+}
+
+
+def intrinsics_for_image(path, shape=None):
+    """저장 이미지의 intrinsics: 세션 폴더(심링크면 실경로) meta.json 'intrinsics' → 없으면 해상도가 KNOWN_CAMERAS 와
+    일치하는 카메라 → 없으면 None(근사 fx + K_DEPTH 폴백). serial 은 int 로 정규화."""
+    import json
+    d = os.path.dirname(os.path.realpath(path))
+    mp = os.path.join(d, 'meta.json')
+    if os.path.exists(mp):
+        try:
+            k = json.load(open(mp)).get('intrinsics')
+            if k and k.get('fx'):
+                k = dict(k); k['serial'] = int(k['serial']) if k.get('serial') is not None else None
+                return k
+        except Exception:      # noqa: BLE001  meta 손상은 폴백으로
+            pass
+    if shape is not None:
+        h, w = shape[:2]
+        return next((dict(c) for c in KNOWN_CAMERAS.values() if c['width'] == w and c['height'] == h), None)
+    return None
 
 
 def lens_scale(calib, fx_ref=FX_REF):
