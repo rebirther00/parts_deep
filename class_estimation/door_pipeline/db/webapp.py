@@ -348,7 +348,7 @@ def latest_benchmarks(con):
         r = con.execute("""SELECT e.*, m.name model FROM evaluation_results e JOIN models m ON m.id=e.model_id
                            WHERE e.eval_type='cross_domain' AND m.name LIKE 'rgbe%' AND e.report_path LIKE '%factory_v2%' ORDER BY e.id DESC LIMIT 1""").fetchone()
         if r:
-            out["cnn"] = N(acc=r["accuracy"], n=r["total_samples"], model=r["model"].replace("rgbe_noaux_448_seed42_", "run "), at=r["evaluated_at"][:10])
+            out["cnn"] = N(acc=r["accuracy"], n=r["total_samples"], model=r["model"].replace("rgbe_noaux_448_", "run "), at=r["evaluated_at"][:10])
         r = con.execute("SELECT * FROM evaluation_results WHERE eval_type='pose_pipeline' ORDER BY id DESC LIMIT 1").fetchone()
         if r:
             sm = (json.loads(r["per_class_results"] or "{}")).get("summary", {})

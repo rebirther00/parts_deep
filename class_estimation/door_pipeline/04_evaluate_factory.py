@@ -8,6 +8,7 @@ ZED 2i로 촬영한 현장 데이터에 대해 RGBE NoAux 모델을 평가한다
     python evaluate_factory.py
     python evaluate_factory.py --model artifacts/rgbe_noaux_448_seed42/model.pth
     python evaluate_factory.py --dataset_dir ../door/datasets_factory
+    python 04_evaluate_factory.py --dataset_dir datasets_blind_20260923/cnn --out_dir report/hole_analysis/blind_eval_20260923/<run>   # 결과를 모델 폴더 밖에 저장
 """
 import torch
 import torch.nn as nn
@@ -99,6 +100,8 @@ parser.add_argument(
 )
 parser.add_argument('-cpu', '--cpu', action='store_true',
                     help='CPU로 강제 실행')
+parser.add_argument('--out_dir', type=str, default=None,
+                    help='결과(factory_*.json/png) 저장 폴더 (기본: 모델 폴더 — 기존 결과를 덮어씀)')
 args = parser.parse_args()
 
 
@@ -313,7 +316,9 @@ def create_confusion_matrix_heatmap(cm, class_names, save_path):
 def main():
     total_start = time.time()
     model_dir = os.path.dirname(args.model)
-    output_prefix = os.path.join(model_dir, "factory")
+    out_dir = args.out_dir or model_dir
+    os.makedirs(out_dir, exist_ok=True)
+    output_prefix = os.path.join(out_dir, "factory")
 
     # 1. 클래스명·데이터셋 로드
     print("=" * 70)

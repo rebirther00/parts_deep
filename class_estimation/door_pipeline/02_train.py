@@ -3,6 +3,8 @@
 - 6종 모델(rgbd, texture_aug, edge, rgbe, rgbe_texture_aug, + no_aux 변형) 지원
 - Train/Val/Test 70/15/15 stratified split
 - Val accuracy 기반 early stopping (data leakage 제거); --select val_loss 로 val 손실 기준 선택 가능(2026-09-07)
+- 클래스 가중치 기본 sqrt 역빈도(--class_weight inv 로 이전 방식 재현), --lr 학습률 (2026-09-23: 역빈도 가중치 — 세션 1개
+  클래스가 ~12배 — 와 lr 1e-3 조합에서 val loss 폭발·클래스 붕괴가 run #10·CV fold0/1 에서 반복된 것의 유력 원인)
 - Epoch별 메트릭 JSON 로깅
 """
 import torch
@@ -184,6 +186,11 @@ parser.add_argument('--patience', type=int, default=10)
 parser.add_argument('--select', choices=['val_acc', 'val_loss'], default='val_acc',
                     help='체크포인트·조기종료 기준. val_loss: val 손실 최소 에폭 저장(세션 수가 적어 val 정확도가 '
                          '에폭마다 크게 출렁일 때 안정적). run 이름에 _vloss 접미')
+parser.add_argument('--class_weight', choices=['inv', 'sqrt', 'none'], default='sqrt',
+                    help='손실 클래스 가중치. inv=역빈도(2026-09-23 이전 기본; 세션 1개 클래스가 ~12배로 학습 불안정), '
+                         'sqrt=역빈도 제곱근(기본), none=미사용. sqrt 외는 run 이름에 _cw<값> 접미')
+parser.add_argument('--lr', type=float, default=0.001,
+                    help='Adam 학습률 (기본 0.001). 기본값 외는 run 이름에 _lr<값> 접미')
 parser.add_argument('--no_aux', action='store_true',
                     help='Aux MLP 제거 ablation 실험')
 parser.add_argument('-cpu', '--cpu', action='store_true')
@@ -306,6 +313,10 @@ def main():
         run_name += "_" + os.path.basename(args.dataset_dir.rstrip('/'))
     if args.select == 'val_loss':
         run_name += "_vloss"
+    if args.class_weight != 'sqrt':
+        run_name += f"_cw{args.class_weight}"
+    if args.lr != 0.001:
+        run_name += f"_lr{args.lr:g}"
     run_dir = os.path.join(PROJECT_DIR, "artifacts", run_name)
     os.makedirs(run_dir, exist_ok=True)
 
@@ -375,6 +386,8 @@ def main():
         "seed": args.seed,
         "model_type": args.model_type,
         "image_size": args.image_size,
+        "class_weight": args.class_weight,
+        "lr": args.lr,
         "class_names": class_names,
         "train_paths": train_paths,
         "val_paths": val_paths,
@@ -416,20 +429,26 @@ def main():
         model = cfg["model_fn"](num_classes).to(device)
     print(f"  디바이스: {device}, 파라미터: {sum(p.numel() for p in model.parameters()):,}")
 
-    # 손실 함수 (역빈도 클래스 가중치)
+    # 손실 함수 (클래스 가중치: --class_weight, 기본 sqrt 역빈도)
     class_counts = [sum(1 for l in train_labels if l == i)
                     for i in range(num_classes)]
     total_count = len(train_labels)
     empty = [class_names[i] for i, c in enumerate(class_counts) if c == 0]
     if empty:   # presplit 뷰에서 test 세션만 있는 클래스 — 학습 불가, 가중치 0 (평가 시 해당 클래스는 항상 오답)
         print(f"  경고: train 샘플 0장 클래스 {empty} → 손실 가중치 0 (이 클래스는 학습되지 않음)")
-    weights = torch.tensor(
-        [total_count / (num_classes * c) if c else 0.0 for c in class_counts],
-        dtype=torch.float32
-    ).to(device)
+    inv = [total_count / (num_classes * c) if c else 0.0 for c in class_counts]
+    if args.class_weight == 'inv':
+        w = inv
+    elif args.class_weight == 'sqrt':   # 역빈도 제곱근: 희소 클래스 가중치 완화 (2026-09-23 기본)
+        w = [x ** 0.5 for x in inv]
+    else:
+        w = [1.0 if c else 0.0 for c in class_counts]
+    weights = torch.tensor(w, dtype=torch.float32).to(device)
+    print(f"  클래스 가중치({args.class_weight}): "
+          + ", ".join(f"{n}={x:.2f}" for n, x in zip(class_names, w)))
     criterion = nn.CrossEntropyLoss(weight=weights)
 
-    optimizer = optim.Adam(model.parameters(), lr=0.001)
+    optimizer = optim.Adam(model.parameters(), lr=args.lr)
     scheduler = optim.lr_scheduler.ReduceLROnPlateau(
         optimizer, mode='min', patience=3, factor=0.5)
 
@@ -444,14 +463,16 @@ def main():
         weights_path=os.path.relpath(model_path, PROJECT_DIR),
         input_size=f"{args.image_size}x{args.image_size}",
         description=f"02_train.py model_type={args.model_type} "
-                    f"no_aux={args.no_aux} seed={args.seed}")
+                    f"no_aux={args.no_aux} seed={args.seed} "
+                    f"class_weight={args.class_weight} lr={args.lr:g}")
     db_sess = db.start_training(
         dataset_name=os.path.basename(dataset_dir), model_id=db_model_id,
-        optimizer="Adam", learning_rate=0.001, batch_size=batch_size,
+        optimizer="Adam", learning_rate=args.lr, batch_size=batch_size,
         max_epochs=args.epochs, early_stop_patience=args.patience,
         train_ratio=0.7, train_count=len(train_paths),
         test_count=len(test_paths), gpu_device=str(device),
-        loss_function="CrossEntropyLoss(weighted)", class_weights=True,
+        loss_function=f"CrossEntropyLoss(weighted:{args.class_weight})",
+        class_weights=args.class_weight != 'none',
         split_indices_path=os.path.relpath(
             os.path.join(run_dir, "split_info.json"), PROJECT_DIR))
 

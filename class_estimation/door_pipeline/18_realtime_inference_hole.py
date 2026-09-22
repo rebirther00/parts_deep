@@ -1,7 +1,7 @@
 """홀 랜드마크 판별기 실시간 추론 서버 + CNN 폴백 (ZED 호환, 웹 UI).
 
 주 판별기 = 16_train_hole_landmarks.py 로 학습한 attribute_models/hole_landmarks/model.pth.
-보조(폴백) = 현장 재학습 CNN(cnn_classifier.py, 정식 run #10) — 홀 판별기가 보류한 프레임에서만 실행.
+보조(폴백) = 현장 재학습 CNN(cnn_classifier.py, 정식 run seed916 — 2026-09-23 교체) — 홀 판별기가 보류한 프레임에서만 실행.
 MobileSAM·U-Net·CAD 템플릿(속성 파이프라인)은 로드하지 않는다
 (U-Net 폴백을 쓰던 통합 서버 14는 2026-09-11 archive_attribute_unet_20260911/ 로 아카이빙, 폴백 역할은 CNN 승계 — 2026-09-16 구현).
 
@@ -74,7 +74,7 @@ parser.add_argument('--bolt_norm', action='store_true',
 parser.add_argument('--fp16', action='store_true',
                     help='FP16 autocast (Jetson GPU 가속)')
 parser.add_argument('--cnn_model', type=str, default=cnn_classifier.MODEL_PATH,
-                    help='폴백 CNN 모델 경로 (기본: artifacts/rgbe_noaux_448_seed42_datasets_factory_v2/model.pth, '
+                    help='폴백 CNN 모델 경로 (기본: artifacts/rgbe_noaux_448_seed916_datasets_factory_v2/model.pth, '
                          '같은 폴더 split_info.json 에서 클래스명)')
 parser.add_argument('--no_cnn', action='store_true', help='CNN 폴백 끔 (홀 판별기만)')
 parser.add_argument('--cnn_every', action='store_true',

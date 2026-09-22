@@ -4,8 +4,9 @@
 모델 구조(NoAuxResNet18)는 02_train.py·05_realtime_inference.py 와 동일해야 한다 — 두 스크립트는 모듈 수준에서
 argparse 를 실행해 임포트할 수 없으므로 여기 복제해 둔다(구조를 바꾸면 세 곳을 같이 고칠 것).
 
-정식 폴백 모델(2026-09-07 채택, DB run #10): artifacts/rgbe_noaux_448_seed42_datasets_factory_v2/model.pth
-  — 8/27 이후 현장 데이터 세션 단위 분할 학습, test 378장 97.4%, 5-fold 세션 CV 97.4%.
+정식 폴백 모델(2026-09-23 채택, DB models #10·학습 #11): artifacts/rgbe_noaux_448_seed916_datasets_factory_v2/model.pth
+  — 8/27~9/16 현장 103세션 세션 단위 분할 학습, test 596장 99.8%, 9/16~9/23 유입 35세션 663장 블라인드 99.4%.
+  (이전 run #10 seed42 는 E30_LH_RR 을 못 배운 채 저장된 체크포인트 — test 93.3%·블라인드 84.3%, report/hole_analysis/blind_eval_20260923/)
 입력은 전체 프레임 레터박스(크롭 없음) 448×448 RGB + Canny 엣지 4채널.
 
 사용:
@@ -26,7 +27,7 @@ from torchvision import models
 from rgbe_utils import RGBETransform, RGBE_IN_CHANNELS
 
 DOOR = os.path.dirname(os.path.abspath(__file__))
-DEFAULT_RUN = os.path.join(DOOR, 'artifacts', 'rgbe_noaux_448_seed42_datasets_factory_v2')
+DEFAULT_RUN = os.path.join(DOOR, 'artifacts', 'rgbe_noaux_448_seed916_datasets_factory_v2')
 MODEL_PATH = os.path.join(DEFAULT_RUN, 'model.pth')
 IMAGE_SIZE = 448
 

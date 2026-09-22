@@ -89,7 +89,7 @@ python 20_session_drift.py --print                    # 표만
 
 ## 산출물/데이터 위치
 
-- `artifacts/` — CNN 모델 run별 산출물. *.pth는 기본 git 미추적이며, **정식 배포 run**(`rgbe_noaux_448_seed42_datasets_factory_v2`, DB models #8)의 `model.pth`만 Gitea LFS로 추적
+- `artifacts/` — CNN 모델 run별 산출물. *.pth는 기본 git 미추적이며, **정식 배포 run**(`rgbe_noaux_448_seed916_datasets_factory_v2`, DB models #10, 2026-09-23 교체)의 `model.pth`만 Gitea LFS로 추적
 - `attribute_models/hole_landmarks/` — 홀 판별기 모델(`model.pth`, Gitea LFS)·split·평가 json
 - `archive_attribute_unet_20260911/` — 속성 파이프라인(U-Net) 아카이브: 스크립트 10~14, attribute_utils, DOC, 모델·템플릿·평가 산출물, vent_labels meta, factory_masks
 - `datasets*`, `sam_models` — `../door/` 심볼릭 링크 (`sam_models`는 아카이브 스크립트만 사용)
@@ -102,7 +102,7 @@ python 20_session_drift.py --print                    # 표만
 - 원격: `origin` fetch = GitHub, push = GitHub **+** Gitea(`http://git.kocetismart.kr:3000/rebirther00/part_deep.git`) 동시(pushurl 2개).
 - LFS 저장소는 `.lfsconfig`로 **Gitea 전용**. GitHub에는 포인터 파일만 올라가고 실제 바이너리는 Gitea에만 저장된다(GitHub LFS 용량 미사용).
 - `.gitattributes`: `*.pth *.pt *.onnx *.engine` → LFS. 단 `.gitignore`가 pth를 기본 제외하므로 **배포 모델만** `.gitignore` 하단에 예외 등록:
-  `attribute_models/hole_landmarks/model.pth`(홀 판별기) · `artifacts/rgbe_noaux_448_seed42_datasets_factory_v2/model.pth`(CNN 정식 run).
+  `attribute_models/hole_landmarks/model.pth`(홀 판별기) · `artifacts/rgbe_noaux_448_seed916_datasets_factory_v2/model.pth`(CNN 정식 run, 2026-09-23 seed916 으로 교체).
   (U-Net `vent_unet.pth`·MobileSAM `mobile_sam.pt`는 2026-09-11 속성 파이프라인 아카이빙으로 배포 목록에서 제외. git/LFS 이력은 유지.)
   새 run을 배포본으로 승격하면 `.gitignore` 예외와 이 목록을 같이 갱신한다.
 
