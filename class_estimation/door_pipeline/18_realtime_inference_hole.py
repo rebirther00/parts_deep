@@ -76,6 +76,9 @@ parser.add_argument('--fp16', action='store_true',
 parser.add_argument('--cnn_model', type=str, default=cnn_classifier.MODEL_PATH,
                     help='폴백 CNN 모델 경로 (기본: artifacts/rgbe_noaux_448_seed916_datasets_factory_v2/model.pth, '
                          '같은 폴더 split_info.json 에서 클래스명)')
+parser.add_argument('--scale', choices=['depth', 'pixel'], default=hole_classifier.SCALE_DEFAULT,
+                    help='홀 판별 D 스케일: depth=depth 평면+잔차 K, pixel=픽셀 폭×S_PIXEL/fx(depth 는 z·tilt 가드만, 2026-09-23). '
+                         '기본 hole_classifier.SCALE_DEFAULT')
 parser.add_argument('--no_cnn', action='store_true', help='CNN 폴백 끔 (홀 판별기만)')
 parser.add_argument('--cnn_every', action='store_true',
                     help='CNN 을 보류 프레임뿐 아니라 매 프레임 실행 (홀 판정과 교차 검증, 프레임당 +~70ms)')
@@ -258,7 +261,8 @@ def inference_loop(source, net, dev, cnn=None):
                                 enabled=args.fp16):
                 hr = hole_classifier.classify(net, dev, rgb, depth,
                                               intrinsics=intr,
-                                              bolt_norm=args.bolt_norm)
+                                              bolt_norm=args.bolt_norm,
+                                              scale=args.scale)
             window.append(hr)
             # CNN 폴백: 홀 게이트 미통과(보류) 프레임만 분류 (--cnn_every 면 매 프레임)
             cv = None

@@ -97,3 +97,42 @@ seed 값 자체는 난수 시드(random·numpy·torch)로, 신규 4채널 첫 co
 2. 5-fold 세션 CV 재실행(새 레시피 검증, fold당 1~1.5시간): `python scripts/session_cv.py --out <scratch>/cv --tag cv20260923` → val loss>2 스파이크 fold 0개·클래스 붕괴 없음이면 레시피 확정. 비교군: `--tag cv20260923inv -- --class_weight inv`.
 3. 35세션 정식 편입: `db/build_dataset.py auto-split` → `build` → `20_session_drift.py`. E25_LH_FRT 는 이제 2세션이라 auto-split 규칙(세션<3 전부 train)상 아직 평가 제외.
 4. 커밋·`scripts/model_sync.sh push`(seed916 model.pth LFS → Gitea, 추론 PC 는 `model_sync.sh pull`). 이전 run #10 의 model.pth·split_info.json 은 `git rm --cached`(이력 유지).
+
+## K 운영 규칙 분석·제안 (2026-09-23 오후, 186세션 session_hole_metrics 기준)
+
+**발견.** K_session 은 도어 거리 z_med 와 −0.95 상관(9/9 전후 동일). K·z 는 1465mm 로 일정(8/27~9/16 산포 0.24%)이고,
+9/9 이전 세션으로 맞춘 직선이 9/9 이후를 0.12% 오차로 예측 → **9/9 "계단"은 카메라 변경이 아니라 depth 가 도어를 7mm 가깝게 읽은 것**이며 관계식은 불변.
+K·z 일정 = 힌지↔래치 **픽셀 폭이 일정** = 도어는 지그에서 3~4mm 이내로 제자리, 흔들린 것은 depth 값(±1.4%).
+남은 산포는 평면 피팅 tilt 와 −0.88 상관: **S = K·z/cos(tilt) 는 8/27~9/16 산포 0.16%**, 9/22(최악, tilt med 8.6°) 도 0.36%.
+즉 depth 스케일과 겉보기 tilt 둘 다 depth 맵 아티팩트(세션마다 달라지는 ZED 자기보정/정렬 변동으로 추정 — 출장 때 확인).
+tilt 가 실제라면 픽셀 폭이 cos 만큼 줄어 K·z 가 커져야 하는데 반대로 작아짐 → 겉보기 tilt.
+
+**규칙 비교(오프라인, 세션 중앙값 기준, dev=D−CAD).** A 상수 K_CAMERA(현행) / C K=z_ref/z_meas / **D 픽셀폭 기준**(D = 픽셀 폭 × 상수, depth·tilt 미사용 = D_raw·S_ref·cos(tilt)/z).
+
+| 구간 | A p95 / max / 경보 | C p95 / max / 경보 | **D p95 / max / 경보** |
+|---|---|---|---|
+| 8/27~9/7 (82) | 11.4 / 19.3 / 1 | 3.9 / 8.5 / 0 | **3.1 / 3.8 / 0** |
+| 9/9~9/16 (65) | 15.5 / 19.9 / 7 | 4.5 / 7.5 / 0 | **3.9 / 7.2 / 0** |
+| 9/16~9/23 (38) | 14.4 / 20.7 / 2 | 15.4 / 16.7 / 3 | **9.0 / 10.3 / 0** |
+| 9/22 만 (13) | 16.5 / 20.7 / 1 | 16.5 / 16.7 / 3 | **10.0 / 10.3 / 0** |
+| 전체 (185) | 15.1 / 20.7 / 10 | 9.7 / 16.7 / 3 | **5.2 / 10.3 / 0** |
+
+FRT 최소 간격 41mm 의 절반 20.5mm 대비 최악 마진: A −0.2mm(9/22 E38_LH_RR −20.7) → D +10.2mm. 이동 중앙값(B)은 p95 14.9 로 계단만 따라가고 산포는 못 잡음.
+
+**제안 = D.** 고정 지그에서는 depth 를 스케일에 쓰지 않는다.
+- `hole_classifier`: D_mm = 픽셀 폭(힌지·래치 코너 홀) × mm_per_px, mm_per_px 는 카메라 설치별 상수(기준 세션들의 CAD_D/픽셀폭 중앙값, 현재 CAD 앵커와 동일). 해상도는 intrinsics fx 로 환산.
+- 가드: depth 로 잰 z_meas·tilt 가 대역 밖(|z−1450|>40mm 또는 tilt>12°)이면 "도어 자세 이상" 경보 + 기존 depth 평면 방식으로 폴백. unknown 판정 로직은 그대로.
+- 드리프트 지표(20·webapp /drift): K 대신 z_meas·tilt·S(픽셀폭 일관성) 를 기록·경보.
+- 적용 전 검증: 186세션 전량 17 재평가로 판정 변경 0·dev p95≤5mm·최소 마진 상승 확인(CPU 25분).
+- 한계: 거리·자세 고정 전제. 로봇 셀 등 거리 가변 환경은 볼트 피치 자기보정(bolt_norm, 미검증) 또는 체커보드 절대 보정으로.
+- 경주 출장 항목 변경: "카메라 변경 여부" → **ZED 자기보정(camera_disable_self_calib)·세션마다 카메라 재오픈 여부 확인 + 체커보드(19)로 depth 스케일 ±1.4% 변동 실측**. 자세 추정 z·tilt 도 같은 아티팩트를 받으므로 트래커 GT 전까지 절대 z ±15mm 유지.
+
+### 구현 상태 (2026-09-23 저녁, 사용자 채택 결정 — 전량 검증 전이라 기본값은 아직 depth)
+- `hole_classifier.py`: `S_PIXEL[54910212]=1478.5`(8/27~9/7 세션×4프레임 239장 직접 보정, 클래스별 편차 0.35%; DB 유도값 1471.3 은 tilt 근사라 −0.5% 치우침 → 직접값 채택),
+  `PIXEL_GUARD`(z 1400~1500mm·tilt 12°), `classify(..., scale='depth'|'pixel')`, 진단 필드 `span_px·z_mm·tilt_deg·D_depth_mm·pose_warn`(두 모드 공통). `SCALE_DEFAULT='depth'` 유지.
+- `17 --scale {depth,pixel}`(rows 에 진단 필드·fx, pixel 은 `_pixel.json`), `18 --scale`, `tools/pixel_scale_eval.py`(depth 모드 json 하나로 S 재보정 + depth↔pixel 판정 비교·세션 편차·가드 통계, 네트워크 재실행 없음).
+- **재부팅(GPU 복구) 후 절차**
+  1. `python 17_evaluate_hole_classifier.py --base datasets_factory_collect` — 186세션 depth 모드(진단 필드 포함), GPU 2~3분
+  2. `python tools/pixel_scale_eval.py attribute_models/hole_landmarks/eval_classifier_datasets_factory_collect.json --sessions` — S 재보정(기준 8/27~9/7, DB 라벨), 판정 변경 0·|dev| p95≤5mm·최소 마진 상승·가드 발동 세션 확인
+  3. 통과 시 `S_PIXEL` 갱신 → `SCALE_DEFAULT='pixel'` → `17 --scale pixel` 로 test·collect 기록(DB) → 18 기본 반영
+  4. `20_session_drift.py`·webapp `/drift` 에 span 기반 S 지표(픽셀 폭 일관성)·z·tilt 경보 추가, K 경보는 참고로 강등

@@ -44,6 +44,18 @@ K_CAMERA = {
 }
 
 
+# ── 픽셀 폭 스케일 (2026-09-23) ─────────────────────────────────────────────
+# 고정 지그(현장)에서는 depth 를 D 스케일에 쓰지 않는다: D_mm = 힌지↔래치 코너 홀 픽셀 폭 × S_PIXEL[serial] / fx.
+# 근거(report/hole_analysis/blind_eval_20260923/ 하단): 186세션에서 K_session·z/cos(tilt) 가 0.16% 로 일정 = 픽셀 폭이 일정.
+# 세션별 depth 스케일 ±1.4%·겉보기 tilt 5~11° 는 depth 맵 아티팩트(ZED 세션별 자기보정 추정) → 상수 K 로는 |dev| p95 15mm·경보 10/185,
+# 픽셀 폭 기준은 p95 5mm·경보 0. S_PIXEL = 기준 세션들의 CAD_D·fx/픽셀폭 중앙값(mm, "유효 기준 거리"). 8종 클래스별 편차 0.35%.
+S_PIXEL = {
+    54910212: 1478.5,   # 현장 ZED X Mini 협각, 2026-09-23 8/27~9/7 세션×4프레임 239장 직접 보정(잠정) — 전량 재평가 후 tools/pixel_scale_eval.py 로 재보정
+}
+PIXEL_GUARD = dict(z=(1400.0, 1500.0), tilt=12.0)   # depth 평면으로 잰 도어 z(mm)·tilt(°) 가 이 밖이면 자세 이상 → depth 방식으로 폴백 + pose_warn
+SCALE_DEFAULT = 'depth'   # 'pixel' 전환은 186세션 전량 검증(17 --scale pixel, 판정 변경 0·dev p95≤5mm) 후
+
+
 def active_k(intrinsics):
     """intrinsics 에 대해 실제 적용되는 잔차 K 와 출처 ('camera' | 'metric' | 'depth')."""
     if intrinsics:
@@ -319,13 +331,15 @@ def judge(D, group=None, unknown_mm=UNKNOWN_MM):
     return pred, float(nearest), float(margin)
 
 
-def classify(net, dev, rgb, depth=None, group=None, intrinsics=None, bolt_norm=False, unknown_mm=UNKNOWN_MM):
+def classify(net, dev, rgb, depth=None, group=None, intrinsics=None, bolt_norm=False, unknown_mm=UNKNOWN_MM, scale=None):
     """단일 프레임 판정. depth 없으면 볼트 피치 스케일 사용. group 지정 시 그룹 내 최근접.
 
     intrinsics: dict(fx, fy, cx, cy) — 카메라 실제 값(렌즈 무관 D). None 이면 수집 카메라 가정.
     bolt_norm: depth D 를 볼트 장변 CAD/실측 비율로 정규화 (D_src='depth+bolt', D_raw_mm 보존).
         기본 꺼짐 — 볼트 국소화 오차(-7% 관측)가 D 에 그대로 증폭되므로 실험용으로만.
     unknown_mm: 최근접 CAD D 편차가 이 값을 넘으면 pred='unknown'(미등록 도어, gate 는 'ok' 유지). None 이면 끔.
+    scale: 'depth'(depth 평면 + 잔차 K, 2026-09-23 이전 방식) | 'pixel'(픽셀 폭 × S_PIXEL/fx, depth 는 z·tilt 가드만) | None=SCALE_DEFAULT.
+        진단 필드 span_px·z_mm·tilt_deg 는 두 모드 모두 채움. pixel 모드에서 가드 밖이면 pose_warn=True, D 는 depth 값(D_src='depth(pose_warn)').
     반환 nearest_mm = 최근접 CAD D 와의 절대 편차, margin_mm = 2위 편차 − 1위 편차."""
     det = detect(net, dev, rgb)
     hinge = det['corner_hinge'][0] if det['corner_hinge'] else None
@@ -333,7 +347,8 @@ def classify(net, dev, rgb, depth=None, group=None, intrinsics=None, bolt_norm=F
     fr = bolt_frame(det['bolt'])
     gate = geometry_gate(fr, hinge, latch, rgb.shape)
     out = dict(points=det, gate=gate, pred=None, D_mm=None, D_src=None, group=None, bolt_mm=None,
-               D_raw_mm=None, k_bolt=None, nearest_mm=None, margin_mm=None)
+               D_raw_mm=None, k_bolt=None, nearest_mm=None, margin_mm=None,
+               span_px=None, z_mm=None, tilt_deg=None, D_depth_mm=None, pose_warn=False)
     corners = [p for p in (hinge, latch) if p is not None]
     pf = None
     if depth is not None and len(det['bolt']) + len(corners) >= 3:
@@ -349,6 +364,22 @@ def classify(net, dev, rgb, depth=None, group=None, intrinsics=None, bolt_norm=F
             if BOLT_NORM_RANGE[0] <= kb <= BOLT_NORM_RANGE[1]:
                 out['D_raw_mm'], out['k_bolt'] = D, kb
                 D *= kb; out['D_src'] = 'depth+bolt'
+    # 자세 진단(픽셀 모드 가드·드리프트 지표): 힌지↔래치 픽셀 폭, 코너 홀 중점 깊이, 평면 기울기(법선 vs 광축)
+    span = math.hypot(hinge[0] - latch[0], hinge[1] - latch[1]); out['span_px'] = span
+    if pf is not None:
+        H, L = pf[0](hinge), pf[0](latch); out['z_mm'] = float((H + L)[2] / 2)
+        if det['bolt']:
+            B = pf[0](det['bolt'][0]); nrm = np.cross(L - H, B - H); nrm /= (np.linalg.norm(nrm) + 1e-9)
+            out['tilt_deg'] = float(np.degrees(np.arccos(min(1.0, abs(nrm[2])))))
+    sn = (intrinsics or {}).get('serial')
+    if (scale or SCALE_DEFAULT) == 'pixel' and sn in S_PIXEL and intrinsics.get('fx'):
+        out['D_depth_mm'] = D
+        warn = (out['z_mm'] is not None and not (PIXEL_GUARD['z'][0] <= out['z_mm'] <= PIXEL_GUARD['z'][1])) or \
+               (out['tilt_deg'] is not None and out['tilt_deg'] > PIXEL_GUARD['tilt'])
+        if warn and D is not None:
+            out['pose_warn'] = True; out['D_src'] = 'depth(pose_warn)'
+        else:
+            D = span * S_PIXEL[sn] / intrinsics['fx']; out['D_src'] = 'pixel' if pf is not None else 'pixel(noguard)'
     if D is None and fr is not None:
         D = math.hypot(hinge[0] - latch[0], hinge[1] - latch[1]) / fr['s']; out['D_src'] = 'bolt'
     out['D_mm'] = D
