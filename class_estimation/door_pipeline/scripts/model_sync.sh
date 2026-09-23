@@ -7,7 +7,8 @@ set -e
 REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
 cd "$REPO"
 MODELS=(
-  class_estimation/door_pipeline/attribute_models/hole_landmarks/model.pth
+  class_estimation/door_pipeline/attribute_models/hole_landmarks_bracket/model.pth   # 4채널(브래킷) 홀 랜드마크 — 2026-09-23 정식(hole_classifier.MODEL_PATH 기본)
+  class_estimation/door_pipeline/attribute_models/hole_landmarks/model.pth           # 3채널 정본(폴백)
   class_estimation/door_pipeline/artifacts/rgbe_noaux_448_seed916_datasets_factory_v2/model.pth
 )
 

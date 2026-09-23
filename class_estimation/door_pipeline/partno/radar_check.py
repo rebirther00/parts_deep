@@ -216,6 +216,71 @@ def montage(frames_rgb, title, path, n=6, tile=(320, 130)):
     return path
 
 
+# ── 4채널 검출기 브래킷 피크 판정 + 하이브리드 (2026-09-23 정식 채택, door_partno 연구 결과) ─────────────
+PEAK_ON, PEAK_OFF = 0.30, 0.12          # 브래킷 히트맵 피크 점수 임계
+TOL_MM, PITCH_TOL = 40.0, 20.0          # 피크를 도어 프레임에 놓았을 때 CAD 브래킷 홀과의 허용 거리 / 홀 간격(91.6) 허용
+
+
+def radar_from_peaks(det, cls, geom):
+    """4채널 검출기의 브래킷 피크 2개로 판정: 'radar' | 'none' | 'unsure' | 'n/a'(브래킷 채널 없음/FRT).
+    피크 2개(점수 ≥ PEAK_ON)가 6점 아핀으로 도어 프레임에 놓였을 때 CAD 홀 위치 ≤ TOL_MM·간격 91.6±PITCH_TOL 이면 radar,
+    최대 피크 < PEAK_OFF 면 none, 그 사이 unsure."""
+    g = geom.get(cls); pk = det.get('bracket')
+    info = dict(n_peaks=len(pk or []), scores=[round(p[2], 3) for p in (pk or [])], dist_mm=None, pitch_mm=None)
+    if g is None or pk is None:
+        return 'n/a', info
+    top = max((p[2] for p in pk), default=0.0)
+    if len(pk) < 2 or min(p[2] for p in pk[:2]) < PEAK_ON:
+        return ('none' if top < PEAK_OFF else 'unsure'), info
+    fit = door_affine(det, g['lm'])
+    if fit is None or fit[1] > MAX_RESID_PX:
+        return 'unsure', info
+    Ai = np.linalg.inv(np.vstack([fit[0], [0, 0, 1]]))
+    P = []
+    for p in pk[:2]:
+        q = Ai @ np.array([p[0], p[1], 1.0]); P.append(q[:2] / q[2])
+    d = [min(np.linalg.norm(p - np.array(e)) for e in g['holes']) for p in P]
+    pitch = float(np.linalg.norm(P[0] - P[1]))
+    info.update(dist_mm=[round(float(x), 1) for x in d], pitch_mm=round(pitch, 1))
+    return ('radar' if (max(d) <= TOL_MM and abs(pitch - g['pitch_mm']) <= PITCH_TOL) else 'unsure'), info
+
+
+def decide_option(net, dev, rgb, depth, cls, intr, geom, det=None):
+    """하이브리드 프레임 판정: ① 브래킷 피크(4채널 모델) → ② 규칙(투영 + 밝기 + depth 판 높이) 순.
+    블라인드 35세션에서 피크 판정률 97.1%·규칙 99.8%, 둘 다 오판 0 → 피크가 보류한 프레임을 규칙이 메운다.
+    반환 dict(status, src('peaks'|'rule'), score, h_mm, info)."""
+    det = det or hc.detect(net, dev, rgb)
+    st, info = radar_from_peaks(det, cls, geom)
+    if st in ('radar', 'none'):
+        return dict(status=st, src='peaks', score=None, h_mm=None, info=info)
+    f = check_frame(net, dev, rgb, depth, cls, intr, geom, det=det)
+    if f.get('status') in ('radar', 'none'):
+        return dict(status=f['status'], src='rule', score=f.get('score'), h_mm=f.get('h_mm'), info=info)
+    return dict(status='unsure', src='rule' if st != 'n/a' else 'none', score=f.get('score'), h_mm=f.get('h_mm'), info=dict(info, rule=f.get('status')))
+
+
+def option_vote(statuses, min_judged=MIN_JUDGED, min_agree=MIN_AGREE):
+    """프레임 판정 목록 → dict(flag 1/0/None, n_radar, n_none, n_judged, n)."""
+    votes = [s for s in statuses if s in ('radar', 'none')]
+    n1, n0 = votes.count('radar'), votes.count('none'); flag = None
+    if len(votes) >= min_judged and max(n1, n0) / len(votes) >= min_agree:
+        flag = 1 if n1 > n0 else 0
+    return dict(flag=flag, n_radar=n1, n_none=n0, n_judged=len(votes), n=len(statuses))
+
+
+_PARTS = None
+
+
+def part_lookup(cls, radar):
+    """(클래스, 레이더 1/0/None) → part_numbers.json 항목 또는 None. FRT 는 레이더 무관."""
+    global _PARTS
+    if _PARTS is None:
+        _PARTS = {(p['class_name'], p['radar']): p for p in json.load(open(os.path.join(HERE, 'part_numbers.json')))['parts']}
+    if cls is None:
+        return None
+    return _PARTS.get((cls, None)) or (_PARTS.get((cls, radar)) if radar in (0, 1) else None)
+
+
 def session_rows(con, only=None):
     ds = con.execute("SELECT id FROM datasets WHERE name=?", (bd.DATASET_NAME,)).fetchone()[0]
     q = """SELECT s.id sid, s.session_dir, s.option_source, c.name cls,

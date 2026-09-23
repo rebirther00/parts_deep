@@ -12,7 +12,7 @@ pred='unknown'(최근접 CAD D 편차 > UNKNOWN_MM, 미등록 도어 판정)은 
 """
 import argparse, glob, json, os, time, collections
 import cv2, numpy as np
-from hole_classifier import load_model, classify, CAD_D, GROUP, UNKNOWN, UNKNOWN_MM, active_k, SCALE_DEFAULT
+from hole_classifier import load_model, classify, CAD_D, GROUP, UNKNOWN, UNKNOWN_MM, active_k, SCALE_DEFAULT, MODEL_PATH
 from camera_utils import intrinsics_for_image
 
 DOOR = os.path.dirname(os.path.abspath(__file__))
@@ -161,7 +161,10 @@ if __name__ == '__main__':
             if png: print(f"저장: attribute_models/hole_landmarks/{os.path.basename(png)}")
     if not args.no_db:
         from db.db_log import DBLog
-        db = DBLog(); mid = db.find_model(weights_path='attribute_models/hole_landmarks/model.pth', name='hole_landmarks_resnet18')
+        rel = os.path.relpath(MODEL_PATH, DOOR)   # 2026-09-23: 배포 기본 = 4채널(브래킷) 모델이면 그 행에 기록(없으면 등록)
+        db = DBLog(); mid = db.find_model(weights_path=rel) or db.register_model(
+            name=('hole_landmarks_bracket_resnet18' if 'bracket' in rel else 'hole_landmarks_resnet18'), architecture='ResNet18-FPN-heatmap',
+            in_channels=3, num_classes=(4 if 'bracket' in rel else 3), weights_path=rel, input_size='1280x768', description='배포 모델(17 평가 등록)')
         dsmap = {'test_split': 'door_real', 'datasets_all': 'door_real', 'datasets_field': 'door_field'}
         for k, v in results.items():
             db.log_evaluation(model_id=mid, dataset_name=dsmap.get(k, k), eval_type='inference_pipeline', total_samples=v['n'],

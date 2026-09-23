@@ -105,6 +105,8 @@ python 17_evaluate_hole_classifier.py --base datasets_factory_v2/test   # ⑥ �
 python 20_session_drift.py                 # ⑥' 세션 지표 + 홀 판정 다수결(pred_major) — ② 직후에 먼저 돌리면 아래 자동 재배정이 가능
 python db/build_dataset.py auto-relabel    # ⑥'' 태블릿 오라벨 자동 재배정(E23↔E25 FRT 등 CAD D 차 ≥100mm·표 10장·일치 90%), 인접 쌍은 확인 목록만 (2026-09-23)
 python partno/radar_check.py               # ⑥''' RR/RH 세션 레이더 옵션 규칙 검사 → session_radar_check + option_*(auto), 웹 /options 에서 확정 (2026-09-23)
+python ../door_partno/19_blind_eval.py --since YYYYMMDD --tag new_YYYYMMDD   # ⑥'''' 신규 세션 블라인드: 확정 **전**에 규칙·검출기·CNN 예측 저장 → 확정(웹 또는
+                                           #        partno/radar_check.py --set <세션> 1|0) → 같은 명령 재실행으로 채점. 한 번에: ../door_partno/scripts/new_sessions.sh YYYYMMDD
 python 02_train.py --model_type rgbe --no_aux --image_size 448 --dataset_dir datasets_factory_v2 --presplit
                                            # ⑦ CNN fine-tune 시: train/val/test 폴더 그대로 사용(세션 격리), run 이름에 _datasets_factory_v2
 ```
@@ -122,8 +124,8 @@ python 02_train.py --model_type rgbe --no_aux --image_size 448 --dataset_dir dat
 0. ~~**레이더 옵션 육안 확정**~~ → **완료(2026-09-23)**: 사용자가 /options 에서 자동 판정 145세션(레이더 51·없음 94)을 육안 검토 후 `partno/radar_check.py --accept-auto` 로 일괄 승인,
    `evaluate_partno.py --db-log` 기록(고정 test 23세션·596장 품번 100%, 전량 183세션 100% — 규칙과 사람 검토의 일치율). 미정 3세션(빈 지그 8/27 s_122816, 1프레임 세션 9/5 s_123451·9/22 s_080559)은 미확정.
    신규 유입 세션은 확정 전에 판정해 비교하면 독립 검증이 된다.
-0'. **후속 연구(사용자 결정 2026-09-23, 별도 폴더·기존 파일 구조)**: 확정 라벨(세션당 20장)로 학습형 레이더 판정기 — ① 홀 랜드마크 검출기에 브래킷 홀 채널 추가(6점+브래킷 한 번에, CAD 규칙 유지)
-   ② CNN(14클래스 또는 9클래스+레이더 이진 헤드). 18번 실시간 서버의 옵션·품번 출력은 이 연구 결과와 함께 통합(사용자 결정). 규칙 라벨은 사람 검토를 거쳤으나 세션 단위 CV·가림 사례로 규칙 대비 이득을 검증.
+0'. ~~**후속 연구**~~ → **완료(2026-09-23 저녁, `../door_partno/`)**: 블라인드 35세션 663장 — 규칙 100%(판정 99.8%), 4채널 검출기 100%(판정 97.1%), CNN 90~95%(형상군 혼동만).
+   4채널 검출기를 배포 정본으로 채택(`attribute_models/hole_landmarks_bracket/model.pth`, LFS), 18 실시간 서버에 레이더 O/X·품번 출력 통합(브래킷 피크 → 규칙 하이브리드).
 0''. 공장 확인(차후): 레이더 표기 해석(X=미장착), 로봇 공정이 옵션으로 갈리는지, 명성 자체 도어 작업 실적(품번·시각) 제공 여부(세션 1:1 GT). AVM 은 구분하지 않기로 함.
 
 ### 바로 실행 가능 (막힌 데 없음)

@@ -87,6 +87,12 @@ python 20_session_drift.py --print                    # 표만
 - 중앙 보강대 패드 홀은 옵션/리비전에 따라 달라 사용 금지. 분석 기록: `report/hole_analysis/`.
 - **E23_door_LH_FRT 추가 (2026-09-07)**: 현장에서 E25_LH_FRT로 입력된 9/3·9/5 4세션이 D≈460mm로 일관 보류 → 육안·CAD 확인 결과 E23(폭 562, D=456). `CAD_D`에 9번째 클래스 등록, 유효 D 범위 `D_RANGE`=400~1500mm(게이트·최종 depth D 공통; 종전 게이트 하한 600, depth D 무검사). CAD `cad/door_stp/E23) 110982-02723 LH FRT.stp`는 외판 단일 솔리드(보강재·힌지 없음)라 코너 프레임 홀이 없음 → 속성 템플릿(10) 생성. 자세 추정 `cad_holes.json`은 **잠정 등록**(`01_extract_cad_holes.PROVISIONAL`: 볼트홀·래치 코너는 E25와 동일 좌표, 힌지 코너는 CAD_D 이동 합성; 현장 4세션 80장 정합 잔차 med 3.3mm·max 5.1mm로 8종과 동급). 보강재 포함 어셈블리 STEP 확보 시 정식 추출로 교체. STL 변환은 `gmsh <stp> -2 -format stl`(numpy-stl은 STEP 불가).
 
+### 4채널(브래킷) 검출기 정식 채택 (2026-09-23 저녁)
+
+`attribute_models/hole_landmarks_bracket/model.pth`(door_partno/16 미세조정본, LFS 배포 목록)가 `hole_classifier.MODEL_PATH` 기본이 됐다. 가중치의 출력 채널 수로 3/4채널을
+자동 판별하므로 기존 3채널 정본(`hole_landmarks/model.pth`)도 그대로 로드된다. 6점 정밀도는 정본과 동일(홀드아웃 ≤8px 100%, 중앙값 0.5px), 브래킷 채널로 레이더 옵션을 판정한다.
+근거: `../door_partno/report/README.md`(블라인드 35세션 663장 — 규칙 100%·검출기 100%, CNN 90~95%).
+
 ## D. 품번(14) 판정 확장 — RADAR 옵션 (2026-09-23, `partno/`)
 
 통합모델 SIDE DOOR 도면·사양표(2026-09-23 입수) 기준 어셈블리 품번은 14종 = 형상군 9종 × RADAR 옵션(LH REAR·RH 만). E23 은 LH FRT 만 고유(REAR·RH 는 E25 공용).
@@ -98,6 +104,8 @@ python 20_session_drift.py --print                    # 표만
   FR/RR 세로 보강재·볼트 사각·힌지는 두 사양 공용 → D·자세 랜드마크는 옵션 불변.
 - 오라벨 자동 재배정 `db/build_dataset.py auto-relabel`(홀 다수결, CAD D 차 ≥100mm), 품번 정확도 `partno/evaluate_partno.py`(판정률·판정 정확도, GT = 사용자 확정),
   생산계획 집계 `partno/production_plan_summary.py`, 명세서 `partno/build_dataset_spec.py` → `DOC_dataset_spec.md/.docx`. 명령 순서는 `partno/README.md`.
+- **실시간 서버 18 통합(2026-09-23 저녁)**: RR/RH 판정 프레임마다 `radar_check.decide_option`(브래킷 피크 → 보류 시 규칙) → 윈도 표(`--option_min_judged` 3, 80%)로 레이더 O/X → 품번.
+  결과 JSON `radar`·`radar_votes`·`radar_src`·`part_no`·`part_name`, 프레임 `frame.option`, UI 카드 "레이더 옵션·품번". `--no_option` 으로 끔. 학습형 판정기 연구는 `../door_partno/`.
 
 ## 산출물/데이터 위치
 

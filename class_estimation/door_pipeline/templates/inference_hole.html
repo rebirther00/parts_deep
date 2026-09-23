@@ -23,6 +23,9 @@
         .legend .bolt::before { border-color: #0000ff; }
         .legend .hinge::before { border-color: #ff0000; }
         .legend .latch::before { border-color: #ff8c00; }
+        .legend .bracket::before { border-color: #ff00ff; }
+        .part-no { font-size: 1.15rem; font-weight: 700; color: #f0abfc; word-break: break-all; }
+        .radar-on { color: #f0abfc; } .radar-off { color: #94a3b8; }
 
         .sidebar { width: 300px; display: flex; flex-direction: column; gap: 12px; }
 
@@ -75,6 +78,7 @@
             <span class="bolt">볼트홀 ×4</span>
             <span class="hinge">힌지측 모서리 홀</span>
             <span class="latch">래치측 모서리 홀</span>
+            <span class="bracket">레이더 브래킷 홀 ×2</span>
         </div>
     </div>
 
@@ -84,6 +88,15 @@
             <span class="model-tag" id="sourceTag">Hole Landmark</span><span class="model-tag conflict" id="conflictTag" hidden>CNN 불일치</span>
             <div class="result-class" id="resultClass">대기 중</div>
             <div class="result-conf" id="resultConf">—</div>
+        </div>
+
+        <div class="card">
+            <h3>레이더 옵션 · 품번</h3>
+            <div class="stat-row"><span>레이더</span><span class="stat-value" id="radar">—</span></div>
+            <div class="stat-row"><span>윈도 표 (O / X / 판정)</span><span class="stat-value" id="radarVotes">—</span></div>
+            <div class="stat-row"><span>현재 프레임 근거</span><span class="stat-value" id="radarFrame" style="font-weight:400;font-size:0.75rem">—</span></div>
+            <div class="stat-row"><span>품번</span><span class="part-no" id="partNo">—</span></div>
+            <div class="stat-row"><span>명칭</span><span class="stat-value" id="partName" style="font-weight:400;font-size:0.75rem">—</span></div>
         </div>
 
         <div class="card">
@@ -170,6 +183,18 @@ async function pollResult() {
             (r.group && r.group !== "-" ? "그룹 " + r.group + " · " : "") +
             (r.confidence > 0 ? r.confidence.toFixed(0) + "%" : "—");
 
+        const rd = document.getElementById("radar");
+        rd.textContent = r.radar || "—";
+        rd.className = "stat-value " + (r.radar === "O" ? "radar-on" : "radar-off");
+        const ov = r.radar_votes;
+        document.getElementById("radarVotes").textContent = ov ? ov.n_radar + " / " + ov.n_none + " / " + ov.n_judged : "—";
+        const fo = r.frame && r.frame.option;
+        document.getElementById("radarFrame").textContent = fo
+            ? fo.status + " · " + fo.src + (fo.peaks ? " · peaks " + fo.peaks.map(x => x.toFixed(2)).join("/") : "")
+              + (fo.score != null ? " · 밝기 " + fo.score.toFixed(2) : "") + (fo.h_mm != null ? " · 판높이 " + fo.h_mm + "mm" : "")
+            : "—";
+        document.getElementById("partNo").textContent = r.part_no || "—";
+        document.getElementById("partName").textContent = r.part_name || "—";
         document.getElementById("dMm").textContent = r.D_mm ? r.D_mm.toFixed(1) + " mm" : "—";
         document.getElementById("marginMm").textContent =
             r.margin_mm != null ? r.margin_mm.toFixed(1) + " mm" : "—";

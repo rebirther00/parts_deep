@@ -27,9 +27,15 @@ import torch.nn.functional as F
 from torchvision import models
 
 DOOR = os.path.dirname(os.path.abspath(__file__))
-MODEL_PATH = os.path.join(DOOR, 'attribute_models', 'hole_landmarks', 'model.pth')
+# 배포 모델: 4채널(볼트·힌지 코너·래치 코너·**브래킷**) 모델이 있으면 그것(2026-09-23 정식 채택, door_partno/16 미세조정 — 6점 정밀도 정본과 동일,
+# 브래킷 홀 2개로 레이더 옵션 판정), 없으면 3채널 정본. 두 모델 모두 load_model() 이 채널 수를 가중치에서 읽어 처리한다.
+MODEL_PATH_LEGACY = os.path.join(DOOR, 'attribute_models', 'hole_landmarks', 'model.pth')
+MODEL_PATH_BRACKET = os.path.join(DOOR, 'attribute_models', 'hole_landmarks_bracket', 'model.pth')
+MODEL_PATH = MODEL_PATH_BRACKET if os.path.exists(MODEL_PATH_BRACKET) else MODEL_PATH_LEGACY
 IN_W, IN_H, STRIDE = 1280, 768, 4
 CH = ['bolt', 'corner_hinge', 'corner_latch']
+CH_BRACKET = 'bracket'                                   # 4채널 모델의 추가 채널: 레이더 브래킷 홀 2개(Ø34, 간격 91.6mm)
+PEAKS_PER_CH = {'bolt': 4, 'corner_hinge': 1, 'corner_latch': 1, CH_BRACKET: 2}
 K_DEPTH = {1080: 0.8235, 1200: 0.8505}
 FX_APPROX = 1065.0                        # intrinsics 없을 때 쓰는 근사 fx (K_DEPTH 의 기준)
 from camera_utils import FX_REF, emulate_fx   # noqa: E402  수집(학습) 카메라 fx 추정·화각 정합 (공용)
@@ -82,8 +88,9 @@ STD = torch.tensor([0.229, 0.224, 0.225])[None, :, None, None]
 
 
 class Net(nn.Module):
-    def __init__(self):
+    def __init__(self, n_out=len(CH)):
         super().__init__()
+        self.channels = CH if n_out == len(CH) else CH + [CH_BRACKET]
         r = models.resnet18(weights=None)
         self.stem = nn.Sequential(r.conv1, r.bn1, r.relu)
         self.l1 = nn.Sequential(r.maxpool, r.layer1)
@@ -92,7 +99,7 @@ class Net(nn.Module):
         self.lat2 = nn.Conv2d(128, 128, 1); self.lat1 = nn.Conv2d(64, 128, 1)
         self.head = nn.Sequential(nn.Conv2d(128, 128, 3, padding=1), nn.BatchNorm2d(128), nn.ReLU(inplace=True),
                                   nn.Conv2d(128, 64, 3, padding=1), nn.BatchNorm2d(64), nn.ReLU(inplace=True),
-                                  nn.Conv2d(64, len(CH), 1))
+                                  nn.Conv2d(64, n_out, 1))
 
     def forward(self, x):
         c1 = self.l1(self.stem(x)); c2 = self.l2(c1); c3 = self.l3(c2); c4 = self.l4(c3)
@@ -104,8 +111,11 @@ class Net(nn.Module):
 
 
 def load_model(path=MODEL_PATH, device=None):
+    """가중치의 마지막 1×1 conv 출력 수로 3채널/4채널을 자동 판별해 로드."""
     dev = torch.device(device or ('cuda' if torch.cuda.is_available() else 'cpu'))
-    net = Net().to(dev); net.load_state_dict(torch.load(path, map_location=dev)); net.eval()
+    sd = torch.load(path, map_location=dev)
+    n_out = sd['head.6.weight'].shape[0]
+    net = Net(n_out).to(dev); net.load_state_dict(sd); net.eval()
     return net, dev
 
 
@@ -177,7 +187,7 @@ def _peaks(hm, k, thr=0.15, nms=5):
 
 @torch.no_grad()
 def detect(net, dev, rgb):
-    """원본 BGR → {'bolt': [(x,y,score)×≤4], 'corner_hinge': [...≤1], 'corner_latch': [...≤1]} (원본 픽셀).
+    """원본 BGR → {'bolt': [(x,y,score)×≤4], 'corner_hinge': [...≤1], 'corner_latch': [...≤1][, 'bracket': [...≤2]]} (원본 픽셀).
 
     letterbox(warpAffine)만 CPU, 이후 BGR→RGB·정규화·forward·피크 탐색은 모두 GPU에서 수행."""
     h, w = rgb.shape[:2]
@@ -189,11 +199,12 @@ def detect(net, dev, rgb):
     t = t.permute(2, 0, 1)[[2, 1, 0]].float()[None] / 255.      # BGR→RGB, GPU
     t = (t - buf['mean']) / buf['std']
     hm = net(t)[0].float()
-    ks = [4 if c == 'bolt' else 1 for c in CH]
+    channels = getattr(net, 'channels', CH)
+    ks = [PEAKS_PER_CH[c] for c in channels]
     pk = _peaks_gpu(hm, ks)
     Mi = cv2.invertAffineTransform(M)
     return {c: [(*_apply(Mi, (px * STRIDE, py * STRIDE)), sc) for px, py, sc in pk[ci]]
-            for ci, c in enumerate(CH)}
+            for ci, c in enumerate(channels)}
 
 
 def bolt_frame(bolts):

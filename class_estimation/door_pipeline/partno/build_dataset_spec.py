@@ -163,6 +163,26 @@ def build_md(S, plan):
             if r: A(f"- {lab}: 대상 {r['n']}(GT 확정 {r['n_gt']}, 미확정 {r['n_gt_missing']}) · 판정률 {r['judged_rate']:.1f}% · 판정 정확도 {r['acc_judged']:.1f}% ({r['correct']}/{r['judged']}).")
     else:
         A("- 품번 정확도: 사용자 레이더 확정 후 `partno/evaluate_partno.py` 실행 시 기록.")
+    rp = os.path.normpath(os.path.join(DOOR, '..', 'door_partno', 'report'))
+    bl = os.path.join(rp, 'blind_unsplit_detblind.json'); cvj = os.path.join(rp, 'cv_cvA_multi_448.json')
+    if os.path.exists(bl):
+        b = json.load(open(bl)); R = b['results']
+        A("")
+        A("### 6.1 학습형 판정기 비교 (door_partno, 2026-09-23)")
+        A("")
+        A(f"확정 라벨로 4채널 홀 랜드마크 검출기(브래킷 채널 추가)와 CNN(9클래스+레이더 헤드 / 14클래스 / 640 변형)을 학습해, 규칙 검사와 같은 프레임에서 비교했다. 블라인드 집합 = 어느 모델도 학습에 쓰지 않은 {len(b['sessions'])}세션(9/16 오후~9/23 유입).")
+        A("")
+        A("| 판정기 | 블라인드 판정률 | 블라인드 품번 정확도 | 세션 |")
+        A("|---|---:|---:|---:|")
+        names = dict(rule='규칙 검사(운영)', det='4채널 검출기(블라인드 세션 제외 학습)', partno_multi_448_seed42='CNN 9클래스+레이더 헤드 448', partno_part14_448_seed42='CNN 14클래스 448', partno_multi_640_seed42='CNN 9클래스+레이더 헤드 640')
+        for k, v in R.items():
+            A(f"| {names.get(k, k)} | {v['judged_rate']:.1f}% | {v['acc']:.1f}% ({v['correct']}/{v['judged']}) | {v['s_correct']}/{v['sessions']} |")
+        cvtxt = ''
+        if os.path.exists(cvj):
+            c = json.load(open(cvj)); tot = sum(x['part_n'] for x in c.values()); ok = sum(x['part_ok'] for x in c.values())
+            cvtxt = f" CNN 9클래스+레이더 헤드 448 의 세션 5-fold 교차검증은 {ok}/{tot} = {100 * ok / max(1, tot):.1f}%."
+        A("")
+        A(f"- CNN 오류는 전부 형상군 혼동(E30↔E38 FRT 47mm 인접 쌍 등)이고 레이더 오류는 0 이었다.{cvtxt} 결론: 형상군은 홀 거리 규칙, 레이더는 검출기 브래킷 채널이 새 세션에서도 100% 를 유지 → 4채널 검출기를 배포 정본으로 채택하고 실시간 서버에는 브래킷 피크 → 규칙 하이브리드로 통합했다(2026-09-23).")
     A("")
     A("## 7. 도구")
     A("")

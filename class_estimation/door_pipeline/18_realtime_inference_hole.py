@@ -14,6 +14,9 @@ MobileSAM·U-Net·CAD 템플릿(속성 파이프라인)은 로드하지 않는�
     → 판정 우선순위: 홀 확정(source=hole) > 홀 수집 중 > CNN 투표 ≥ min_judged & 평균 확률 ≥ cnn_min_prob(source=cnn) > 보류
       홀 확정과 CNN 다수결이 다르면 conflict=True 로 표시만 함(판정은 홀 우선).
 
+    → 레이더 옵션·품번(2026-09-23): RR/RH 판정 프레임마다 4채널 모델의 브래킷 피크 → (보류 시) 규칙(투영+밝기+depth 판 높이) 하이브리드로
+      레이더 유무를 판정하고 윈도 표(≥ option_min_judged, 80%)로 O/X 확정 → partno/part_numbers.json 으로 품번 출력 (FRT 는 옵션 없음)
+
 depth 가 없으면(리플레이 폴더에 depth_*.png 없음) 볼트 피치 스케일로 D 를
 추정한다(정밀도 낮음, 검증용).
 
@@ -46,6 +49,8 @@ import cnn_classifier
 DOOR_DIR = os.path.dirname(os.path.abspath(__file__))
 REPO_DIR = os.path.dirname(os.path.dirname(DOOR_DIR))
 sys.path.insert(0, REPO_DIR)
+sys.path.insert(0, os.path.join(DOOR_DIR, 'partno'))
+import radar_check as rc                     # 레이더 옵션(브래킷 피크 + 규칙 하이브리드)·품번 조회
 
 parser = argparse.ArgumentParser(
     description='홀 랜드마크 판별기 전용 실시간 추론 서버',
@@ -84,6 +89,9 @@ parser.add_argument('--cnn_every', action='store_true',
                     help='CNN 을 보류 프레임뿐 아니라 매 프레임 실행 (홀 판정과 교차 검증, 프레임당 +~70ms)')
 parser.add_argument('--cnn_min_prob', type=float, default=0.5,
                     help='CNN 폴백 판정에 필요한 다수결 클래스의 평균 softmax 확률 (기본 0.5)')
+parser.add_argument('--no_option', action='store_true', help='레이더 옵션·품번 판정 끔 (형상군만)')
+parser.add_argument('--option_min_judged', type=int, default=3,
+                    help='레이더 O/X 확정에 필요한 윈도 내 옵션 판정 프레임 수 (기본 3, 다수 80%% 이상)')
 parser.add_argument('--device', type=str, default='cuda')
 args = parser.parse_args()
 
@@ -93,6 +101,7 @@ inference_result = {
     'class': '대기 중', 'group': '-', 'confidence': 0.0, 'source': None, 'conflict': False,
     'D_mm': None, 'margin_mm': None, 'nearest_mm': None, 'n_judged': 0, 'window': 0,
     'gate': None, 'gate_counts': {}, 'candidates': [], 'cnn': None,
+    'radar': None, 'radar_votes': None, 'radar_src': None, 'part_no': None, 'part_name': None,
     'frame': None, 'inference_ms': 0.0, 'timestamp': 0.0,
 }
 UNKNOWN_LABEL = '미등록 도어 (unknown)'
@@ -244,10 +253,13 @@ def inference_loop(source, net, dev, cnn=None):
     import torch
     window = collections.deque(maxlen=args.n_frames)
     cnn_window = collections.deque(maxlen=args.n_frames)   # 홀 윈도와 같은 길이로 프레임마다 추가 (미실행 프레임 = None)
+    opt_window = collections.deque(maxlen=args.n_frames)   # 레이더 옵션 프레임 판정 (미실행 = None)
+    geom = None if args.no_option else rc.load_geometry()
     while not stop_event.is_set():
         if reset_event.is_set():
             window.clear()
             cnn_window.clear()
+            opt_window.clear()
             reset_event.clear()
         rgb, depth, intr = source.get()
         if rgb is None:
@@ -270,6 +282,11 @@ def inference_loop(source, net, dev, cnn=None):
                 c_pred, c_prob, _ = cnn.predict(rgb)
                 cv = (c_pred, c_prob)
             cnn_window.append(cv)
+            # 레이더 옵션: RR/RH 로 판정된(게이트 통과) 프레임만 — 브래킷 피크 → 규칙 하이브리드
+            opt = None
+            if geom is not None and hr['gate'] == 'ok' and hr['pred'] in CAD_D and GROUP[hr['pred']] != 'FRT':
+                opt = rc.decide_option(net, dev, rgb, depth, hr['pred'], intr, geom, det=hr['points'])
+            opt_window.append(opt)
             agg = hole_classifier.aggregate(list(window))
             vote = cnn_vote(cnn_window)
             gate_counts = dict(collections.Counter(
@@ -293,6 +310,18 @@ def inference_loop(source, net, dev, cnn=None):
                 conf = 0.0
             else:
                 pred, grp, conf = '보류', '-', 0.0
+            # 레이더 옵션 윈도 표 → O/X/미정, 품번 = 확정 클래스 × 레이더
+            pred_cls = (agg['pred'] if src == 'hole' and agg['pred'] in CAD_D and agg['n_judged'] >= args.min_judged
+                        else vote['pred'] if src == 'cnn' and vote and vote['pred'] in CAD_D and conf > 0 else None)
+            ov = rc.option_vote([o['status'] for o in opt_window if o], min_judged=args.option_min_judged) if geom is not None else None
+            radar_txt = radar_flag = None
+            if pred_cls and GROUP[pred_cls] == 'FRT':
+                radar_txt = '해당 없음'
+            elif ov:
+                radar_flag = ov['flag']
+                radar_txt = {1: 'O', 0: 'X'}.get(radar_flag, f"미정 ({ov['n_judged']}/{args.option_min_judged})")
+            part = rc.part_lookup(pred_cls, radar_flag) if pred_cls else None
+            last_opt = next((o for o in reversed(opt_window) if o), None)
             # 볼트 피치(depth·mm) 윈도 중앙값 — CAD 157×96 대비 오차 = 스케일 체인 진단
             bl = [r['bolt_mm']['long'] for r in window if r.get('bolt_mm')]
             bs = [r['bolt_mm']['short'] for r in window if r.get('bolt_mm')]
@@ -316,6 +345,10 @@ def inference_loop(source, net, dev, cnn=None):
                            for c, v in hr['points'].items()},
             }
             frame_info['cnn'] = ({'pred': cv[0], 'prob': round(cv[1], 3)} if cv else None)
+            frame_info['option'] = ({'status': opt['status'], 'src': opt['src'],
+                                     'score': round(opt['score'], 2) if opt.get('score') is not None else None,
+                                     'h_mm': round(opt['h_mm']) if opt.get('h_mm') is not None else None,
+                                     'peaks': opt['info'].get('scores'), 'dist_mm': opt['info'].get('dist_mm')} if opt else None)
             result = {
                 'class': pred, 'group': grp, 'confidence': round(conf, 1),
                 'source': src, 'conflict': conflict,
@@ -329,6 +362,8 @@ def inference_loop(source, net, dev, cnn=None):
                 'candidates': candidates_from_D(agg['D_mm'])[:4],
                 'cnn': vote,
                 'bolt_mm': bolt_agg,
+                'radar': radar_txt, 'radar_votes': ov, 'radar_src': (last_opt['src'] if last_opt else None),
+                'part_no': (f"{part['part_no']}-{part['rev']}" if part else None), 'part_name': (part['name'] if part else None),
                 'frame': frame_info,
             }
         except Exception as e:
@@ -336,7 +371,8 @@ def inference_loop(source, net, dev, cnn=None):
                       'source': None, 'conflict': False,
                       'D_mm': None, 'margin_mm': None, 'nearest_mm': None, 'n_judged': 0,
                       'window': len(window), 'gate': None, 'gate_counts': {},
-                      'candidates': [], 'cnn': None, 'frame': None}
+                      'candidates': [], 'cnn': None, 'radar': None, 'radar_votes': None, 'radar_src': None,
+                      'part_no': None, 'part_name': None, 'frame': None}
         result['inference_ms'] = round((time.time() - t0) * 1000, 1)
         result['timestamp'] = time.time()
         with result_lock:
@@ -346,7 +382,7 @@ def inference_loop(source, net, dev, cnn=None):
 # ── MJPEG 스트리밍 ──────────────────────────────────────
 
 POINT_COLORS = (('bolt', (255, 0, 0)), ('corner_hinge', (0, 0, 255)),
-                ('corner_latch', (0, 140, 255)))
+                ('corner_latch', (0, 140, 255)), ('bracket', (255, 0, 255)))
 
 
 def generate_mjpeg():
@@ -372,7 +408,7 @@ def generate_mjpeg():
             cv2.line(frame, (int(a[0] * sc), int(a[1] * sc)),
                      (int(b[0] * sc), int(b[1] * sc)), (0, 200, 255), 1)
         overlay = frame.copy()
-        cv2.rectangle(overlay, (0, 0), (520, 155), (0, 0, 0), -1)
+        cv2.rectangle(overlay, (0, 0), (520, 182), (0, 0, 0), -1)
         cv2.addWeighted(overlay, 0.6, frame, 0.4, 0, frame)
         color = (0, 255, 0) if r['confidence'] > 60 else (0, 200, 255)
         if r.get('source') == 'cnn':
@@ -406,6 +442,11 @@ def generate_mjpeg():
         c_txt = (f" | cnn {cv['pred']} p={cv['prob']:.2f} ({cv['n']}/{cv['n_total']})" if cv else '')
         cv2.putText(frame, f"{b_txt} | CAD {BOLT_PITCH[0]:.0f}x{BOLT_PITCH[1]:.0f}{c_txt}",
                     (10, 138), cv2.FONT_HERSHEY_SIMPLEX, 0.55, (0, 200, 255), 1)
+        ov = r.get('radar_votes') or {}
+        fo = fi.get('option') or {}
+        o_txt = (f"radar {r.get('radar') or '-'}" + (f" (O{ov.get('n_radar', 0)}/X{ov.get('n_none', 0)}/{ov.get('n_judged', 0)})" if ov else '')
+                 + (f" [{fo.get('status')}/{fo.get('src')}]" if fo else '') + f" | part {r.get('part_no') or '-'}")
+        cv2.putText(frame, o_txt, (10, 166), cv2.FONT_HERSHEY_SIMPLEX, 0.55, (255, 120, 255), 1)
         ok, buf = cv2.imencode('.jpg', frame, [cv2.IMWRITE_JPEG_QUALITY, 75])
         if ok:
             yield (b'--frame\r\n'
@@ -442,6 +483,8 @@ def api_camera_info():
     info['model'] = os.path.relpath(args.model, DOOR_DIR)
     info['cnn_model'] = (os.path.relpath(args.cnn_model, DOOR_DIR) if cnn is not None else None)
     info['cnn_mode'] = ('off' if cnn is None else 'every' if args.cnn_every else 'fallback')
+    info['option_mode'] = ('off' if args.no_option else 'hybrid(peaks→rule)')
+    info['channels'] = getattr(net, 'channels', None)
     return jsonify(info)
 
 
@@ -459,6 +502,7 @@ if __name__ == '__main__':
                          f'scripts/model_sync.sh 로 받아오세요')
     print(f'홀 랜드마크 모델: {args.model}')
     net, dev = hole_classifier.load_model(args.model, device=args.device)
+    print(f"  채널 {net.channels} → 레이더 옵션 {'끔(--no_option)' if args.no_option else ('브래킷 피크 + 규칙 하이브리드' if 'bracket' in net.channels else '규칙만(3채널 모델)')}")
     cnn = None
     if not args.no_cnn:
         if os.path.exists(args.cnn_model):

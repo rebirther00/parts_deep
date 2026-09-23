@@ -127,7 +127,10 @@ if __name__ == '__main__':
         print_table(con); sys.exit()
     sys.path.insert(0, os.path.join(DOOR, 'db'))
     from db_log import DBLog
-    mid = DBLog(args.db).find_model(weights_path=os.path.relpath(args.model, DOOR), name='hole_landmarks_resnet18')
+    rel = os.path.relpath(args.model, DOOR); dbl = DBLog(args.db)
+    mid = dbl.find_model(weights_path=rel) or dbl.register_model(   # 2026-09-23 4채널 배포본도 자기 행에 기록
+        name=('hole_landmarks_bracket_resnet18' if 'bracket' in rel else 'hole_landmarks_resnet18'), architecture='ResNet18-FPN-heatmap',
+        in_channels=3, num_classes=(4 if 'bracket' in rel else 3), weights_path=rel, input_size='1280x768', description='배포 모델(20 등록)')
     if mid is None: raise SystemExit('models 테이블에 홀 판별기 모델이 없습니다')
     done = {r[0] for r in con.execute("SELECT session_id FROM session_hole_metrics WHERE model_id=?", (mid,))}
     todo = [r for r in session_rows(con) if args.recompute or r['sid'] not in done]
