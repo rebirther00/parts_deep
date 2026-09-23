@@ -1,0 +1,52 @@
+{
+ "0": {
+  "run": "partno_multi_448_seed42_cvA_fold0",
+  "part_acc": 97.32262382864792,
+  "part_n": 747,
+  "part_ok": 727,
+  "cls_acc": 96.16908850726553,
+  "radar_acc": 100.0,
+  "session_acc": 96.875,
+  "minutes": 7.1
+ },
+ "1": {
+  "run": "partno_multi_448_seed42_cvA_fold1",
+  "part_acc": 100.0,
+  "part_n": 667,
+  "part_ok": 667,
+  "cls_acc": 100.0,
+  "radar_acc": 100.0,
+  "session_acc": 100.0,
+  "minutes": 7.4
+ },
+ "2": {
+  "run": "partno_multi_448_seed42_cvA_fold2",
+  "part_acc": 100.0,
+  "part_n": 601,
+  "part_ok": 601,
+  "cls_acc": 100.0,
+  "radar_acc": 100.0,
+  "session_acc": 100.0,
+  "minutes": 6.2
+ },
+ "3": {
+  "run": "partno_multi_448_seed42_cvA_fold3",
+  "part_acc": 100.0,
+  "part_n": 565,
+  "part_ok": 565,
+  "cls_acc": 100.0,
+  "radar_acc": 100.0,
+  "session_acc": 100.0,
+  "minutes": 9.2
+ },
+ "4": {
+  "run": "partno_multi_448_seed42_cvA_fold4",
+  "part_acc": 100.0,
+  "part_n": 516,
+  "part_ok": 516,
+  "cls_acc": 100.0,
+  "radar_acc": 100.0,
+  "session_acc": 100.0,
+  "minutes": 7.0
+ }
+}

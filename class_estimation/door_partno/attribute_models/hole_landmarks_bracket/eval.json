@@ -1,0 +1,41 @@
+{
+ "holdout": {
+  "tag": "holdout",
+  "n": 16,
+  "six_le8": 1.0,
+  "six_med": 1.2258646776046467,
+  "bracket_med": 3.209211079332956,
+  "bracket_le8": 0.7857142857142857,
+  "radar_n": 10,
+  "radar_judged": 6,
+  "radar_correct": 6,
+  "radar_wrong": 0,
+  "radar_acc": 1.0
+ },
+ "val": {
+  "tag": "val",
+  "n": 427,
+  "six_le8": 1.0,
+  "six_med": 0.5257815304222027,
+  "bracket_med": 4.675856938281067,
+  "bracket_le8": 0.9850746268656716,
+  "radar_n": 327,
+  "radar_judged": 327,
+  "radar_correct": 327,
+  "radar_wrong": 0,
+  "radar_acc": 1.0
+ },
+ "test": {
+  "tag": "test",
+  "n": 446,
+  "six_le8": 1.0,
+  "six_med": 0.5021054814528525,
+  "bracket_med": 4.474152145137966,
+  "bracket_le8": 0.9875,
+  "radar_n": 347,
+  "radar_judged": 347,
+  "radar_correct": 347,
+  "radar_wrong": 0,
+  "radar_acc": 1.0
+ }
+}
