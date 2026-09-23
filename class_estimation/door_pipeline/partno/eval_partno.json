@@ -1,15 +1,15 @@
 {
  "gt_mode": "user",
  "session_all": {
-  "label": "세션 단위 · 전량 (186세션)",
-  "n": 186,
-  "n_gt": 183,
-  "n_gt_missing": 3,
+  "label": "세션 단위 · 전량 (185세션)",
+  "n": 185,
+  "n_gt": 185,
+  "n_gt_missing": 0,
   "judged": 183,
   "correct": 183,
-  "judged_rate": 100.0,
+  "judged_rate": 98.91891891891892,
   "acc_judged": 100.0,
-  "acc_overall": 100.0,
+  "acc_overall": 98.91891891891892,
   "per_part": {
    "110982-02292": {
     "n": 9,
@@ -24,7 +24,7 @@
     "missing": 0
    },
    "110982-02325": {
-    "n": 9,
+    "n": 10,
     "judged": 9,
     "correct": 9,
     "missing": 0
@@ -36,7 +36,7 @@
     "missing": 0
    },
    "110982-02334": {
-    "n": 31,
+    "n": 32,
     "judged": 31,
     "correct": 31,
     "missing": 0
@@ -94,24 +94,6 @@
     "judged": 15,
     "correct": 15,
     "missing": 0
-   },
-   "?E30_E38_door_RH": {
-    "n": 0,
-    "judged": 0,
-    "correct": 0,
-    "missing": 1
-   },
-   "?E30_door_LH_RR": {
-    "n": 0,
-    "judged": 0,
-    "correct": 0,
-    "missing": 1
-   },
-   "?E38_door_LH_RR": {
-    "n": 0,
-    "judged": 0,
-    "correct": 0,
-    "missing": 1
    }
   },
   "wrong": []
@@ -297,18 +279,6 @@
    "gt_missing": false,
    "pred": "110982-02414",
    "pred_cls": "E30_door_LH_FRT",
-   "gt_radar": null,
-   "auto_flag": null,
-   "radar_src": null
-  },
-  {
-   "session_dir": "20260827/E30_door_LH_RR/s_122816",
-   "cls": "E30_door_LH_RR",
-   "split": "val",
-   "gt": null,
-   "gt_missing": true,
-   "pred": null,
-   "pred_cls": null,
    "gt_radar": null,
    "auto_flag": null,
    "radar_src": null
@@ -1169,13 +1139,13 @@
    "session_dir": "20260905/E30_door_LH_RR/s_123451",
    "cls": "E30_E38_door_RH",
    "split": "train",
-   "gt": null,
-   "gt_missing": true,
+   "gt": "110982-02334",
+   "gt_missing": false,
    "pred": null,
    "pred_cls": "E30_E38_door_RH",
-   "gt_radar": null,
+   "gt_radar": 0,
    "auto_flag": null,
-   "radar_src": null
+   "radar_src": "user"
   },
   {
    "session_dir": "20260905/E38_door_LH_RR/s_084706",
@@ -2465,13 +2435,13 @@
    "session_dir": "20260922/E38_door_LH_RR/s_080559",
    "cls": "E38_door_LH_RR",
    "split": null,
-   "gt": null,
-   "gt_missing": true,
+   "gt": "110982-02325",
+   "gt_missing": false,
    "pred": null,
    "pred_cls": "E38_door_LH_RR",
-   "gt_radar": null,
+   "gt_radar": 1,
    "auto_flag": null,
-   "radar_src": null
+   "radar_src": "user"
   },
   {
    "session_dir": "20260922/E38_door_LH_RR/s_081005",

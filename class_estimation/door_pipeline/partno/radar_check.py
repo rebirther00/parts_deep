@@ -6,6 +6,7 @@
   python partno/radar_check.py --dry-run --limit 20  # DB 기록 없이 점수·몽타주만
   python partno/radar_check.py --print               # 현재 표만
   python partno/radar_check.py --accept-auto         # 육안 확인 후 자동 판정을 사용자 확정으로 일괄 승인 (미정 제외)
+  python partno/radar_check.py --set <session_dir> 1|0|clear   # 세션 하나 확정(웹 접근 불가 시 CLI)
   python partno/radar_check.py --recompute --cls E30_door_LH_RR   # 특정 클래스만 재검사 (브래킷 좌표 갱신 후)
 
 프레임 판정:
@@ -263,12 +264,30 @@ if __name__ == '__main__':
     ap.add_argument('--cls', action='append', default=[], help='이 클래스 세션만 (예: 브래킷 좌표 갱신 후 --recompute --cls E30_door_LH_RR)')
     ap.add_argument('--accept-auto', action='store_true',
                     help='자동 판정(auto 1/0)을 사용자 확정(user)으로 일괄 승인 — 웹 /options 육안 확인을 마쳤을 때. 미정(NULL)은 그대로')
+    ap.add_argument('--set', nargs=2, metavar=('SESSION_DIR', 'VALUE'), action='append', default=[],
+                    help="세션 하나를 사용자 확정으로 설정 (웹 /options 버튼과 동일, 외부망 등 웹 접근 불가 시): --set 20260922/E38_door_LH_RR/s_080559 1  (VALUE 1|0|clear)")
     a = ap.parse_args()
     THR_ON, THR_OFF = a.thr_on, a.thr_off
     con = sqlite3.connect(a.db); con.row_factory = sqlite3.Row
     from migrate_options import ensure; ensure(con)
     if a.print:
         print_table(con); sys.exit()
+    if a.set:
+        now = time.strftime('%Y-%m-%d %H:%M')
+        for sd, val in a.set:
+            r = con.execute("SELECT id FROM capture_sessions WHERE session_dir=?", (sd,)).fetchone()
+            if not r: print(f"세션 없음: {sd}"); continue
+            auto = con.execute("SELECT auto_flag, score_med FROM session_radar_check WHERE session_id=?", (r['id'],)).fetchone()
+            if val == 'clear':
+                con.execute("UPDATE capture_sessions SET option_radar=NULL, option_source=NULL, option_note=?, option_at=datetime('now','localtime'), notes=COALESCE(notes || '\n', '') || ? WHERE id=?",
+                            (f"user cleared {now} (cli)", f"[{now}] 옵션 확정 취소 (cli)", r['id'])); print(f"{sd}: 확정 취소")
+            else:
+                v = int(val)
+                con.execute("UPDATE capture_sessions SET option_radar=?, option_source='user', option_note=?, option_at=datetime('now','localtime'), notes=COALESCE(notes || '\n', '') || ? WHERE id=?",
+                            (v, f"user confirm cli (auto {auto['auto_flag'] if auto else None}, score {auto['score_med'] if auto and auto['score_med'] is not None else float('nan'):.2f})",
+                             f"[{now}] 옵션 확정(cli): 레이더 {'O' if v else 'X'} (자동 판정 {auto['auto_flag'] if auto else '미검사'})", r['id']))
+                print(f"{sd}: 레이더 {'O' if v else 'X'} 확정")
+        con.commit(); sys.exit()
     if a.accept_auto:
         now = time.strftime('%Y-%m-%d %H:%M')
         rows = con.execute("SELECT id, session_dir, option_radar FROM capture_sessions WHERE option_source='auto' AND option_radar IS NOT NULL").fetchall()
