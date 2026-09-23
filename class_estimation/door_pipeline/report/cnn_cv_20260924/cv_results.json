@@ -1,0 +1,107 @@
+{
+ "0": {
+  "run": "rgbe_noaux_448_seed42_cv20260924_fold0",
+  "accuracy": 98.98,
+  "total": 883,
+  "correct": 874,
+  "class_acc": {
+   "E23_door_LH_FRT": 100.0,
+   "E25_door_LH_FRT": null,
+   "E25_door_LH_RR": 100.0,
+   "E25_door_RH": 100.0,
+   "E30_E38_door_RH": 100.0,
+   "E30_door_LH_FRT": 100.0,
+   "E30_door_LH_RR": 86.96,
+   "E38_door_LH_FRT": 100.0,
+   "E38_door_LH_RR": 100.0
+  },
+  "best_epoch": 5,
+  "val_loss_spikes": [],
+  "minutes": 114.5
+ },
+ "1": {
+  "run": "rgbe_noaux_448_seed42_cv20260924_fold1",
+  "accuracy": 100.0,
+  "total": 751,
+  "correct": 751,
+  "class_acc": {
+   "E23_door_LH_FRT": 100.0,
+   "E25_door_LH_FRT": null,
+   "E25_door_LH_RR": 100.0,
+   "E25_door_RH": 100.0,
+   "E30_E38_door_RH": 100.0,
+   "E30_door_LH_FRT": 100.0,
+   "E30_door_LH_RR": 100.0,
+   "E38_door_LH_FRT": 100.0,
+   "E38_door_LH_RR": 100.0
+  },
+  "best_epoch": 8,
+  "val_loss_spikes": [
+   1,
+   4
+  ],
+  "minutes": 144.3
+ },
+ "2": {
+  "run": "rgbe_noaux_448_seed42_cv20260924_fold2",
+  "accuracy": 99.58,
+  "total": 714,
+  "correct": 711,
+  "class_acc": {
+   "E23_door_LH_FRT": 100.0,
+   "E25_door_LH_FRT": null,
+   "E25_door_LH_RR": 100.0,
+   "E25_door_RH": 100.0,
+   "E30_E38_door_RH": 100.0,
+   "E30_door_LH_FRT": 100.0,
+   "E30_door_LH_RR": 100.0,
+   "E38_door_LH_FRT": 95.0,
+   "E38_door_LH_RR": 100.0
+  },
+  "best_epoch": 5,
+  "val_loss_spikes": [
+   2
+  ],
+  "minutes": 134.3
+ },
+ "3": {
+  "run": "rgbe_noaux_448_seed42_cv20260924_fold3",
+  "accuracy": 100.0,
+  "total": 707,
+  "correct": 707,
+  "class_acc": {
+   "E23_door_LH_FRT": 100.0,
+   "E25_door_LH_FRT": null,
+   "E25_door_LH_RR": 100.0,
+   "E25_door_RH": 100.0,
+   "E30_E38_door_RH": 100.0,
+   "E30_door_LH_FRT": 100.0,
+   "E30_door_LH_RR": 100.0,
+   "E38_door_LH_FRT": 100.0,
+   "E38_door_LH_RR": 100.0
+  },
+  "best_epoch": 3,
+  "val_loss_spikes": [],
+  "minutes": 170.9
+ },
+ "4": {
+  "run": "rgbe_noaux_448_seed42_cv20260924_fold4",
+  "accuracy": 100.0,
+  "total": 694,
+  "correct": 694,
+  "class_acc": {
+   "E23_door_LH_FRT": 100.0,
+   "E25_door_LH_FRT": null,
+   "E25_door_LH_RR": 100.0,
+   "E25_door_RH": 100.0,
+   "E30_E38_door_RH": 100.0,
+   "E30_door_LH_FRT": 100.0,
+   "E30_door_LH_RR": 100.0,
+   "E38_door_LH_FRT": 100.0,
+   "E38_door_LH_RR": 100.0
+  },
+  "best_epoch": 6,
+  "val_loss_spikes": [],
+  "minutes": 148.8
+ }
+}
