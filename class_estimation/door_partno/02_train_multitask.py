@@ -7,7 +7,7 @@
 입력: door_pipeline 과 동일한 RGBE(RGB + Canny) 전체 프레임 레터박스, NoAuxResNet18 백본. 초기화 기본 seed916 정식 run(백본+9클래스 헤드), --init imagenet 가능.
 데이터: labels/partno_manifest.json (partno_labels.py) — train/val/test 는 DB 세션 단위 split 그대로.
 손실: multi = CE(클래스, sqrt 역빈도 가중) + w·BCE(레이더, GT 있는 RR/RH 프레임만) / part14 = CE(품번 14, sqrt 가중; 품번 미정 프레임 제외)
-선택: val 복합 점수(클래스 정확도와 레이더 정확도 평균 / part14 는 품번 정확도) 최대 에폭, 조기 종료 patience.
+선택: val 복합 점수(클래스 정확도와 레이더 정확도 평균 / part14 는 품번 정확도) 최대 에폭(동점이면 val 손실 최소), 조기 종료 patience.
 산출: artifacts/<run>/{model.pth, split_info.json, train_log.json} + DB(models/training_sessions).
 """
 import argparse, json, os, random, sys, time
@@ -124,7 +124,7 @@ if __name__ == '__main__':
     json.dump(dict(run=RUN, mode=args.mode, image_size=args.image_size, seed=args.seed, init=args.init, class_names=pl.CLASSES, parts=pl.PARTS,
                    train_paths=[r['path'] for r in tr], val_paths=[r['path'] for r in va], test_paths=[r['path'] for r in te]),
               open(os.path.join(RUN_DIR, 'split_info.json'), 'w'), ensure_ascii=False, indent=1)
-    best, best_ep, wait, hist, t0, status = None, None, 0, [], time.time(), 'completed'
+    best, best_loss, best_ep, wait, hist, t0, status = None, None, None, 0, [], time.time(), 'completed'
     try:
         for ep in range(args.epochs):
             a = run_epoch(net, dl_tr, dev, opt, w_cls, w_part); b = run_epoch(net, dl_va, dev, None, w_cls, w_part)
@@ -132,8 +132,9 @@ if __name__ == '__main__':
             score = (b['cls_acc'] + b['radar_acc']) / 2 if args.mode == 'multi' else b['part_acc']
             hist.append(dict(epoch=ep + 1, train=a, val=b, score=score, lr=opt.param_groups[0]['lr']))
             db.log_epoch(sess, ep + 1, round(a['loss'], 6), round(b['loss'], 6), round(score, 4), opt.param_groups[0]['lr'], round(time.time() - t0, 1))
-            improved = best is None or score > best
-            if improved: best, best_ep, wait = score, ep + 1, 0; torch.save(net.state_dict(), os.path.join(RUN_DIR, 'model.pth'))
+            # 선택: 복합 점수 최대, 동점이면 val 손실 최소(2026-09-23: 점수가 일찍 100% 에 닿아 덜 수렴한 2~5에폭이 저장되던 문제)
+            improved = best is None or score > best or (score == best and b['loss'] < best_loss)
+            if improved: best, best_loss, best_ep, wait = score, b['loss'], ep + 1, 0; torch.save(net.state_dict(), os.path.join(RUN_DIR, 'model.pth'))
             else: wait += 1
             print(f"  ep{ep + 1:3d} train L{a['loss']:.4f} cls {a['cls_acc']:.1f} radar {a['radar_acc']:.1f} part {a['part_acc']:.1f} | "
                   f"val L{b['loss']:.4f} cls {b['cls_acc']:.1f} radar {b['radar_acc']:.1f} part {b['part_acc']:.1f} | score {score:.2f} best {best:.2f}@{best_ep} {'*' if improved else ''} [{time.time() - t0:.0f}s]", flush=True)

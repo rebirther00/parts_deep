@@ -32,6 +32,9 @@ if cv:
         r = json.load(open(p)); tot = sum(v['part_n'] for v in r.values()); ok = sum(v['part_ok'] for v in r.values())
         L.append(f"- {os.path.basename(p)}: 품번 합산 {ok}/{tot} = **{100 * ok / max(1, tot):.1f}%**, fold별 {[round(v['part_acc'], 1) for v in r.values()]}")
     L.append("")
+L += ["## 해석 (2026-09-23)", "",
+      "- CNN 의 블라인드 오류는 전부 형상군(E30↔E38 LH FRT, 폭 차 47mm)이고 레이더 헤드 오류는 0. 학습률 1e-4 재실험: 2에폭 체크포인트(seed916 에 가까움) 99.8%, 오래 학습한 run 은 헤드 유무와 무관하게 91%대 → 학습 세션 외관에 과적합하는 CNN 의 구조적 한계.",
+      "- 홀 거리 규칙과 4채널 검출기는 같은 세션에서 100% 유지 → 형상군은 기하, 레이더는 브래킷 채널(+규칙 폴백)로 운영.", ""]
 bl = sorted(glob.glob(os.path.join(HERE, 'blind_*.json')))
 if bl:
     L += ["## 블라인드 평가 (학습에 쓰지 않은 세션)", ""]
