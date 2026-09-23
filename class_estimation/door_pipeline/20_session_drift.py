@@ -97,10 +97,12 @@ def compute(net, dev, r):
     return out
 
 
-def print_table(con):
+def print_table(con, mid=None):
+    if mid is None:   # 모델 미지정: 가장 최근에 기록한 모델 (검출기 교체 후 모델별 행이 공존)
+        r = con.execute("SELECT model_id FROM session_hole_metrics ORDER BY evaluated_at DESC LIMIT 1").fetchone(); mid = r[0] if r else None
     rows = con.execute(
         """SELECT m.*, s.session_dir, s.started_at FROM session_hole_metrics m JOIN capture_sessions s ON s.id=m.session_id
-           ORDER BY s.started_at""").fetchall()
+           WHERE m.model_id=? ORDER BY s.started_at""", (mid,)).fetchall()
     print(f"\n{'세션':34s} {'클래스':16s} {'n':>3s} {'판정':>3s} {'D med':>7s} {'CAD':>5s} {'dev':>6s} {'K_sess':>7s} {'z':>6s} {'tilt':>4s} {'마진':>5s} 경보")
     for m in rows:
         flag = []
@@ -147,4 +149,4 @@ if __name__ == '__main__':
             print(f"  [{i + 1}/{len(todo)}] {r['session_dir']} {r['cls']} n={o['n_frames']} judged={o['n_judged']} "
                   f"dev={o.get('dev_mm', float('nan')):+.1f} K={o.get('k_session', float('nan')):.4f} "
                   f"devP={o.get('dev_pix_mm', float('nan')):+.1f} S={o.get('s_session', float('nan')):.1f}  {time.time() - t0:.0f}s")
-    print_table(con)
+    print_table(con, mid)

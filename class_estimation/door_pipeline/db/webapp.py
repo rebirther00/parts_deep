@@ -359,7 +359,8 @@ def latest_benchmarks(con):
                             used=100.0 * r["correct"] / max(1, r["total_samples"]),
                             theta_std=med("theta"), tilt_std=med("tilt"), z_std=med("z"), at=r["evaluated_at"][:10])
         rows = con.execute("""SELECT m.k_session, m.k_applied, m.dev_mm, m.s_session, m.s_ref, m.dev_pix_mm FROM session_hole_metrics m JOIN capture_sessions s ON s.id=m.session_id
-                              WHERE m.k_session IS NOT NULL ORDER BY s.started_at DESC LIMIT 7""").fetchall()
+                              WHERE m.k_session IS NOT NULL AND m.model_id = (SELECT model_id FROM session_hole_metrics ORDER BY evaluated_at DESC LIMIT 1)
+                              ORDER BY s.started_at DESC LIMIT 7""").fetchall()
         if rows:
             px = [x for x in rows if x["s_session"] and x["s_ref"]]
             if px:   # 2026-09-24 픽셀 폭 판정: S_session(픽셀 폭 일관성)·dev_pix 기준
@@ -1157,7 +1158,9 @@ def drift():
     try:
         raw = con.execute(
             """SELECT m.*, s.session_dir, s.started_at FROM session_hole_metrics m
-               JOIN capture_sessions s ON s.id=m.session_id ORDER BY s.started_at""").fetchall()
+               JOIN capture_sessions s ON s.id=m.session_id
+               WHERE m.model_id = (SELECT model_id FROM session_hole_metrics ORDER BY evaluated_at DESC LIMIT 1)
+               ORDER BY s.started_at""").fetchall()   # 검출기 모델 교체(2026-09-23 4채널) 후 최신 모델 행만 (모델별 세션 1행)
     except sqlite3.OperationalError:
         raw = []
     rows = []
