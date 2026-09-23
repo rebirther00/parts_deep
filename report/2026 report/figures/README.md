@@ -21,12 +21,14 @@
 | 그림 15 | fig15_홀검출_현장판정예.jpg | 현장 판정 예 — 홀 6점 검출과 모서리 홀 거리 D=1,037mm → E25_door_LH_RR | 내부회의 보고 자료 20260910 9P |
 | 그림 16 | fig16_미등록도어_보류_판별예.jpg | 미등록 기종 처리 — (a) E23 도어(D=461mm)는 D 범위·unknown 게이트로 보류, (b) E25 LH FRT(D=723mm) 판별 | report/poster_20260908/photo1_hole_detection.jpg |
 | 그림 17 | fig18_CNN_혼동행렬_실패사례.png | 현장 재학습 CNN 결과 — (a) seed916 test 596장 혼동행렬, (b) 초기 세션 실패 사례(프로토콜 이전 촬영 조건) | artifacts/rgbe_noaux_448_seed916_datasets_factory_v2/factory_confusion_matrix.png, report/poster_20260908/fig8_failure_case.jpg |
-| 그림 18 | fig17_홀판별기_혼동행렬.png | 홀 판별기 혼동행렬 — (a) 현장 test 596장, (b) 블라인드 663장(보류 열 포함, 보류 0) | attribute_models/hole_landmarks/*_confusion_matrix.png |
-| 그림 19 | fig24_홀판별기_판정_보류_샘플.png | 홀 판별기 판정·보류 샘플 — (a) 기종별 판정 성공 예, (b) 게이트 보류 예(홀 프레임 밖·미검출·기하 불일치 등) | report/hole_analysis/samples/montage_success.png, montage_abstain.png |
-| 그림 20 | fig21_드리프트_시계열.png | 세션별 깊이 스케일 지표 K_session(위)과 판정 마진 소모량 dev(아래) 시계열(2026-08-27~09-16, 151세션) | DB session_hole_metrics로 생성 |
-| 그림 21 | fig20_CAD_홀추출.png | CAD 홀 추출 결과 — 관측면 투영에 볼트홀 4점(파랑)과 코너 홀(주황)을 표시 | pos_estimation/pos_pipeline/artifacts/cad_holes_debug/*.png |
-| 그림 22 | fig19_자세추정_오버레이.jpg | 현장 프레임 자세 추정 결과 — 도어 좌표축과 추정 자세로 재투영한 CAD 홀(o) 오버레이 | 내부회의 보고 자료 20260910 11P |
-| 그림 23 | fig22_자동공정_로드맵.png | 자동 공정 로드맵(계획 부분은 가안) | report/poster_20260908/fig5_roadmap.png |
+| 그림 18 | fig25_레이더_브래킷_CAD_크롭.png | 레이더 옵션 규칙 검사 — (a) RADAR 사양 CAD의 브래킷 홀 2개 추출, (b) 레이더 O 세션 크롭(어두운 홀 2개, 초록), (c) 레이더 X 세션 크롭(빨강) | class_estimation/door_pipeline/partno/artifacts/bracket_E25_door_RH.png, radar_crops/20260828_s_073428.jpg·s_085518.jpg |
+| 그림 19 | fig26_웹도구_옵션확인_화면.png | DB 웹 도구 옵션·품번 확인 화면(/options, 2026-09-23 캡처) — 자동 판정 크롭·점수·표를 보고 세션별 레이더 O/X를 확정 | webapp.py 화면 캡처 |
+| 그림 20 | fig17_홀판별기_혼동행렬.png | 홀 판별기 혼동행렬 — (a) 현장 test 596장, (b) 블라인드 663장(보류 열 포함, 보류 0) | attribute_models/hole_landmarks/*_confusion_matrix.png |
+| 그림 21 | fig24_홀판별기_판정_보류_샘플.png | 홀 판별기 판정·보류 샘플 — (a) 기종별 판정 성공 예, (b) 게이트 보류 예(홀 프레임 밖·미검출·기하 불일치 등) | report/hole_analysis/samples/montage_success.png, montage_abstain.png |
+| 그림 22 | fig21_드리프트_시계열.png | 세션별 깊이 스케일 지표 K_session(위)과 판정 마진 소모량 dev(아래) 시계열(2026-08-27~09-16, 151세션) | DB session_hole_metrics로 생성 |
+| 그림 23 | fig20_CAD_홀추출.png | CAD 홀 추출 결과 — 관측면 투영에 볼트홀 4점(파랑)과 코너 홀(주황)을 표시 | pos_estimation/pos_pipeline/artifacts/cad_holes_debug/*.png |
+| 그림 24 | fig19_자세추정_오버레이.jpg | 현장 프레임 자세 추정 결과 — 도어 좌표축과 추정 자세로 재투영한 CAD 홀(o) 오버레이 | 내부회의 보고 자료 20260910 11P |
+| 그림 25 | fig22_자동공정_로드맵.png | 자동 공정 로드맵(계획 부분은 가안) | report/poster_20260908/fig5_roadmap.png |
 
 - fig10·fig11: `db/webapp.py`(포트 5051 임시 인스턴스, 현재 코드) 화면을 headless Chromium으로 캡처. 대시보드 CNN 카드는 캡처 시점의 마지막 평가 기록(run #10 블라인드 84.3%)을 표시하고 있으므로 필요 시 재캡처.
 - fig07·fig21: DB(door_pipeline.db) 조회로 생성한 matplotlib 차트(세션·쌍 수, 세션별 K_session·dev). 데이터가 늘면 재생성 필요.
