@@ -90,3 +90,6 @@ class_estimation/door_pipeline/artifacts/rgbe_noaux_448_seed916_datasets_factory
 
 # 발표자료(pptx)는 git 미추적 (사용자 지시 2026-09-10)
 발표자료/
+
+# 2차년도 연차보고서 그림 폴더는 png 전역 제외의 예외
+!report/2026 report/figures/*.png
