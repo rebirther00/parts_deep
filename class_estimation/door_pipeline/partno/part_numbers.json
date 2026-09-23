@@ -20,7 +20,7 @@
    "drawing": "E30) 110982-02414H LH FRT.pdf", "step": "E30) 110982-02414H LH FRT.stp"},
   {"part_no": "110982-02447", "rev": "L", "name": "DOOR ASSY,SIDE;LH,FR,W_AVM", "models": ["E35", "E38"], "position": "LH_FRT", "radar": null,
    "class_name": "E38_door_LH_FRT", "width_mm": 916, "outer_panel": "110982-02388B", "mid_reinf": "910303-00053A",
-   "drawing": "E35,E38) 110982-02447L LH FRT.PDF", "step": "E35,E38) 110982-02447L LH FRT.stp", "note": "W_AVM 사양. AVM 미장착 FRT 품번 존재 여부 공장 확인 필요"},
+   "drawing": "E35,E38) 110982-02447L LH FRT.PDF", "step": "E35,E38) 110982-02447L LH FRT.stp", "note": "W_AVM 사양(도면 1종). AVM 은 구분하지 않음(사용자 결정 2026-09-23)"},
 
   {"part_no": "110982-02427", "rev": "C", "name": "DOOR,SIDE;LH,RR,W_O RADAR", "models": ["E23", "E25"], "position": "LH_RR", "radar": 0,
    "class_name": "E25_door_LH_RR", "width_mm": 1141, "outer_panel": "110982-02479B", "mid_reinf": "910303-00064",
