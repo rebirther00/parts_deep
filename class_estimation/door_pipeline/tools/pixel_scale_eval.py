@@ -24,7 +24,13 @@ args = ap.parse_args()
 res = json.load(open(args.json))
 rows = [r for v in res.values() for r in v['rows']]
 con = sqlite3.connect(args.db)
-dbcls = dict(con.execute("select session_dir, class_name from capture_sessions"))
+# 정정 라벨은 images.class_id(classes.name)에, 무효화는 images.is_valid=0 에 있다 (capture_sessions.class_name 은 폴더명 그대로)
+dbcls, invalid = {}, set()
+for sd, cls, nv in con.execute("""select s.session_dir, c.name, sum(i.is_valid) from capture_sessions s
+        join images i on i.session_id=s.id join classes c on c.id=i.class_id group by s.id, c.name order by 3"""):
+    if nv: dbcls[sd] = cls
+for (sd,) in con.execute("select s.session_dir from capture_sessions s join images i on i.session_id=s.id group by s.id having sum(i.is_valid)=0"):
+    invalid.add(sd)
 
 def sess_of(r):
     """(세션 키, 날짜 YYYY-MM-DD, DB 정정 라벨)"""
@@ -39,9 +45,11 @@ def sess_of(r):
     return os.path.dirname(p), '', r['cls']
 
 ok = [r for r in rows if r.get('gate') == 'ok' and r.get('span_px') and r.get('fx') and r.get('serial') is not None]
-print(f"rows {len(rows)}  gate ok+span/fx/serial {len(ok)}")
 for r in ok:
     r['sess'], r['date'], r['cls_db'] = sess_of(r)
+n_inv = sum(1 for r in ok if r['sess'] in invalid)
+ok = [r for r in ok if r['sess'] not in invalid]
+print(f"rows {len(rows)}  gate ok+span/fx/serial {len(ok)} (무효 세션 프레임 {n_inv}장 제외, 라벨은 DB 정정 라벨)")
 # ① S 보정
 S = {}
 for sn in sorted(set(r['serial'] for r in ok)):
@@ -63,8 +71,11 @@ for r in ok:
     r['pred_pix'] = judge(r['D_pix'], None, args.unknown_mm)[0]
     r['warn'] = (r.get('z_mm') is not None and not (PIXEL_GUARD['z'][0] <= r['z_mm'] <= PIXEL_GUARD['z'][1])) or \
                 (r.get('tilt_deg') is not None and r['tilt_deg'] > PIXEL_GUARD['tilt'])
-    if r['warn']: guard[r['sess']] += 1
-    if r['pred_pix'] != r['pred']: chg[(r['cls_db'], r['pred'], r['pred_pix'])] += 1
+    if r['warn']:
+        guard[r['sess']] += 1
+        if r.get('D_mm'):   # classify 와 동일: 가드 발동 시 depth D 로 폴백
+            r['D_pix'], r['pred_pix'] = r['D_mm'], r['pred']
+    if r['pred_pix'] != r['pred']: chg[(r['sess'], r['cls_db'], r['pred'], r['pred_pix'])] += 1
 ok = [r for r in ok if 'D_pix' in r]
 print(f"\n프레임 판정 변경 depth→pixel: {sum(chg.values())}/{len(ok)}  {dict(chg) if chg else ''}")
 print(f"depth 판정 정확도 {100 * np.mean([r['pred'] == r['cls_db'] for r in ok]):.2f}%  →  pixel {100 * np.mean([r['pred_pix'] == r['cls_db'] for r in ok]):.2f}%  (DB 라벨 기준, gate ok 프레임)")

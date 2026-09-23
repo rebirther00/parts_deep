@@ -50,10 +50,10 @@ K_CAMERA = {
 # 세션별 depth 스케일 ±1.4%·겉보기 tilt 5~11° 는 depth 맵 아티팩트(ZED 세션별 자기보정 추정) → 상수 K 로는 |dev| p95 15mm·경보 10/185,
 # 픽셀 폭 기준은 p95 5mm·경보 0. S_PIXEL = 기준 세션들의 CAD_D·fx/픽셀폭 중앙값(mm, "유효 기준 거리"). 8종 클래스별 편차 0.35%.
 S_PIXEL = {
-    54910212: 1478.5,   # 현장 ZED X Mini 협각, 2026-09-23 8/27~9/7 세션×4프레임 239장 직접 보정(잠정) — 전량 재평가 후 tools/pixel_scale_eval.py 로 재보정
+    54910212: 1477.8,   # 현장 ZED X Mini 협각, 2026-09-24 8/27~9/7 기준 1,747프레임 보정(tools/pixel_scale_eval.py, 프레임 std 0.16%, 9종 클래스 ±0.3%)
 }
 PIXEL_GUARD = dict(z=(1400.0, 1500.0), tilt=12.0)   # depth 평면으로 잰 도어 z(mm)·tilt(°) 가 이 밖이면 자세 이상 → depth 방식으로 폴백 + pose_warn
-SCALE_DEFAULT = 'depth'   # 'pixel' 전환은 186세션 전량 검증(17 --scale pixel, 판정 변경 0·dev p95≤5mm) 후
+SCALE_DEFAULT = 'pixel'   # 2026-09-24 전환: 185세션 3,762프레임 판정 변경 0, 세션 |dev| p95 15.1→4.1mm·경보 10→0·최소 마진 12→17mm (depth 는 비교용 --scale depth)
 
 
 def active_k(intrinsics):

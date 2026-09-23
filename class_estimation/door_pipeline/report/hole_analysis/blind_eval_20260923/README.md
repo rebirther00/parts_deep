@@ -136,3 +136,11 @@ FRT 최소 간격 41mm 의 절반 20.5mm 대비 최악 마진: A −0.2mm(9/22 E
   2. `python tools/pixel_scale_eval.py attribute_models/hole_landmarks/eval_classifier_datasets_factory_collect.json --sessions` — S 재보정(기준 8/27~9/7, DB 라벨), 판정 변경 0·|dev| p95≤5mm·최소 마진 상승·가드 발동 세션 확인
   3. 통과 시 `S_PIXEL` 갱신 → `SCALE_DEFAULT='pixel'` → `17 --scale pixel` 로 test·collect 기록(DB) → 18 기본 반영
   4. `20_session_drift.py`·webapp `/drift` 에 span 기반 S 지표(픽셀 폭 일관성)·z·tilt 경보 추가, K 경보는 참고로 강등
+
+### 전환 완료 (2026-09-24, 재부팅·GPU 복구 후)
+- 186세션 전량 17(depth 모드, 진단 필드) → `tools/pixel_scale_eval.py`: **S = 1477.8mm**(기준 8/27~9/7 1,747프레임, 프레임 std 0.16%, 9종 클래스 −0.15~+0.30%, E23 포함).
+  무효 2세션 제외 185세션 3,762프레임 **판정 변경 0**(정확도 99.97% 동일), 세션 |dev| med 6.3→1.4·p95 15.1→4.1·max 20.7→11.1mm, **경보 10→0**, 최소 마진 12.1→17.2(p5 19.6→36.5)mm, 가드 발동 2세션 각 1프레임.
+- `hole_classifier.S_PIXEL[54910212]=1477.8`, **`SCALE_DEFAULT='pixel'`** → 17/18/20 기본. `17 --scale pixel` 기록: test 596/596·D_src pixel 596.
+- `20_session_drift.py`·DB `session_hole_metrics` 에 `span_med·s_session·s_ref·d_pix_med·dev_pix_mm·margin_pix_min` 추가(`migrate_session_metrics.py` 멱등 ALTER), 전량 `--recompute`.
+  webapp `/drift`·대시보드 카드는 S_session(±0.5%)·dev_pix 를 주 지표로, K_session·dev(depth)는 참고로 강등.
+- 5-fold 세션 CV(새 레시피 sqrt 가중치, `scripts/session_cv.py --tag cv20260924`, 186세션) 재부팅 후 시작 — 결과는 별도 기록.

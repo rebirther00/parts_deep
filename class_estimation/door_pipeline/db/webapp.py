@@ -177,8 +177,8 @@ DASH = """
     <div class="lbl">자세 CAD 정합 잔차 RMS 중앙값 (6홀, {{ b.pose.sessions if b.pose else '' }}세션 {{ b.pose.n if b.pose else '' }}프레임, 판정률 {{ '%.1f%%' % b.pose.used if b.pose else '' }}) · {{ b.pose.at if b.pose else '' }}</div></div>
   <div class="card"><div class="num">{{ ('%.2f° / %.2f°' % (b.pose.theta_std, b.pose.tilt_std)) if b.pose else '—' }}</div>
     <div class="lbl">자세 반복 정밀도 std 중앙값 θ / tilt (세션 내; z std {{ '%.1f mm' % b.pose.z_std if b.pose else '' }})</div></div>
-  <div class="card"><div class="num {{ 'warn' if b.drift and b.drift.warn else '' }}">{{ '%.4f' % b.drift.k if b.drift else '—' }}</div>
-    <div class="lbl">최근 7세션 K_session 중앙값 (기준 {{ '%.4f' % b.drift.kref if b.drift else '' }}, 경보 {{ b.drift.warn if b.drift else '' }}/7) · <a href="{{ url_for('drift') }}">드리프트</a></div></div>
+  <div class="card"><div class="num {{ 'warn' if b.drift and b.drift.warn else '' }}">{{ ('%.1f' if b.drift.pixel else '%.4f') % b.drift.k if b.drift else '—' }}</div>
+    <div class="lbl">최근 7세션 {{ 'S_session(픽셀 폭)' if b.drift and b.drift.pixel else 'K_session' }} 중앙값 (기준 {{ ('%.1f' if b.drift.pixel else '%.4f') % b.drift.kref if b.drift else '' }}, 경보 {{ b.drift.warn if b.drift else '' }}/7) · <a href="{{ url_for('drift') }}">드리프트</a></div></div>
 </div>
 <p class="muted small">정확도 = 판정 프레임 중 정답 비율. 자세 잔차 = 측정 홀 6점을 CAD 홀 패턴에 강체 정합한 뒤 남는 홀별 거리 오차 RMS(GT 아님, 형상 일치도). 절대 정확도는 레이저 트래커 GT 몫.</p>
 
@@ -358,11 +358,16 @@ def latest_benchmarks(con):
                             sessions=sum(v.get("sessions", 0) for v in vals), n=r["total_samples"],
                             used=100.0 * r["correct"] / max(1, r["total_samples"]),
                             theta_std=med("theta"), tilt_std=med("tilt"), z_std=med("z"), at=r["evaluated_at"][:10])
-        rows = con.execute("""SELECT m.k_session, m.k_applied, m.dev_mm FROM session_hole_metrics m JOIN capture_sessions s ON s.id=m.session_id
+        rows = con.execute("""SELECT m.k_session, m.k_applied, m.dev_mm, m.s_session, m.s_ref, m.dev_pix_mm FROM session_hole_metrics m JOIN capture_sessions s ON s.id=m.session_id
                               WHERE m.k_session IS NOT NULL ORDER BY s.started_at DESC LIMIT 7""").fetchall()
         if rows:
-            out["drift"] = N(k=statistics.median([x["k_session"] for x in rows]), kref=rows[0]["k_applied"] or 0.0,
-                             warn=sum(1 for x in rows if abs(x["dev_mm"] or 0) > DRIFT_DEV_WARN or (x["k_applied"] and abs(x["k_session"] / x["k_applied"] - 1) > DRIFT_K_WARN)))
+            px = [x for x in rows if x["s_session"] and x["s_ref"]]
+            if px:   # 2026-09-24 픽셀 폭 판정: S_session(픽셀 폭 일관성)·dev_pix 기준
+                out["drift"] = N(k=statistics.median([x["s_session"] for x in px]), kref=px[0]["s_ref"], pixel=True,
+                                 warn=sum(1 for x in px if abs(x["dev_pix_mm"] or 0) > DRIFT_DEV_WARN or abs(x["s_session"] / x["s_ref"] - 1) > DRIFT_S_WARN))
+            else:
+                out["drift"] = N(k=statistics.median([x["k_session"] for x in rows]), kref=rows[0]["k_applied"] or 0.0, pixel=False,
+                                 warn=sum(1 for x in rows if abs(x["dev_mm"] or 0) > DRIFT_DEV_WARN or (x["k_applied"] and abs(x["k_session"] / x["k_applied"] - 1) > DRIFT_K_WARN)))
     except (sqlite3.OperationalError, ValueError, TypeError, KeyError):
         pass
     return type("BM", (), out)
@@ -1060,7 +1065,7 @@ def training():
 CLASS_COLORS = {"E23_door_LH_FRT": "#7c3aed", "E25_door_LH_FRT": "#2563eb", "E30_door_LH_FRT": "#0891b2", "E38_door_LH_FRT": "#059669",
                 "E25_door_LH_RR": "#d97706", "E30_door_LH_RR": "#dc2626", "E38_door_LH_RR": "#db2777",
                 "E25_door_RH": "#65a30d", "E30_E38_door_RH": "#6b7280"}
-DRIFT_DEV_WARN, DRIFT_K_WARN = 15.0, 0.01
+DRIFT_DEV_WARN, DRIFT_K_WARN, DRIFT_S_WARN = 15.0, 0.01, 0.005
 
 
 def _ts(s):
@@ -1095,7 +1100,8 @@ def drift_svg(rows, key, title, band=None, fmt="{:.1f}", ref=None):
         out.append(f'<text x="{X(max(x0, t)):.1f}" y="{H-8}">{d[5:]}</text>')
     for r, v in pts:
         c = CLASS_COLORS.get(r["class_name"], "#999")
-        warn = (key == "dev_mm" and abs(v) > DRIFT_DEV_WARN) or (key == "k_session" and ref and abs(v / ref - 1) > DRIFT_K_WARN)
+        warn = (key in ("dev_mm", "dev_pix_mm") and abs(v) > DRIFT_DEV_WARN) or (key == "k_session" and ref and abs(v / ref - 1) > DRIFT_K_WARN) \
+            or (key == "s_session" and ref and abs(v / ref - 1) > DRIFT_S_WARN)
         out.append(f'<circle cx="{X(_ts(r["started_at"])):.1f}" cy="{Y(v):.1f}" r="{5 if warn else 3.5}" fill="{c}" '
                    f'{"stroke=var(--flag) stroke-width=2" if warn else ""}><title>{r["session_dir"]} {r["class_name"]} {fmt.format(v)}</title></circle>')
     out.append("</svg>")
@@ -1104,31 +1110,38 @@ def drift_svg(rows, key, title, band=None, fmt="{:.1f}", ref=None):
 
 DRIFT = """
 <h1>드리프트 — 세션별 홀 판별기 지표</h1>
-<p class="muted small">20_session_drift.py 가 세션마다 기록. <b>K_session</b> = CAD_D / median(역투영 원거리) — 카메라 depth 스케일(클래스 무관), 기준 K {{ kref }} 대비 ±1% 밖이면 경보.
-<b>dev</b> = median(D) − CAD_D — 판정 마진 소모, |dev| &gt; 15mm 경보. z·tilt 는 도어 평면 깊이·기울기(원인 추적용). 점 색 = 클래스, 굵은 테두리 = 경보.</p>
+<p class="muted small">20_session_drift.py 가 세션마다 기록. <b>S_session</b> = CAD_D·fx / median(픽셀 폭) — 픽셀 폭 일관성(2026-09-24 픽셀 폭 판정 전환 후 주 지표), 기준 S_PIXEL {{ sref }} 대비 ±0.5% 밖이면 경보.
+<b>dev_pix</b> = 픽셀 D 중앙값 − CAD_D — 현행 판정의 마진 소모, |dev| &gt; 15mm 경보. <b>K_session</b>(depth 스케일, 기준 {{ kref }} ±1%)·dev(depth D)는 depth 경로 참고 지표.
+z·tilt 는 depth 평면 깊이·기울기(depth 아티팩트 추적용). 점 색 = 클래스, 굵은 테두리 = 경보.</p>
 <div class="cards">
   <div class="card"><div class="num">{{ n }}</div><div class="lbl">세션</div></div>
+  <div class="card"><div class="num">{{ '%.1f' % smed if smed else '—' }}</div><div class="lbl">S_session 중앙값 (std {{ '%.2f' % (100*sstd) if sstd is not none else '—' }}%)</div></div>
+  <div class="card"><div class="num">{{ '%+.1f' % devpmed if devpmed is not none else '—' }}</div><div class="lbl">dev_pix 중앙값 mm</div></div>
   <div class="card"><div class="num">{{ '%.4f' % kmed if kmed else '—' }}</div><div class="lbl">K_session 중앙값 (std {{ '%.2f' % (100*kstd) if kstd is not none else '—' }}%)</div></div>
-  <div class="card"><div class="num">{{ '%+.1f' % devmed if devmed is not none else '—' }}</div><div class="lbl">dev 중앙값 mm</div></div>
+  <div class="card"><div class="num">{{ '%+.1f' % devmed if devmed is not none else '—' }}</div><div class="lbl">dev(depth) 중앙값 mm</div></div>
   <div class="card"><div class="num {{ 'warn' if nwarn else 'ok' }}">{{ nwarn }}</div><div class="lbl">경보 세션</div></div>
   <div class="card"><div class="num">{{ latest }}</div><div class="lbl">최근 세션</div></div>
 </div>
+<div class="box" style="margin-bottom:12px">{{ svg_s|safe }}</div>
+<div class="box" style="margin-bottom:12px">{{ svg_devp|safe }}</div>
 <div class="box" style="margin-bottom:12px">{{ svg_k|safe }}</div>
 <div class="box" style="margin-bottom:12px">{{ svg_dev|safe }}</div>
 <div class="box" style="margin-bottom:12px">{{ svg_z|safe }}</div>
 <p class="small">{% for c, col in colors.items() %}<span style="display:inline-block;width:10px;height:10px;background:{{ col }};border-radius:50%;margin:0 4px 0 10px"></span>{{ c }}{% endfor %}</p>
 <h2>세션 표 (최근순)</h2>
 <div class="tbl tall"><table>
-<tr><th>세션</th><th>클래스</th><th class="n">n</th><th class="n">판정</th><th class="n">D med</th><th class="n">CAD</th><th class="n">dev</th><th class="n">K_session</th><th class="n">z</th><th class="n">tilt</th><th class="n">마진 min</th><th>경보</th><th>기록</th></tr>
+<tr><th>세션</th><th>클래스</th><th class="n">n</th><th class="n">판정</th><th class="n">D_pix med</th><th class="n">CAD</th><th class="n">dev_pix</th><th class="n">S_session</th><th class="n">마진P min</th><th class="n">dev(depth)</th><th class="n">K_session</th><th class="n">z</th><th class="n">tilt</th><th>경보</th><th>기록</th></tr>
 {% for m in rows %}
 <tr class="click" onclick="location='{{ url_for('session_detail', sid=m['session_id']) }}'">
   <td>{{ m['session_dir'] }}</td><td>{{ m['class_name'] }}</td>
   <td class="n">{{ m['n_frames'] }}</td><td class="n">{{ m['n_judged'] }}</td>
-  <td class="n">{{ '%.1f' % m['d_med'] if m['d_med'] else '—' }}</td><td class="n">{{ m['cad_d'] or '—' }}</td>
+  <td class="n">{{ '%.1f' % m['d_pix_med'] if m['d_pix_med'] else '—' }}</td><td class="n">{{ m['cad_d'] or '—' }}</td>
+  <td class="n {{ 'warn' if m['dev_pix_mm'] is not none and m['dev_pix_mm']|abs > 15 }}">{{ '%+.1f' % m['dev_pix_mm'] if m['dev_pix_mm'] is not none else '—' }}</td>
+  <td class="n {{ 'warn' if m['swarn'] }}">{{ '%.1f' % m['s_session'] if m['s_session'] else '—' }}</td>
+  <td class="n">{{ '%.1f' % m['margin_pix_min'] if m['margin_pix_min'] is not none else '—' }}</td>
   <td class="n {{ 'warn' if m['dev_mm'] is not none and m['dev_mm']|abs > 15 }}">{{ '%+.1f' % m['dev_mm'] if m['dev_mm'] is not none else '—' }}</td>
   <td class="n {{ 'warn' if m['kwarn'] }}">{{ '%.4f' % m['k_session'] if m['k_session'] else '—' }}</td>
   <td class="n">{{ '%.0f' % m['z_med'] if m['z_med'] else '—' }}</td><td class="n">{{ '%.1f' % m['tilt_med'] if m['tilt_med'] else '—' }}</td>
-  <td class="n">{{ '%.1f' % m['margin_min'] if m['margin_min'] is not none else '—' }}</td>
   <td class="warn">{{ m['flags'] }}</td><td class="muted small">{{ m['evaluated_at'][:16] }}</td>
 </tr>
 {% endfor %}
@@ -1148,9 +1161,13 @@ def drift():
     rows = []
     for r in raw:
         m = dict(r)
+        for k in ("s_session", "s_ref", "dev_pix_mm", "d_pix_med", "margin_pix_min"): m.setdefault(k, None)
         m["kwarn"] = bool(m["k_session"] and m["k_applied"] and abs(m["k_session"] / m["k_applied"] - 1) > DRIFT_K_WARN)
+        m["swarn"] = bool(m["s_session"] and m["s_ref"] and abs(m["s_session"] / m["s_ref"] - 1) > DRIFT_S_WARN)
         flags = []
-        if m["dev_mm"] is not None and abs(m["dev_mm"]) > DRIFT_DEV_WARN: flags.append("dev")
+        if m["dev_pix_mm"] is not None and abs(m["dev_pix_mm"]) > DRIFT_DEV_WARN: flags.append("dev_pix")
+        if m["swarn"]: flags.append("S %+.2f%%" % (100 * (m["s_session"] / m["s_ref"] - 1)))
+        if m["dev_mm"] is not None and abs(m["dev_mm"]) > DRIFT_DEV_WARN: flags.append("dev(depth)")
         if m["kwarn"]: flags.append("K %+.1f%%" % (100 * (m["k_session"] / m["k_applied"] - 1)))
         if m["n_wrong"]: flags.append("오판 %d" % m["n_wrong"])
         if m["n_unknown"]: flags.append("unknown %d" % m["n_unknown"])
@@ -1159,11 +1176,19 @@ def drift():
         rows.append(m)
     ks = [m["k_session"] for m in rows if m["k_session"]]
     devs = [m["dev_mm"] for m in rows if m["dev_mm"] is not None]
+    ss = [m["s_session"] for m in rows if m["s_session"]]
+    devp = [m["dev_pix_mm"] for m in rows if m["dev_pix_mm"] is not None]
+    sref = next((m["s_ref"] for m in reversed(rows) if m["s_ref"]), None)
     kref = rows[-1]["k_applied"] if rows and rows[-1]["k_applied"] else None
     band = (kref * (1 - DRIFT_K_WARN), kref * (1 + DRIFT_K_WARN)) if kref else None
     return page("드리프트", "drift", DRIFT, rows=list(reversed(rows)), n=len(rows),
                 kmed=statistics.median(ks) if ks else None, kstd=statistics.pstdev(ks) if len(ks) > 1 else None,
                 devmed=statistics.median(devs) if devs else None, nwarn=sum(1 for m in rows if m["flags"]),
+                smed=statistics.median(ss) if ss else None, sstd=statistics.pstdev(ss) / statistics.median(ss) if len(ss) > 1 else None,
+                devpmed=statistics.median(devp) if devp else None, sref=("%.1f" % sref) if sref else "—",
+                svg_s=drift_svg(rows, "s_session", "S_session = CAD_D·fx/픽셀 폭 (mm) — 픽셀 폭 일관성, 음영 = S_PIXEL ±0.5%",
+                                band=(sref * (1 - DRIFT_S_WARN), sref * (1 + DRIFT_S_WARN)) if sref else None, fmt="{:.0f}", ref=sref),
+                svg_devp=drift_svg(rows, "dev_pix_mm", "dev_pix = 픽셀 D 중앙값 − CAD_D (mm) — 현행 판정 마진 소모, 경보 ±15", band=(-DRIFT_DEV_WARN, DRIFT_DEV_WARN), fmt="{:+.0f}", ref=0.0),
                 latest=rows[-1]["started_at"][:10] if rows else "—", kref=("%.4f" % kref) if kref else "—",
                 colors={c: col for c, col in CLASS_COLORS.items() if any(m["class_name"] == c for m in rows)},
                 svg_k=drift_svg(rows, "k_session", "K_session (depth 스케일) — 음영 = 기준 ±1%", band=band, fmt="{:.4f}", ref=kref),

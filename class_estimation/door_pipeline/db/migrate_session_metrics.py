@@ -15,6 +15,12 @@ def ensure(con):
     if not m:
         raise SystemExit("schema.sql 에 session_hole_metrics DDL 이 없습니다")
     con.executescript(m.group(0))
+    # 2026-09-24 픽셀 폭 지표 컬럼 추가(멱등)
+    have = {r[1] for r in con.execute("PRAGMA table_info(session_hole_metrics)")}
+    for col in ("span_med", "s_session", "s_ref", "d_pix_med", "dev_pix_mm", "margin_pix_min"):
+        if col not in have:
+            con.execute(f"ALTER TABLE session_hole_metrics ADD COLUMN {col} REAL")
+    con.commit()
 
 
 if __name__ == "__main__":

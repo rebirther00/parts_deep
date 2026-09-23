@@ -212,6 +212,12 @@ CREATE TABLE IF NOT EXISTS session_hole_metrics (
     z_med           REAL,
     tilt_med        REAL,
     margin_min      REAL,
+    span_med        REAL,                         -- 힌지↔래치 픽셀 폭 중앙값(px, 2026-09-24)
+    s_session       REAL,                         -- CAD_D·fx/span_med (mm) — 픽셀 폭 일관성, S_PIXEL 대비 ±0.5% 경보
+    s_ref           REAL,                         -- 적용 S_PIXEL[serial]
+    d_pix_med       REAL,                         -- 픽셀 폭 기준 D 중앙값(mm) = span_med·s_ref/fx
+    dev_pix_mm      REAL,                         -- d_pix_med − CAD_D (판정 마진 소모, 현행 판정 기준)
+    margin_pix_min  REAL,
     evaluated_at    TIMESTAMP NOT NULL DEFAULT (datetime('now','localtime')),
     UNIQUE(session_id, model_id)
 );
