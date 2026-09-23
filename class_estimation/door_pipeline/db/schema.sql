@@ -58,7 +58,13 @@ CREATE TABLE IF NOT EXISTS capture_sessions (
     stop_reason     VARCHAR(30),
     started_at      TIMESTAMP NOT NULL DEFAULT (datetime('now','localtime')),
     ended_at        TIMESTAMP,
-    notes           TEXT
+    notes           TEXT,
+    -- 2026-09-23 옵션(RADAR) — 세션 단위 속성. 품번 = classes.name(형상군) × option_radar (partno/part_numbers.json)
+    --   option_radar 1=레이더 사양, 0=미장착, NULL=미정/해당 없음(FRT). option_source 'auto'(partno/radar_check.py) | 'user'(webapp /options 확정)
+    option_radar    INTEGER CHECK (option_radar IN (0, 1)),
+    option_source   VARCHAR(10) CHECK (option_source IN ('auto', 'user')),
+    option_note     TEXT,
+    option_at       TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS images (
@@ -218,8 +224,29 @@ CREATE TABLE IF NOT EXISTS session_hole_metrics (
     d_pix_med       REAL,                         -- 픽셀 폭 기준 D 중앙값(mm) = span_med·s_ref/fx
     dev_pix_mm      REAL,                         -- d_pix_med − CAD_D (판정 마진 소모, 현행 판정 기준)
     margin_pix_min  REAL,
+    pred_major      VARCHAR(100),                 -- 2026-09-23 세션 홀 판정 다수결 클래스 (build_dataset.py auto-relabel 근거)
+    n_pred_major    INTEGER,                      -- 다수결 클래스 프레임 수 (n_judged 중)
     evaluated_at    TIMESTAMP NOT NULL DEFAULT (datetime('now','localtime')),
     UNIQUE(session_id, model_id)
 );
 CREATE INDEX IF NOT EXISTS idx_shm_session ON session_hole_metrics(session_id);
+
+-- 2026-09-23: 세션별 RADAR 옵션 규칙 검사 결과 (partno/radar_check.py 기록, webapp /options 열람·확정)
+--   6점 도어 좌표계로 CAD 브래킷 홀 2개 위치를 투영해 어두운 홀 유무를 프레임별 판정 → 세션 집계.
+--   확정값은 capture_sessions.option_radar/option_source 에 두고, 이 표는 자동 검사 근거(표·점수·크롭)만 보관.
+CREATE TABLE IF NOT EXISTS session_radar_check (
+    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    session_id      INTEGER NOT NULL UNIQUE REFERENCES capture_sessions(id) ON DELETE CASCADE,
+    class_name      VARCHAR(100) NOT NULL,        -- 검사 시점 DB 라벨(브래킷 좌표 출처)
+    n_frames        INTEGER NOT NULL,
+    n_judged        INTEGER NOT NULL,             -- 6점 검출 + 투영 영역이 프레임 안인 프레임
+    n_radar         INTEGER NOT NULL,             -- 홀 2개 모두 어두움(브래킷 있음) 표
+    n_none          INTEGER NOT NULL,             -- 둘 다 없음 표
+    score_med       REAL,                         -- 프레임 점수 중앙값 (min(홀1,홀2) 대비 — 양수=있음)
+    auto_flag       INTEGER,                      -- 1/0, NULL=미정(표 부족·갈림)
+    agree           REAL,                         -- 다수 표 비율
+    crop_path       VARCHAR(500),                 -- 확인용 몽타주 jpg (door_pipeline 기준 상대경로)
+    params          TEXT,                         -- 임계값 등 json
+    checked_at      TIMESTAMP NOT NULL DEFAULT (datetime('now','localtime'))
+);
 

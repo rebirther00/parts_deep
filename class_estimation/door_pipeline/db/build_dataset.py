@@ -14,6 +14,7 @@ DB 기준(synced_local=1, is_valid=1, 클래스 확정, split 지정)으로만 �
   python db/build_dataset.py split <session_dir> <train|val|test|none>
   python db/build_dataset.py auto-split [--reset-nontest]   # 세션 단위 70/15/15: 시간순 test=max(1,15%) → val=max(1,15%) → train; 세션<3 클래스는 전부 train
   python db/build_dataset.py relabel <session_dir> <class>   # 라벨 정정(Unknown 포함) — 파일 이동 없이 DB만
+  python db/build_dataset.py auto-relabel [--dry-run]        # 홀 판별기 다수결로 명백한 오라벨(E23↔E25 FRT 등) 자동 재배정(2026-09-23)
   python db/build_dataset.py invalidate <session_dir> "<사유>"   # 세션 무효화(시험 촬영·빈 지그) → 뷰 제외. validate 로 복귀
 
 규칙: split은 항상 세션 단위(프레임 단위 분할 금지). 라벨 정정은 capture_sessions.class_name(현장 입력 원본)은
@@ -119,7 +120,7 @@ def cmd_auto_split(con, reset_nontest=False):
     con.commit()
 
 
-def cmd_relabel(con, session_dir, new_cls):
+def cmd_relabel(con, session_dir, new_cls, tag="relabel"):
     s = session_row(con, session_dir)
     ds = dataset_id(con)
     model, part = parse_class_name(new_cls)
@@ -132,7 +133,7 @@ def cmd_relabel(con, session_dir, new_cls):
            WHERE i.session_id = ?""", (s["id"],)).fetchall()
     old = ",".join(r[0] for r in old) or "?"
     n = con.execute("UPDATE images SET class_id = ? WHERE session_id = ?", (cid, s["id"])).rowcount
-    note = f"[{time.strftime('%Y-%m-%d %H:%M')}] relabel {old} → {new_cls} ({n}장)"
+    note = f"[{time.strftime('%Y-%m-%d %H:%M')}] {tag} {old} → {new_cls} ({n}장)"
     con.execute("UPDATE capture_sessions SET notes = COALESCE(notes || '\n', '') || ? WHERE id = ?",
                 (note, s["id"]))
     for r in con.execute("SELECT id FROM classes WHERE dataset_id = ?", (ds,)):
@@ -140,6 +141,49 @@ def cmd_relabel(con, session_dir, new_cls):
                     (r[0], r[0]))
     con.commit()
     print(f"{session_dir}: {note}  (현장 입력 원본 class_name={s['class_name']} 유지)")
+
+
+AUTO_RELABEL = dict(min_judged=10, min_agree=0.9, min_gap_mm=100.0)   # 자동 재배정 기준(사용자 결정 2026-09-23)
+
+
+def cmd_auto_relabel(con, apply=True, **kw):
+    """홀 판별기 세션 다수결(session_hole_metrics.pred_major, 20_session_drift.py)이 DB 라벨과 다르고
+    ① 판정 프레임 ≥ min_judged ② 다수결 일치율 ≥ min_agree ③ 두 클래스의 CAD D 차 ≥ min_gap_mm 이면 자동 재배정.
+    E23↔E25 FRT(268mm)·RR↔RH 오입력처럼 명백한 경우만 바꾸고, E30↔E38 FRT(47mm) 같은 인접 쌍은 '확인 필요'로만 출력.
+    재배정한 세션의 지표 행은 지워서 다음 20 실행 때 새 라벨로 다시 계산되게 한다. 태블릿 라벨 원본(class_name)은 유지."""
+    import sys
+    sys.path.insert(0, str(BASE_DIR))
+    from hole_classifier import CAD_D
+    p = dict(AUTO_RELABEL, **{k: v for k, v in kw.items() if v is not None})
+    ds = dataset_id(con)
+    rows = con.execute(
+        """SELECT s.id, s.session_dir, c.name AS cls, m.pred_major, m.n_pred_major, m.n_judged
+           FROM session_hole_metrics m JOIN capture_sessions s ON s.id = m.session_id
+           JOIN images i ON i.session_id = s.id JOIN classes c ON c.id = i.class_id
+           WHERE s.dataset_id = ? AND m.pred_major IS NOT NULL GROUP BY s.id ORDER BY s.session_dir""", (ds,)).fetchall()
+    changed, review = [], []
+    for r in rows:
+        if r["pred_major"] == r["cls"] or r["pred_major"] not in CAD_D:
+            continue
+        agree = r["n_pred_major"] / max(1, r["n_judged"])
+        gap = abs(CAD_D[r["pred_major"]] - CAD_D[r["cls"]]) if r["cls"] in CAD_D else 1e9
+        strong = r["n_judged"] >= p["min_judged"] and agree >= p["min_agree"]
+        line = (f"{r['session_dir']:40s} 라벨 {r['cls']:16s} → 다수결 {r['pred_major']:16s} "
+                f"{r['n_pred_major']}/{r['n_judged']} ({100 * agree:.0f}%) D차 {gap:.0f}mm")
+        if strong and gap >= p["min_gap_mm"]:
+            if apply:
+                cmd_relabel(con, r["session_dir"], r["pred_major"],
+                            tag=f"auto-relabel 다수결 {r['n_pred_major']}/{r['n_judged']} D차 {gap:.0f}mm")
+                con.execute("DELETE FROM session_hole_metrics WHERE session_id = ?", (r["id"],))
+                con.commit()
+            changed.append(line)
+        else:
+            review.append(line + ("  [표 부족/일치율 낮음]" if not strong else "  [인접 클래스 — 육안 확인]"))
+    print(f"자동 재배정 {'적용' if apply else '미리보기'} {len(changed)}건 (기준 {p}):")
+    for l in changed: print("  " + l)
+    print(f"확인 필요 {len(review)}건 (자동 변경 안 함):")
+    for l in review: print("  " + l)
+    return changed, review
 
 
 def cmd_validity(con, session_dir, valid, reason):
@@ -226,6 +270,9 @@ def main():
                                                     help="test 유지, val/train 재계산")
     p = sub.add_parser("split"); p.add_argument("session_dir"); p.add_argument("split", choices=SPLITS + ("none",))
     p = sub.add_parser("relabel"); p.add_argument("session_dir"); p.add_argument("new_class")
+    p = sub.add_parser("auto-relabel", help="홀 판별기 세션 다수결로 명백한 오라벨 자동 재배정 (20_session_drift.py 실행 후)")
+    p.add_argument("--dry-run", action="store_true", help="변경 없이 대상만 출력")
+    p.add_argument("--min-judged", type=int); p.add_argument("--min-agree", type=float); p.add_argument("--min-gap-mm", type=float)
     for name in ("invalidate", "validate"):
         p = sub.add_parser(name); p.add_argument("session_dir"); p.add_argument("reason")
     a = ap.parse_args()
@@ -240,6 +287,8 @@ def main():
         cmd_split(con, a.session_dir, a.split)
     elif a.cmd == "relabel":
         cmd_relabel(con, a.session_dir, a.new_class)
+    elif a.cmd == "auto-relabel":
+        cmd_auto_relabel(con, apply=not a.dry_run, min_judged=a.min_judged, min_agree=a.min_agree, min_gap_mm=a.min_gap_mm)
     elif a.cmd in ("invalidate", "validate"):
         cmd_validity(con, a.session_dir, a.cmd == "validate", a.reason)
 

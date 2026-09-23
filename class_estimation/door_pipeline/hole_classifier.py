@@ -65,9 +65,10 @@ def active_k(intrinsics):
         h = intrinsics.get('height', 1080)
         return K_METRIC.get(h, K_METRIC[1080]), 'metric'
     return None, 'depth'
-CAD_D = {'E23_door_LH_FRT': 456, 'E25_door_LH_FRT': 724, 'E30_door_LH_FRT': 765, 'E38_door_LH_FRT': 812,
+CAD_D = {'E23_door_LH_FRT': 458, 'E25_door_LH_FRT': 724, 'E30_door_LH_FRT': 765, 'E38_door_LH_FRT': 812,
          'E25_door_LH_RR': 1037, 'E30_door_LH_RR': 1158, 'E38_door_LH_RR': 1352, 'E25_door_RH': 886, 'E30_E38_door_RH': 1087}
 # D = 도어 폭 − 106mm. E23은 2026-09-07 추가(STP 폭 562 → 456, 현장 실측 중앙값 460)
+#   → 2026-09-23 어셈블리 STEP(110982-02444B) 코너 홀 실측 457.6 으로 재유도해 458 (다른 8종은 CAD 코너 홀 거리 = CAD_D − 0.4 관례)
 D_RANGE = (400, 1500)   # 유효 코너 홀 거리(mm) — 게이트(볼트 스케일)와 최종 depth D 공통
 # 미등록 도어 판정: 최근접 CAD D 와의 절대 편차가 이 값을 넘으면 pred='unknown'.
 # 근거(2026-09-16, 기존 평가 json 재집계): 정상 판정 프레임의 최근접 편차 최대 = 현장 27.0mm(1,777장)·사무실 32.9mm(814장, 그 1장은 오판),

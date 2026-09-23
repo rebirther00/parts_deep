@@ -12,6 +12,8 @@
   s_session = CAD_D·fx/median(span_px) — 픽셀 폭 일관성(2026-09-24). 판정이 픽셀 폭 기준(hole_classifier.S_PIXEL)으로 바뀐 뒤의 주 지표:
                                        S_PIXEL 대비 ±0.5% 밖이면 경보(기준 세션 std 0.16%). dev_pix_mm = 픽셀 D 중앙값 − CAD_D 가 현행 판정의 마진 소모.
                                        K_session·dev_mm 은 depth 경로 참고 지표로 유지.
+  pred_major / n_pred_major          — 프레임별 판정(현행 픽셀 폭 D) 다수결 클래스와 표 수(2026-09-23). build_dataset.py auto-relabel 이
+                                       라벨과 다수결이 크게 어긋난 세션(CAD D 차 ≥100mm·표 10장·일치 90%)을 자동 재배정하는 근거.
 D 계산 경로는 17/18 과 동일(세션 meta intrinsics + K_CAMERA). 라벨은 DB 정정 라벨(classes.name), Unknown·is_valid=0 세션 제외.
 """
 import argparse, collections, os, sqlite3, sys, time
@@ -65,11 +67,16 @@ def compute(net, dev, r):
             span = float(np.hypot(hinge[0] - latch[0], hinge[1] - latch[1]))
             if sn in hc.S_PIXEL and fx:
                 D_pix = span * hc.S_PIXEL[sn] / fx; margin_pix = hc.judge(D_pix)[2]
+        # 현행 판정(SCALE_DEFAULT='pixel')과 같은 D 로 프레임 클래스 — 세션 다수결(pred_major, 자동 재배정 근거)
+        pred_use = hc.judge(D_pix)[0] if (D_pix is not None and hc.D_RANGE[0] <= D_pix <= hc.D_RANGE[1]) else pred
         rows.append(dict(gate=gate, m=m, pred=pred, margin=margin, k_src=hc.active_k(intr)[1],
-                         serial=sn, fx=fx, span=span, D_pix=D_pix, margin_pix=margin_pix))
+                         serial=sn, fx=fx, span=span, D_pix=D_pix, margin_pix=margin_pix, pred_use=pred_use))
     ok = [x for x in rows if x['m']]
     out = dict(n_frames=len(rows), n_judged=len(ok), serial=rows[0]['serial'] if rows else None,
                k_src=rows[0]['k_src'] if rows else None, class_name=r['cls'], cad_d=CAD_D.get(r['cls']))
+    votes = collections.Counter(x['pred_use'] for x in rows if x['pred_use'])
+    if votes:
+        out['pred_major'], out['n_pred_major'] = votes.most_common(1)[0]
     if ok:
         med = lambda key: float(np.median([x['m'][key] for x in ok]))
         out.update(k_applied=ok[0]['m']['k'], d_raw_med=med('D_raw'), d_med=med('D_mm'), z_med=med('z'), tilt_med=med('tilt'),

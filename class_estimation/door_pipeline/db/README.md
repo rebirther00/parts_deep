@@ -14,8 +14,9 @@
 | `ingest_local.py` | 로컬 `datasets*/` 스캔 → datasets/classes/images 등록 |
 | `ingest_nas.py` | NAS 세션 트리 스캔 → capture_sessions/images 등록 (`synced_local=FALSE`) |
 | `db_log.py` | 학습·평가 스크립트 → DB 자동 기록 헬퍼 (3단계) |
-| `webapp.py` | 열람·관리 웹 도구 — 대시보드/세션/이미지 썸네일/홀 라벨 뷰(점 오버레이)/학습 이력/**드리프트 시계열** + 라벨정정·split·무효화 버튼 |
+| `webapp.py` | 열람·관리 웹 도구 — 대시보드/세션/이미지 썸네일/홀 라벨 뷰(점 오버레이)/학습 이력/**드리프트 시계열**/**옵션·품번 확인(/options)** + 라벨정정·split·무효화·옵션 확정 버튼 |
 | `migrate_session_metrics.py` | `session_hole_metrics` 테이블 생성(멱등, 2026-09-16) — `../20_session_drift.py` 가 세션별 K_session·dev·z·tilt 기록, webapp `/drift` 열람 |
+| `migrate_options.py` | 세션 옵션(RADAR) 컬럼 `capture_sessions.option_radar/option_source/option_note/option_at` + `session_radar_check` 표 + `session_hole_metrics.pred_major` (멱등, 2026-09-23). 품번 = 클래스 × option_radar (`../partno/part_numbers.json`), webapp `/options` 에서 확정 |
 | `door_pipeline.db` | SQLite DB 본체 (git 미추적) |
 
 ## 사용
@@ -101,6 +102,9 @@ python db/build_dataset.py auto-split      # ④ 클래스별 첫 세션=test, �
 python db/build_dataset.py split <session_dir> test|train|val|none
 python db/build_dataset.py build           # ⑤ datasets_factory_v2/{all,train,val,test}/<class>/rgb_<날짜>_<세션>_<idx>.png + manifest.json
 python 17_evaluate_hole_classifier.py --base datasets_factory_v2/test   # ⑥ 평가 (DB 자동 기록)
+python 20_session_drift.py                 # ⑥' 세션 지표 + 홀 판정 다수결(pred_major) — ② 직후에 먼저 돌리면 아래 자동 재배정이 가능
+python db/build_dataset.py auto-relabel    # ⑥'' 태블릿 오라벨 자동 재배정(E23↔E25 FRT 등 CAD D 차 ≥100mm·표 10장·일치 90%), 인접 쌍은 확인 목록만 (2026-09-23)
+python partno/radar_check.py               # ⑥''' RR/RH 세션 레이더 옵션 규칙 검사 → session_radar_check + option_*(auto), 웹 /options 에서 확정 (2026-09-23)
 python 02_train.py --model_type rgbe --no_aux --image_size 448 --dataset_dir datasets_factory_v2 --presplit
                                            # ⑦ CNN fine-tune 시: train/val/test 폴더 그대로 사용(세션 격리), run 이름에 _datasets_factory_v2
 ```
@@ -112,6 +116,14 @@ python 02_train.py --model_type rgbe --no_aux --image_size 448 --dataset_dir dat
 ## 다음 작업 (TODO, 2026-09-01 분류·추정 전체 검토로 갱신)
 
 우선순위 순. 완료 시 줄을 지우거나 취소선 처리.
+
+### 품번(14)·레이더 옵션 (2026-09-23 추가, `partno/README.md`)
+
+0. **레이더 옵션 육안 확정** — `python db/webapp.py`(쓰기 가능 인스턴스) → `/options` 에서 RR/RH 148세션의 브래킷 크롭을 보고 레이더 O/X 확정(자동 판정: 레이더 51·없음 88·미정 9, 1차). 확정 후
+   `python partno/evaluate_partno.py --db-log` 로 품번 정확도 공식 기록. 미정 세션(프레임 1~3장·빈 지그)은 시트에서 직접 판단.
+0'. **후속 연구(사용자 제안 2026-09-23)**: 확정 라벨(세션당 20장)로 학습형 레이더 판정기 — ① 홀 랜드마크 검출기에 브래킷 홀 채널 2개 추가(6점+브래킷 한 번에, CAD 규칙 유지)
+   ② CNN 14클래스 또는 9클래스+레이더 이진 헤드(비교 기준선) ③ 브래킷 크롭 이진 분류기(경량). 규칙 라벨은 약지도이므로 세션 단위 CV·가림 사례로 규칙 대비 이득을 검증.
+0''. 공장 확인: 레이더 표기 해석(X=미장착), AVM 이 FRT 품번을 바꾸는지, 로봇 공정이 옵션으로 갈리는지, 명성 자체 도어 작업 실적(품번·시각) 제공 여부(세션 1:1 GT).
 
 ### 바로 실행 가능 (막힌 데 없음)
 
@@ -130,7 +142,7 @@ python 02_train.py --model_type rgbe --no_aux --image_size 448 --dataset_dir dat
 
 5. **E25_door_LH_FRT 정상 세션 재수집(최소 2세션)** — 9/3·9/5 수집분은 E23으로 판명(2026-09-07), **9/12 2세션도 또 E23**(2026-09-16 정정) → 현장에 E23/E25_LH_FRT 구분 안내 필요. 현재 유효 세션 9/4 1개뿐이라
    test 불가. 재수집 후 `auto-split --reset-nontest`로 분할 재계산 → 8종(+E23) 현장 공식 인식률 완결.
-   **E23 어셈블리 STEP 확보** — 자세 추정은 잠정 등록 상태(`pos_pipeline/01_extract_cad_holes.PROVISIONAL`).
+   ~~**E23 어셈블리 STEP 확보** — 자세 추정은 잠정 등록 상태(`pos_pipeline/01_extract_cad_holes.PROVISIONAL`).~~ → **완료(2026-09-23)**: 110982-02444B 어셈블리 메시(`cad/door_stl/E23_door_LH_FRT_assy.stl`, git 미추적)로 정식 등록, CAD_D 456→458.
 6. **Unknown 4세션 61쌍 라벨 확정** — 홀 판별기 판정 참조로 빠르게 정리 가능. (2026-09-07: 이 4세션은 is_valid=0 무효 처리 상태라 뷰 제외)
 7. ~~**홀 판별기 거리 정밀화** — K_DEPTH 상수를 실측 intrinsics 기반으로 재유도~~ → **완료 (2026-09-16)**, `report/hole_analysis/k_depth_20260916/`.
    실측 intrinsics 자체는 D 를 +1mm 만 바꿈. 효과는 잔차 K 를 현장 83세션으로 재적합한 것: `K_CAMERA[54910212]=1.0064`(이전 환산 1.0140 은 +6.6mm 전역 편향).

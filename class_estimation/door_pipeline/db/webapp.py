@@ -135,7 +135,7 @@ svg text { fill:var(--muted); font-size:10px; }
 </style></head><body>
 <nav>
   <span class="brand">🗄️ door_pipeline DB</span>
-  {% for ep, label in [('dashboard','대시보드'), ('sessions','세션'), ('images','이미지'), ('labels','라벨'), ('training','학습·평가'), ('drift','드리프트')] %}
+  {% for ep, label in [('dashboard','대시보드'), ('sessions','세션'), ('images','이미지'), ('labels','라벨'), ('training','학습·평가'), ('drift','드리프트'), ('options','옵션·품번')] %}
     <a class="tab {{ 'on' if active == ep }}" href="{{ url_for(ep) }}">{{ label }}</a>
   {% endfor %}
   {% if readonly %}<span class="ro">열람 전용 모드</span>{% endif %}
@@ -412,6 +412,8 @@ DETAIL = """
   <div class="card"><div class="num">{{ s['class_name'] }}</div><div class="lbl">현장 입력 원본</div></div>
   <div class="card"><div class="num">{{ n }}</div><div class="lbl">NAS 등록 장수</div></div>
   <div class="card"><div class="num">{{ n_local }}</div><div class="lbl">로컬 샘플</div></div>
+  <div class="card"><div class="num">{{ {1:'레이더 O', 0:'레이더 X'}.get(s['option_radar'], '—') }}</div>
+    <div class="lbl">옵션 ({{ s['option_source'] or '미판정' }}) · <a href="{{ url_for('options', q=s['session_dir']) }}">옵션·품번</a></div></div>
 </div>
 
 <div class="box small" style="margin-bottom:14px">
@@ -1194,6 +1196,153 @@ def drift():
                 svg_k=drift_svg(rows, "k_session", "K_session (depth 스케일) — 음영 = 기준 ±1%", band=band, fmt="{:.4f}", ref=kref),
                 svg_dev=drift_svg(rows, "dev_mm", "dev = median(D) − CAD_D (mm) — 점선 0, 경보 ±15", band=(-DRIFT_DEV_WARN, DRIFT_DEV_WARN), fmt="{:+.0f}", ref=0.0),
                 svg_z=drift_svg(rows, "z_med", "z_med — 코너 홀 평면 깊이 (mm)", fmt="{:.0f}"))
+
+
+# ── 옵션(RADAR)·품번 확인 ─────────────────────────────────
+# partno/radar_check.py 가 기록한 세션별 자동 판정(session_radar_check)과 브래킷 크롭 몽타주를 보고 사용자가 확정한다.
+# 확정값은 capture_sessions.option_radar/option_source='user'. 품번 = 클래스 × 레이더 (partno/part_numbers.json).
+
+PARTNO_JSON = BASE_DIR / "partno" / "part_numbers.json"
+
+
+def load_partno():
+    try:
+        d = json.loads(PARTNO_JSON.read_text(encoding="utf8"))
+    except OSError:
+        return {}
+    return {(p["class_name"], p["radar"]): p for p in d["parts"]}
+
+
+def partno_for(pn, cls, radar):
+    if not cls:
+        return None
+    p = pn.get((cls, None)) or (pn.get((cls, radar)) if radar is not None else None)
+    return p
+
+
+OPTIONS = """
+<h1>옵션(레이더)·품번 확인 <span class="muted small">RR·RH 세션 {{ rows|length }}개 표시</span></h1>
+<p class="small muted">자동 판정 = 홀 랜드마크 6점 도어 좌표계에 CAD 브래킷 홀 2개를 투영해 어두운 홀 유무를 규칙으로 검사(<code>partno/radar_check.py</code>).
+크롭의 <span style="color:#0c0">초록 원</span>=홀 있음(레이더), <span style="color:#d00">빨강 원</span>=없음. 육안으로 확인하고 버튼으로 확정하면 품번이 정해진다. 확정값은 자동 재검사로 덮어쓰지 않는다.</p>
+<div class="cards">
+  <div class="card"><div class="num">{{ c.user }}</div><div class="lbl">사용자 확정</div></div>
+  <div class="card"><div class="num">{{ c.auto1 }}</div><div class="lbl">자동 레이더 O (미확정)</div></div>
+  <div class="card"><div class="num">{{ c.auto0 }}</div><div class="lbl">자동 레이더 X (미확정)</div></div>
+  <div class="card"><div class="num">{{ c.none }}</div><div class="lbl">미정·미검사</div></div>
+</div>
+<form class="filters" method="get">
+  <select name="cls" onchange="this.form.submit()"><option value="">클래스 전체</option>
+    {% for k in clss %}<option {{ 'selected' if k == cur.cls }}>{{ k }}</option>{% endfor %}</select>
+  <select name="status" onchange="this.form.submit()">
+    {% for v, lab in [('', '상태 전체'), ('todo', '미확정만'), ('user', '확정만'), ('unsure', '미정·미검사만')] %}
+      <option value="{{ v }}" {{ 'selected' if v == cur.status }}>{{ lab }}</option>{% endfor %}</select>
+  <input type="text" name="q" value="{{ cur.q }}" placeholder="세션 검색 (예: 20260914)">
+  <button class="ghost">필터</button>
+  <a class="small" href="{{ url_for('options') }}">초기화</a>
+</form>
+<div class="tbl"><table>
+<tr><th>세션</th><th>클래스</th><th>브래킷 크롭 (판정 프레임 6장)</th><th>자동 판정</th><th>확정</th><th>품번</th><th>{{ '' if readonly else '확정 버튼' }}</th></tr>
+{% for r in rows %}
+<tr>
+  <td><a href="{{ url_for('session_detail', sid=r.id) }}">{{ r.session_dir }}</a><br>
+      <span class="pill {{ r.split or 'none' }}">{{ r.split or '미지정' }}</span></td>
+  <td>{{ r.cls }}</td>
+  <td>{% if r.crop_path %}<a href="{{ url_for('options_crop', sid=r.id) }}" target="_blank"><img src="{{ url_for('options_crop', sid=r.id) }}" style="width:480px;display:block" loading="lazy" alt=""></a>
+      {% else %}<span class="muted small">미검사 — <code>python partno/radar_check.py</code></span>{% endif %}</td>
+  <td>{% if r.auto_flag is not none %}<b>{{ '레이더 O' if r.auto_flag == 1 else '레이더 X' }}</b>{% elif r.n_judged is not none %}<span class="warn">미정</span>{% else %}—{% endif %}
+      {% if r.n_judged is not none %}<br><span class="muted small">O {{ r.n_radar }} / X {{ r.n_none }} / 판정 {{ r.n_judged }}/{{ r.n_frames }} · 점수 {{ '%.2f'|format(r.score_med) if r.score_med is not none else '—' }}</span>{% endif %}</td>
+  <td>{% if r.option_source == 'user' %}<b class="ok">{{ '레이더 O' if r.option_radar == 1 else '레이더 X' }}</b><br><span class="muted small">사용자 {{ r.option_at }}</span>
+      {% elif r.option_radar is not none %}<span class="muted">{{ '레이더 O' if r.option_radar == 1 else '레이더 X' }} (자동)</span>{% else %}<span class="muted">—</span>{% endif %}</td>
+  <td>{% if r.part %}<b>{{ r.part.part_no }}</b><span class="muted small">-{{ r.part.rev }}</span><br><span class="muted small">{{ r.part.models|join('/') }} {{ r.part.position }}</span>{% else %}<span class="muted small">옵션 확정 후</span>{% endif %}</td>
+  <td>{% if not readonly %}
+    <form class="inline" method="post" action="{{ url_for('act_option', sid=r.id) }}">
+      <button name="value" value="1" {{ 'class=ghost' if r.option_source == 'user' and r.option_radar == 1 }}>레이더 O</button>
+      <button name="value" value="0" {{ 'class=ghost' if r.option_source == 'user' and r.option_radar == 0 }}>레이더 X</button>
+      {% if r.option_source == 'user' %}<button class="danger" name="value" value="clear">확정 취소</button>{% endif %}
+    </form>{% endif %}</td>
+</tr>
+{% endfor %}
+</table></div>
+"""
+
+
+def option_rows(con):
+    return con.execute(
+        """SELECT s.id, s.session_dir, s.option_radar, s.option_source, s.option_note, s.option_at,
+                  (SELECT c.name FROM images i JOIN classes c ON c.id=i.class_id WHERE i.session_id=s.id LIMIT 1) cls,
+                  (SELECT split FROM images WHERE session_id=s.id LIMIT 1) split,
+                  COALESCE((SELECT MIN(is_valid) FROM images WHERE session_id=s.id), 1) valid,
+                  r.n_frames, r.n_judged, r.n_radar, r.n_none, r.score_med, r.auto_flag, r.agree, r.crop_path, r.checked_at
+           FROM capture_sessions s LEFT JOIN session_radar_check r ON r.session_id=s.id
+           ORDER BY s.session_dir DESC""").fetchall()
+
+
+@app.route("/options")
+def options():
+    con = db()
+    try:
+        raw = option_rows(con)
+    except sqlite3.OperationalError:
+        raw = []
+    pn = load_partno()
+    cur = dict(cls=request.args.get("cls", ""), status=request.args.get("status", ""), q=request.args.get("q", "").strip())
+    rows = []
+    for r in raw:
+        m = dict(r)
+        if not m["valid"] or not m["cls"] or m["cls"] == "Unknown" or "FRT" in m["cls"]:
+            continue
+        m["part"] = partno_for(pn, m["cls"], m["option_radar"])
+        rows.append(m)
+    clss = sorted({m["cls"] for m in rows})
+    c = dict(user=sum(m["option_source"] == "user" for m in rows),
+             auto1=sum(m["option_source"] == "auto" and m["option_radar"] == 1 for m in rows),
+             auto0=sum(m["option_source"] == "auto" and m["option_radar"] == 0 for m in rows),
+             none=sum(m["option_radar"] is None for m in rows))
+    if cur["cls"]:
+        rows = [m for m in rows if m["cls"] == cur["cls"]]
+    if cur["status"] == "todo":
+        rows = [m for m in rows if m["option_source"] != "user"]
+    elif cur["status"] == "user":
+        rows = [m for m in rows if m["option_source"] == "user"]
+    elif cur["status"] == "unsure":
+        rows = [m for m in rows if m["option_radar"] is None]
+    if cur["q"]:
+        rows = [m for m in rows if cur["q"] in m["session_dir"]]
+    return page("옵션·품번", "options", OPTIONS, rows=rows, clss=clss, cur=cur, c=c, readonly=app.config["READONLY"])
+
+
+@app.route("/options/crop/<int:sid>")
+def options_crop(sid):
+    r = db().execute("SELECT crop_path FROM session_radar_check WHERE session_id=?", (sid,)).fetchone()
+    if not r or not r["crop_path"]:
+        abort(404)
+    p = BASE_DIR / r["crop_path"]
+    if not p.exists():
+        abort(404)
+    return send_file(p, max_age=600)
+
+
+@app.post("/options/<int:sid>/set")
+def act_option(sid):
+    guard_write()
+    val = request.form["value"]
+    sdir = _session_dir(sid)
+    con = db()
+    auto = con.execute("SELECT auto_flag, score_med FROM session_radar_check WHERE session_id=?", (sid,)).fetchone()
+    now = time.strftime("%Y-%m-%d %H:%M")
+    if val == "clear":
+        con.execute("UPDATE capture_sessions SET option_radar=NULL, option_source=NULL, option_note=?, option_at=datetime('now','localtime') WHERE id=?",
+                    (f"user cleared {now}", sid))
+        note = f"[{now}] 옵션 확정 취소"
+    else:
+        v = int(val)
+        con.execute("UPDATE capture_sessions SET option_radar=?, option_source='user', option_note=?, option_at=datetime('now','localtime') WHERE id=?",
+                    (v, f"user confirm (auto {auto['auto_flag'] if auto else None}, score {auto['score_med'] if auto and auto['score_med'] is not None else float('nan'):.2f})", sid))
+        note = f"[{now}] 옵션 확정: 레이더 {'O' if v else 'X'} (자동 판정 {auto['auto_flag'] if auto else '미검사'})"
+    con.execute("UPDATE capture_sessions SET notes = COALESCE(notes || '\n', '') || ? WHERE id = ?", (note, sid))
+    con.commit()
+    flash(f"{sdir}: {note}")
+    return redirect(request.referrer or url_for("options"))
 
 
 # ── 이미지 서빙 ──────────────────────────────────────────

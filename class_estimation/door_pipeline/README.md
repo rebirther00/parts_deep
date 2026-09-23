@@ -87,6 +87,18 @@ python 20_session_drift.py --print                    # 표만
 - 중앙 보강대 패드 홀은 옵션/리비전에 따라 달라 사용 금지. 분석 기록: `report/hole_analysis/`.
 - **E23_door_LH_FRT 추가 (2026-09-07)**: 현장에서 E25_LH_FRT로 입력된 9/3·9/5 4세션이 D≈460mm로 일관 보류 → 육안·CAD 확인 결과 E23(폭 562, D=456). `CAD_D`에 9번째 클래스 등록, 유효 D 범위 `D_RANGE`=400~1500mm(게이트·최종 depth D 공통; 종전 게이트 하한 600, depth D 무검사). CAD `cad/door_stp/E23) 110982-02723 LH FRT.stp`는 외판 단일 솔리드(보강재·힌지 없음)라 코너 프레임 홀이 없음 → 속성 템플릿(10) 생성. 자세 추정 `cad_holes.json`은 **잠정 등록**(`01_extract_cad_holes.PROVISIONAL`: 볼트홀·래치 코너는 E25와 동일 좌표, 힌지 코너는 CAD_D 이동 합성; 현장 4세션 80장 정합 잔차 med 3.3mm·max 5.1mm로 8종과 동급). 보강재 포함 어셈블리 STEP 확보 시 정식 추출로 교체. STL 변환은 `gmsh <stp> -2 -format stl`(numpy-stl은 STEP 불가).
 
+## D. 품번(14) 판정 확장 — RADAR 옵션 (2026-09-23, `partno/`)
+
+통합모델 SIDE DOOR 도면·사양표(2026-09-23 입수) 기준 어셈블리 품번은 14종 = 형상군 9종 × RADAR 옵션(LH REAR·RH 만). E23 은 LH FRT 만 고유(REAR·RH 는 E25 공용).
+**클래스 체계(9종)·태블릿 라벨·홀 판별기·CNN 은 그대로 두고**, 세션 단위 옵션 `capture_sessions.option_radar`(1/0/NULL) 를 얹어 `partno/part_numbers.json` 으로 품번을 낸다.
+
+- 옵션 판정은 학습 없이 **규칙**: 홀 판별기가 찾는 6점으로 도어 좌표계를 만들고 CAD 브래킷 홀 2개(Ø34, 간격 91.6, 판 높이 70mm)를 투영해
+  어두운 홀 + depth 판 높이로 판정(`partno/radar_check.py`). 자동 플래그는 웹 도구 `/options` 에서 육안 확정(user)한다.
+- 현장 라벨 안에 RADAR/비RADAR 가 섞여 있었고(148 RR/RH 세션 중 자동 판정 레이더 약 1/3), 기존 `cad/door_stp` RR/RH 5종은 모두 RADAR 사양.
+  FR/RR 세로 보강재·볼트 사각·힌지는 두 사양 공용 → D·자세 랜드마크는 옵션 불변.
+- 오라벨 자동 재배정 `db/build_dataset.py auto-relabel`(홀 다수결, CAD D 차 ≥100mm), 품번 정확도 `partno/evaluate_partno.py`(판정률·판정 정확도, GT = 사용자 확정),
+  생산계획 집계 `partno/production_plan_summary.py`, 명세서 `partno/build_dataset_spec.py` → `DOC_dataset_spec.md/.docx`. 명령 순서는 `partno/README.md`.
+
 ## 산출물/데이터 위치
 
 - `artifacts/` — CNN 모델 run별 산출물. *.pth는 기본 git 미추적이며, **정식 배포 run**(`rgbe_noaux_448_seed916_datasets_factory_v2`, DB models #10, 2026-09-23 교체)의 `model.pth`만 Gitea LFS로 추적

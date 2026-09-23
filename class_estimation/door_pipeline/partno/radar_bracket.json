@@ -1,0 +1,129 @@
+{
+ "meta": {
+  "units": "mm",
+  "frame": "pos_pipeline/cad_holes.json 도어 프레임(원점 코너 홀 중점, X 힌지→래치, Z 카메라 쪽)",
+  "method": "카메라 쪽 최대 z 지도(1mm/px)에서 빈 원형 영역 쌍 검출",
+  "band_abs_y": [
+   300.0,
+   700.0
+  ],
+  "note": "holes/plate 는 6홀 평면 위 z_plate 만큼 솟아 있음 — 투영 시 시차 보정 필요"
+ },
+ "classes": {
+  "E25_door_LH_RR": {
+   "holes": [
+    [
+     -13.3,
+     470.5
+    ],
+    [
+     78.3,
+     470.6
+    ]
+   ],
+   "r_mm": 16.9,
+   "pitch_mm": 91.6,
+   "plate": [
+    -152.5,
+    411.0,
+    193.5,
+    538.0
+   ],
+   "z_plate": 69.7,
+   "z_strip": 29.0,
+   "stl": "cad/door_stl/E25_door_LH_RR.stl"
+  },
+  "E30_door_LH_RR": {
+   "holes": [
+    [
+     198.2,
+     470.6
+    ],
+    [
+     289.8,
+     470.6
+    ]
+   ],
+   "r_mm": 16.9,
+   "pitch_mm": 91.6,
+   "plate": [
+    59.0,
+    411.0,
+    405.0,
+    538.0
+   ],
+   "z_plate": 69.7,
+   "z_strip": 28.1,
+   "stl": "cad/door_stl/E30_door_LH_RR.stl"
+  },
+  "E38_door_LH_RR": {
+   "holes": [
+    [
+     23.2,
+     470.6
+    ],
+    [
+     114.8,
+     470.6
+    ]
+   ],
+   "r_mm": 16.9,
+   "pitch_mm": 91.6,
+   "plate": [
+    -116.0,
+    411.0,
+    230.0,
+    538.0
+   ],
+   "z_plate": 69.5,
+   "z_strip": 27.8,
+   "stl": "cad/door_stl/E38_door_LH_RR.stl"
+  },
+  "E25_door_RH": {
+   "holes": [
+    [
+     62.2,
+     -471.5
+    ],
+    [
+     153.8,
+     -471.5
+    ]
+   ],
+   "r_mm": 17.0,
+   "pitch_mm": 91.6,
+   "plate": [
+    -77.0,
+    -539.0,
+    269.0,
+    -412.0
+   ],
+   "z_plate": 70.0,
+   "z_strip": 29.5,
+   "stl": "cad/door_stl/E25_door_RH.stl"
+  },
+  "E30_E38_door_RH": {
+   "holes": [
+    [
+     162.7,
+     -471.6
+    ],
+    [
+     254.3,
+     -471.5
+    ]
+   ],
+   "r_mm": 17.0,
+   "pitch_mm": 91.6,
+   "plate": [
+    23.5,
+    -539.0,
+    369.5,
+    -412.0
+   ],
+   "z_plate": 70.1,
+   "z_strip": 25.8,
+   "stl": "cad/door_stl/E30_E38_door_RH.stl"
+  }
+ }
+}

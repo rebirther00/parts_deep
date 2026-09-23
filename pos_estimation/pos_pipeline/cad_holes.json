@@ -15,17 +15,17 @@
  },
  "classes": {
   "E23_door_LH_FRT": {
-   "D_mm": 456.0,
-   "D_cad": 456,
-   "field_fit_mm": 3.53,
-   "field_margin_mm": 1000000000.0,
+   "D_mm": 457.6,
+   "D_cad": 458,
+   "field_fit_mm": 3.12,
+   "field_margin_mm": 30.48,
    "n_field": 24,
    "field_features": {
-    "ul": 146.3,
-    "wl": 185.2,
-    "uh": -314.2,
-    "wh": 185.3,
-    "D": 460.5
+    "ul": 145.1,
+    "wl": 185.6,
+    "uh": -315.4,
+    "wh": 184.9,
+    "D": 460.2
    },
    "rect_err": 0.67,
    "dist_rect_to_latch": 236.1,
@@ -33,7 +33,7 @@
    "view_free": "+Y",
    "chirality_ok": null,
    "chirality_votes": {},
-   "n_circular_holes": 6,
+   "n_circular_holes": 34,
    "holes_cad": {
     "bolt_tl": [
      -947.05,
@@ -56,83 +56,83 @@
      290.0
     ],
     "corner_hinge": [
-     -1177.2,
-     7.42,
-     58.17
+     -1178.8,
+     8.0,
+     58.2
     ],
     "corner_latch": [
      -721.2,
-     7.42,
-     58.16
+     8.0,
+     58.2
     ]
    },
    "holes_door": {
     "bolt_tl": [
-     2.15,
-     -135.9,
-     -5.1
+     2.95,
+     -135.91,
+     -5.33
     ],
     "bolt_tr": [
-     158.2,
-     -135.9,
-     -5.1
+     159.0,
+     -135.91,
+     -5.33
     ],
     "bolt_bl": [
-     2.15,
+     2.95,
      -232.24,
-     0.45
+     0.47
     ],
     "bolt_br": [
-     158.2,
+     159.0,
      -232.24,
-     0.45
+     0.47
     ],
     "corner_hinge": [
-     -228.0,
+     -228.8,
      -0.0,
      0.0
     ],
     "corner_latch": [
-     228.0,
-     0.0,
-     -0.0
+     228.8,
+     -0.0,
+     0.0
     ]
    },
    "hole_r_mm": {
-    "bolt_tl": 5.0,
-    "bolt_tr": 5.0,
-    "bolt_bl": 5.0,
-    "bolt_br": 5.0,
+    "bolt_tl": 4.98,
+    "bolt_tr": 4.98,
+    "bolt_bl": 4.98,
+    "bolt_br": 4.98,
     "corner_hinge": 4.75,
     "corner_latch": 4.75
    },
    "plane_offset_mm": {
-    "bolt_tl": -3.64,
-    "bolt_tr": -3.36,
-    "bolt_bl": 1.91,
-    "bolt_br": 2.19,
-    "corner_hinge": 1.04,
-    "corner_latch": 1.87
+    "bolt_tl": -3.81,
+    "bolt_tr": -3.51,
+    "bolt_bl": 1.99,
+    "bolt_br": 2.29,
+    "corner_hinge": 1.08,
+    "corner_latch": 1.95
    },
-   "coplanarity_mm": 5.83,
+   "coplanarity_mm": 6.09,
    "T_door_to_cad": [
     [
      1.0,
-     -1.4e-05,
+     0.0,
+     -1e-06,
+     -950.001114
+    ],
+    [
      1e-06,
-     -949.2
+     0.06332,
+     0.997993,
+     8.002481
     ],
     [
      0.0,
-     0.060713,
-     0.998155,
-     7.42
-    ],
-    [
-     -1.4e-05,
-     -0.998155,
-     0.060713,
-     58.163151
+     -0.997993,
+     0.06332,
+     58.200137
     ],
     [
      0.0,
@@ -141,18 +141,7 @@
      1.0
     ]
    ],
-   "provisional": {
-    "base": "E25_door_LH_FRT",
-    "note": "외판 단일 솔리드 STEP — 코너 홀은 E25 래치 코너 기준 CAD_D 이동으로 합성(잠정)",
-    "synthetic_landmarks": [
-     "bolt_tl",
-     "bolt_tr",
-     "bolt_bl",
-     "bolt_br",
-     "corner_hinge",
-     "corner_latch"
-    ]
-   }
+   "stl": "cad/door_stl/E23_door_LH_FRT_assy.stl"
   },
   "E25_door_LH_FRT": {
    "D_mm": 723.6,
@@ -808,15 +797,15 @@
   "E30_door_LH_RR": {
    "D_mm": 1157.61,
    "D_cad": 1158,
-   "field_fit_mm": 4.39,
-   "field_margin_mm": 28.54,
+   "field_fit_mm": 4.7,
+   "field_margin_mm": 28.8,
    "n_field": 24,
    "field_features": {
-    "ul": 155.1,
+    "ul": 155.2,
     "wl": -187.8,
-    "uh": -1005.4,
-    "wh": -182.9,
-    "D": 1160.0
+    "uh": -1003.7,
+    "wh": -184.0,
+    "D": 1159.2
    },
    "rect_err": 0.7,
    "dist_rect_to_latch": 236.1,

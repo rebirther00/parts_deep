@@ -20,6 +20,10 @@ def ensure(con):
     for col in ("span_med", "s_session", "s_ref", "d_pix_med", "dev_pix_mm", "margin_pix_min"):
         if col not in have:
             con.execute(f"ALTER TABLE session_hole_metrics ADD COLUMN {col} REAL")
+    # 2026-09-23 세션 다수결 클래스(자동 재배정 근거) — migrate_options.py 와 동일
+    for col, typ in (("pred_major", "VARCHAR(100)"), ("n_pred_major", "INTEGER")):
+        if col not in have:
+            con.execute(f"ALTER TABLE session_hole_metrics ADD COLUMN {col} {typ}")
     con.commit()
 
 

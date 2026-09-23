@@ -42,7 +42,7 @@ DBG_DIR = os.path.join(BASE, 'artifacts', 'cad_holes_debug')
 # 관측면 정본: cad/door_stp/'cad 설명.txt'의 '카메라가 바라봐야 하는 방향'(STP ±Z).
 # STP Z = -STL Y 매핑(-Z→+Y, +Z→-Y)은 자유 선택이 확신(마진 1.9~32.6mm)인 6클래스에서
 # 전부 일치함을 확인. RH 2종은 코너 행이 볼트 직사각 기준 준대칭이라 이 정본으로 고정.
-# E23_door_LH_FRT(2026-09-07 추가): STP 좌표계가 E25와 동일(Y 두께, Z −47~1093)이라 E25 규칙(-Z→+Y) 적용.
+# E23_door_LH_FRT(2026-09-07 추가): STP 좌표계가 E25와 동일(Y 두께, Z −47~1093)이라 E25 규칙(-Z→+Y) 적용 (2026-09-23 어셈블리 메시도 동일 좌표계).
 VIEW_DESC = {'E23_door_LH_FRT': '+Y',
              'E25_door_LH_FRT': '+Y', 'E25_door_LH_RR': '+Y', 'E25_door_RH': '+Y',
              'E30_E38_door_RH': '+Y', 'E30_door_LH_FRT': '-Y', 'E30_door_LH_RR': '-Y',
@@ -51,8 +51,9 @@ VIEW_DESC = {'E23_door_LH_FRT': '+Y',
 #   E23_door_LH_FRT(2026-09-07): STEP이 외판 단일 솔리드라 보강재 코너 홀 없음. 차체 좌표계·래치 볼트홀 4개가 E25와
 #   완전히 동일하고, 현장 검출 특징도 래치측 (ul,wl)=(146.2,185.4) vs E25 (145.1,185.7)로 같은 래치 보강재임을 확인
 #   → 래치 코너 = E25 래치 코너, 힌지 코너 = 래치에서 힌지 방향으로 CAD_D 만큼. 어셈블리 STEP 확보 시 삭제.
-PROVISIONAL = {'E23_door_LH_FRT': dict(base='E25_door_LH_FRT',
-                                       note='외판 단일 솔리드 STEP — 코너 홀은 E25 래치 코너 기준 CAD_D 이동으로 합성(잠정)')}
+# 2026-09-23: E23 어셈블리 STEP(110982-02444B, 보강재·힌지 포함) 확보 → cad/door_stl/E23_door_LH_FRT.stl 을 어셈블리 메시로 교체하고
+#   잠정 등록 해제(정식 추출). 외판 단일 메시는 E23_door_LH_FRT_outer_02723.stl 로 보관.
+PROVISIONAL = {}
 RES = 1.0             # 디버그 투영 mm/px
 RECT = (157.0, 96.0)  # 볼트홀 직사각(hole_classifier.bolt_frame과 동일 상수)
 RECT_DIAG = math.hypot(*RECT)
@@ -70,11 +71,15 @@ def load_mesh(path):
     return tris, mins, maxs, (thin, a0, a1)
 
 
-def find_holes_3d(tris, axes):
+CLUSTER_MM = 1.2   # 홀 벽면 점 클러스터 연결 반경(mm). 메시가 성기면(변 길이 > 1.2mm) --cluster-mm 로 키운다 (2026-09-23)
+
+
+def find_holes_3d(tris, axes, cluster_mm=None):
     """홀 벽면 삼각형 조밀 샘플 → 클러스터 → PCA 평면 원 피팅.
 
     반환: dict(c3=중심 3D, X/Y3/Z, r, rms, cover, n, ax_extent) 리스트."""
     thin, a0, a1 = axes
+    cluster_mm = cluster_mm or CLUSTER_MM
     n = np.cross(tris[:, 1] - tris[:, 0], tris[:, 2] - tris[:, 0])
     n /= np.maximum(np.linalg.norm(n, axis=1, keepdims=True), 1e-12)
     W = tris[np.abs(n[:, thin]) < 0.5]
@@ -82,7 +87,7 @@ def find_holes_3d(tris, axes):
         return []
     P = np.concatenate([W.reshape(-1, 3), W.mean(1)])          # 4점/삼각형
     tree = cKDTree(P)
-    pairs = tree.query_pairs(1.2, output_type='ndarray')
+    pairs = tree.query_pairs(cluster_mm, output_type='ndarray')
     parent = np.arange(len(P))
 
     def find(i):
@@ -307,8 +312,14 @@ def camera_layer(h, holes, view, thin):
     return max(same, key=lambda g: ysign * g['Y3'])
 
 
+def stl_path(cls):
+    """<class>_assy.stl(어셈블리 STEP 메시, git 미추적·재생성 가능)이 있으면 우선, 없으면 <class>.stl (2026-09-23)."""
+    assy = os.path.join(STL_DIR, cls + '_assy.stl')
+    return assy if os.path.exists(assy) else os.path.join(STL_DIR, cls + '.stl')
+
+
 def extract(cls, net, dev):
-    tris, mins, maxs, axes = load_mesh(os.path.join(STL_DIR, cls + '.stl'))
+    tris, mins, maxs, axes = load_mesh(stl_path(cls))
     thin, a0, a1 = axes
     holes = find_holes_3d(tris, axes)
 
@@ -409,6 +420,13 @@ def debug_png(cls, tris, holes, named, mins, axes, info):
 
 
 if __name__ == '__main__':
+    import argparse
+    ap = argparse.ArgumentParser(description='CAD STL → cad_holes.json (전 클래스 또는 --only 지정 클래스만 재추출, 나머지는 기존 항목 유지)')
+    ap.add_argument('--only', action='append', default=[], help='재추출할 클래스 (여러 번 지정 가능). 생략 시 전 클래스')
+    ap.add_argument('--cluster-mm', type=float, default=None, help=f'홀 벽면 점 연결 반경 mm (기본 {CLUSTER_MM}; 성긴 메시는 2.0 등)')
+    args = ap.parse_args()
+    if args.cluster_mm:
+        CLUSTER_MM = args.cluster_mm
     os.makedirs(DBG_DIR, exist_ok=True)
     out = dict(meta=dict(
         units='mm', source='cad/door_stl',
@@ -420,6 +438,10 @@ if __name__ == '__main__':
           f"{'직사각':>5s} {'래치거리':>7s} {'공면성':>6s} 관측면 라벨검증 실측n")
     prev = json.load(open(OUT_JSON)).get('classes', {}) if os.path.exists(OUT_JSON) else {}
     for cls in sorted(CAD_D):
+        if args.only and cls not in args.only:
+            if cls in prev:
+                out['classes'][cls] = prev[cls]
+            continue
         try:
             info, tris, holes, named, mins, axes = extract(cls, net, dev)
         except AssertionError as e:
@@ -430,6 +452,7 @@ if __name__ == '__main__':
                 out['classes'][cls] = prev[cls]
             continue
         debug_png(cls, tris, holes, named, mins, axes, info)
+        info['stl'] = os.path.relpath(stl_path(cls), ROOT)
         out['classes'][cls] = info
         print(f"{cls:17s} {info['D_mm']:7.1f} {info['D_cad']:5d} {info['D_mm'] - info['D_cad']:+5.1f} "
               f"{info['field_fit_mm']:6.1f} {info['field_margin_mm']:6.1f} {info['rect_err']:5.2f} "
