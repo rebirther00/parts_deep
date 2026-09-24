@@ -228,7 +228,12 @@ class DBLog:
         """eval_type: in_domain | cross_domain | inference_pipeline"""
         if model_id is None:
             return None
-        ds_id = self.dataset_id(dataset_name)
+        # 2026-09-24: 평가 폴더 이름으로 datasets 행을 자동 생성하지 않는다(cnn/collect 같은 빈 행이 생겼던 문제).
+        # 등록된 데이터셋이 아니면 정본 door_factory_collect 에 연결하고 원래 이름은 per_class_results.dataset_dir 에 남긴다.
+        ds_id = self.dataset_id(dataset_name, create=False)
+        if ds_id is None:
+            ds_id = self.dataset_id("door_factory_collect", create=False)
+            per_class_results = dict(per_class_results or {}, dataset_dir=str(dataset_name))
         if ds_id is None:
             return None
         if session_id is None:
