@@ -53,64 +53,64 @@
  "detector_blind": true,
  "results": {
   "rule": {
-   "frames": 738,
-   "judged": 671,
-   "correct": 671,
-   "unconfirmed": 166,
-   "judged_rate": 90.92140921409214,
+   "frames": 904,
+   "judged": 811,
+   "correct": 811,
+   "unconfirmed": 0,
+   "judged_rate": 89.71238938053098,
    "acc": 100.0,
-   "sessions": 37,
-   "s_judged": 36,
-   "s_correct": 36,
+   "sessions": 46,
+   "s_judged": 45,
+   "s_correct": 45,
    "s_acc": 100.0
   },
   "det": {
-   "frames": 738,
-   "judged": 720,
-   "correct": 720,
-   "unconfirmed": 166,
-   "judged_rate": 97.5609756097561,
+   "frames": 904,
+   "judged": 884,
+   "correct": 884,
+   "unconfirmed": 0,
+   "judged_rate": 97.78761061946902,
    "acc": 100.0,
-   "sessions": 37,
-   "s_judged": 37,
-   "s_correct": 37,
+   "sessions": 46,
+   "s_judged": 46,
+   "s_correct": 46,
    "s_acc": 100.0
   },
   "partno_multi_448_seed42": {
-   "frames": 738,
-   "judged": 738,
-   "correct": 645,
-   "unconfirmed": 166,
+   "frames": 904,
+   "judged": 904,
+   "correct": 811,
+   "unconfirmed": 0,
    "judged_rate": 100.0,
-   "acc": 87.39837398373983,
-   "sessions": 37,
-   "s_judged": 37,
-   "s_correct": 32,
-   "s_acc": 86.48648648648648
+   "acc": 89.71238938053098,
+   "sessions": 46,
+   "s_judged": 46,
+   "s_correct": 41,
+   "s_acc": 89.1304347826087
   },
   "partno_part14_448_seed42": {
-   "frames": 738,
-   "judged": 738,
-   "correct": 642,
-   "unconfirmed": 166,
+   "frames": 904,
+   "judged": 904,
+   "correct": 805,
+   "unconfirmed": 0,
    "judged_rate": 100.0,
-   "acc": 86.99186991869918,
-   "sessions": 37,
-   "s_judged": 37,
-   "s_correct": 32,
-   "s_acc": 86.48648648648648
+   "acc": 89.04867256637168,
+   "sessions": 46,
+   "s_judged": 46,
+   "s_correct": 41,
+   "s_acc": 89.1304347826087
   },
   "partno_multi_640_seed42": {
-   "frames": 738,
-   "judged": 738,
-   "correct": 591,
-   "unconfirmed": 166,
+   "frames": 904,
+   "judged": 904,
+   "correct": 713,
+   "unconfirmed": 0,
    "judged_rate": 100.0,
-   "acc": 80.08130081300813,
-   "sessions": 37,
-   "s_judged": 37,
-   "s_correct": 30,
-   "s_acc": 81.08108108108108
+   "acc": 78.8716814159292,
+   "sessions": 46,
+   "s_judged": 46,
+   "s_correct": 37,
+   "s_acc": 80.43478260869566
   }
  },
  "frames": [
@@ -21755,8 +21755,8 @@
   {
    "session": "20261002/E25_door_LH_RR/s_144347",
    "cls": "E25_door_LH_RR",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 0,
+   "gt_part": 4,
    "rule": {
     "cls": "E25_door_LH_RR",
     "radar": 0,
@@ -21786,8 +21786,8 @@
   {
    "session": "20261002/E25_door_LH_RR/s_144347",
    "cls": "E25_door_LH_RR",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 0,
+   "gt_part": 4,
    "rule": {
     "cls": "E25_door_LH_RR",
     "radar": 0,
@@ -21817,8 +21817,8 @@
   {
    "session": "20261002/E25_door_LH_RR/s_144347",
    "cls": "E25_door_LH_RR",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 0,
+   "gt_part": 4,
    "rule": {
     "cls": "E25_door_LH_RR",
     "radar": 0,
@@ -21848,8 +21848,8 @@
   {
    "session": "20261002/E25_door_LH_RR/s_144347",
    "cls": "E25_door_LH_RR",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 0,
+   "gt_part": 4,
    "rule": {
     "cls": "E25_door_LH_RR",
     "radar": 0,
@@ -21879,8 +21879,8 @@
   {
    "session": "20261002/E25_door_LH_RR/s_144347",
    "cls": "E25_door_LH_RR",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 0,
+   "gt_part": 4,
    "rule": {
     "cls": "E25_door_LH_RR",
     "radar": 0,
@@ -21910,8 +21910,8 @@
   {
    "session": "20261002/E25_door_LH_RR/s_144347",
    "cls": "E25_door_LH_RR",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 0,
+   "gt_part": 4,
    "rule": {
     "cls": "E25_door_LH_RR",
     "radar": 0,
@@ -21941,8 +21941,8 @@
   {
    "session": "20261002/E25_door_LH_RR/s_144347",
    "cls": "E25_door_LH_RR",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 0,
+   "gt_part": 4,
    "rule": {
     "cls": "E25_door_LH_RR",
     "radar": 0,
@@ -21972,8 +21972,8 @@
   {
    "session": "20261002/E25_door_LH_RR/s_144347",
    "cls": "E25_door_LH_RR",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 0,
+   "gt_part": 4,
    "rule": {
     "cls": "E25_door_LH_RR",
     "radar": 0,
@@ -22003,8 +22003,8 @@
   {
    "session": "20261002/E25_door_LH_RR/s_144347",
    "cls": "E25_door_LH_RR",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 0,
+   "gt_part": 4,
    "rule": {
     "cls": "E25_door_LH_RR",
     "radar": 0,
@@ -22034,8 +22034,8 @@
   {
    "session": "20261002/E25_door_LH_RR/s_144347",
    "cls": "E25_door_LH_RR",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 0,
+   "gt_part": 4,
    "rule": {
     "cls": "E25_door_LH_RR",
     "radar": 0,
@@ -22065,8 +22065,8 @@
   {
    "session": "20261002/E25_door_LH_RR/s_144347",
    "cls": "E25_door_LH_RR",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 0,
+   "gt_part": 4,
    "rule": {
     "cls": "E25_door_LH_RR",
     "radar": 0,
@@ -22096,8 +22096,8 @@
   {
    "session": "20261002/E25_door_LH_RR/s_144347",
    "cls": "E25_door_LH_RR",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 0,
+   "gt_part": 4,
    "rule": {
     "cls": "E25_door_LH_RR",
     "radar": 0,
@@ -22127,8 +22127,8 @@
   {
    "session": "20261002/E25_door_LH_RR/s_144347",
    "cls": "E25_door_LH_RR",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 0,
+   "gt_part": 4,
    "rule": {
     "cls": "E25_door_LH_RR",
     "radar": 0,
@@ -22158,8 +22158,8 @@
   {
    "session": "20261002/E25_door_LH_RR/s_144347",
    "cls": "E25_door_LH_RR",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 0,
+   "gt_part": 4,
    "rule": {
     "cls": "E25_door_LH_RR",
     "radar": 0,
@@ -22189,8 +22189,8 @@
   {
    "session": "20261002/E25_door_LH_RR/s_144347",
    "cls": "E25_door_LH_RR",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 0,
+   "gt_part": 4,
    "rule": {
     "cls": "E25_door_LH_RR",
     "radar": 0,
@@ -22220,8 +22220,8 @@
   {
    "session": "20261002/E25_door_LH_RR/s_144347",
    "cls": "E25_door_LH_RR",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 0,
+   "gt_part": 4,
    "rule": {
     "cls": "E25_door_LH_RR",
     "radar": 0,
@@ -22251,8 +22251,8 @@
   {
    "session": "20261002/E25_door_LH_RR/s_144347",
    "cls": "E25_door_LH_RR",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 0,
+   "gt_part": 4,
    "rule": {
     "cls": "E25_door_LH_RR",
     "radar": 0,
@@ -22282,8 +22282,8 @@
   {
    "session": "20261002/E25_door_LH_RR/s_144347",
    "cls": "E25_door_LH_RR",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 0,
+   "gt_part": 4,
    "rule": {
     "cls": "E25_door_LH_RR",
     "radar": 0,
@@ -22313,8 +22313,8 @@
   {
    "session": "20261002/E25_door_LH_RR/s_144347",
    "cls": "E25_door_LH_RR",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 0,
+   "gt_part": 4,
    "rule": {
     "cls": "E25_door_LH_RR",
     "radar": 0,
@@ -22344,8 +22344,8 @@
   {
    "session": "20261002/E25_door_LH_RR/s_151003",
    "cls": "E25_door_LH_RR",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 0,
+   "gt_part": 4,
    "rule": {
     "cls": "E25_door_LH_RR",
     "radar": 0,
@@ -22375,8 +22375,8 @@
   {
    "session": "20261002/E25_door_LH_RR/s_151003",
    "cls": "E25_door_LH_RR",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 0,
+   "gt_part": 4,
    "rule": {
     "cls": "E25_door_LH_RR",
     "radar": 0,
@@ -22406,8 +22406,8 @@
   {
    "session": "20261002/E25_door_LH_RR/s_151003",
    "cls": "E25_door_LH_RR",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 0,
+   "gt_part": 4,
    "rule": {
     "cls": "E25_door_LH_RR",
     "radar": 0,
@@ -22437,8 +22437,8 @@
   {
    "session": "20261002/E25_door_LH_RR/s_151003",
    "cls": "E25_door_LH_RR",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 0,
+   "gt_part": 4,
    "rule": {
     "cls": "E25_door_LH_RR",
     "radar": 0,
@@ -22468,8 +22468,8 @@
   {
    "session": "20261002/E25_door_LH_RR/s_151003",
    "cls": "E25_door_LH_RR",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 0,
+   "gt_part": 4,
    "rule": {
     "cls": "E25_door_LH_RR",
     "radar": 0,
@@ -22499,8 +22499,8 @@
   {
    "session": "20261002/E25_door_LH_RR/s_151003",
    "cls": "E25_door_LH_RR",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 0,
+   "gt_part": 4,
    "rule": {
     "cls": "E25_door_LH_RR",
     "radar": 0,
@@ -22530,8 +22530,8 @@
   {
    "session": "20261002/E25_door_LH_RR/s_151003",
    "cls": "E25_door_LH_RR",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 0,
+   "gt_part": 4,
    "rule": {
     "cls": "E25_door_LH_RR",
     "radar": 0,
@@ -22561,8 +22561,8 @@
   {
    "session": "20261002/E25_door_LH_RR/s_151003",
    "cls": "E25_door_LH_RR",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 0,
+   "gt_part": 4,
    "rule": {
     "cls": "E25_door_LH_RR",
     "radar": 0,
@@ -22592,8 +22592,8 @@
   {
    "session": "20261002/E25_door_LH_RR/s_151003",
    "cls": "E25_door_LH_RR",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 0,
+   "gt_part": 4,
    "rule": {
     "cls": "E25_door_LH_RR",
     "radar": 0,
@@ -22623,8 +22623,8 @@
   {
    "session": "20261002/E25_door_LH_RR/s_151003",
    "cls": "E25_door_LH_RR",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 0,
+   "gt_part": 4,
    "rule": {
     "cls": "E25_door_LH_RR",
     "radar": 0,
@@ -22654,8 +22654,8 @@
   {
    "session": "20261002/E25_door_LH_RR/s_151003",
    "cls": "E25_door_LH_RR",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 0,
+   "gt_part": 4,
    "rule": {
     "cls": "E25_door_LH_RR",
     "radar": 0,
@@ -22685,8 +22685,8 @@
   {
    "session": "20261002/E25_door_LH_RR/s_151003",
    "cls": "E25_door_LH_RR",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 0,
+   "gt_part": 4,
    "rule": {
     "cls": "E25_door_LH_RR",
     "radar": 0,
@@ -22716,8 +22716,8 @@
   {
    "session": "20261002/E25_door_LH_RR/s_151003",
    "cls": "E25_door_LH_RR",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 0,
+   "gt_part": 4,
    "rule": {
     "cls": "E25_door_LH_RR",
     "radar": 0,
@@ -22747,8 +22747,8 @@
   {
    "session": "20261002/E25_door_LH_RR/s_151003",
    "cls": "E25_door_LH_RR",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 0,
+   "gt_part": 4,
    "rule": {
     "cls": "E25_door_LH_RR",
     "radar": 0,
@@ -22778,8 +22778,8 @@
   {
    "session": "20261002/E25_door_LH_RR/s_151003",
    "cls": "E25_door_LH_RR",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 0,
+   "gt_part": 4,
    "rule": {
     "cls": "E25_door_LH_RR",
     "radar": 0,
@@ -22809,8 +22809,8 @@
   {
    "session": "20261002/E25_door_LH_RR/s_151003",
    "cls": "E25_door_LH_RR",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 0,
+   "gt_part": 4,
    "rule": {
     "cls": "E25_door_LH_RR",
     "radar": 0,
@@ -22840,8 +22840,8 @@
   {
    "session": "20261002/E25_door_LH_RR/s_151003",
    "cls": "E25_door_LH_RR",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 0,
+   "gt_part": 4,
    "rule": {
     "cls": "E25_door_LH_RR",
     "radar": 0,
@@ -22871,8 +22871,8 @@
   {
    "session": "20261002/E25_door_LH_RR/s_151003",
    "cls": "E25_door_LH_RR",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 0,
+   "gt_part": 4,
    "rule": {
     "cls": "E25_door_LH_RR",
     "radar": 0,
@@ -22902,8 +22902,8 @@
   {
    "session": "20261002/E25_door_LH_RR/s_151003",
    "cls": "E25_door_LH_RR",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 0,
+   "gt_part": 4,
    "rule": {
     "cls": "E25_door_LH_RR",
     "radar": 0,
@@ -22933,8 +22933,8 @@
   {
    "session": "20261002/E25_door_LH_RR/s_151003",
    "cls": "E25_door_LH_RR",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 0,
+   "gt_part": 4,
    "rule": {
     "cls": "E25_door_LH_RR",
     "radar": 0,
@@ -22964,8 +22964,8 @@
   {
    "session": "20261002/E25_door_RH/s_154727",
    "cls": "E25_door_RH",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 0,
+   "gt_part": 10,
    "rule": {
     "cls": null,
     "radar": null,
@@ -22995,8 +22995,8 @@
   {
    "session": "20261002/E25_door_RH/s_154727",
    "cls": "E25_door_RH",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 0,
+   "gt_part": 10,
    "rule": {
     "cls": "E25_door_RH",
     "radar": 0,
@@ -23026,8 +23026,8 @@
   {
    "session": "20261002/E25_door_RH/s_154727",
    "cls": "E25_door_RH",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 0,
+   "gt_part": 10,
    "rule": {
     "cls": "E25_door_RH",
     "radar": 0,
@@ -23057,8 +23057,8 @@
   {
    "session": "20261002/E25_door_RH/s_154727",
    "cls": "E25_door_RH",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 0,
+   "gt_part": 10,
    "rule": {
     "cls": null,
     "radar": null,
@@ -23088,8 +23088,8 @@
   {
    "session": "20261002/E25_door_RH/s_154727",
    "cls": "E25_door_RH",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 0,
+   "gt_part": 10,
    "rule": {
     "cls": null,
     "radar": null,
@@ -23119,8 +23119,8 @@
   {
    "session": "20261002/E25_door_RH/s_154727",
    "cls": "E25_door_RH",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 0,
+   "gt_part": 10,
    "rule": {
     "cls": "E25_door_RH",
     "radar": 0,
@@ -23150,8 +23150,8 @@
   {
    "session": "20261002/E25_door_RH/s_154727",
    "cls": "E25_door_RH",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 0,
+   "gt_part": 10,
    "rule": {
     "cls": "E25_door_RH",
     "radar": 0,
@@ -23181,8 +23181,8 @@
   {
    "session": "20261002/E25_door_RH/s_154727",
    "cls": "E25_door_RH",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 0,
+   "gt_part": 10,
    "rule": {
     "cls": null,
     "radar": null,
@@ -23212,8 +23212,8 @@
   {
    "session": "20261002/E25_door_RH/s_154727",
    "cls": "E25_door_RH",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 0,
+   "gt_part": 10,
    "rule": {
     "cls": "E25_door_RH",
     "radar": 0,
@@ -23243,8 +23243,8 @@
   {
    "session": "20261002/E25_door_RH/s_154727",
    "cls": "E25_door_RH",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 0,
+   "gt_part": 10,
    "rule": {
     "cls": null,
     "radar": null,
@@ -23274,8 +23274,8 @@
   {
    "session": "20261002/E25_door_RH/s_154727",
    "cls": "E25_door_RH",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 0,
+   "gt_part": 10,
    "rule": {
     "cls": null,
     "radar": null,
@@ -23305,8 +23305,8 @@
   {
    "session": "20261002/E25_door_RH/s_154727",
    "cls": "E25_door_RH",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 0,
+   "gt_part": 10,
    "rule": {
     "cls": "E25_door_RH",
     "radar": 0,
@@ -23336,8 +23336,8 @@
   {
    "session": "20261002/E25_door_RH/s_154727",
    "cls": "E25_door_RH",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 0,
+   "gt_part": 10,
    "rule": {
     "cls": null,
     "radar": null,
@@ -23367,8 +23367,8 @@
   {
    "session": "20261002/E25_door_RH/s_154727",
    "cls": "E25_door_RH",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 0,
+   "gt_part": 10,
    "rule": {
     "cls": null,
     "radar": null,
@@ -23398,8 +23398,8 @@
   {
    "session": "20261002/E25_door_RH/s_154727",
    "cls": "E25_door_RH",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 0,
+   "gt_part": 10,
    "rule": {
     "cls": "E25_door_RH",
     "radar": 0,
@@ -23429,8 +23429,8 @@
   {
    "session": "20261002/E25_door_RH/s_154727",
    "cls": "E25_door_RH",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 0,
+   "gt_part": 10,
    "rule": {
     "cls": null,
     "radar": null,
@@ -23460,8 +23460,8 @@
   {
    "session": "20261002/E25_door_RH/s_154727",
    "cls": "E25_door_RH",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 0,
+   "gt_part": 10,
    "rule": {
     "cls": null,
     "radar": null,
@@ -23491,8 +23491,8 @@
   {
    "session": "20261002/E25_door_RH/s_154727",
    "cls": "E25_door_RH",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 0,
+   "gt_part": 10,
    "rule": {
     "cls": "E25_door_RH",
     "radar": 0,
@@ -23522,8 +23522,8 @@
   {
    "session": "20261002/E25_door_RH/s_154727",
    "cls": "E25_door_RH",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 0,
+   "gt_part": 10,
    "rule": {
     "cls": "E25_door_RH",
     "radar": 0,
@@ -23553,8 +23553,8 @@
   {
    "session": "20261002/E25_door_RH/s_154727",
    "cls": "E25_door_RH",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 0,
+   "gt_part": 10,
    "rule": {
     "cls": "E25_door_RH",
     "radar": 0,
@@ -23584,8 +23584,8 @@
   {
    "session": "20261002/E25_door_RH/s_164340",
    "cls": "E25_door_RH",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 0,
+   "gt_part": 10,
    "rule": {
     "cls": "E25_door_RH",
     "radar": 0,
@@ -23615,39 +23615,8 @@
   {
    "session": "20261002/E25_door_RH/s_164340",
    "cls": "E25_door_RH",
-   "gt_radar": null,
-   "gt_part": -1,
-   "rule": {
-    "cls": null,
-    "radar": null,
-    "part": -1
-   },
-   "det": {
-    "cls": "E25_door_RH",
-    "radar": 0,
-    "part": 10
-   },
-   "partno_multi_448_seed42": {
-    "part": 10,
-    "cls": "E25_door_RH",
-    "radar": 0
-   },
-   "partno_part14_448_seed42": {
-    "part": 10,
-    "cls": null,
-    "radar": null
-   },
-   "partno_multi_640_seed42": {
-    "part": 10,
-    "cls": "E25_door_RH",
-    "radar": 0
-   }
-  },
-  {
-   "session": "20261002/E25_door_RH/s_164340",
-   "cls": "E25_door_RH",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 0,
+   "gt_part": 10,
    "rule": {
     "cls": null,
     "radar": null,
@@ -23677,8 +23646,8 @@
   {
    "session": "20261002/E25_door_RH/s_164340",
    "cls": "E25_door_RH",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 0,
+   "gt_part": 10,
    "rule": {
     "cls": null,
     "radar": null,
@@ -23708,8 +23677,8 @@
   {
    "session": "20261002/E25_door_RH/s_164340",
    "cls": "E25_door_RH",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 0,
+   "gt_part": 10,
    "rule": {
     "cls": null,
     "radar": null,
@@ -23739,8 +23708,8 @@
   {
    "session": "20261002/E25_door_RH/s_164340",
    "cls": "E25_door_RH",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 0,
+   "gt_part": 10,
    "rule": {
     "cls": null,
     "radar": null,
@@ -23770,8 +23739,8 @@
   {
    "session": "20261002/E25_door_RH/s_164340",
    "cls": "E25_door_RH",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 0,
+   "gt_part": 10,
    "rule": {
     "cls": null,
     "radar": null,
@@ -23801,39 +23770,8 @@
   {
    "session": "20261002/E25_door_RH/s_164340",
    "cls": "E25_door_RH",
-   "gt_radar": null,
-   "gt_part": -1,
-   "rule": {
-    "cls": "E25_door_RH",
-    "radar": 0,
-    "part": 10
-   },
-   "det": {
-    "cls": "E25_door_RH",
-    "radar": 0,
-    "part": 10
-   },
-   "partno_multi_448_seed42": {
-    "part": 10,
-    "cls": "E25_door_RH",
-    "radar": 0
-   },
-   "partno_part14_448_seed42": {
-    "part": 10,
-    "cls": null,
-    "radar": null
-   },
-   "partno_multi_640_seed42": {
-    "part": 10,
-    "cls": "E25_door_RH",
-    "radar": 0
-   }
-  },
-  {
-   "session": "20261002/E25_door_RH/s_164340",
-   "cls": "E25_door_RH",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 0,
+   "gt_part": 10,
    "rule": {
     "cls": null,
     "radar": null,
@@ -23863,8 +23801,39 @@
   {
    "session": "20261002/E25_door_RH/s_164340",
    "cls": "E25_door_RH",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 0,
+   "gt_part": 10,
+   "rule": {
+    "cls": "E25_door_RH",
+    "radar": 0,
+    "part": 10
+   },
+   "det": {
+    "cls": "E25_door_RH",
+    "radar": 0,
+    "part": 10
+   },
+   "partno_multi_448_seed42": {
+    "part": 10,
+    "cls": "E25_door_RH",
+    "radar": 0
+   },
+   "partno_part14_448_seed42": {
+    "part": 10,
+    "cls": null,
+    "radar": null
+   },
+   "partno_multi_640_seed42": {
+    "part": 10,
+    "cls": "E25_door_RH",
+    "radar": 0
+   }
+  },
+  {
+   "session": "20261002/E25_door_RH/s_164340",
+   "cls": "E25_door_RH",
+   "gt_radar": 0,
+   "gt_part": 10,
    "rule": {
     "cls": null,
     "radar": null,
@@ -23894,39 +23863,8 @@
   {
    "session": "20261002/E25_door_RH/s_164340",
    "cls": "E25_door_RH",
-   "gt_radar": null,
-   "gt_part": -1,
-   "rule": {
-    "cls": "E25_door_RH",
-    "radar": 0,
-    "part": 10
-   },
-   "det": {
-    "cls": "E25_door_RH",
-    "radar": 0,
-    "part": 10
-   },
-   "partno_multi_448_seed42": {
-    "part": 10,
-    "cls": "E25_door_RH",
-    "radar": 0
-   },
-   "partno_part14_448_seed42": {
-    "part": 10,
-    "cls": null,
-    "radar": null
-   },
-   "partno_multi_640_seed42": {
-    "part": 10,
-    "cls": "E25_door_RH",
-    "radar": 0
-   }
-  },
-  {
-   "session": "20261002/E25_door_RH/s_164340",
-   "cls": "E25_door_RH",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 0,
+   "gt_part": 10,
    "rule": {
     "cls": null,
     "radar": null,
@@ -23956,8 +23894,39 @@
   {
    "session": "20261002/E25_door_RH/s_164340",
    "cls": "E25_door_RH",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 0,
+   "gt_part": 10,
+   "rule": {
+    "cls": "E25_door_RH",
+    "radar": 0,
+    "part": 10
+   },
+   "det": {
+    "cls": "E25_door_RH",
+    "radar": 0,
+    "part": 10
+   },
+   "partno_multi_448_seed42": {
+    "part": 10,
+    "cls": "E25_door_RH",
+    "radar": 0
+   },
+   "partno_part14_448_seed42": {
+    "part": 10,
+    "cls": null,
+    "radar": null
+   },
+   "partno_multi_640_seed42": {
+    "part": 10,
+    "cls": "E25_door_RH",
+    "radar": 0
+   }
+  },
+  {
+   "session": "20261002/E25_door_RH/s_164340",
+   "cls": "E25_door_RH",
+   "gt_radar": 0,
+   "gt_part": 10,
    "rule": {
     "cls": null,
     "radar": null,
@@ -23987,8 +23956,8 @@
   {
    "session": "20261002/E25_door_RH/s_164340",
    "cls": "E25_door_RH",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 0,
+   "gt_part": 10,
    "rule": {
     "cls": null,
     "radar": null,
@@ -24018,8 +23987,8 @@
   {
    "session": "20261002/E25_door_RH/s_164340",
    "cls": "E25_door_RH",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 0,
+   "gt_part": 10,
    "rule": {
     "cls": null,
     "radar": null,
@@ -24049,8 +24018,8 @@
   {
    "session": "20261002/E25_door_RH/s_164340",
    "cls": "E25_door_RH",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 0,
+   "gt_part": 10,
    "rule": {
     "cls": null,
     "radar": null,
@@ -24080,8 +24049,8 @@
   {
    "session": "20261002/E25_door_RH/s_164340",
    "cls": "E25_door_RH",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 0,
+   "gt_part": 10,
    "rule": {
     "cls": null,
     "radar": null,
@@ -24111,8 +24080,8 @@
   {
    "session": "20261002/E25_door_RH/s_164340",
    "cls": "E25_door_RH",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 0,
+   "gt_part": 10,
    "rule": {
     "cls": null,
     "radar": null,
@@ -24142,8 +24111,8 @@
   {
    "session": "20261002/E25_door_RH/s_164340",
    "cls": "E25_door_RH",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 0,
+   "gt_part": 10,
    "rule": {
     "cls": null,
     "radar": null,
@@ -24173,8 +24142,39 @@
   {
    "session": "20261002/E25_door_RH/s_164340",
    "cls": "E25_door_RH",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 0,
+   "gt_part": 10,
+   "rule": {
+    "cls": null,
+    "radar": null,
+    "part": -1
+   },
+   "det": {
+    "cls": "E25_door_RH",
+    "radar": 0,
+    "part": 10
+   },
+   "partno_multi_448_seed42": {
+    "part": 10,
+    "cls": "E25_door_RH",
+    "radar": 0
+   },
+   "partno_part14_448_seed42": {
+    "part": 10,
+    "cls": null,
+    "radar": null
+   },
+   "partno_multi_640_seed42": {
+    "part": 10,
+    "cls": "E25_door_RH",
+    "radar": 0
+   }
+  },
+  {
+   "session": "20261002/E25_door_RH/s_164340",
+   "cls": "E25_door_RH",
+   "gt_radar": 0,
+   "gt_part": 10,
    "rule": {
     "cls": "E25_door_RH",
     "radar": 0,
@@ -24204,8 +24204,8 @@
   {
    "session": "20261002/E30_E38_door_RH/s_125238",
    "cls": "E30_E38_door_RH",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 1,
+   "gt_part": 13,
    "rule": {
     "cls": "E30_E38_door_RH",
     "radar": 1,
@@ -24235,8 +24235,8 @@
   {
    "session": "20261002/E30_E38_door_RH/s_125238",
    "cls": "E30_E38_door_RH",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 1,
+   "gt_part": 13,
    "rule": {
     "cls": "E30_E38_door_RH",
     "radar": 1,
@@ -24266,8 +24266,8 @@
   {
    "session": "20261002/E30_E38_door_RH/s_125238",
    "cls": "E30_E38_door_RH",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 1,
+   "gt_part": 13,
    "rule": {
     "cls": "E30_E38_door_RH",
     "radar": 1,
@@ -24297,8 +24297,8 @@
   {
    "session": "20261002/E30_E38_door_RH/s_125238",
    "cls": "E30_E38_door_RH",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 1,
+   "gt_part": 13,
    "rule": {
     "cls": "E30_E38_door_RH",
     "radar": 1,
@@ -24328,8 +24328,8 @@
   {
    "session": "20261002/E30_E38_door_RH/s_125238",
    "cls": "E30_E38_door_RH",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 1,
+   "gt_part": 13,
    "rule": {
     "cls": "E30_E38_door_RH",
     "radar": 1,
@@ -24359,8 +24359,8 @@
   {
    "session": "20261002/E30_E38_door_RH/s_125238",
    "cls": "E30_E38_door_RH",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 1,
+   "gt_part": 13,
    "rule": {
     "cls": "E30_E38_door_RH",
     "radar": 1,
@@ -24390,8 +24390,8 @@
   {
    "session": "20261002/E30_E38_door_RH/s_125238",
    "cls": "E30_E38_door_RH",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 1,
+   "gt_part": 13,
    "rule": {
     "cls": "E30_E38_door_RH",
     "radar": 1,
@@ -24421,8 +24421,8 @@
   {
    "session": "20261002/E30_E38_door_RH/s_125238",
    "cls": "E30_E38_door_RH",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 1,
+   "gt_part": 13,
    "rule": {
     "cls": "E30_E38_door_RH",
     "radar": 1,
@@ -24452,8 +24452,8 @@
   {
    "session": "20261002/E30_E38_door_RH/s_125238",
    "cls": "E30_E38_door_RH",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 1,
+   "gt_part": 13,
    "rule": {
     "cls": "E30_E38_door_RH",
     "radar": 1,
@@ -24483,8 +24483,8 @@
   {
    "session": "20261002/E30_E38_door_RH/s_125238",
    "cls": "E30_E38_door_RH",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 1,
+   "gt_part": 13,
    "rule": {
     "cls": "E30_E38_door_RH",
     "radar": 1,
@@ -24514,8 +24514,8 @@
   {
    "session": "20261002/E30_E38_door_RH/s_125238",
    "cls": "E30_E38_door_RH",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 1,
+   "gt_part": 13,
    "rule": {
     "cls": "E30_E38_door_RH",
     "radar": 1,
@@ -24545,8 +24545,8 @@
   {
    "session": "20261002/E30_E38_door_RH/s_125238",
    "cls": "E30_E38_door_RH",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 1,
+   "gt_part": 13,
    "rule": {
     "cls": "E30_E38_door_RH",
     "radar": 1,
@@ -24576,8 +24576,8 @@
   {
    "session": "20261002/E30_E38_door_RH/s_125238",
    "cls": "E30_E38_door_RH",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 1,
+   "gt_part": 13,
    "rule": {
     "cls": "E30_E38_door_RH",
     "radar": 1,
@@ -24607,8 +24607,8 @@
   {
    "session": "20261002/E30_E38_door_RH/s_125238",
    "cls": "E30_E38_door_RH",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 1,
+   "gt_part": 13,
    "rule": {
     "cls": "E30_E38_door_RH",
     "radar": 1,
@@ -24638,8 +24638,8 @@
   {
    "session": "20261002/E30_E38_door_RH/s_125238",
    "cls": "E30_E38_door_RH",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 1,
+   "gt_part": 13,
    "rule": {
     "cls": "E30_E38_door_RH",
     "radar": 1,
@@ -24669,8 +24669,8 @@
   {
    "session": "20261002/E30_E38_door_RH/s_125238",
    "cls": "E30_E38_door_RH",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 1,
+   "gt_part": 13,
    "rule": {
     "cls": "E30_E38_door_RH",
     "radar": 1,
@@ -24700,8 +24700,8 @@
   {
    "session": "20261002/E30_E38_door_RH/s_125238",
    "cls": "E30_E38_door_RH",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 1,
+   "gt_part": 13,
    "rule": {
     "cls": "E30_E38_door_RH",
     "radar": 1,
@@ -24731,8 +24731,8 @@
   {
    "session": "20261002/E30_E38_door_RH/s_125238",
    "cls": "E30_E38_door_RH",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 1,
+   "gt_part": 13,
    "rule": {
     "cls": "E30_E38_door_RH",
     "radar": 1,
@@ -24762,8 +24762,8 @@
   {
    "session": "20261002/E30_E38_door_RH/s_125238",
    "cls": "E30_E38_door_RH",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 1,
+   "gt_part": 13,
    "rule": {
     "cls": "E30_E38_door_RH",
     "radar": 1,
@@ -24793,8 +24793,8 @@
   {
    "session": "20261002/E30_E38_door_RH/s_125238",
    "cls": "E30_E38_door_RH",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 1,
+   "gt_part": 13,
    "rule": {
     "cls": "E30_E38_door_RH",
     "radar": 1,
@@ -24824,8 +24824,8 @@
   {
    "session": "20261002/E30_E38_door_RH/s_132105",
    "cls": "E30_E38_door_RH",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 0,
+   "gt_part": 12,
    "rule": {
     "cls": "E30_E38_door_RH",
     "radar": 0,
@@ -24855,8 +24855,8 @@
   {
    "session": "20261002/E30_E38_door_RH/s_132105",
    "cls": "E30_E38_door_RH",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 0,
+   "gt_part": 12,
    "rule": {
     "cls": "E30_E38_door_RH",
     "radar": 0,
@@ -24886,8 +24886,8 @@
   {
    "session": "20261002/E30_E38_door_RH/s_132105",
    "cls": "E30_E38_door_RH",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 0,
+   "gt_part": 12,
    "rule": {
     "cls": "E30_E38_door_RH",
     "radar": 0,
@@ -24917,8 +24917,8 @@
   {
    "session": "20261002/E30_E38_door_RH/s_132105",
    "cls": "E30_E38_door_RH",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 0,
+   "gt_part": 12,
    "rule": {
     "cls": "E30_E38_door_RH",
     "radar": 0,
@@ -24948,8 +24948,8 @@
   {
    "session": "20261002/E30_E38_door_RH/s_132105",
    "cls": "E30_E38_door_RH",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 0,
+   "gt_part": 12,
    "rule": {
     "cls": "E30_E38_door_RH",
     "radar": 0,
@@ -24979,8 +24979,8 @@
   {
    "session": "20261002/E30_E38_door_RH/s_132105",
    "cls": "E30_E38_door_RH",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 0,
+   "gt_part": 12,
    "rule": {
     "cls": "E30_E38_door_RH",
     "radar": 0,
@@ -25010,8 +25010,8 @@
   {
    "session": "20261002/E30_E38_door_RH/s_132105",
    "cls": "E30_E38_door_RH",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 0,
+   "gt_part": 12,
    "rule": {
     "cls": "E30_E38_door_RH",
     "radar": 0,
@@ -25041,8 +25041,8 @@
   {
    "session": "20261002/E30_E38_door_RH/s_135546",
    "cls": "E30_E38_door_RH",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 0,
+   "gt_part": 12,
    "rule": {
     "cls": "E30_E38_door_RH",
     "radar": 0,
@@ -25072,8 +25072,8 @@
   {
    "session": "20261002/E30_E38_door_RH/s_135546",
    "cls": "E30_E38_door_RH",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 0,
+   "gt_part": 12,
    "rule": {
     "cls": "E30_E38_door_RH",
     "radar": 0,
@@ -25103,8 +25103,8 @@
   {
    "session": "20261002/E30_E38_door_RH/s_135546",
    "cls": "E30_E38_door_RH",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 0,
+   "gt_part": 12,
    "rule": {
     "cls": "E30_E38_door_RH",
     "radar": 0,
@@ -25134,8 +25134,8 @@
   {
    "session": "20261002/E30_E38_door_RH/s_135546",
    "cls": "E30_E38_door_RH",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 0,
+   "gt_part": 12,
    "rule": {
     "cls": "E30_E38_door_RH",
     "radar": 0,
@@ -25165,8 +25165,8 @@
   {
    "session": "20261002/E30_E38_door_RH/s_135546",
    "cls": "E30_E38_door_RH",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 0,
+   "gt_part": 12,
    "rule": {
     "cls": "E30_E38_door_RH",
     "radar": 0,
@@ -25196,8 +25196,8 @@
   {
    "session": "20261002/E30_E38_door_RH/s_135546",
    "cls": "E30_E38_door_RH",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 0,
+   "gt_part": 12,
    "rule": {
     "cls": "E30_E38_door_RH",
     "radar": 0,
@@ -25227,8 +25227,8 @@
   {
    "session": "20261002/E30_E38_door_RH/s_135546",
    "cls": "E30_E38_door_RH",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 0,
+   "gt_part": 12,
    "rule": {
     "cls": "E30_E38_door_RH",
     "radar": 0,
@@ -25258,8 +25258,8 @@
   {
    "session": "20261002/E30_E38_door_RH/s_135546",
    "cls": "E30_E38_door_RH",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 0,
+   "gt_part": 12,
    "rule": {
     "cls": "E30_E38_door_RH",
     "radar": 0,
@@ -25289,8 +25289,8 @@
   {
    "session": "20261002/E30_E38_door_RH/s_135546",
    "cls": "E30_E38_door_RH",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 0,
+   "gt_part": 12,
    "rule": {
     "cls": "E30_E38_door_RH",
     "radar": 0,
@@ -25320,8 +25320,8 @@
   {
    "session": "20261002/E30_E38_door_RH/s_135546",
    "cls": "E30_E38_door_RH",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 0,
+   "gt_part": 12,
    "rule": {
     "cls": "E30_E38_door_RH",
     "radar": 0,
@@ -25351,8 +25351,8 @@
   {
    "session": "20261002/E30_E38_door_RH/s_135546",
    "cls": "E30_E38_door_RH",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 0,
+   "gt_part": 12,
    "rule": {
     "cls": "E30_E38_door_RH",
     "radar": 0,
@@ -25382,8 +25382,8 @@
   {
    "session": "20261002/E30_E38_door_RH/s_135546",
    "cls": "E30_E38_door_RH",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 0,
+   "gt_part": 12,
    "rule": {
     "cls": "E30_E38_door_RH",
     "radar": 0,
@@ -25413,8 +25413,8 @@
   {
    "session": "20261002/E30_E38_door_RH/s_135546",
    "cls": "E30_E38_door_RH",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 0,
+   "gt_part": 12,
    "rule": {
     "cls": "E30_E38_door_RH",
     "radar": 0,
@@ -25444,8 +25444,8 @@
   {
    "session": "20261002/E30_E38_door_RH/s_135546",
    "cls": "E30_E38_door_RH",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 0,
+   "gt_part": 12,
    "rule": {
     "cls": "E30_E38_door_RH",
     "radar": 0,
@@ -25475,8 +25475,8 @@
   {
    "session": "20261002/E30_E38_door_RH/s_135546",
    "cls": "E30_E38_door_RH",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 0,
+   "gt_part": 12,
    "rule": {
     "cls": "E30_E38_door_RH",
     "radar": 0,
@@ -25506,8 +25506,8 @@
   {
    "session": "20261002/E30_E38_door_RH/s_135546",
    "cls": "E30_E38_door_RH",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 0,
+   "gt_part": 12,
    "rule": {
     "cls": "E30_E38_door_RH",
     "radar": 0,
@@ -25537,8 +25537,8 @@
   {
    "session": "20261002/E30_E38_door_RH/s_135546",
    "cls": "E30_E38_door_RH",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 0,
+   "gt_part": 12,
    "rule": {
     "cls": "E30_E38_door_RH",
     "radar": 0,
@@ -25568,8 +25568,8 @@
   {
    "session": "20261002/E30_E38_door_RH/s_135546",
    "cls": "E30_E38_door_RH",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 0,
+   "gt_part": 12,
    "rule": {
     "cls": "E30_E38_door_RH",
     "radar": 0,
@@ -25599,8 +25599,8 @@
   {
    "session": "20261002/E30_E38_door_RH/s_135546",
    "cls": "E30_E38_door_RH",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 0,
+   "gt_part": 12,
    "rule": {
     "cls": "E30_E38_door_RH",
     "radar": 0,
@@ -25630,8 +25630,8 @@
   {
    "session": "20261002/E30_E38_door_RH/s_135546",
    "cls": "E30_E38_door_RH",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 0,
+   "gt_part": 12,
    "rule": {
     "cls": "E30_E38_door_RH",
     "radar": 0,
@@ -26901,8 +26901,8 @@
   {
    "session": "20261002/E38_door_LH_RR/s_100901",
    "cls": "E38_door_LH_RR",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 0,
+   "gt_part": 8,
    "rule": {
     "cls": "E38_door_LH_RR",
     "radar": 0,
@@ -26932,8 +26932,8 @@
   {
    "session": "20261002/E38_door_LH_RR/s_100901",
    "cls": "E38_door_LH_RR",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 0,
+   "gt_part": 8,
    "rule": {
     "cls": "E38_door_LH_RR",
     "radar": 0,
@@ -26963,8 +26963,8 @@
   {
    "session": "20261002/E38_door_LH_RR/s_100901",
    "cls": "E38_door_LH_RR",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 0,
+   "gt_part": 8,
    "rule": {
     "cls": "E38_door_LH_RR",
     "radar": 0,
@@ -26994,8 +26994,8 @@
   {
    "session": "20261002/E38_door_LH_RR/s_100901",
    "cls": "E38_door_LH_RR",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 0,
+   "gt_part": 8,
    "rule": {
     "cls": "E38_door_LH_RR",
     "radar": 0,
@@ -27025,8 +27025,8 @@
   {
    "session": "20261002/E38_door_LH_RR/s_100901",
    "cls": "E38_door_LH_RR",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 0,
+   "gt_part": 8,
    "rule": {
     "cls": "E38_door_LH_RR",
     "radar": 0,
@@ -27056,8 +27056,8 @@
   {
    "session": "20261002/E38_door_LH_RR/s_100901",
    "cls": "E38_door_LH_RR",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 0,
+   "gt_part": 8,
    "rule": {
     "cls": "E38_door_LH_RR",
     "radar": 0,
@@ -27087,8 +27087,8 @@
   {
    "session": "20261002/E38_door_LH_RR/s_100901",
    "cls": "E38_door_LH_RR",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 0,
+   "gt_part": 8,
    "rule": {
     "cls": "E38_door_LH_RR",
     "radar": 0,
@@ -27118,8 +27118,8 @@
   {
    "session": "20261002/E38_door_LH_RR/s_100901",
    "cls": "E38_door_LH_RR",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 0,
+   "gt_part": 8,
    "rule": {
     "cls": "E38_door_LH_RR",
     "radar": 0,
@@ -27149,8 +27149,8 @@
   {
    "session": "20261002/E38_door_LH_RR/s_100901",
    "cls": "E38_door_LH_RR",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 0,
+   "gt_part": 8,
    "rule": {
     "cls": "E38_door_LH_RR",
     "radar": 0,
@@ -27180,8 +27180,8 @@
   {
    "session": "20261002/E38_door_LH_RR/s_100901",
    "cls": "E38_door_LH_RR",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 0,
+   "gt_part": 8,
    "rule": {
     "cls": "E38_door_LH_RR",
     "radar": 0,
@@ -27211,8 +27211,8 @@
   {
    "session": "20261002/E38_door_LH_RR/s_100901",
    "cls": "E38_door_LH_RR",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 0,
+   "gt_part": 8,
    "rule": {
     "cls": "E38_door_LH_RR",
     "radar": 0,
@@ -27242,8 +27242,8 @@
   {
    "session": "20261002/E38_door_LH_RR/s_100901",
    "cls": "E38_door_LH_RR",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 0,
+   "gt_part": 8,
    "rule": {
     "cls": "E38_door_LH_RR",
     "radar": 0,
@@ -27273,8 +27273,8 @@
   {
    "session": "20261002/E38_door_LH_RR/s_100901",
    "cls": "E38_door_LH_RR",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 0,
+   "gt_part": 8,
    "rule": {
     "cls": "E38_door_LH_RR",
     "radar": 0,
@@ -27304,8 +27304,8 @@
   {
    "session": "20261002/E38_door_LH_RR/s_100901",
    "cls": "E38_door_LH_RR",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 0,
+   "gt_part": 8,
    "rule": {
     "cls": "E38_door_LH_RR",
     "radar": 0,
@@ -27335,8 +27335,8 @@
   {
    "session": "20261002/E38_door_LH_RR/s_100901",
    "cls": "E38_door_LH_RR",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 0,
+   "gt_part": 8,
    "rule": {
     "cls": "E38_door_LH_RR",
     "radar": 0,
@@ -27366,8 +27366,8 @@
   {
    "session": "20261002/E38_door_LH_RR/s_100901",
    "cls": "E38_door_LH_RR",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 0,
+   "gt_part": 8,
    "rule": {
     "cls": "E38_door_LH_RR",
     "radar": 0,
@@ -27397,8 +27397,8 @@
   {
    "session": "20261002/E38_door_LH_RR/s_100901",
    "cls": "E38_door_LH_RR",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 0,
+   "gt_part": 8,
    "rule": {
     "cls": "E38_door_LH_RR",
     "radar": 0,
@@ -27428,8 +27428,8 @@
   {
    "session": "20261002/E38_door_LH_RR/s_100901",
    "cls": "E38_door_LH_RR",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 0,
+   "gt_part": 8,
    "rule": {
     "cls": "E38_door_LH_RR",
     "radar": 0,
@@ -27459,8 +27459,8 @@
   {
    "session": "20261002/E38_door_LH_RR/s_100901",
    "cls": "E38_door_LH_RR",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 0,
+   "gt_part": 8,
    "rule": {
     "cls": "E38_door_LH_RR",
     "radar": 0,
@@ -27490,8 +27490,8 @@
   {
    "session": "20261002/E38_door_LH_RR/s_100901",
    "cls": "E38_door_LH_RR",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 0,
+   "gt_part": 8,
    "rule": {
     "cls": "E38_door_LH_RR",
     "radar": 0,
@@ -27521,8 +27521,8 @@
   {
    "session": "20261002/E38_door_LH_RR/s_121505",
    "cls": "E38_door_LH_RR",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 1,
+   "gt_part": 9,
    "rule": {
     "cls": "E38_door_LH_RR",
     "radar": 1,
@@ -27552,8 +27552,8 @@
   {
    "session": "20261002/E38_door_LH_RR/s_121505",
    "cls": "E38_door_LH_RR",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 1,
+   "gt_part": 9,
    "rule": {
     "cls": "E38_door_LH_RR",
     "radar": 1,
@@ -27583,8 +27583,8 @@
   {
    "session": "20261002/E38_door_LH_RR/s_121505",
    "cls": "E38_door_LH_RR",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 1,
+   "gt_part": 9,
    "rule": {
     "cls": "E38_door_LH_RR",
     "radar": 1,
@@ -27614,39 +27614,8 @@
   {
    "session": "20261002/E38_door_LH_RR/s_121505",
    "cls": "E38_door_LH_RR",
-   "gt_radar": null,
-   "gt_part": -1,
-   "rule": {
-    "cls": "E38_door_LH_RR",
-    "radar": 1,
-    "part": 9
-   },
-   "det": {
-    "cls": "E38_door_LH_RR",
-    "radar": 1,
-    "part": 9
-   },
-   "partno_multi_448_seed42": {
-    "part": 9,
-    "cls": "E38_door_LH_RR",
-    "radar": 1
-   },
-   "partno_part14_448_seed42": {
-    "part": 9,
-    "cls": null,
-    "radar": null
-   },
-   "partno_multi_640_seed42": {
-    "part": 7,
-    "cls": "E30_door_LH_RR",
-    "radar": 1
-   }
-  },
-  {
-   "session": "20261002/E38_door_LH_RR/s_121505",
-   "cls": "E38_door_LH_RR",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 1,
+   "gt_part": 9,
    "rule": {
     "cls": "E38_door_LH_RR",
     "radar": 1,
@@ -27676,8 +27645,8 @@
   {
    "session": "20261002/E38_door_LH_RR/s_121505",
    "cls": "E38_door_LH_RR",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 1,
+   "gt_part": 9,
    "rule": {
     "cls": "E38_door_LH_RR",
     "radar": 1,
@@ -27707,8 +27676,8 @@
   {
    "session": "20261002/E38_door_LH_RR/s_121505",
    "cls": "E38_door_LH_RR",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 1,
+   "gt_part": 9,
    "rule": {
     "cls": "E38_door_LH_RR",
     "radar": 1,
@@ -27738,8 +27707,8 @@
   {
    "session": "20261002/E38_door_LH_RR/s_121505",
    "cls": "E38_door_LH_RR",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 1,
+   "gt_part": 9,
    "rule": {
     "cls": "E38_door_LH_RR",
     "radar": 1,
@@ -27769,8 +27738,8 @@
   {
    "session": "20261002/E38_door_LH_RR/s_121505",
    "cls": "E38_door_LH_RR",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 1,
+   "gt_part": 9,
    "rule": {
     "cls": "E38_door_LH_RR",
     "radar": 1,
@@ -27800,39 +27769,8 @@
   {
    "session": "20261002/E38_door_LH_RR/s_121505",
    "cls": "E38_door_LH_RR",
-   "gt_radar": null,
-   "gt_part": -1,
-   "rule": {
-    "cls": "E38_door_LH_RR",
-    "radar": 1,
-    "part": 9
-   },
-   "det": {
-    "cls": "E38_door_LH_RR",
-    "radar": 1,
-    "part": 9
-   },
-   "partno_multi_448_seed42": {
-    "part": 9,
-    "cls": "E38_door_LH_RR",
-    "radar": 1
-   },
-   "partno_part14_448_seed42": {
-    "part": 9,
-    "cls": null,
-    "radar": null
-   },
-   "partno_multi_640_seed42": {
-    "part": 9,
-    "cls": "E38_door_LH_RR",
-    "radar": 1
-   }
-  },
-  {
-   "session": "20261002/E38_door_LH_RR/s_121505",
-   "cls": "E38_door_LH_RR",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 1,
+   "gt_part": 9,
    "rule": {
     "cls": "E38_door_LH_RR",
     "radar": 1,
@@ -27862,8 +27800,70 @@
   {
    "session": "20261002/E38_door_LH_RR/s_121505",
    "cls": "E38_door_LH_RR",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 1,
+   "gt_part": 9,
+   "rule": {
+    "cls": "E38_door_LH_RR",
+    "radar": 1,
+    "part": 9
+   },
+   "det": {
+    "cls": "E38_door_LH_RR",
+    "radar": 1,
+    "part": 9
+   },
+   "partno_multi_448_seed42": {
+    "part": 9,
+    "cls": "E38_door_LH_RR",
+    "radar": 1
+   },
+   "partno_part14_448_seed42": {
+    "part": 9,
+    "cls": null,
+    "radar": null
+   },
+   "partno_multi_640_seed42": {
+    "part": 9,
+    "cls": "E38_door_LH_RR",
+    "radar": 1
+   }
+  },
+  {
+   "session": "20261002/E38_door_LH_RR/s_121505",
+   "cls": "E38_door_LH_RR",
+   "gt_radar": 1,
+   "gt_part": 9,
+   "rule": {
+    "cls": "E38_door_LH_RR",
+    "radar": 1,
+    "part": 9
+   },
+   "det": {
+    "cls": "E38_door_LH_RR",
+    "radar": 1,
+    "part": 9
+   },
+   "partno_multi_448_seed42": {
+    "part": 9,
+    "cls": "E38_door_LH_RR",
+    "radar": 1
+   },
+   "partno_part14_448_seed42": {
+    "part": 9,
+    "cls": null,
+    "radar": null
+   },
+   "partno_multi_640_seed42": {
+    "part": 7,
+    "cls": "E30_door_LH_RR",
+    "radar": 1
+   }
+  },
+  {
+   "session": "20261002/E38_door_LH_RR/s_121505",
+   "cls": "E38_door_LH_RR",
+   "gt_radar": 1,
+   "gt_part": 9,
    "rule": {
     "cls": "E38_door_LH_RR",
     "radar": 1,
@@ -27893,8 +27893,8 @@
   {
    "session": "20261002/E38_door_LH_RR/s_121505",
    "cls": "E38_door_LH_RR",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 1,
+   "gt_part": 9,
    "rule": {
     "cls": "E38_door_LH_RR",
     "radar": 1,
@@ -27924,8 +27924,8 @@
   {
    "session": "20261002/E38_door_LH_RR/s_121505",
    "cls": "E38_door_LH_RR",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 1,
+   "gt_part": 9,
    "rule": {
     "cls": "E38_door_LH_RR",
     "radar": 1,
@@ -27955,8 +27955,8 @@
   {
    "session": "20261002/E38_door_LH_RR/s_121505",
    "cls": "E38_door_LH_RR",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 1,
+   "gt_part": 9,
    "rule": {
     "cls": "E38_door_LH_RR",
     "radar": 1,
@@ -27986,8 +27986,8 @@
   {
    "session": "20261002/E38_door_LH_RR/s_121505",
    "cls": "E38_door_LH_RR",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 1,
+   "gt_part": 9,
    "rule": {
     "cls": "E38_door_LH_RR",
     "radar": 1,
@@ -28017,8 +28017,8 @@
   {
    "session": "20261002/E38_door_LH_RR/s_121505",
    "cls": "E38_door_LH_RR",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 1,
+   "gt_part": 9,
    "rule": {
     "cls": "E38_door_LH_RR",
     "radar": 1,
@@ -28048,8 +28048,8 @@
   {
    "session": "20261002/E38_door_LH_RR/s_121505",
    "cls": "E38_door_LH_RR",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 1,
+   "gt_part": 9,
    "rule": {
     "cls": "E38_door_LH_RR",
     "radar": 1,
@@ -28079,8 +28079,8 @@
   {
    "session": "20261002/E38_door_LH_RR/s_121505",
    "cls": "E38_door_LH_RR",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 1,
+   "gt_part": 9,
    "rule": {
     "cls": "E38_door_LH_RR",
     "radar": 1,
@@ -28110,8 +28110,8 @@
   {
    "session": "20261002/E38_door_LH_RR/s_121505",
    "cls": "E38_door_LH_RR",
-   "gt_radar": null,
-   "gt_part": -1,
+   "gt_radar": 1,
+   "gt_part": 9,
    "rule": {
     "cls": "E38_door_LH_RR",
     "radar": 1,
