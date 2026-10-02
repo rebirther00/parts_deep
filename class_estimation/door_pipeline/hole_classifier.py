@@ -58,7 +58,8 @@ K_CAMERA = {
 S_PIXEL = {
     54910212: 1477.8,   # 현장 ZED X Mini 협각, 2026-09-24 8/27~9/7 기준 1,747프레임 보정(tools/pixel_scale_eval.py, 프레임 std 0.16%, 9종 클래스 ±0.3%)
 }
-PIXEL_GUARD = dict(z=(1400.0, 1500.0), tilt=12.0)   # depth 평면으로 잰 도어 z(mm)·tilt(°) 가 이 밖이면 자세 이상 → depth 방식으로 폴백 + pose_warn
+PIXEL_GUARD = dict(z=(1400.0, 1500.0), tilt=15.0)   # depth 평면으로 잰 도어 z(mm)·tilt(°) 가 이 밖이면 자세 이상 → 판정 보류(gate='pose_warn').
+#   2026-10-02: tilt 12→15°(E25_RH 는 지그 안착 자체가 12~14°, 블라인드 738장 시뮬레이션 보류 0·오판 0), depth 폴백 폐지(+28~62mm 편향) — report/hole_analysis/blind_eval_20261002/guard_sim.md
 SCALE_DEFAULT = 'pixel'   # 2026-09-24 전환: 185세션 3,762프레임 판정 변경 0, 세션 |dev| p95 15.1→4.1mm·경보 10→0·최소 마진 12→17mm (depth 는 비교용 --scale depth)
 
 
@@ -351,7 +352,8 @@ def classify(net, dev, rgb, depth=None, group=None, intrinsics=None, bolt_norm=F
         기본 꺼짐 — 볼트 국소화 오차(-7% 관측)가 D 에 그대로 증폭되므로 실험용으로만.
     unknown_mm: 최근접 CAD D 편차가 이 값을 넘으면 pred='unknown'(미등록 도어, gate 는 'ok' 유지). None 이면 끔.
     scale: 'depth'(depth 평면 + 잔차 K, 2026-09-23 이전 방식) | 'pixel'(픽셀 폭 × S_PIXEL/fx, depth 는 z·tilt 가드만) | None=SCALE_DEFAULT.
-        진단 필드 span_px·z_mm·tilt_deg 는 두 모드 모두 채움. pixel 모드에서 가드 밖이면 pose_warn=True, D 는 depth 값(D_src='depth(pose_warn)').
+        진단 필드 span_px·z_mm·tilt_deg 는 두 모드 모두 채움. pixel 모드에서 가드 밖이면 pose_warn=True·gate='pose_warn' 으로 판정 보류
+        (D_mm 은 픽셀 값을 진단용으로 채움, D_src='pixel(pose_warn)'; 2026-10-02 이전엔 depth 값으로 폴백했음).
     반환 nearest_mm = 최근접 CAD D 와의 절대 편차, margin_mm = 2위 편차 − 1위 편차."""
     det = detect(net, dev, rgb)
     hinge = det['corner_hinge'][0] if det['corner_hinge'] else None
@@ -388,10 +390,13 @@ def classify(net, dev, rgb, depth=None, group=None, intrinsics=None, bolt_norm=F
         out['D_depth_mm'] = D
         warn = (out['z_mm'] is not None and not (PIXEL_GUARD['z'][0] <= out['z_mm'] <= PIXEL_GUARD['z'][1])) or \
                (out['tilt_deg'] is not None and out['tilt_deg'] > PIXEL_GUARD['tilt'])
-        if warn and D is not None:
-            out['pose_warn'] = True; out['D_src'] = 'depth(pose_warn)'
+        D = span * S_PIXEL[sn] / intrinsics['fx']
+        if warn:
+            out['pose_warn'] = True; out['D_src'] = 'pixel(pose_warn)'
+            if gate == 'ok':
+                gate = out['gate'] = 'pose_warn'   # 자세 가드 밖: 판정 보류(depth 폴백 폐지 2026-10-02, guard_sim.md)
         else:
-            D = span * S_PIXEL[sn] / intrinsics['fx']; out['D_src'] = 'pixel' if pf is not None else 'pixel(noguard)'
+            out['D_src'] = 'pixel' if pf is not None else 'pixel(noguard)'
     if D is None and fr is not None:
         D = math.hypot(hinge[0] - latch[0], hinge[1] - latch[1]) / fr['s']; out['D_src'] = 'bolt'
     out['D_mm'] = D
