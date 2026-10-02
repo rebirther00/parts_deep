@@ -1,0 +1,19 @@
+{
+ "rgb": "/home/koceti/parts_deep/class_estimation/door_pipeline/datasets_factory_collect/20260929/E25_door_RH/s_100746/rgb_0016.png",
+ "result": {
+  "gate": "ok",
+  "pred": "unknown",
+  "D_mm": 916.03,
+  "D_src": "depth(pose_warn)",
+  "group": null,
+  "D_raw_mm": null,
+  "k_bolt": null,
+  "nearest_mm": 30.03,
+  "margin_mm": 74.0,
+  "span_px": 764.32,
+  "z_mm": 1460.93,
+  "tilt_deg": 12.18,
+  "D_depth_mm": 916.03,
+  "pose_warn": true
+ }
+}
