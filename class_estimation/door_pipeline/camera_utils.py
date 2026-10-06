@@ -42,7 +42,7 @@ def intrinsics_for_image(path, shape=None):
     mp = os.path.join(d, 'meta.json')
     if os.path.exists(mp):
         try:
-            k = json.load(open(mp)).get('intrinsics')
+            k = json.load(open(mp, encoding='utf-8')).get('intrinsics')
             if k and k.get('fx'):
                 k = dict(k); k['serial'] = int(k['serial']) if k.get('serial') is not None else None
                 return k

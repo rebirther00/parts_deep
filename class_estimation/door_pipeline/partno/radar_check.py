@@ -48,8 +48,8 @@ Z_NOMINAL = 1450.0                  # depth 없을 때 도어 평면 깊이(mm) 
 
 
 def load_geometry():
-    cadh = json.load(open(CAD_HOLES))['classes']
-    br = json.load(open(BRACKET_JSON))['classes']
+    cadh = json.load(open(CAD_HOLES, encoding='utf-8'))['classes']
+    br = json.load(open(BRACKET_JSON, encoding='utf-8'))['classes']
     return {cls: dict(lm={k: np.array(v[:2], float) for k, v in cadh[cls]['holes_door'].items()}, **br[cls]) for cls in br}
 
 
@@ -275,7 +275,7 @@ def part_lookup(cls, radar):
     """(클래스, 레이더 1/0/None) → part_numbers.json 항목 또는 None. FRT 는 레이더 무관."""
     global _PARTS
     if _PARTS is None:
-        _PARTS = {(p['class_name'], p['radar']): p for p in json.load(open(os.path.join(HERE, 'part_numbers.json')))['parts']}
+        _PARTS = {(p['class_name'], p['radar']): p for p in json.load(open(os.path.join(HERE, 'part_numbers.json'), encoding='utf-8'))['parts']}
     if cls is None:
         return None
     return _PARTS.get((cls, None)) or (_PARTS.get((cls, radar)) if radar in (0, 1) else None)

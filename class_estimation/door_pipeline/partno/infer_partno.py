@@ -18,7 +18,7 @@ import hole_classifier as hc
 from camera_utils import intrinsics_for_image
 import radar_check as rc
 
-PN = {(p['class_name'], p['radar']): p for p in json.load(open(os.path.join(HERE, 'part_numbers.json')))['parts']}
+PN = {(p['class_name'], p['radar']): p for p in json.load(open(os.path.join(HERE, 'part_numbers.json'), encoding='utf-8'))['parts']}
 
 
 def part_for(cls, radar):

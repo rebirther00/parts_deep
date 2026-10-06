@@ -106,6 +106,8 @@ inference_result = {
 }
 UNKNOWN_LABEL = '미등록 도어 (unknown)'
 latest_frame = None
+latest_depth = None          # /api/snapshot 용 (rgb 와 같은 프레임의 depth·intrinsics)
+latest_intr = None
 frame_lock = threading.Lock()
 reset_event = threading.Event()
 stop_event = threading.Event()
@@ -249,7 +251,7 @@ def cnn_vote(cnn_window):
 
 
 def inference_loop(source, net, dev, cnn=None):
-    global inference_result, latest_frame
+    global inference_result, latest_frame, latest_depth, latest_intr
     import torch
     window = collections.deque(maxlen=args.n_frames)
     cnn_window = collections.deque(maxlen=args.n_frames)   # 홀 윈도와 같은 길이로 프레임마다 추가 (미실행 프레임 = None)
@@ -267,6 +269,8 @@ def inference_loop(source, net, dev, cnn=None):
             continue
         with frame_lock:
             latest_frame = rgb.copy()
+            latest_depth = None if depth is None else depth.copy()
+            latest_intr = intr
         t0 = time.time()
         try:
             with torch.autocast(device_type='cuda', dtype=torch.float16,
@@ -407,16 +411,16 @@ def generate_mjpeg():
             a, b = pts['corner_hinge'][0], pts['corner_latch'][0]
             cv2.line(frame, (int(a[0] * sc), int(a[1] * sc)),
                      (int(b[0] * sc), int(b[1] * sc)), (0, 200, 255), 1)
-        overlay = frame.copy()
-        cv2.rectangle(overlay, (0, 0), (520, 182), (0, 0, 0), -1)
-        cv2.addWeighted(overlay, 0.6, frame, 0.4, 0, frame)
+        # 상태 텍스트는 영상 위에 덮지 않고 아래 띠(band)에 그린다 (영상 전체가 보이도록)
+        band = np.zeros((210, frame.shape[1], 3), np.uint8); band[:] = (24, 24, 24)
+        frame = np.vstack([frame, band]); y0 = frame.shape[0] - 210
         color = (0, 255, 0) if r['confidence'] > 60 else (0, 200, 255)
         if r.get('source') == 'cnn':
             color = (255, 200, 0)                      # CNN 폴백 = 하늘색 계열로 구분
         src_tag = {'hole': '[HOLE]', 'cnn': '[CNN]'}.get(r.get('source'), '')
         if r.get('conflict'):
             src_tag += ' !CNN differs'
-        cv2.putText(frame, f"{src_tag} {r['class']}", (10, 42),
+        cv2.putText(frame, f"{src_tag} {r['class']}", (10, y0 + 42),
                     cv2.FONT_HERSHEY_SIMPLEX, 1.0, color, 2)
         d_txt = f"D={r['D_mm']:.0f}mm" if r.get('D_mm') else 'D=-'
         m_txt = (f" margin {r['margin_mm']:.0f}mm"
@@ -424,14 +428,14 @@ def generate_mjpeg():
         cv2.putText(frame,
                     f"group {r['group']} | {d_txt}{m_txt} | "
                     f"judged {r['n_judged']}/{r['window']}",
-                    (10, 80), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (200, 200, 200), 1)
+                    (10, y0 + 80), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (200, 200, 200), 1)
         f_d = f"{fi['D_mm']:.0f}mm/{fi.get('D_src')}" if fi.get('D_mm') else '-'
         if fi.get('D_raw_mm'):
             f_d += f" (raw {fi['D_raw_mm']:.0f} x{fi['k_bolt']:.3f})"
         cv2.putText(frame,
                     f"frame gate [{fi.get('gate')}] D {f_d} | "
                     f"{r['inference_ms']:.0f}ms",
-                    (10, 110), cv2.FONT_HERSHEY_SIMPLEX, 0.55, (0, 200, 255), 1)
+                    (10, y0 + 110), cv2.FONT_HERSHEY_SIMPLEX, 0.55, (0, 200, 255), 1)
         b = r.get('bolt_mm')
         b_txt = (f"bolt {b['long']:.0f}x{b['short']:.0f}mm "
                  f"({b['long_err_pct']:+.1f}%/{b['short_err_pct']:+.1f}%, n={b['n']})"
@@ -440,13 +444,15 @@ def generate_mjpeg():
         b_txt += k_txt + (' +boltnorm' if args.bolt_norm else '')
         cv = r.get('cnn')
         c_txt = (f" | cnn {cv['pred']} p={cv['prob']:.2f} ({cv['n']}/{cv['n_total']})" if cv else '')
-        cv2.putText(frame, f"{b_txt} | CAD {BOLT_PITCH[0]:.0f}x{BOLT_PITCH[1]:.0f}{c_txt}",
-                    (10, 138), cv2.FONT_HERSHEY_SIMPLEX, 0.55, (0, 200, 255), 1)
+        cv2.putText(frame, f"{b_txt} | CAD {BOLT_PITCH[0]:.0f}x{BOLT_PITCH[1]:.0f}",
+                    (10, y0 + 138), cv2.FONT_HERSHEY_SIMPLEX, 0.55, (0, 200, 255), 1)
+        if c_txt:   # CNN 폴백 결과는 줄이 길어 별도 줄
+            cv2.putText(frame, c_txt.lstrip(' |'), (10, y0 + 194), cv2.FONT_HERSHEY_SIMPLEX, 0.55, (255, 200, 0), 1)
         ov = r.get('radar_votes') or {}
         fo = fi.get('option') or {}
         o_txt = (f"radar {r.get('radar') or '-'}" + (f" (O{ov.get('n_radar', 0)}/X{ov.get('n_none', 0)}/{ov.get('n_judged', 0)})" if ov else '')
                  + (f" [{fo.get('status')}/{fo.get('src')}]" if fo else '') + f" | part {r.get('part_no') or '-'}")
-        cv2.putText(frame, o_txt, (10, 166), cv2.FONT_HERSHEY_SIMPLEX, 0.55, (255, 120, 255), 1)
+        cv2.putText(frame, o_txt, (10, y0 + 166), cv2.FONT_HERSHEY_SIMPLEX, 0.55, (255, 120, 255), 1)
         ok, buf = cv2.imencode('.jpg', frame, [cv2.IMWRITE_JPEG_QUALITY, 75])
         if ok:
             yield (b'--frame\r\n'
@@ -486,6 +492,30 @@ def api_camera_info():
     info['option_mode'] = ('off' if args.no_option else 'hybrid(peaks→rule)')
     info['channels'] = getattr(net, 'channels', None)
     return jsonify(info)
+
+
+@app.route('/api/snapshot')
+def api_snapshot():
+    """현재 원본 프레임(rgb png·depth 16bit png·intrinsics json)을 snapshots/<ts>/ 에 저장 — 현장 디버그·보정용."""
+    import json
+    with frame_lock:
+        rgb = None if latest_frame is None else latest_frame.copy()
+        depth = None if latest_depth is None else latest_depth.copy()
+        intr = latest_intr
+    if rgb is None:
+        return jsonify({'ok': False, 'error': 'no frame'})
+    out = os.path.join(DOOR_DIR, 'snapshots', time.strftime('%Y%m%d_%H%M%S'))
+    os.makedirs(out, exist_ok=True)
+    cv2.imwrite(os.path.join(out, 'rgb_0000.png'), rgb)
+    if depth is not None:
+        cv2.imwrite(os.path.join(out, 'depth_0000.png'), np.nan_to_num(depth, nan=0.0).clip(0, 65535).astype(np.uint16))
+    with open(os.path.join(out, 'meta.json'), 'w', encoding='utf-8') as f:
+        json.dump({'intrinsics': intr, 'camera': source.cam.camera_type if hasattr(source, 'cam') else None}, f, ensure_ascii=False, indent=1)
+    with result_lock:
+        r = inference_result.copy()
+    with open(os.path.join(out, 'result.json'), 'w', encoding='utf-8') as f:
+        json.dump(r, f, ensure_ascii=False, indent=1)
+    return jsonify({'ok': True, 'dir': out, 'depth': depth is not None})
 
 
 @app.route('/api/reset')
