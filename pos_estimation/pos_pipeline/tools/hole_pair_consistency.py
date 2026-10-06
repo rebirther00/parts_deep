@@ -73,5 +73,6 @@ for k, v in G.items():
     L.append(f"| {k} | {v.size:,} | {v.mean():+.2f} | {v.std():.2f} | {np.median(av):.2f} | {np.percentile(av, 95):.2f} | {av.max():.1f} |")
 out['summary'] = summary
 os.makedirs(os.path.join(BASE, 'artifacts'), exist_ok=True)
-json.dump(out, open(os.path.join(BASE, 'artifacts', 'hole_pair_consistency.json'), 'w'), ensure_ascii=False, indent=1)
-open(os.path.join(BASE, 'artifacts', 'hole_pair_consistency.md'), 'w', encoding='utf8').write('\n'.join(L) + '\n'); print('\n'.join(L))
+tag = a.base.strip('/').replace('/', '_')          # 2026-10-06: base 별 파일명 (datasets_factory_v2_all / datasets 가 서로 덮어쓰지 않도록)
+json.dump(out, open(os.path.join(BASE, 'artifacts', f'hole_pair_consistency_{tag}.json'), 'w'), ensure_ascii=False, indent=1)
+open(os.path.join(BASE, 'artifacts', f'hole_pair_consistency_{tag}.md'), 'w', encoding='utf8').write('\n'.join(L) + '\n'); print('\n'.join(L))
