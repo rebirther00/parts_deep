@@ -62,7 +62,7 @@ pipx run sqlite-web db/door_pipeline.db     # 또는: pipx run datasette db/door
 
 - 정확도류는 JSON 산출물과 같은 백분율(0~100).
 - 평가 행의 `session_id`는 같은 모델의 최신 training_sessions에 자동 연결
-  (DB 도입 전에 학습된 모델은 NULL).
+  (DB 도입 전에 학습된 모델·기록 없이 학습된 run 은 NULL → 화면에 "학습 기록 없음").
 - 비활성: `DOOR_DB_LOG=0 python 02_train.py ...` / 다른 DB: `DOOR_DB_PATH=...`
 - 조회 예:
   ```sql

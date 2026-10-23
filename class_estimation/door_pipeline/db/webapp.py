@@ -829,7 +829,7 @@ TRAINING = """
 {% for e in evals %}
 <tr class="click" onclick="var d=document.getElementById('ev{{ e['id'] }}'); d.hidden=!d.hidden">
     <td class="muted">{{ e['evaluated_at'] }}</td><td>{{ e['model'] }}</td>
-    <td>{% if e['session_id'] %}<span class="pill">#{{ e['session_id'] }}</span>{% else %}<span class="muted small">DB 도입 전</span>{% endif %}</td>
+    <td>{% if e['session_id'] %}<span class="pill">#{{ e['session_id'] }}</span>{% else %}<span class="muted small" title="연결된 training_sessions 기록 없음">학습 기록 없음</span>{% endif %}</td>
     <td>{{ e['dataset'] }}</td>
     <td class="muted">{{ e['eval_type'] }}</td>
     <td class="n"><b>{{ '%.1f'|format(e['accuracy']) }}%</b></td>
@@ -976,17 +976,23 @@ def eval_report_view(con, report_path):
                     and r.get("gate") not in (None, "ok"))
     out_held = []
     view_re = re.compile(r"rgb_(\d{8})_(s_\d{6})_(\d+)\.png$")   # 링크 뷰(v2·eval20) 파일명 → 미러 세션·파일
+    mirror_re = re.compile(r"(\d{8})/[^/]+/(s_\d{6})/(rgb_\d+\.png)$")   # 미러 구조 <날짜>/<클래스>/s_HHMMSS/rgb_XXXX.png (datasets_blind_*/collect 링크 뷰 포함)
     for r in held[:80]:
         img = r.get("image", "")
         first, _, rel = img.partition("/")
         if "/datasets/" in img and img.startswith(".."):   # 실험실 평가의 '../door_paper/datasets/<cls>/rgb_*.png' 경로 → door_real
             first, rel = "datasets", img.split("/datasets/", 1)[1]
-        m = view_re.search(img)
+        m = view_re.search(img); m2 = None if m else mirror_re.search(img)
         if m:   # datasets_factory_v2/all/<cls>/rgb_<날짜>_<세션>_<idx>.png 등 링크 뷰 경로는 세션+파일명으로 DB 조회
             row = con.execute(
                 """SELECT i.id, i.synced_local FROM images i JOIN capture_sessions s ON s.id=i.session_id
                    WHERE s.session_dir LIKE ? AND i.rgb_filename=?""",
                 (f"{m.group(1)}/%/{m.group(2)}", f"rgb_{m.group(3)}.png")).fetchone()
+        elif m2:   # 2026-10-21: 날짜/세션/파일명으로 조회 — 클래스 폴더명은 재배정·링크 뷰에 따라 달라질 수 있어 무시
+            row = con.execute(
+                """SELECT i.id, i.synced_local FROM images i JOIN capture_sessions s ON s.id=i.session_id
+                   WHERE s.session_dir LIKE ? AND i.rgb_filename=?""",
+                (f"{m2.group(1)}/%/{m2.group(2)}", m2.group(3))).fetchone()
         else:
             row = con.execute(
                 """SELECT i.id, i.synced_local FROM images i JOIN classes c ON c.id=i.class_id
@@ -994,7 +1000,9 @@ def eval_report_view(con, report_path):
                    WHERE i.rgb_path=? AND (d.base_path=? OR d.base_path LIKE 'nas:%')""",
                 (rel, first + "/")).fetchone()
         parts = img.split("/")
-        if len(parts) >= 4 and len(parts[1]) == 8 and parts[1].isdigit():
+        if m2:
+            label = f"{m2.group(1)}/{m2.group(2)}/{m2.group(3)}"   # 날짜/세션/파일
+        elif len(parts) >= 4 and len(parts[1]) == 8 and parts[1].isdigit():
             label = f"{parts[1]}/{parts[-2]}/{parts[-1]}"   # 날짜/세션/파일 (미러 구조)
         else:
             label = "/".join(parts[-2:])
