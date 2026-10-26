@@ -95,14 +95,15 @@ nav .brand { font-weight:700; margin-right:16px; padding:12px 0; }
 nav a.tab { padding:12px 12px; color:var(--muted); border-bottom:2px solid transparent; }
 nav a.tab.on { color:var(--ink); border-bottom-color:var(--accent); font-weight:500; }
 nav .ro { margin-left:auto; font-size:12px; color:var(--flag); }
-main { max-width:1200px; margin:0 auto; padding:22px 20px 60px; }
+main { max-width:1880px; margin:0 auto; padding:22px 24px 60px; }   /* 2026-10-26: 1200px 고정폭 → 넓은 화면을 쓰도록 확장(표 잘림 방지) */
 h1 { font-size:20px; margin:6px 0 16px; } h2 { font-size:16px; margin:26px 0 10px; }
 .cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:10px; margin-bottom:8px; }
 .card { background:var(--card); border:1px solid var(--line); border-radius:6px; padding:12px 14px; }
 .card .num { font-size:22px; font-weight:700; font-variant-numeric:tabular-nums; }
 .card .lbl { font-size:12px; color:var(--muted); }
 .tbl { overflow-x:auto; background:var(--card); border:1px solid var(--line); border-radius:6px; }
-.tbl.tall { max-height:72vh; overflow-y:auto; }   /* 가로 스크롤바가 화면 안에 보이도록 */
+.tbl.tall { max-height:78vh; overflow-y:auto; }   /* 세로 스크롤을 표 안에 두어 가로 스크롤바가 화면 안에 보이도록 */
+.tbl.wrap td { white-space:normal; }               /* 좁은 창에서 셀 줄바꿈 허용(옵션·품번 표) */
 table { border-collapse:collapse; width:100%; font-size:13.5px; }
 th,td { text-align:left; padding:7px 12px; border-bottom:1px solid var(--line); white-space:nowrap; }
 th { font-size:12px; color:var(--muted); font-weight:500; background:var(--paper); position:sticky; top:0; }
@@ -1251,14 +1252,14 @@ OPTIONS = """
   <button class="ghost">필터</button>
   <a class="small" href="{{ url_for('options') }}">초기화</a>
 </form>
-<div class="tbl"><table>
+<div class="tbl tall wrap"><table>
 <tr><th>세션</th><th>클래스</th><th>브래킷 크롭 (판정 프레임 6장)</th><th>자동 판정</th><th>확정</th><th>품번</th><th>{{ '' if readonly else '확정 버튼' }}</th></tr>
 {% for r in rows %}
 <tr>
   <td><a href="{{ url_for('session_detail', sid=r.id) }}">{{ r.session_dir }}</a><br>
       <span class="pill {{ r.split or 'none' }}">{{ r.split or '미지정' }}</span></td>
   <td>{{ r.cls }}</td>
-  <td>{% if r.crop_path %}<a href="{{ url_for('options_crop', sid=r.id) }}" target="_blank"><img src="{{ url_for('options_crop', sid=r.id) }}" style="width:480px;display:block" loading="lazy" alt=""></a>
+  <td>{% if r.crop_path %}<a href="{{ url_for('options_crop', sid=r.id) }}" target="_blank"><img src="{{ url_for('options_crop', sid=r.id) }}" style="width:clamp(300px,30vw,560px);display:block" loading="lazy" alt=""></a>
       {% else %}<span class="muted small">미검사 — <code>python partno/radar_check.py</code></span>{% endif %}</td>
   <td>{% if r.auto_flag is not none %}<b>{{ '레이더 O' if r.auto_flag == 1 else '레이더 X' }}</b>{% elif r.n_judged is not none %}<span class="warn">미정</span>{% else %}—{% endif %}
       {% if r.n_judged is not none %}<br><span class="muted small">O {{ r.n_radar }} / X {{ r.n_none }} / 판정 {{ r.n_judged }}/{{ r.n_frames }} · 점수 {{ '%.2f'|format(r.score_med) if r.score_med is not none else '—' }}</span>{% endif %}</td>
