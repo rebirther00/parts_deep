@@ -17,6 +17,8 @@
 | `webapp.py` | 열람·관리 웹 도구 — 대시보드/세션/이미지 썸네일/홀 라벨 뷰(점 오버레이)/학습 이력/**드리프트 시계열**/**옵션·품번 확인(/options)** + 라벨정정·split·무효화·옵션 확정 버튼 |
 | `migrate_session_metrics.py` | `session_hole_metrics` 테이블 생성(멱등, 2026-09-16) — `../20_session_drift.py` 가 세션별 K_session·dev·z·tilt 기록, webapp `/drift` 열람 |
 | `migrate_options.py` | 세션 옵션(RADAR) 컬럼 `capture_sessions.option_radar/option_source/option_note/option_at` + `session_radar_check` 표 + `session_hole_metrics.pred_major` (멱등, 2026-09-23). 품번 = 클래스 × option_radar (`../partno/part_numbers.json`), webapp `/options` 에서 확정 |
+| `backup_db.py` | **야간 백업**(2026-10-30) — 온라인 백업 → quick_check → gzip → `db/backups/`(최근 14개) + NAS `nas:Guest/weld_db_backup`(30일, 매월 1일분 계속 보관), `decisions.csv` 내보내기, 결과 `db/backups/last_backup.json`(대시보드 표시). `--restore-test` 로 최근 백업 복원 시험 |
+| `decisions.csv` | 세션별 **사람 판단**(현장 입력·DB 클래스·split·유효·레이더 옵션·출처·품번·notes) — git 추적. DB 유실 시 복원 근거, diff 로 판단 변경 확인 |
 | `door_pipeline.db` | SQLite DB 본체 (git 미추적) |
 
 ## 사용
@@ -35,6 +37,20 @@ python db/webapp.py                # --readonly 로 열람 전용, --port 로 �
 # SQL로 직접 보고 싶을 때 (선택)
 pipx run sqlite-web db/door_pipeline.db     # 또는: pipx run datasette db/door_pipeline.db
 ```
+
+백업 (2026-10-30): 라벨 정정·무효화·split·레이더 확정은 DB 에만 있으므로 매일 백업한다.
+
+```bash
+python db/backup_db.py                 # 수동 실행 (NAS 업로드 포함), --no-remote 로 로컬만
+python db/backup_db.py --restore-test  # 최근 백업을 풀어 integrity_check·행 수 비교
+# cron (매일 02:40) — crontab -e 로 등록:
+# 40 2 * * * cd /home/koceti/parts_deep/class_estimation/door_pipeline && PATH=/home/koceti/.local/bin:$PATH /home/koceti/parts_deep/venv/parts_deep/bin/python db/backup_db.py >> logs/backup_db.log 2>&1
+# 복원: gunzip -c db/backups/door_pipeline_YYYYMMDD_HHMM.db.gz > db/door_pipeline.db  (webapp·cron 정지 후, 기존 파일은 먼저 옮겨 둘 것)
+```
+
+대시보드 상단(2026-10-30): **수집·백업 상태**(마지막 수집 세션 — 주말 제외 2일 무수집 경보, ingest_nas 마지막 실행, 마지막 백업)와
+**할 일**(레이더 확정 대기·레이더 미검사·샘플 미수신·드리프트 미기록·Unknown 세션 수 → 누르면 `/options?status=pending|unchecked`,
+`/sessions?todo=pull|drift|unknown` 목록)을 보여 준다. 기준값은 `webapp.py` 의 `STALE_WORKDAYS`·`INGEST_STALE_H`·`BACKUP_STALE_H`.
 
 외부 사용자(인터넷) 공개 절차는 `../DOC_external_access.md` 참조 (tailscale funnel + 인증·읽기 전용).
 

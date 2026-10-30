@@ -5,7 +5,7 @@
   python db/webapp.py --port 5051 --db 다른경로.db
 
 화면:
-  /          대시보드 — 규모 요약, 데이터셋 현황, 현장 수집 클래스별 세션·수집량, 최근 세션·평가
+  /          대시보드 — 수집·백업 상태와 할 일(2026-10-30), 규모 요약, 데이터셋 현황, 현장 수집 클래스별 세션·수집량, 최근 세션·평가
   /sessions  세션 목록 — build_dataset.py status 와 같은 내용을 표로
   /sessions/<id>  세션 상세 — 메타·이력(notes)·썸네일 + 라벨정정/split/무효화 버튼
   /images    이미지 브라우저 — 데이터셋·클래스·split 필터 + 썸네일
@@ -16,6 +16,7 @@
 """
 import argparse
 import ast
+import datetime as dt
 import hmac
 import json
 import os
@@ -101,6 +102,8 @@ h1 { font-size:20px; margin:6px 0 16px; } h2 { font-size:16px; margin:26px 0 10p
 .card { background:var(--card); border:1px solid var(--line); border-radius:6px; padding:12px 14px; }
 .card .num { font-size:22px; font-weight:700; font-variant-numeric:tabular-nums; }
 .card .lbl { font-size:12px; color:var(--muted); }
+.card .num.flag { color:var(--flag); }
+a.card { color:inherit; } a.card:hover { border-color:var(--accent); text-decoration:none; }
 .tbl { overflow-x:auto; background:var(--card); border:1px solid var(--line); border-radius:6px; }
 .tbl.tall { max-height:78vh; overflow-y:auto; }   /* 세로 스크롤을 표 안에 두어 가로 스크롤바가 화면 안에 보이도록 */
 .tbl.wrap td { white-space:normal; }               /* 좁은 창에서 셀 줄바꿈 허용(옵션·품번 표) */
@@ -159,6 +162,27 @@ def page(title, active, body_tpl, **ctx):
 
 DASH = """
 <h1>대시보드</h1>
+<h2 style="margin-top:0">수집·백업 상태 <span class="muted small">무인 운영 감시 — 주황 = 확인 필요</span></h2>
+<div class="cards">
+  <div class="card"><div class="num {{ 'flag' if st.cap_warn }}">{{ st.cap_at }}</div>
+    <div class="lbl">마지막 수집 세션 · {{ st.cap_ago }}{% if st.cap_warn %} · <b>가동일 {{ st.idle_wd }}일 무수집</b>{% endif %}
+      <span class="muted">(주말 제외 {{ stale_wd }}일 경보)</span></div></div>
+  <div class="card"><div class="num {{ 'flag' if st.ing_warn }}">{{ st.ing_at }}</div>
+    <div class="lbl">NAS 자동 등록 (ingest_nas, 30분 cron) · {{ st.ing_ago }}</div></div>
+  <div class="card"><div class="num {{ 'flag' if st.bak_warn }}">{{ st.bak_at }}</div>
+    <div class="lbl">DB 백업 (db/backup_db.py) · {{ st.bak_msg }}</div></div>
+</div>
+
+<h2>할 일 <span class="muted small">유효 세션 기준 — 카드를 누르면 해당 목록</span></h2>
+<div class="cards">
+{% for t in todo %}
+  <a class="card" href="{{ t.url }}"><div class="num {{ 'flag' if t.n }}">{{ t.n }}</div>
+    <div class="lbl">{{ t.label }}{% if t.n and t.hint %}<br><code>{{ t.hint }}</code>{% endif %}</div></a>
+{% endfor %}
+</div>
+{% if todo_cmd %}<p class="muted small">한 번에 처리: <code>{{ todo_cmd }}</code> — 등록 → 샘플 pull → 드리프트 지표 → 오라벨 자동 재배정 → 레이더 검사 → 블라인드 예측 저장. 레이더 확정은 그 뒤 옵션·품번 화면에서.</p>{% endif %}
+
+<h2>규모</h2>
 <div class="cards">
   <div class="card"><div class="num">{{ c.datasets }}</div><div class="lbl">데이터셋</div></div>
   <div class="card"><div class="num">{{ c.sessions }}</div><div class="lbl">촬영 세션</div></div>
@@ -240,9 +264,109 @@ DASH = """
 """
 
 
+# ── 할 일·수집 상태 (2026-10-30) ───────────────────────────
+# 신규 세션 루틴(door_partno/scripts/new_sessions.sh) 중 비어 있는 단계를 세션 수로 보여 주고,
+# 무인 운영에서 수집 PC·cron·백업이 멈춘 것을 알아채도록 마지막 시각을 띄운다.
+
+STALE_WORKDAYS = 2                                   # 주말 제외 이 일수 동안 새 세션이 없으면 경보
+INGEST_LOG = BASE_DIR / "logs" / "ingest_nas.log"    # cron 이 30분마다 덧붙임 → 파일 수정 시각 = 마지막 실행
+INGEST_STALE_H = 2
+BACKUP_STATUS = BASE_DIR / "db" / "backups" / "last_backup.json"
+BACKUP_STALE_H = 36
+TODO_ITEMS = [  # (키, 라벨, 목록 링크(endpoint, 인자), 처리 명령)
+    ("confirm", "레이더 확정 대기 (자동 판정됨)", ("options", {"status": "pending"}), None),
+    ("radar", "레이더 미검사 RR·RH 세션", ("options", {"status": "unchecked"}), "python partno/radar_check.py"),
+    ("pull", "샘플 미수신 세션", ("sessions", {"todo": "pull"}), "python db/pull_nas.py"),
+    ("drift", "드리프트 지표 미기록", ("sessions", {"todo": "drift"}), "python 20_session_drift.py"),
+    ("unknown", "라벨 미확정(Unknown) 세션", ("sessions", {"todo": "unknown"}), None),
+]
+
+
+def todo_sets(con):
+    """유효 세션 중 루틴 단계가 빈 세션 → {키: [(id, session_dir)]}. 대시보드 카드와 /sessions?todo= 가 공용."""
+    out = {k: [] for k, *_ in TODO_ITEMS}
+    sess = con.execute(
+        """SELECT s.id, s.session_dir, s.option_source, MIN(c.name) cls,
+                  COALESCE(MIN(i.is_valid), 1) valid, COALESCE(SUM(i.synced_local), 0) n_local
+           FROM capture_sessions s LEFT JOIN images i ON i.session_id=s.id LEFT JOIN classes c ON c.id=i.class_id
+           GROUP BY s.id""").fetchall()
+    try:   # 드리프트 페이지와 같이 최신 검출기 모델 행 기준
+        drift_done = {r[0] for r in con.execute(
+            """SELECT session_id FROM session_hole_metrics
+               WHERE model_id = (SELECT model_id FROM session_hole_metrics ORDER BY evaluated_at DESC LIMIT 1)""")}
+        radar_done = {r[0] for r in con.execute("SELECT session_id FROM session_radar_check")}
+    except sqlite3.OperationalError:
+        drift_done, radar_done = set(), set()
+    for r in sess:
+        if not r["valid"] or not r["cls"]:
+            continue
+        item = (r["id"], r["session_dir"])
+        if not r["n_local"]:
+            out["pull"].append(item)
+        if r["cls"] == "Unknown":                   # 라벨이 정해져야 지표·레이더 검사가 돈다
+            out["unknown"].append(item)
+            continue
+        if r["n_local"] and r["id"] not in drift_done:
+            out["drift"].append(item)
+        if "FRT" not in r["cls"]:                    # 레이더 옵션은 RR·RH 만
+            if r["id"] not in radar_done:
+                out["radar"].append(item)
+            elif r["option_source"] != "user":
+                out["confirm"].append(item)
+    return out
+
+
+def _ago(ts):
+    sec = max(0, time.time() - ts)
+    if sec < 3600:
+        return f"{sec / 60:.0f}분 전"
+    if sec < 86400 * 2:
+        return f"{sec / 3600:.0f}시간 전"
+    return f"{sec / 86400:.0f}일 전"
+
+
+def _idle_workdays(last_date):
+    """마지막 수집일 다음 날부터 어제까지의 평일 수 (오늘은 아직 진행 중이라 뺌)."""
+    d, today, n = last_date + dt.timedelta(days=1), dt.date.today(), 0
+    while d < today:
+        n += d.weekday() < 5
+        d += dt.timedelta(days=1)
+    return n
+
+
+def ops_status(con):
+    N = lambda **kw: type("S", (), kw)
+    st = dict(cap_at="—", cap_ago="기록 없음", cap_warn=False, idle_wd=0,
+              ing_at="—", ing_ago="로그 없음", ing_warn=True, bak_at="—", bak_msg="기록 없음 — python db/backup_db.py", bak_warn=True)
+    last = con.execute("SELECT MAX(started_at) FROM capture_sessions").fetchone()[0]
+    if last:
+        t = dt.datetime.strptime(last[:19], "%Y-%m-%d %H:%M:%S")
+        st.update(cap_at=t.strftime("%m/%d %H:%M"), cap_ago=_ago(t.timestamp()), idle_wd=_idle_workdays(t.date()))
+        st["cap_warn"] = st["idle_wd"] >= STALE_WORKDAYS
+    if INGEST_LOG.exists():
+        m = INGEST_LOG.stat().st_mtime
+        st.update(ing_at=time.strftime("%m/%d %H:%M", time.localtime(m)), ing_ago=_ago(m),
+                  ing_warn=time.time() - m > INGEST_STALE_H * 3600)
+    try:
+        b = json.loads(BACKUP_STATUS.read_text(encoding="utf-8"))
+        t = dt.datetime.strptime(b["at"], "%Y-%m-%d %H:%M:%S")
+        st.update(bak_at=t.strftime("%m/%d %H:%M"),
+                  bak_msg=(f"{_ago(t.timestamp())} · {b.get('gz_bytes', 0) / 1e6:.1f}MB · 무결성 {b.get('quick_check')} · NAS {b.get('remote', '?')}"
+                           if b.get("ok") else f"실패 — {b.get('error') or b.get('remote') or b.get('quick_check')}"),
+                  bak_warn=not b.get("ok") or time.time() - t.timestamp() > BACKUP_STALE_H * 3600)
+    except (OSError, ValueError, KeyError):
+        pass
+    return N(**st)
+
+
 @app.route("/")
 def dashboard():
     con = db()
+    sets = todo_sets(con)
+    todo = [type("T", (), dict(n=len(sets[k]), label=lab, url=url_for(ep, **args), hint=hint))
+            for k, lab, (ep, args), hint in TODO_ITEMS]
+    pending = sorted(sd for k in ("pull", "drift", "radar") for _, sd in sets[k])
+    todo_cmd = f"../door_partno/scripts/new_sessions.sh {pending[0][:8]}" if pending else ""
     c = {k: con.execute(q).fetchone()[0] for k, q in {
         "datasets": "SELECT COUNT(*) FROM datasets",
         "sessions": "SELECT COUNT(*) FROM capture_sessions",
@@ -295,6 +419,7 @@ def dashboard():
            JOIN models m ON m.id=e.model_id JOIN datasets d ON d.id=e.dataset_id
            ORDER BY e.evaluated_at DESC LIMIT 6""").fetchall()
     return page("대시보드", "dashboard", DASH, c=type("C", (), c), datasets=datasets, b=latest_benchmarks(con),
+                st=ops_status(con), stale_wd=STALE_WORKDAYS, todo=todo, todo_cmd=todo_cmd,
                 field_rows=field_rows, field_total=field_total,
                 recent_sessions=recent_sessions, recent_evals=recent_evals)
 
@@ -305,10 +430,11 @@ SESSIONS = """
 <h1>촬영 세션 <span class="muted small">{{ rows|length }}개 — 행을 누르면 상세·이미지·관리</span></h1>
 <p class="small muted" style="margin:-8px 0 12px">
   정렬:
-  {% if order == 'desc' %}<b>최신순</b> · <a href="{{ url_for('sessions', order='asc', show_invalid=1 if show_invalid else none) }}">오래된순</a>
-  {% else %}<a href="{{ url_for('sessions', show_invalid=1 if show_invalid else none) }}">최신순</a> · <b>오래된순</b>{% endif %}
+  {% if order == 'desc' %}<b>최신순</b> · <a href="{{ url_for('sessions', order='asc', show_invalid=1 if show_invalid else none, todo=todo or none) }}">오래된순</a>
+  {% else %}<a href="{{ url_for('sessions', show_invalid=1 if show_invalid else none, todo=todo or none) }}">최신순</a> · <b>오래된순</b>{% endif %}
   &nbsp;|&nbsp;
-  {% if n_hidden %}무효 세션 {{ n_hidden }}개 숨김 — <a href="{{ url_for('sessions', show_invalid=1, order=order) }}">표시하기</a>
+  {% if todo_label %}할 일 필터: <b>{{ todo_label }}</b> — <a href="{{ url_for('sessions', order=order) }}">해제</a>
+  {% elif n_hidden %}무효 세션 {{ n_hidden }}개 숨김 — <a href="{{ url_for('sessions', show_invalid=1, order=order) }}">표시하기</a>
   {% elif show_invalid %}무효 세션 포함 — <a href="{{ url_for('sessions', order=order) }}">숨기기</a>{% endif %}
 </p>
 <div class="tbl"><table>
@@ -393,14 +519,21 @@ def sessions():
     order = "asc" if request.args.get("order") == "asc" else "desc"
     rows = session_list_rows(db(), order)
     show_invalid = request.args.get("show_invalid") == "1"
-    if not show_invalid:
+    todo = request.args.get("todo", "")
+    todo_label = dict((k, lab) for k, lab, *_ in TODO_ITEMS).get(todo)
+    if todo_label:                                   # 대시보드 '할 일' 카드에서 온 필터 (유효 세션만)
+        ids = {sid for sid, _ in todo_sets(db())[todo]}
+        rows = [r for r in rows if r["id"] in ids]
+        n_hidden = 0
+    elif not show_invalid:
         visible = [r for r in rows if r["valid"]]
         n_hidden = len(rows) - len(visible)
         rows = visible
     else:
         n_hidden = 0
     return page("세션", "sessions", SESSIONS, rows=rows, n_hidden=n_hidden, order=order,
-                show_invalid=show_invalid, readonly=app.config["READONLY"])
+                show_invalid=show_invalid, todo=todo if todo_label else "", todo_label=todo_label,
+                readonly=app.config["READONLY"])
 
 
 DETAIL = """
@@ -1246,7 +1379,7 @@ OPTIONS = """
   <select name="cls" onchange="this.form.submit()"><option value="">클래스 전체</option>
     {% for k in clss %}<option {{ 'selected' if k == cur.cls }}>{{ k }}</option>{% endfor %}</select>
   <select name="status" onchange="this.form.submit()">
-    {% for v, lab in [('', '상태 전체'), ('todo', '미확정만'), ('user', '확정만'), ('unsure', '미정·미검사만')] %}
+    {% for v, lab in [('', '상태 전체'), ('todo', '미확정만'), ('pending', '확정 대기(자동 판정됨)'), ('unchecked', '미검사만'), ('user', '확정만'), ('unsure', '미정·미검사만')] %}
       <option value="{{ v }}" {{ 'selected' if v == cur.status }}>{{ lab }}</option>{% endfor %}</select>
   <input type="text" name="q" value="{{ cur.q }}" placeholder="세션 검색 (예: 20260914)">
   <button class="ghost">필터</button>
@@ -1318,6 +1451,10 @@ def options():
         rows = [m for m in rows if m["option_source"] == "user"]
     elif cur["status"] == "unsure":
         rows = [m for m in rows if m["option_radar"] is None]
+    elif cur["status"] == "pending":                 # 대시보드 '레이더 확정 대기' (검사됨·미확정)
+        rows = [m for m in rows if m["checked_at"] and m["option_source"] != "user"]
+    elif cur["status"] == "unchecked":               # 대시보드 '레이더 미검사'
+        rows = [m for m in rows if not m["checked_at"]]
     if cur["q"]:
         rows = [m for m in rows if cur["q"] in m["session_dir"]]
     return page("옵션·품번", "options", OPTIONS, rows=rows, clss=clss, cur=cur, c=c, readonly=app.config["READONLY"])

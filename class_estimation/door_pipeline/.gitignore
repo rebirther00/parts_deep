@@ -3,3 +3,6 @@ datasets_factory_v2/
 datasets_eval20/
 datasets_blind_*/
 snapshots/
+
+# 2026-10-30 db/backup_db.py 로컬 백업 (NAS 에도 보관)
+db/backups/
