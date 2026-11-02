@@ -1,0 +1,128 @@
+{
+ "E23_door_LH_FRT.jpg": {
+  "class": "E23_door_LH_FRT",
+  "radar": null,
+  "session_dir": "20260903/E25_door_LH_FRT/s_124446",
+  "file": "rgb_0012.png",
+  "D_mm": 457.2,
+  "margin_mm": 266.0,
+  "part": null
+ },
+ "E25_door_LH_FRT.jpg": {
+  "class": "E25_door_LH_FRT",
+  "radar": null,
+  "session_dir": "20260904/E25_door_LH_FRT/s_132137",
+  "file": "rgb_0029.png",
+  "D_mm": 721.8,
+  "margin_mm": 41.0,
+  "part": null
+ },
+ "E30_door_LH_FRT.jpg": {
+  "class": "E30_door_LH_FRT",
+  "radar": null,
+  "session_dir": "20260901/E30_door_LH_FRT/s_074126",
+  "file": "rgb_0012.png",
+  "D_mm": 765.8,
+  "margin_mm": 41.0,
+  "part": null
+ },
+ "E38_door_LH_FRT.jpg": {
+  "class": "E38_door_LH_FRT",
+  "radar": null,
+  "session_dir": "20260831/E38_door_LH_FRT/s_164555",
+  "file": "rgb_0010.png",
+  "D_mm": 812.2,
+  "margin_mm": 47.0,
+  "part": null
+ },
+ "E25_door_LH_RR__radar0.jpg": {
+  "class": "E25_door_LH_RR",
+  "radar": 0,
+  "session_dir": "20260917/E25_door_LH_RR/s_122607",
+  "file": "rgb_0011.png",
+  "D_mm": 1034.8,
+  "margin_mm": 50.0,
+  "part": null
+ },
+ "E25_door_LH_RR__radar1.jpg": {
+  "class": "E25_door_LH_RR",
+  "radar": 1,
+  "session_dir": "20260916/E25_door_LH_RR/s_125051",
+  "file": "rgb_0028.png",
+  "D_mm": 1035.6,
+  "margin_mm": 50.0,
+  "part": null
+ },
+ "E30_door_LH_RR__radar0.jpg": {
+  "class": "E30_door_LH_RR",
+  "radar": 0,
+  "session_dir": "20260828/E30_door_LH_RR/s_133831",
+  "file": "rgb_0018.png",
+  "D_mm": 1158.7,
+  "margin_mm": 71.0,
+  "part": null
+ },
+ "E30_door_LH_RR__radar1.jpg": {
+  "class": "E30_door_LH_RR",
+  "radar": 1,
+  "session_dir": "20260901/E30_door_LH_RR/s_150706",
+  "file": "rgb_0013.png",
+  "D_mm": 1160.9,
+  "margin_mm": 71.0,
+  "part": null
+ },
+ "E38_door_LH_RR__radar0.jpg": {
+  "class": "E38_door_LH_RR",
+  "radar": 0,
+  "session_dir": "20260831/E38_door_LH_RR/s_104040",
+  "file": "rgb_0029.png",
+  "D_mm": 1352.8,
+  "margin_mm": 194.0,
+  "part": null
+ },
+ "E38_door_LH_RR__radar1.jpg": {
+  "class": "E38_door_LH_RR",
+  "radar": 1,
+  "session_dir": "20260901/E38_door_LH_RR/s_124406",
+  "file": "rgb_0013.png",
+  "D_mm": 1355.0,
+  "margin_mm": 194.0,
+  "part": null
+ },
+ "E25_door_RH__radar0.jpg": {
+  "class": "E25_door_RH",
+  "radar": 0,
+  "session_dir": "20260828/E25_door_RH/s_191838",
+  "file": "rgb_0029.png",
+  "D_mm": 893.6,
+  "margin_mm": 74.0,
+  "part": null
+ },
+ "E25_door_RH__radar1.jpg": {
+  "class": "E25_door_RH",
+  "radar": 1,
+  "session_dir": "20260828/E25_door_RH/s_073451",
+  "file": "rgb_0029.png",
+  "D_mm": 894.6,
+  "margin_mm": 74.0,
+  "part": null
+ },
+ "E30_E38_door_RH__radar0.jpg": {
+  "class": "E30_E38_door_RH",
+  "radar": 0,
+  "session_dir": "20260828/E30_E38_door_RH/s_143127",
+  "file": "rgb_0013.png",
+  "D_mm": 1096.2,
+  "margin_mm": 50.0,
+  "part": null
+ },
+ "E30_E38_door_RH__radar1.jpg": {
+  "class": "E30_E38_door_RH",
+  "radar": 1,
+  "session_dir": "20260901/E30_E38_door_RH/s_133500",
+  "file": "rgb_0013.png",
+  "D_mm": 1087.7,
+  "margin_mm": 50.0,
+  "part": null
+ }
+}

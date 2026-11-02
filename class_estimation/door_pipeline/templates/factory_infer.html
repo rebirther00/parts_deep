@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>도어 실시간 판정 — 경주</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:#0f1218; color:#e8eaf0; font-family:'Noto Sans KR','Malgun Gothic',sans-serif; font-size:14px; }
+  a { color:#8ab4ff; }
+  header { display:flex; align-items:center; gap:16px; padding:10px 18px; background:#161b24; border-bottom:1px solid #2a3140; position:sticky; top:0; z-index:5; }
+  header h1 { font-size:18px; font-weight:700; }
+  .badge { padding:3px 10px; border-radius:12px; font-weight:700; font-size:13px; background:#2a3140; }
+  .badge.EMPTY { background:#3a4150; } .badge.JUDGING { background:#8a5a00; } .badge.JUDGED { background:#1d7a45; } .badge.UNRESOLVED { background:#9a3a1a; }
+  .badge.shadow { background:#5b3fa0; }
+  #clock { margin-left:auto; color:#9aa3b5; }
+  main { display:grid; grid-template-columns: 420px 1fr; gap:14px; padding:14px; }
+  @media (max-width: 1000px) { main { grid-template-columns: 1fr; } }
+  .card { background:#1b2230; border:1px solid #2a3140; border-radius:12px; padding:12px; }
+  .card h2 { font-size:14px; color:#9aa3b5; margin-bottom:8px; font-weight:600; }
+  #preview { width:100%; border-radius:8px; background:#000; display:block; }
+  .kv { display:grid; grid-template-columns: auto 1fr; gap:3px 10px; font-size:13px; }
+  .kv b { color:#9aa3b5; font-weight:500; }
+  .big { font-size:22px; font-weight:800; margin:4px 0; }
+  .muted { color:#9aa3b5; }
+  .warn { color:#ffb020; } .err { color:#ff5c5c; } .ok { color:#4cd98a; }
+  .stats { display:flex; gap:8px; flex-wrap:wrap; margin-top:8px; }
+  .stat { flex:1; min-width:80px; background:#161b24; border:1px solid #2a3140; border-radius:8px; padding:6px 8px; text-align:center; }
+  .stat b { display:block; font-size:18px; }
+  .stat small { color:#9aa3b5; }
+  table { width:100%; border-collapse:collapse; }
+  th, td { padding:6px 8px; border-bottom:1px solid #2a3140; vertical-align:top; text-align:left; }
+  th { color:#9aa3b5; font-weight:600; font-size:12.5px; }
+  tr.row:hover { background:#202838; cursor:pointer; }
+  .imgs { display:flex; gap:6px; }
+  .imgs figure { width:150px; }
+  .imgs img { width:150px; height:94px; object-fit:cover; border-radius:6px; border:1px solid #2a3140; background:#000; display:block; }
+  .imgs figcaption { font-size:11px; color:#9aa3b5; text-align:center; margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .st { font-weight:700; padding:2px 8px; border-radius:10px; font-size:12px; display:inline-block; }
+  .st.judged { background:#1d7a45; } .st.unknown { background:#9a3a1a; } .st.unrecognized { background:#5b3fa0; } .st.abstain { background:#8a5a00; } .st.open { background:#3a4150; }
+  .toolbar { display:flex; gap:8px; align-items:center; margin-bottom:8px; flex-wrap:wrap; }
+  .toolbar select, .toolbar button { background:#252a35; color:#e8eaf0; border:1px solid #3a4150; border-radius:8px; padding:6px 10px; font-size:13px; cursor:pointer; }
+  .toolbar button.danger { border-color:#4a3030; color:#d08a8a; }
+  #modal { position:fixed; inset:0; background:rgba(0,0,0,.7); display:none; align-items:center; justify-content:center; z-index:20; }
+  #modal .box { background:#1b2230; border:1px solid #2a3140; border-radius:14px; padding:18px; max-width:92vw; max-height:92vh; overflow:auto; }
+  #modal .box h3 { font-size:16px; margin-bottom:10px; }
+  #modal .grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(300px, 1fr)); gap:8px; }
+  #modal .grid img { width:100%; border-radius:6px; border:1px solid #2a3140; }
+  #modal pre { font-size:11.5px; color:#9aa3b5; white-space:pre-wrap; margin-top:10px; max-height:30vh; overflow:auto; }
+  #modal .close { float:right; background:#3a4150; color:#fff; border:none; border-radius:8px; padding:6px 12px; cursor:pointer; }
+  #toast { position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:#e8eaf0; color:#0f1218; font-weight:700; padding:10px 22px; border-radius:10px; display:none; z-index:30; }
+  #metricsChart { width:100%; height:110px; display:block; background:#161b24; border-radius:8px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>도어 실시간 판정 — 경주</h1>
+  <span id="stateBadge" class="badge">-</span>
+  <span id="shadowBadge" class="badge shadow" style="display:none">그림자 모드 (NAS 업로드 꺼짐)</span>
+  <span id="camBadge" class="badge">카메라 -</span>
+  <span id="clock">--/-- --:--:--</span>
+</header>
+<main>
+  <section>
+    <div class="card">
+      <h2>라이브 (점유·정지·침입 지표는 영상 아래 띠)</h2>
+      <img id="preview" src="/frame.jpg" alt="camera">
+      <canvas id="metricsChart" width="400" height="110" title="오늘 diff(주황)·intr(빨강)·motion/50(회색) 시계열 — 배경은 상태(판정 중/완료/미확정)"></canvas>
+    </div>
+    <div class="card" style="margin-top:12px">
+      <h2>현재 세션</h2>
+      <div id="curNone" class="muted">빈 지그 — 도어 대기 중</div>
+      <div id="cur" style="display:none">
+        <div class="big" id="curClass">-</div>
+        <div class="kv">
+          <b>상태</b><span id="curStatus">-</span>
+          <b>품번</b><span id="curPart">-</span>
+          <b>레이더</b><span id="curRadar">-</span>
+          <b>신뢰도</b><span id="curConf">-</span>
+          <b>D / 마진</b><span id="curD">-</span>
+          <b>판정 프레임</b><span id="curJudged">-</span>
+          <b>게이트</b><span id="curGates">-</span>
+          <b>후보</b><span id="curCands">-</span>
+          <b>체류</b><span id="curDwell">-</span>
+          <b>세션</b><span id="curDir">-</span>
+        </div>
+      </div>
+      <div class="stats">
+        <div class="stat"><b id="stToday">0</b><small>오늘 도어</small></div>
+        <div class="stat"><b id="stJudged">0</b><small>판정</small></div>
+        <div class="stat"><b id="stIssue">0</b><small>미등록·미인식·보류</small></div>
+        <div class="stat"><b id="stDisk">-</b><small>디스크 여유</small></div>
+        <div class="stat"><b id="stUpload">-</b><small>업로드</small></div>
+        <div class="stat"><b id="stMs">-</b><small>추론 ms</small></div>
+      </div>
+      <div class="muted" id="svcInfo" style="margin-top:8px;font-size:12px"></div>
+      <div class="toolbar" style="margin-top:10px">
+        <button id="resetBtn">재판정 (윈도 초기화)</button>
+        <button id="shutdownBtn" class="danger">시스템 종료</button>
+      </div>
+    </div>
+  </section>
+  <section class="card">
+    <div class="toolbar">
+      <h2 style="margin:0">도어 목록</h2>
+      <select id="dateSel"></select>
+      <span id="dateCounts" class="muted"></span>
+      <span class="muted" style="margin-left:auto">행 클릭 → 저장 프레임 보기</span>
+    </div>
+    <table>
+      <thead><tr><th>시각</th><th>상태</th><th>판정 / 품번</th><th>신뢰도·D</th><th>판정 이미지 | 작업자 라벨 대표 이미지 | 2순위 후보</th></tr></thead>
+      <tbody id="rows"></tbody>
+    </table>
+  </section>
+</main>
+<div id="modal"><div class="box"><button class="close" onclick="closeModal()">닫기</button><h3 id="mTitle"></h3><div class="grid" id="mGrid"></div><pre id="mJson"></pre></div></div>
+<div id="toast"></div>
+<script>
+const $ = s => document.querySelector(s);
+let curDate = null, dates = [];
+function toast(t, ms=2500) { const e=$('#toast'); e.textContent=t; e.style.display='block'; setTimeout(()=>e.style.display='none', ms); }
+function fmt(v, d=1) { return (v===null||v===undefined) ? '-' : (typeof v==='number' ? v.toFixed(d) : v); }
+function stTag(s) { const lab={judged:'판정',unknown:'미등록',unrecognized:'미인식',abstain:'보류',open:'진행'}; return `<span class="st ${s||'open'}">${lab[s]||s||'진행'}</span>`; }
+
+async function refreshStatus() {
+  try {
+    const st = await (await fetch('/api/status')).json();
+    $('#clock').textContent = st.now;
+    const b = $('#stateBadge'); b.textContent = {EMPTY:'빈 지그',JUDGING:'판정 중',JUDGED:'판정 완료',UNRESOLVED:'미확정'}[st.state] + ` (${Math.round(st.state_for_s)}s)`; b.className = 'badge ' + st.state;
+    $('#shadowBadge').style.display = st.service.shadow ? '' : 'none';
+    const cb = $('#camBadge'); cb.textContent = st.camera_ok ? `카메라 OK · S/N ${st.serial||'-'}` : `카메라 연결 대기 (${st.camera_error||''})`; cb.className = 'badge ' + (st.camera_ok ? 'JUDGED' : 'UNRESOLVED');
+    const s = st.session;
+    $('#curNone').style.display = s ? 'none' : ''; $('#cur').style.display = s ? '' : 'none';
+    if (s) {
+      $('#curClass').textContent = s.class || '수집 중';
+      $('#curStatus').innerHTML = (s.status ? stTag(s.status) : '판정 중') + (s.locked ? ' · 잠금' : '') + (s.conflict ? ' <span class="warn">CNN 불일치</span>' : '') + (s.source ? ` <span class="muted">[${s.source}]</span>` : '');
+      $('#curPart').textContent = s.part_no ? `${s.part_no} ${s.part_name||''}` : '-';
+      $('#curRadar').textContent = s.radar_txt || '-';
+      $('#curConf').textContent = s.confidence ? s.confidence + '%' : '-';
+      $('#curD').textContent = s.D_mm ? `${fmt(s.D_mm,0)} mm / ${fmt(s.margin_mm,0)} mm` : '-';
+      $('#curJudged').textContent = `${s.n_judged||0}/${s.window||0} (clean ${s.n_clean}/${s.n_processed}, pts max ${s.max_pts})`;
+      $('#curGates').textContent = Object.entries(s.gate_counts||{}).map(([k,v])=>`${k}:${v}`).join(' ') || '-';
+      $('#curCands').textContent = (s.candidates||[]).slice(0,3).map(c=>`${c.class} Δ${c.diff_mm}`).join(' · ') || '-';
+      $('#curDwell').textContent = `${Math.round(s.dwell_s)} s (시작 ${s.started_at})`;
+      $('#curDir').textContent = s.session_dir;
+    }
+    const t = st.today || {};
+    $('#stToday').textContent = t.total || 0; $('#stJudged').textContent = t.judged || 0;
+    const issue = (t.unknown||0)+(t.unrecognized||0)+(t.abstain||0); const si = $('#stIssue'); si.textContent = issue; si.className = issue ? 'warn' : '';
+    const sd = $('#stDisk'); sd.textContent = st.disk_free_gb + ' GB'; sd.className = st.disk_warn ? 'warn' : '';
+    const su = $('#stUpload'); su.textContent = st.upload.enabled ? (st.upload.pending ? `대기 ${st.upload.pending}` : 'OK') : '꺼짐'; su.title = `마지막 OK ${st.upload.last_ok||'-'} / FAIL ${st.upload.last_fail||'-'}`;
+    $('#stMs').textContent = Math.round(st.infer_ms);
+    const m = st.service.models;
+    $('#svcInfo').textContent = `v${st.service.version} 시작 ${st.service.started} · 홀 ${m.hole} (${m.hole_sha}) · CNN ${m.cnn||'off'} · 옵션 ${m.option} · ${m.fp16?'FP16':'FP32'} · ${st.camera_type}`;
+  } catch (e) { $('#stateBadge').textContent = '서버 연결 실패'; $('#stateBadge').className = 'badge UNRESOLVED'; }
+}
+
+async function loadDates() {
+  dates = await (await fetch('/api/dates')).json();
+  const today = new Date(); const td = today.getFullYear() + String(today.getMonth()+1).padStart(2,'0') + String(today.getDate()).padStart(2,'0');
+  if (!dates.find(d=>d.date===td)) dates.unshift({date: td, total: 0});
+  const sel = $('#dateSel'); const prev = sel.value;
+  sel.innerHTML = dates.map(d=>`<option value="${d.date}">${d.date.slice(0,4)}-${d.date.slice(4,6)}-${d.date.slice(6,8)} (${d.total||0})</option>`).join('');
+  sel.value = prev && dates.find(d=>d.date===prev) ? prev : td; curDate = sel.value;
+}
+
+let sessionsCache = [];
+async function loadSessions() {
+  if (!curDate) return;
+  const r = await (await fetch('/api/sessions?date=' + curDate)).json();
+  sessionsCache = r.sessions;
+  const c = r.counts || {};
+  $('#dateCounts').textContent = `총 ${c.total||0} · 판정 ${c.judged||0} · 미등록 ${c.unknown||0} · 미인식 ${c.unrecognized||0} · 보류 ${c.abstain||0}`;
+  $('#rows').innerHTML = r.sessions.map((s,i)=>`<tr class="row" data-i="${i}">
+    <td>${s.started_at.slice(11,16)}<br><small class="muted">${Math.round(s.dwell_s/60)}분${s.final?'':' · 진행'}${s.uploaded?' · ↑':''}</small></td>
+    <td>${stTag(s.status)}${s.conflict?'<br><small class="warn">CNN 불일치</small>':''}${s.source?`<br><small class="muted">${s.source}</small>`:''}</td>
+    <td><b>${s.pred_class||s.class||'-'}</b><br><small>${s.part_no||'-'} ${s.part_name||''}</small><br><small class="muted">레이더 ${s.radar_txt||'-'}</small></td>
+    <td>${s.confidence?s.confidence+'%':'-'}<br><small class="muted">D ${fmt(s.D_mm,0)} / 마진 ${fmt(s.margin_mm,0)}</small><br><small class="muted">${s.n_judged||0}/${s.window||0}f · ${s.saved_pairs||0}장</small></td>
+    <td><div class="imgs">
+      <figure><img src="${s.thumb_url||''}" alt="" onerror="this.style.opacity=.2"><figcaption>판정 ${s.started_at.slice(11,19)}</figcaption></figure>
+      <figure><img src="${s.ref_url||''}" alt="" onerror="this.style.opacity=.2"><figcaption>라벨 대표: ${s.pred_class||'-'}</figcaption></figure>
+      <figure><img src="${s.ref2_url||''}" alt="" onerror="this.style.opacity=.2"><figcaption>2순위: ${s.second_class||'-'}</figcaption></figure>
+    </div></td></tr>`).join('') || '<tr><td colspan="5" class="muted">세션 없음</td></tr>';
+  document.querySelectorAll('tr.row').forEach(tr => tr.onclick = () => openModal(sessionsCache[+tr.dataset.i]));
+}
+
+function openModal(s) {
+  $('#mTitle').textContent = `${s.session_dir} — ${s.pred_class||s.class||'-'} ${s.part_no||''} (${s.status||'진행'})`;
+  $('#mGrid').innerHTML = (s.frame_urls||[]).map((u,i)=>{ const f=(s.frames||[])[i]||{}; return `<figure><img src="${u}" loading="lazy"><figcaption class="muted">${f.file||''} gate ${f.gate||'-'} ${f.pred||''} D ${fmt(f.D_mm,0)}</figcaption></figure>`; }).join('') || '<span class="muted">저장 프레임 없음</span>';
+  const j = Object.assign({}, s); delete j.frames; delete j.frame_urls; delete j.config; delete j.intrinsics;
+  $('#mJson').textContent = JSON.stringify(j, null, 1);
+  $('#modal').style.display = 'flex';
+}
+function closeModal() { $('#modal').style.display = 'none'; }
+$('#modal').addEventListener('click', e => { if (e.target.id==='modal') closeModal(); });
+
+async function drawMetrics() {
+  try {
+    const m = await (await fetch('/api/metrics?date=' + (curDate||'') + '&max=400')).json();
+    const c = $('#metricsChart'); const ctx = c.getContext('2d'); const W = c.width = c.clientWidth || 400, H = c.height;
+    ctx.fillStyle = '#161b24'; ctx.fillRect(0,0,W,H);
+    if (!m.length) { ctx.fillStyle='#555'; ctx.fillText('metrics 없음', 10, 20); return; }
+    const n = m.length; const x = i => i*(W-1)/Math.max(1,n-1);
+    // 상태 배경
+    const stc = {JUDGING:'#3a2a00', JUDGED:'#0f3a20', UNRESOLVED:'#3a1a0a'};
+    m.forEach((p,i)=>{ if (stc[p.state]) { ctx.fillStyle=stc[p.state]; ctx.fillRect(x(i),0,Math.max(1,W/n+1),H); } });
+    const line = (key, color, scale) => { ctx.strokeStyle=color; ctx.lineWidth=1.2; ctx.beginPath(); m.forEach((p,i)=>{ const v=Math.min(1,(p[key]||0)*scale); const y=H-2-v*(H-6); i?ctx.lineTo(x(i),y):ctx.moveTo(x(i),y); }); ctx.stroke(); };
+    line('motion', '#777', 1/50); line('intr', '#ff5c5c', 1/0.1); line('diff', '#ffb020', 1);
+    ctx.strokeStyle='#ffb02088'; ctx.setLineDash([3,3]); ctx.beginPath(); const yth = H-2-0.15*(H-6); ctx.moveTo(0,yth); ctx.lineTo(W,yth); ctx.stroke(); ctx.setLineDash([]);
+    ctx.fillStyle='#9aa3b5'; ctx.font='11px sans-serif'; ctx.fillText(`${m[0].ts.slice(11,16)} → ${m[n-1].ts.slice(11,16)}  diff(주황, 점선=OCC_ON 0.15) intr(빨강 ×10) motion(회색 /50)`, 6, 12);
+  } catch (e) {}
+}
+
+$('#dateSel').onchange = e => { curDate = e.target.value; loadSessions(); drawMetrics(); };
+$('#resetBtn').onclick = async () => { await fetch('/api/reset', {method:'POST'}); toast('재판정: 윈도 초기화'); };
+$('#shutdownBtn').onclick = async () => { if (!confirm('장비(Zed Box)를 종료할까요? 1분 후 꺼집니다.')) return; const r = await (await fetch('/api/shutdown', {method:'POST'})).json(); toast(r.ok ? '종료 예약됨 (1분 후)' : r.error, 5000); };
+
+setInterval(() => { $('#preview').src = '/frame.jpg?t=' + Date.now(); }, 700);
+setInterval(refreshStatus, 1000);
+setInterval(async () => { const t = dates.length ? dates[0].date : null; await loadDates(); await loadSessions(); }, 15000);
+setInterval(drawMetrics, 30000);
+(async () => { await refreshStatus(); await loadDates(); await loadSessions(); drawMetrics(); })();
+</script>
+</body>
+</html>

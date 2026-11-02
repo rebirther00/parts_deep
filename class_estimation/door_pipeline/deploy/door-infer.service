@@ -1,0 +1,26 @@
+[Unit]
+Description=Door factory realtime inference service (Flask + ZED, replaces door-capture)
+# 부팅 직후 CUDA/ZED 준비 전에는 앱이 스스로 exit(3) → 재시작 반복으로 대기
+After=network-online.target time-sync.target zed_x_daemon.service
+Wants=network-online.target
+Conflicts=door-capture.service
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+User=user
+WorkingDirectory=/home/user/workspace/parts_deep/class_estimation/door_pipeline
+# 운영 설정(그림자 모드 ↔ 업로드, 임계값)은 유닛을 고치지 않고 이 파일로: DOOR_INFER_UPLOAD=1 등
+EnvironmentFile=-/home/user/.config/door-infer.env
+# 시계 동기화(NTP) 전에 시작하면 세션이 1970 날짜 폴더에 저장됨 (2026-08-10 사고)
+# → 최대 120초 대기, 그래도 안 잡히면 경고 남기고 시작 (오프라인 현장에서도 서비스는 떠야 함)
+ExecStartPre=/bin/bash -c 'for i in $(seq 1 24); do [ "$(date +%%Y)" -ge 2025 ] && exit 0; sleep 5; done; echo "경고: 시계 미동기화 상태로 시작 — 날짜 폴더가 unsynced_ 로 저장됨"; exit 0'
+ExecStart=/home/user/workspace/zed_env/bin/python 07_factory_infer.py
+# SIGTERM → 진행 중 세션 마감(result.json final) → 카메라 닫기. 15초 안에 끝남
+KillSignal=SIGTERM
+TimeoutStopSec=40
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

@@ -139,7 +139,7 @@ svg text { fill:var(--muted); font-size:10px; }
 </style></head><body>
 <nav>
   <span class="brand">🗄️ door_pipeline DB</span>
-  {% for ep, label in [('dashboard','대시보드'), ('sessions','세션'), ('images','이미지'), ('labels','라벨'), ('training','학습·평가'), ('drift','드리프트'), ('options','옵션·품번')] %}
+  {% for ep, label in [('dashboard','대시보드'), ('inference','현장 판정'), ('sessions','세션'), ('images','이미지'), ('labels','라벨'), ('training','학습·평가'), ('drift','드리프트'), ('options','옵션·품번')] %}
     <a class="tab {{ 'on' if active == ep }}" href="{{ url_for(ep) }}">{{ label }}</a>
   {% endfor %}
   {% if readonly %}<span class="ro">열람 전용 모드</span>{% endif %}
@@ -171,6 +171,22 @@ DASH = """
     <div class="lbl">NAS 자동 등록 (ingest_nas, 30분 cron) · {{ st.ing_ago }}</div></div>
   <div class="card"><div class="num {{ 'flag' if st.bak_warn }}">{{ st.bak_at }}</div>
     <div class="lbl">DB 백업 (db/backup_db.py) · {{ st.bak_msg }}</div></div>
+</div>
+
+<h2>현장 판정 서비스 <span class="muted small">(07_factory_infer, 2026-11-02~) — NAS → ingest_infer 30분 cron · <a href="{{ url_for('inference') }}">판정 목록·확정</a></span></h2>
+<div class="cards">
+  <div class="card"><div class="num {{ 'flag' if inf.hb_warn }}">{{ inf.hb_at }}</div>
+    <div class="lbl">서비스 하트비트 (10분 주기) · {{ inf.hb_msg }}</div></div>
+  <a class="card" href="{{ url_for('inference', date=inf.today) }}"><div class="num">{{ inf.today_n }}</div>
+    <div class="lbl">오늘 도어 · 판정 {{ inf.today_judged }} / 미확정 {{ inf.today_issue }}</div></a>
+  <a class="card" href="{{ url_for('inference') }}"><div class="num">{{ inf.week_n }}</div>
+    <div class="lbl">최근 7일 도어 · 마지막 판정 {{ inf.last_at }}</div></a>
+  <a class="card" href="{{ url_for('inference', confirm='todo') }}"><div class="num {{ 'flag' if inf.todo }}">{{ inf.todo }}</div>
+    <div class="lbl">확정 대기 (판정 완료, 육안 확인 전)</div></a>
+  <a class="card" href="{{ url_for('inference', status='issue') }}"><div class="num {{ 'flag' if inf.issue }}">{{ inf.issue }}</div>
+    <div class="lbl">미등록·미인식·보류 (확정 전)</div></a>
+  <div class="card"><div class="num {{ 'ok' if inf.agree_pct is not none and inf.agree_pct >= 99 }}">{{ ('%.1f%%' % inf.agree_pct) if inf.agree_pct is not none else '—' }}</div>
+    <div class="lbl">판정 = 확정 일치율 (확정 {{ inf.confirmed }}건)</div></div>
 </div>
 
 <h2>할 일 <span class="muted small">유효 세션 기준 — 카드를 누르면 해당 목록</span></h2>
@@ -285,10 +301,12 @@ TODO_ITEMS = [  # (키, 라벨, 목록 링크(endpoint, 인자), 처리 명령)
 def todo_sets(con):
     """유효 세션 중 루틴 단계가 빈 세션 → {키: [(id, session_dir)]}. 대시보드 카드와 /sessions?todo= 가 공용."""
     out = {k: [] for k, *_ in TODO_ITEMS}
+    # 현장 판정 세션(door_factory_infer)은 수집 루틴(pull·drift·레이더 검사) 대상이 아니다 — /inference 에서 확정만 한다
     sess = con.execute(
         """SELECT s.id, s.session_dir, s.option_source, MIN(c.name) cls,
                   COALESCE(MIN(i.is_valid), 1) valid, COALESCE(SUM(i.synced_local), 0) n_local
            FROM capture_sessions s LEFT JOIN images i ON i.session_id=s.id LEFT JOIN classes c ON c.id=i.class_id
+           WHERE s.dataset_id != COALESCE((SELECT id FROM datasets WHERE name='door_factory_infer'), -1)
            GROUP BY s.id""").fetchall()
     try:   # 드리프트 페이지와 같이 최신 검출기 모델 행 기준
         drift_done = {r[0] for r in con.execute(
@@ -419,7 +437,7 @@ def dashboard():
            JOIN models m ON m.id=e.model_id JOIN datasets d ON d.id=e.dataset_id
            ORDER BY e.evaluated_at DESC LIMIT 6""").fetchall()
     return page("대시보드", "dashboard", DASH, c=type("C", (), c), datasets=datasets, b=latest_benchmarks(con),
-                st=ops_status(con), stale_wd=STALE_WORKDAYS, todo=todo, todo_cmd=todo_cmd,
+                st=ops_status(con), inf=infer_status(con), stale_wd=STALE_WORKDAYS, todo=todo, todo_cmd=todo_cmd,
                 field_rows=field_rows, field_total=field_total,
                 recent_sessions=recent_sessions, recent_evals=recent_evals)
 
@@ -1492,6 +1510,312 @@ def act_option(sid):
     con.commit()
     flash(f"{sdir}: {note}")
     return redirect(request.referrer or url_for("options"))
+
+
+# ── 현장 판정 (07_factory_infer → ingest_infer → inference_results, 2026-11-02) ──────────────
+
+INFER_DATASET = "door_factory_infer"
+INFER_MIRROR = BASE_DIR / "datasets_factory_infer"
+REF_DIR = BASE_DIR / "reference_images"
+INFER_HB_STALE_MIN = 60                              # 하트비트가 이보다 오래되면 경보 (근무시간 외에는 꺼져 있는 게 정상)
+INFER_CLASSES = ("E23_door_LH_FRT", "E25_door_LH_FRT", "E25_door_LH_RR", "E25_door_RH", "E30_door_LH_FRT",
+                 "E30_door_LH_RR", "E30_E38_door_RH", "E38_door_LH_FRT", "E38_door_LH_RR")
+INFER_STATUS_LABEL = {"judged": "판정", "unknown": "미등록 도어", "unrecognized": "미인식(기종 외)", "abstain": "보류"}
+
+
+def ref_image_name(cls, radar):
+    """클래스(+레이더) 대표 이미지 파일명 (reference_images/). 없으면 None."""
+    if cls not in INFER_CLASSES:
+        return None
+    names = ([f"{cls}__radar{radar}.jpg"] if radar in (0, 1) else []) + [f"{cls}.jpg", f"{cls}__radar1.jpg", f"{cls}__radar0.jpg"]
+    return next((n for n in names if (REF_DIR / n).exists()), None)
+
+
+def infer_status(con):
+    """대시보드 카드: 하트비트·오늘/7일 도어 수·확정 대기·미확정·판정-확정 일치율."""
+    N = lambda **kw: type("I", (), kw)
+    today = dt.date.today()
+    st = dict(hb_at="—", hb_msg="미러 없음 (ingest_infer 미실행)", hb_warn=True, today=today.strftime("%Y%m%d"),
+              today_n=0, today_judged=0, today_issue=0, week_n=0, last_at="—", todo=0, issue=0, confirmed=0, agree_pct=None)
+    try:
+        hb = json.loads((INFER_MIRROR / "heartbeat.json").read_text(encoding="utf-8"))
+        t = dt.datetime.strptime(hb["ts"][:19], "%Y-%m-%d %H:%M:%S")
+        age_min = (time.time() - t.timestamp()) / 60
+        st.update(hb_at=t.strftime("%m/%d %H:%M"), hb_warn=age_min > INFER_HB_STALE_MIN,
+                  hb_msg=f"{_ago(t.timestamp())} · 상태 {hb.get('state')} · 디스크 {hb.get('disk_free_gb')}GB · "
+                         f"{'업로드 ON' if hb.get('upload') else '그림자 모드'}")
+    except (OSError, ValueError, KeyError):
+        pass
+    try:
+        rows = con.execute("SELECT status, started_at, judged_at, pred_class, confirmed_class FROM inference_results").fetchall()
+    except sqlite3.OperationalError:
+        return N(**st)
+    t0 = today.strftime("%Y-%m-%d")
+    w0 = (today - dt.timedelta(days=6)).strftime("%Y-%m-%d")
+    for r in rows:
+        d = (r["started_at"] or "")[:10]
+        if d == t0:
+            st["today_n"] += 1
+            st["today_judged"] += r["status"] == "judged"
+            st["today_issue"] += r["status"] != "judged"
+        if d >= w0:
+            st["week_n"] += 1
+        if r["confirmed_class"] is None:
+            if r["status"] == "judged":
+                st["todo"] += 1
+            else:
+                st["issue"] += 1
+        else:
+            st["confirmed"] += 1
+    last = con.execute("SELECT MAX(judged_at) FROM inference_results WHERE status='judged'").fetchone()[0]
+    if last:
+        st["last_at"] = last[5:16]
+    agree = con.execute("SELECT SUM(confirmed_class = pred_class), COUNT(*) FROM inference_results "
+                        "WHERE confirmed_class IS NOT NULL AND status='judged'").fetchone()
+    if agree and agree[1]:
+        st["agree_pct"] = 100.0 * (agree[0] or 0) / agree[1]
+    return N(**st)
+
+
+INFERENCE = """
+<h1>현장 판정 <span class="muted small">{{ rows|length }}개 표시 — 모델 판정은 잠정값, 대표 이미지와 비교해 확정하면 재학습 GT 가 된다</span></h1>
+<p class="small muted">판정 이미지(6점 오버레이) | 판정 클래스의 <b>작업자 라벨 대표 이미지</b> | 2순위 후보 대표 이미지. 경주 박스 실시간 화면은
+<a href="http://100.70.228.127:5000" target="_blank">zedbox :5000</a>(tailscale). 상태: 판정 = 홀/CNN 확정 · 미등록 도어 = 홀은 보이나 CAD D 와 30mm+ 어긋남 ·
+미인식 = 홀 자체가 안 잡힘(기종 외 부품) · 보류 = 도어는 봤으나 게이트(정지·침입·기하) 실패.</p>
+<div class="cards">
+  <div class="card"><div class="num">{{ c.total }}</div><div class="lbl">필터 결과</div></div>
+  <div class="card"><div class="num">{{ c.judged }}</div><div class="lbl">판정</div></div>
+  <div class="card"><div class="num {{ 'flag' if c.issue }}">{{ c.issue }}</div><div class="lbl">미등록·미인식·보류</div></div>
+  <div class="card"><div class="num {{ 'flag' if c.todo }}">{{ c.todo }}</div><div class="lbl">확정 대기</div></div>
+  <div class="card"><div class="num">{{ c.confirmed }}</div><div class="lbl">확정됨{% if c.agree is not none %} · 일치 {{ '%.1f%%' % c.agree }}{% endif %}</div></div>
+</div>
+<form class="filters" method="get">
+  <input type="text" name="date" value="{{ cur.date }}" placeholder="날짜 YYYYMMDD (앞부분만도 됨)" style="width:200px">
+  <select name="status" onchange="this.form.submit()">
+    {% for v, lab in [('', '상태 전체'), ('judged', '판정만'), ('issue', '미등록·미인식·보류'), ('unknown', '미등록 도어'), ('unrecognized', '미인식'), ('abstain', '보류')] %}
+      <option value="{{ v }}" {{ 'selected' if v == cur.status }}>{{ lab }}</option>{% endfor %}</select>
+  <select name="confirm" onchange="this.form.submit()">
+    {% for v, lab in [('', '확정 여부 전체'), ('todo', '미확정만'), ('done', '확정만'), ('mismatch', '확정≠판정')] %}
+      <option value="{{ v }}" {{ 'selected' if v == cur.confirm }}>{{ lab }}</option>{% endfor %}</select>
+  <select name="cls" onchange="this.form.submit()"><option value="">클래스 전체</option>
+    {% for k in clss %}<option {{ 'selected' if k == cur.cls }}>{{ k }}</option>{% endfor %}</select>
+  <button class="ghost">필터</button> <a class="small" href="{{ url_for('inference') }}">초기화</a>
+  <span class="muted small" style="margin-left:auto">최근 {{ limit }}개까지 표시</span>
+</form>
+<div class="tbl tall wrap"><table>
+<tr><th>시각 · 세션</th><th>상태</th><th>판정</th><th>판정 이미지 | 라벨 대표 | 2순위</th><th>확정</th><th>{{ '' if readonly else '확정 버튼' }}</th></tr>
+{% for r in rows %}
+<tr>
+  <td><b>{{ (r.started_at or '')[5:16] }}</b><br><a href="{{ url_for('inference_detail', sid=r.session_id) }}" class="small">{{ r.session_dir }}</a>
+      <br><span class="muted small">체류 {{ '%.0f' % ((r.dwell_s or 0) / 60) }}분 · {{ r.source or '—' }}{% if r.conflict %} · <span class="warn">CNN 불일치</span>{% endif %}</span></td>
+  <td><span class="pill {{ 'test' if r.status != 'judged' }}">{{ labels[r.status] }}</span>
+      {% if r.gate_counts and r.status != 'judged' %}<br><span class="muted small">{{ r.gate_counts }}</span>{% endif %}</td>
+  <td>{% if r.pred_class %}<b>{{ r.pred_class }}</b>{% else %}<span class="muted">—</span>{% endif %}
+      <br><span class="small">{{ r.part_no or '—' }} {{ r.part_name or '' }}</span>
+      <br><span class="muted small">레이더 {{ r.radar_txt or '—' }} · 신뢰도 {{ '%.0f%%' % r.confidence if r.confidence else '—' }}
+      · D {{ '%.0f' % r.d_mm if r.d_mm else '—' }} / 마진 {{ '%.0f' % r.margin_mm if r.margin_mm is not none else '—' }} · {{ r.n_judged or 0 }}/{{ r.n_window or 0 }}f</span>
+      {% if r.second %}<br><span class="muted small">2순위 {{ r.second }}</span>{% endif %}</td>
+  <td><div style="display:flex;gap:6px">
+      {% if r.thumb_path %}<a href="{{ url_for('inference_thumb', sid=r.session_id) }}" target="_blank"><img src="{{ url_for('inference_thumb', sid=r.session_id) }}" style="width:220px;height:138px;object-fit:cover;border-radius:4px;display:block" loading="lazy" alt="판정"></a>
+      {% else %}<div class="muted small" style="width:220px">썸네일 없음</div>{% endif %}
+      {% if r.ref %}<a href="{{ url_for('ref_image', name=r.ref) }}" target="_blank"><img src="{{ url_for('ref_image', name=r.ref) }}" style="width:220px;height:138px;object-fit:cover;border-radius:4px;display:block" loading="lazy" alt="라벨 대표"></a>
+      {% else %}<div class="muted small" style="width:220px">대표 없음</div>{% endif %}
+      {% if r.ref2 %}<a href="{{ url_for('ref_image', name=r.ref2) }}" target="_blank"><img src="{{ url_for('ref_image', name=r.ref2) }}" style="width:220px;height:138px;object-fit:cover;border-radius:4px;display:block;opacity:.75" loading="lazy" alt="2순위"></a>{% endif %}
+      </div></td>
+  <td>{% if r.confirmed_class %}<b class="{{ 'ok' if r.confirmed_class == r.pred_class else 'warn' }}">{{ r.confirmed_class }}</b>
+        {% if r.confirmed_radar is not none %}<span class="small">· 레이더 {{ 'O' if r.confirmed_radar else 'X' }}</span>{% endif %}
+        <br><span class="muted small">{{ r.confirmed_by }} {{ (r.confirmed_at or '')[:16] }}</span>
+      {% else %}<span class="muted">미확정</span>{% endif %}
+      {% if r.note %}<br><span class="muted small">{{ r.note }}</span>{% endif %}</td>
+  <td>{% if not readonly %}
+    <form class="inline" method="post" action="{{ url_for('act_infer_confirm', sid=r.session_id) }}" style="flex-direction:column;align-items:flex-start;gap:4px">
+      {% if r.pred_class and r.pred_class != 'unknown' %}<button name="value" value="ok" {{ 'class=ghost' if r.confirmed_class == r.pred_class }}>판정대로 확정</button>{% endif %}
+      <span><select name="cls">{% for k in ['', 'Unknown'] + classes %}<option value="{{ k }}" {{ 'selected' if k == (r.confirmed_class or r.pred_class) }}>{{ k or '클래스…' }}</option>{% endfor %}</select>
+      <select name="radar"><option value="">레이더 —</option><option value="1" {{ 'selected' if (r.confirmed_radar if r.confirmed_radar is not none else r.radar) == 1 }}>레이더 O</option><option value="0" {{ 'selected' if (r.confirmed_radar if r.confirmed_radar is not none else r.radar) == 0 }}>레이더 X</option></select>
+      <button name="value" value="set" class="ghost">이 값으로 확정</button></span>
+      {% if r.confirmed_class %}<button class="danger" name="value" value="clear">확정 취소</button>{% endif %}
+    </form>{% endif %}</td>
+</tr>
+{% endfor %}
+</table></div>
+"""
+
+INFER_DETAIL = """
+<h1>{{ r.session_dir }} <span class="muted small">현장 판정 상세 · <a href="{{ url_for('inference') }}">목록</a>{% if sid %} · <a href="{{ url_for('session_detail', sid=sid) }}">세션 레코드</a>{% endif %}</span></h1>
+<div class="cards">
+  <div class="card"><div class="num">{{ labels[r.status] }}</div><div class="lbl">상태 · {{ r.source or '—' }}</div></div>
+  <div class="card"><div class="num" style="font-size:16px">{{ r.pred_class or '—' }}</div><div class="lbl">판정 · {{ r.part_no or '—' }} · 레이더 {{ r.radar_txt or '—' }}</div></div>
+  <div class="card"><div class="num">{{ '%.0f%%' % r.confidence if r.confidence else '—' }}</div><div class="lbl">신뢰도 · {{ r.n_judged or 0 }}/{{ r.n_window or 0 }}f · clean {{ r.n_clean }}/{{ r.n_processed }}</div></div>
+  <div class="card"><div class="num">{{ '%.0f' % r.d_mm if r.d_mm else '—' }} mm</div><div class="lbl">D · 마진 {{ '%.0f' % r.margin_mm if r.margin_mm is not none else '—' }} · 편차 {{ '%.0f' % r.nearest_mm if r.nearest_mm is not none else '—' }}</div></div>
+  <div class="card"><div class="num" style="font-size:16px">{{ r.confirmed_class or '미확정' }}</div><div class="lbl">확정 {{ (r.confirmed_at or '')[:16] }}</div></div>
+</div>
+<div style="display:flex;gap:10px;flex-wrap:wrap;margin:10px 0">
+  {% if r.thumb_path %}<figure style="margin:0"><img src="{{ url_for('inference_thumb', sid=r.session_id) }}" style="width:480px;border-radius:6px"><figcaption class="muted small">판정 대표 프레임</figcaption></figure>{% endif %}
+  {% if ref %}<figure style="margin:0"><img src="{{ url_for('ref_image', name=ref) }}" style="width:480px;border-radius:6px"><figcaption class="muted small">작업자 라벨 대표: {{ r.pred_class }}</figcaption></figure>{% endif %}
+  {% if ref2 %}<figure style="margin:0"><img src="{{ url_for('ref_image', name=ref2) }}" style="width:480px;border-radius:6px;opacity:.8"><figcaption class="muted small">2순위 후보: {{ second }}</figcaption></figure>{% endif %}
+</div>
+<h2>후보 (CAD D 거리순)</h2>
+<div class="tbl"><table><tr><th>클래스</th><th class="n">CAD D</th><th class="n">편차 mm</th></tr>
+{% for c in cands %}<tr><td>{{ c['class'] }}</td><td class="n">{{ c['cad_D_mm'] }}</td><td class="n">{{ c['diff_mm'] }}</td></tr>{% endfor %}</table></div>
+<h2>result.json</h2>
+<pre class="notes">{{ raw }}</pre>
+"""
+
+
+def _infer_rows(con):
+    return con.execute(
+        """SELECT r.*, s.session_dir, s.notes FROM inference_results r JOIN capture_sessions s ON s.id = r.session_id
+           ORDER BY r.started_at DESC""").fetchall()
+
+
+def _second_class(m):
+    try:
+        cands = json.loads(m.get("candidates") or "[]")
+    except ValueError:
+        cands = []
+    sec = next((c["class"] for c in cands if c["class"] != m.get("pred_class")), None)
+    if sec is None and m.get("cnn"):
+        try:
+            top = json.loads(m["cnn"]).get("top") or []
+            sec = top[1]["class"] if len(top) > 1 else None
+        except (ValueError, AttributeError, KeyError, TypeError):
+            sec = None
+    return sec
+
+
+@app.route("/inference")
+def inference():
+    con = db()
+    try:
+        raw = _infer_rows(con)
+    except sqlite3.OperationalError:
+        raw = []
+    cur = dict(date=request.args.get("date", "").strip(), status=request.args.get("status", ""),
+               confirm=request.args.get("confirm", ""), cls=request.args.get("cls", ""))
+    limit = int(request.args.get("limit", 300))
+    rows = []
+    for r in raw:
+        m = dict(r)
+        m["second"] = _second_class(m)
+        m["ref"] = ref_image_name(m["pred_class"], m["radar"])
+        m["ref2"] = ref_image_name(m["second"], m["radar"])
+        rows.append(m)
+    clss = sorted({m["pred_class"] for m in rows if m["pred_class"]})
+    c = dict(total=len(rows), judged=sum(m["status"] == "judged" for m in rows),
+             issue=sum(m["status"] != "judged" for m in rows),
+             todo=sum(m["confirmed_class"] is None and m["status"] == "judged" for m in rows),
+             confirmed=sum(m["confirmed_class"] is not None for m in rows), agree=None)
+    conf = [m for m in rows if m["confirmed_class"] is not None and m["status"] == "judged"]
+    if conf:
+        c["agree"] = 100.0 * sum(m["confirmed_class"] == m["pred_class"] for m in conf) / len(conf)
+    if cur["date"]:
+        rows = [m for m in rows if (m["session_dir"] or "").startswith(cur["date"])]
+    if cur["status"] == "issue":
+        rows = [m for m in rows if m["status"] != "judged"]
+    elif cur["status"]:
+        rows = [m for m in rows if m["status"] == cur["status"]]
+    if cur["confirm"] == "todo":
+        rows = [m for m in rows if m["confirmed_class"] is None]
+    elif cur["confirm"] == "done":
+        rows = [m for m in rows if m["confirmed_class"] is not None]
+    elif cur["confirm"] == "mismatch":
+        rows = [m for m in rows if m["confirmed_class"] is not None and m["confirmed_class"] != m["pred_class"]]
+    if cur["cls"]:
+        rows = [m for m in rows if m["pred_class"] == cur["cls"]]
+    rows = rows[:limit]
+    return page("현장 판정", "inference", INFERENCE, rows=rows, cur=cur, c=c, clss=clss, labels=INFER_STATUS_LABEL,
+                classes=list(INFER_CLASSES), limit=limit, readonly=app.config["READONLY"])
+
+
+@app.route("/inference/<int:sid>")
+def inference_detail(sid):
+    con = db()
+    r = con.execute("SELECT r.*, s.session_dir FROM inference_results r JOIN capture_sessions s ON s.id=r.session_id "
+                    "WHERE r.session_id=?", (sid,)).fetchone()
+    if not r:
+        abort(404)
+    m = dict(r)
+    second = _second_class(m)
+    try:
+        cands = json.loads(m.get("candidates") or "[]")
+        raw = json.dumps(json.loads(m.get("result_json") or "{}"), ensure_ascii=False, indent=1)
+    except ValueError:
+        cands, raw = [], m.get("result_json") or ""
+    return page(f"판정 {m['session_dir']}", "inference", INFER_DETAIL, r=m, sid=sid, labels=INFER_STATUS_LABEL,
+                ref=ref_image_name(m["pred_class"], m["radar"]), ref2=ref_image_name(second, m["radar"]), second=second,
+                cands=cands, raw=raw)
+
+
+@app.route("/inference/thumb/<int:sid>")
+def inference_thumb(sid):
+    r = db().execute("SELECT thumb_path FROM inference_results WHERE session_id=?", (sid,)).fetchone()
+    if not r or not r["thumb_path"]:
+        abort(404)
+    p = Path(r["thumb_path"])
+    p = p if p.is_absolute() else BASE_DIR / p
+    if not p.exists():
+        abort(404)
+    return send_file(p, max_age=3600)
+
+
+@app.route("/refimg/<name>")
+def ref_image(name):
+    if not re.fullmatch(r"[A-Za-z0-9_]+(__radar[01])?(_pts)?\.jpg", name):
+        abort(404)
+    p = REF_DIR / name
+    if not p.exists():
+        abort(404)
+    return send_file(p, max_age=86400)
+
+
+@app.post("/inference/<int:sid>/confirm")
+def act_infer_confirm(sid):
+    guard_write()
+    con = db()
+    r = con.execute("SELECT r.*, s.session_dir, s.dataset_id FROM inference_results r JOIN capture_sessions s ON s.id=r.session_id "
+                    "WHERE r.session_id=?", (sid,)).fetchone()
+    if not r:
+        abort(404)
+    val = request.form["value"]
+    now = time.strftime("%Y-%m-%d %H:%M")
+    if val == "clear":
+        con.execute("UPDATE inference_results SET confirmed_class=NULL, confirmed_radar=NULL, confirmed_by=NULL, confirmed_at=NULL, "
+                    "updated_at=datetime('now','localtime') WHERE session_id=?", (sid,))
+        note = f"[{now}] 판정 확정 취소"
+    else:
+        if val == "ok":
+            cls, radar = r["pred_class"], r["radar"]
+        else:
+            cls = (request.form.get("cls") or "").strip()
+            rv = request.form.get("radar", "")
+            radar = int(rv) if rv in ("0", "1") else None
+        if cls == "unknown" or not cls:
+            cls = "Unknown"
+        if cls != "Unknown" and cls not in INFER_CLASSES:
+            flash(f"알 수 없는 클래스: {cls}", "error")
+            return redirect(request.referrer or url_for("inference"))
+        if "FRT" in cls:
+            radar = None
+        con.execute("UPDATE inference_results SET confirmed_class=?, confirmed_radar=?, confirmed_by='user', "
+                    "confirmed_at=datetime('now','localtime'), updated_at=datetime('now','localtime') WHERE session_id=?",
+                    (cls, radar, sid))
+        # 이미지 라벨(재학습 GT) = 확정 클래스 — door_factory_infer 데이터셋 안에서 재배정
+        model, part = (cls.split("_door_", 1)[0], "door_" + cls.split("_door_", 1)[1]) if "_door_" in cls else (None, None)
+        con.execute("INSERT OR IGNORE INTO classes (dataset_id, name, display_name, model_name, part_type) VALUES (?, ?, ?, ?, ?)",
+                    (r["dataset_id"], cls, cls.replace("_", " "), model, part))
+        cid = con.execute("SELECT id FROM classes WHERE dataset_id=? AND name=?", (r["dataset_id"], cls)).fetchone()[0]
+        n = con.execute("UPDATE images SET class_id=? WHERE session_id=?", (cid, sid)).rowcount
+        for row in con.execute("SELECT id FROM classes WHERE dataset_id=?", (r["dataset_id"],)).fetchall():
+            con.execute("UPDATE classes SET image_count=(SELECT COUNT(*) FROM images WHERE class_id=?) WHERE id=?", (row[0], row[0]))
+        if radar in (0, 1):
+            con.execute("UPDATE capture_sessions SET option_radar=?, option_source='user', option_note=?, option_at=datetime('now','localtime') WHERE id=?",
+                        (radar, f"user confirm via /inference (pred {r['radar']})", sid))
+        agree = "일치" if cls == r["pred_class"] and (radar == r["radar"] or "FRT" in cls) else f"판정 {r['pred_class']}/{r['radar_txt']} 과 다름"
+        note = f"[{now}] 판정 확정: {cls}{' 레이더 ' + ('O' if radar else 'X') if radar in (0, 1) else ''} ({agree}, {n}장 재배정)"
+    con.execute("UPDATE capture_sessions SET notes = COALESCE(notes || '\n', '') || ? WHERE id = ?", (note, sid))
+    con.commit()
+    flash(f"{r['session_dir']}: {note}")
+    return redirect(request.referrer or url_for("inference"))
 
 
 # ── 이미지 서빙 ──────────────────────────────────────────

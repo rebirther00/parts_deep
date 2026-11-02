@@ -1,0 +1,11 @@
+{
+ "source": "datasets_factory_collect/20260827/E30_door_LH_RR/s_122816 (빈 지그 9장 depth 중앙값)",
+ "shape": [
+  300,
+  480
+ ],
+ "stride": 4,
+ "unit": "mm",
+ "z_med": 1491.0,
+ "created": "2026-11-02"
+}

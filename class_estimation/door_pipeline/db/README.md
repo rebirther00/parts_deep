@@ -17,6 +17,8 @@
 | `webapp.py` | 열람·관리 웹 도구 — 대시보드/세션/이미지 썸네일/홀 라벨 뷰(점 오버레이)/학습 이력/**드리프트 시계열**/**옵션·품번 확인(/options)** + 라벨정정·split·무효화·옵션 확정 버튼 |
 | `migrate_session_metrics.py` | `session_hole_metrics` 테이블 생성(멱등, 2026-09-16) — `../20_session_drift.py` 가 세션별 K_session·dev·z·tilt 기록, webapp `/drift` 열람 |
 | `migrate_options.py` | 세션 옵션(RADAR) 컬럼 `capture_sessions.option_radar/option_source/option_note/option_at` + `session_radar_check` 표 + `session_hole_metrics.pred_major` (멱등, 2026-09-23). 품번 = 클래스 × option_radar (`../partno/part_numbers.json`), webapp `/options` 에서 확정 |
+| `migrate_inference.py` | **현장 판정 결과 표** `inference_results` 생성(멱등, user_version=3, 2026-11-02). 세션은 capture_sessions(dataset `door_factory_infer`)에 두고 판정값·사용자 확정값은 이 표에 |
+| `ingest_infer.py` | NAS `nas:Guest/weld_infer`(07_factory_infer.py 업로드) 스캔 → capture_sessions/images/inference_results 등록 + `result.json`·`thumb.jpg`·`heartbeat.json` 로컬 미러(`datasets_factory_infer/`). 사용자 확정(confirmed_*, option_source='user')은 덮어쓰지 않음 |
 | `backup_db.py` | **야간 백업**(2026-10-30) — 온라인 백업 → quick_check → gzip → `db/backups/`(최근 14개) + NAS `nas:Guest/weld_db_backup`(30일, 매월 1일분 계속 보관), `decisions.csv` 내보내기, 결과 `db/backups/last_backup.json`(대시보드 표시). `--restore-test` 로 최근 백업 복원 시험 |
 | `decisions.csv` | 세션별 **사람 판단**(현장 입력·DB 클래스·split·유효·레이더 옵션·출처·품번·notes) — git 추적. DB 유실 시 복원 근거, diff 로 판단 변경 확인 |
 | `door_pipeline.db` | SQLite DB 본체 (git 미추적) |
@@ -53,6 +55,25 @@ python db/backup_db.py --restore-test  # 최근 백업을 풀어 integrity_check
 `/sessions?todo=pull|drift|unknown` 목록)을 보여 준다. 기준값은 `webapp.py` 의 `STALE_WORKDAYS`·`INGEST_STALE_H`·`BACKUP_STALE_H`.
 
 외부 사용자(인터넷) 공개 절차는 `../DOC_external_access.md` 참조 (tailscale funnel + 인증·읽기 전용).
+
+
+## 현장 판정 서비스 연동 (2026-11-02)
+
+경주 박스의 추론 서비스(`../07_factory_infer.py`, `../DOC_factory_infer.md`)가 도어마다 `result.json`+판정 프레임을 NAS `nas:Guest/weld_infer` 에 올린다.
+학습 PC 는 30분 cron 으로 등록하고 webapp **현장 판정(`/inference`)** 에서 판정 이미지 | 작업자 라벨 대표 이미지 | 2순위 후보를 나란히 보고 확정한다.
+
+```bash
+python db/migrate_inference.py             # 최초 1회 (ingest_infer 가 자동으로도 호출)
+python db/ingest_infer.py                  # NAS → DB (+ 썸네일 미러). --refresh 로 판정값 재읽기, --local-dir 로 로컬 테스트
+# cron (ingest_nas 와 같은 주기) — crontab -e:
+# */30 * * * * cd /home/koceti/parts_deep/class_estimation/door_pipeline && /home/koceti/parts_deep/venv/parts_deep/bin/python db/ingest_infer.py >> logs/ingest_infer.log 2>&1
+```
+
+- `inference_results.status`: `judged`(판정) · `unknown`(미등록 도어) · `unrecognized`(미인식 = 기종 외 부품) · `abstain`(보류). `confirmed_class/confirmed_radar` = 사용자 확정(재학습 GT).
+- 확정 버튼(`/inference`): [판정대로 확정] 또는 클래스·레이더 선택 → `inference_results.confirmed_*` + `images.class_id` 재배정(door_factory_infer 안) + RR/RH 는 `capture_sessions.option_radar/option_source='user'` + notes 이력.
+  확정 취소 가능. 대시보드 "현장 판정 서비스" 카드: 하트비트(10분 주기, 60분 넘으면 주황), 오늘/7일 도어, 확정 대기, 미확정, 판정=확정 일치율.
+- `door_factory_infer` 세션은 수집 루틴(pull·drift·레이더 검사 할 일)에서 제외된다. 학습 데이터로 쓰려면 확정된 세션만 골라 별도 뷰를 만든다(미구현, 판정 프레임 ≤10장/세션).
+- 대표 이미지 `../reference_images/<class>[__radar{0,1}].jpg` 는 `../tools/make_reference_images.py` 가 `decisions.csv` + 로컬 미러에서 만든다(git 추적, 두 PC 공용).
 
 ## 주의
 

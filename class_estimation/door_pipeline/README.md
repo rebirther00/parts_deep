@@ -107,6 +107,23 @@ python 20_session_drift.py --print                    # 표만
 - **실시간 서버 18 통합(2026-09-23 저녁)**: RR/RH 판정 프레임마다 `radar_check.decide_option`(브래킷 피크 → 보류 시 규칙) → 윈도 표(`--option_min_judged` 3, 80%)로 레이더 O/X → 품번.
   결과 JSON `radar`·`radar_votes`·`radar_src`·`part_no`·`part_name`, 프레임 `frame.option`, UI 카드 "레이더 옵션·품번". `--no_option` 으로 끔. 학습형 판정기 연구는 `../door_partno/`.
 
+## E. 현장 실시간 추론 서비스 (2026-11-02, `07_factory_infer.py`) — 수집 서비스(06) 대체
+
+경주 Zed Box 에서 부팅 시 자동 실행되는 **무인 판정 서비스**. 작업자 조작·터치모니터 없이 도어가 지그에 올라오면
+클래스·레이더·품번을 판정하고 **판정 프레임만** 저장한다. 설계·결정 사항은 `DOC_infer_service_plan.md`, 운영은 `DOC_factory_infer.md`.
+
+- 상태기계: `EMPTY → JUDGING → JUDGED/UNRESOLVED → (이탈) EMPTY`. 점유는 **빈 지그 배경 기준맵**(depth 1/4, 시드 `reference_images/empty_jig_depth_small.png`)
+  대비 차이 픽셀 비율 `diff`(빈 지그 ≈0.01, 도어 ≈0.7) + 홀 검출 점 수 `pts`. 게이트: 정지(프레임 차분) · 침입(도어 ROI 안에서 배경보다 250mm 이상 가까운 픽셀 ≥2.5%) · 기하 게이트 · pose_warn.
+  CNN 폴백은 "도어는 보이는데(pts≥4) 기하 실패"인 프레임에만 → 빈 지그 오판 차단.
+- 판정 집계는 18 과 동일(윈도 10·min_judged 3·CNN 투표·레이더 표 ≥3·품번). 클래스 확정 후 윈도가 찰 때까지(≤10s) 더 모아 잠근다.
+- 저장: `datasets_factory_infer/<날짜>/s_HHMMSS/` — rgb/depth ≤10쌍 + `result.json`(원자적) + `meta.json`(06 호환) + `thumb.jpg`.
+  미확정(`unknown`/`unrecognized`/`abstain`)은 정지 후보 5장. `events.jsonl`, `metrics/metrics_<날짜>.jsonl`(1Hz 지표, 임계값 튜닝용), `heartbeat.json`, `background.npz`(학습된 배경).
+- 웹 `:5000`(`templates/factory_infer.html`): 라이브·지표 차트·현재 세션·오늘 도어 목록(판정 이미지 | 작업자 라벨 대표 이미지 | 2순위 후보)·재판정·원격 종료.
+  대표 이미지는 `reference_images/<class>[__radar{0,1}].jpg` (`tools/make_reference_images.py` 가 decisions.csv + 로컬 미러에서 생성).
+- 배포: `deploy/door-infer.service`(door-capture 와 Conflicts) + `deploy/install_infer.sh`(sudo 1회: 수집 서비스·키오스크 제거, 크론 nas_sync_infer 5분 + 20:00 자동 종료).
+  운영 설정은 `~/.config/door-infer.env`(`DOOR_INFER_UPLOAD=0` 그림자 모드 기본 → NAS 연동 시 1). 업로드 `deploy/nas_sync_infer.sh` → `nas:Guest/weld_infer`.
+- Jetson 실측: 홀 판별기 117ms/프레임(FP16)·CNN 46ms·GPU 342MB. 리플레이 검증: `--replay "빈지그:20,도어:45,빈지그:25"` (폴더:초).
+
 ## 산출물/데이터 위치
 
 - `artifacts/` — CNN 모델 run별 산출물. *.pth는 기본 git 미추적이며, **정식 배포 run**(`rgbe_noaux_448_seed916_datasets_factory_v2`, DB models #10, 2026-09-23 교체)의 `model.pth`만 Gitea LFS로 추적

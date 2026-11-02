@@ -112,19 +112,23 @@ CREATE TABLE IF NOT EXISTS inference_results (
 
 ## 4. 위험과 투입 방식
 
-- **점유 감지**가 핵심. "지그를 교체"하면 배경이 도어마다 달라져 빈 지그 기준 depth 맵 비교가 흔들린다 → 고정 배경 비교 대신
-  "작업 거리(z 1200~1600mm)에 큰 평면체 존재 + 홀 검출 여부"로 점유를 잡는다.
-- 빈 지그 프레임이 기존 데이터에 거의 없음(8/27 s_122816 9장) → **그림자 모드** 투입: 첫 며칠은 상태 전이·점유 지표·판정을 전부 기록만 하고
-  개발자가 `:5000`에서 확인하며 임계값을 맞춘 뒤 NAS·DB 연동을 켠다.
+- **점유 감지**(구현에서 확정, 2026-11-02): 지그는 평판+레일+클램프로 **도어 종류·날짜와 무관하게 고정**이고 "교체"는 도어를 말한다.
+  빈 지그 평판이 카메라 정면 ~1475mm, 도어 면은 그 위 ~33mm 라 절대 z 나 "돌출 픽셀 비율"(지그 레일·클램프가 40mm+ 돌출, 빈 지그 0.18 vs 도어 0.24)로는
+  구분이 안 됐다. **빈 지그 배경 기준맵(depth 1/4) 대비 25mm 넘게 다른 픽셀 비율 `diff`**는 빈 지그 0.015 vs 도어 0.68~0.74 로 극명 →
+  채택. 시드 `reference_images/empty_jig_depth_small.png`(8/27 9장 중앙값), EMPTY 에서 EMA(τ 5분) 추종, UNRESOLVED 에서 느린 흡수(τ 20분, 기종 외 부품 세션 종료용), `background.npz` 보존.
+- **침입 게이트**: 도어 ROI 안에서 배경보다 250mm 이상 가까운 픽셀 비율 — 도어만 0.007~0.016, 작업자 유입 0.033~0.062 → 임계 0.025.
+  (150mm 기준은 클램프 열림/닫힘 차이로 도어만 있어도 0.03 이 나와 폐기. 전체 프레임 기준은 현장 첫 가동에서 ROI 밖 우측 토치 케이블·장비가 0.10 을 내 판정을 막아 폐기 → 진단값 `intr_full` 로만 기록)
+- **그림자 모드** 투입: 첫 며칠은 상태 전이·지표(`metrics_<날짜>.jsonl`)·판정을 기록만 하고 개발자가 `:5000`에서 확인하며 임계값을 맞춘 뒤 NAS·DB 연동(`DOOR_INFER_UPLOAD=1`)을 켠다.
 - 로컬 디스크: 기존 `datasets_factory_collect/` 141GB 는 전량 NAS 업로드 확인 후 정리(별도 결정).
 
-## 5. 구현 순서
+## 5. 구현 순서·현황
 
-1. 박스: `07_factory_infer.py`(상태기계·게이트·저장) + `templates/factory_infer.html` + `:5000` API — 그림자 모드
-2. 박스: `deploy/door-infer.service`·`install_infer.sh`·크론(nas_sync 루트 변경, 20:00 종료) 교체, 보존 정리 스크립트
-3. 학습 PC: `inference_results` 마이그레이션, ingest 확장, webapp `/inference`·대시보드 타일·확정 버튼
-4. `reference_images/` 클래스×레이더 대표 이미지 생성 스크립트
-5. 현장 그림자 모드 → 임계값 확정 → NAS·DB 연동 ON
+1. ~~박스: `07_factory_infer.py`(상태기계·게이트·저장) + `templates/factory_infer.html` + `:5000` API — 그림자 모드~~ → **완료 2026-11-02**
+   (리플레이 `--replay "빈지그:20,도어:45,빈지그:25,작업자:40,…"` 로 EMPTY→JUDGING→JUDGED→EMPTY 전이·보류·시한 초과 검증)
+2. ~~박스: `deploy/door-infer.service`·`install_infer.sh`·크론(nas_sync_infer 5분, 20:00 종료), 보존 정리~~ → **완료 2026-11-02** (보존 정리는 서비스 내부 시간당 1회)
+3. ~~학습 PC: `inference_results` 마이그레이션, ingest 확장, webapp `/inference`·대시보드 타일·확정 버튼~~ → **완료 2026-11-02** (`db/migrate_inference.py`, `db/ingest_infer.py`, webapp `/inference`·`/inference/<sid>`·확정 POST·대시보드 "현장 판정 서비스" 카드; 임시 DB 로 인제스트→열람→확정→재인제스트 보존 검증)
+4. ~~`reference_images/` 클래스×레이더 대표 이미지~~ → **완료 2026-11-02** (`tools/make_reference_images.py`, 14장 + 점 오버레이본, 출처 `manifest.json`)
+5. 현장 설치(`sudo bash deploy/install_infer.sh`) → 그림자 모드 며칠 → 임계값 확정 → `DOOR_INFER_UPLOAD=1` → NAS·DB 연동 ON
 
 ## 6. 관련 문서
 

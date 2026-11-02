@@ -250,3 +250,49 @@ CREATE TABLE IF NOT EXISTS session_radar_check (
     checked_at      TIMESTAMP NOT NULL DEFAULT (datetime('now','localtime'))
 );
 
+
+-- 2026-11-02: 추론 서비스(07_factory_infer.py) 판정 결과 (db/migrate_inference.py 가 생성, db/ingest_infer.py 기록, webapp /inference 열람·확정)
+--   세션 자체는 capture_sessions(dataset 'door_factory_infer', class_name=판정 클래스 또는 Unknown). confirmed_* 는 사용자 확정(재학습 GT).
+CREATE TABLE IF NOT EXISTS inference_results (
+    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    session_id      INTEGER NOT NULL UNIQUE REFERENCES capture_sessions(id) ON DELETE CASCADE,
+    status          VARCHAR(16) NOT NULL CHECK (status IN ('judged', 'unknown', 'unrecognized', 'abstain')),
+    pred_class      VARCHAR(100),
+    pred_group      VARCHAR(8),
+    part_no         VARCHAR(30),
+    part_name       VARCHAR(100),
+    radar           INTEGER CHECK (radar IN (0, 1)),
+    radar_txt       VARCHAR(30),
+    source          VARCHAR(8),
+    conflict        BOOLEAN,
+    confidence      REAL,
+    d_mm            REAL,
+    margin_mm       REAL,
+    nearest_mm      REAL,
+    n_judged        INTEGER,
+    n_window        INTEGER,
+    n_processed     INTEGER,
+    n_clean         INTEGER,
+    gate_counts     TEXT,
+    candidates      TEXT,
+    cnn             TEXT,
+    model_hole      VARCHAR(200),
+    model_hole_sha  VARCHAR(16),
+    model_cnn       VARCHAR(200),
+    service_version VARCHAR(16),
+    dwell_s         REAL,
+    judged_at       TIMESTAMP,
+    started_at      TIMESTAMP,
+    ended_at        TIMESTAMP,
+    thumb_path      VARCHAR(500),
+    result_json     TEXT,
+    confirmed_class VARCHAR(100),
+    confirmed_radar INTEGER CHECK (confirmed_radar IN (0, 1)),
+    confirmed_by    VARCHAR(30),
+    confirmed_at    TIMESTAMP,
+    note            TEXT,
+    created_at      TIMESTAMP NOT NULL DEFAULT (datetime('now','localtime')),
+    updated_at      TIMESTAMP NOT NULL DEFAULT (datetime('now','localtime'))
+);
+CREATE INDEX IF NOT EXISTS idx_infer_status ON inference_results(status);
+CREATE INDEX IF NOT EXISTS idx_infer_started ON inference_results(started_at);

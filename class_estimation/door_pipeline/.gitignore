@@ -6,3 +6,6 @@ snapshots/
 
 # 2026-10-30 db/backup_db.py 로컬 백업 (NAS 에도 보관)
 db/backups/
+
+# 2026-11-02 추론 서비스(07_factory_infer.py) 산출물 — NAS 가 정본, 로컬은 보존 정리 대상
+datasets_factory_infer/
