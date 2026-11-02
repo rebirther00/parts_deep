@@ -108,7 +108,7 @@
       <span class="muted" style="margin-left:auto">행 클릭 → 저장 프레임 보기</span>
     </div>
     <table>
-      <thead><tr><th>시각</th><th>상태</th><th>판정 / 품번</th><th>신뢰도·D</th><th>판정 이미지 | 작업자 라벨 대표 이미지 | 2순위 후보</th></tr></thead>
+      <thead><tr><th>시각</th><th>상태</th><th>판정 / 품번 <small class="muted">(진행 중 = 잠정, 이탈 시 최종)</small></th><th>신뢰도·D</th><th>판정 이미지 | 작업자 라벨 대표 이미지 | 2순위 후보</th></tr></thead>
       <tbody id="rows"></tbody>
     </table>
   </section>
@@ -133,7 +133,8 @@ async function refreshStatus() {
     $('#curNone').style.display = s ? 'none' : ''; $('#cur').style.display = s ? '' : 'none';
     if (s) {
       $('#curClass').textContent = s.class || '수집 중';
-      $('#curStatus').innerHTML = (s.status ? stTag(s.status) : '판정 중') + (s.locked ? ' · 잠금' : '') + (s.conflict ? ' <span class="warn">CNN 불일치</span>' : '') + (s.source ? ` <span class="muted">[${s.source}]</span>` : '');
+      $('#curStatus').innerHTML = (s.status ? stTag(s.status) : '판정 중') + (s.locked ? ' · <span class="warn">잠정</span> <span class="muted">(이탈 시 마지막 프레임으로 최종)</span>' : '') + (s.conflict ? ' <span class="warn">CNN 불일치</span>' : '') + (s.source ? ` <span class="muted">[${s.source}]</span>` : '')
+        + ((s.pred_history||[]).length > 1 ? `<br><small class="muted">변경 ${s.pred_history.length-1}회: ${s.pred_history.map(h=>`${h.ts.slice(11,16)} ${h.pred_class}${h.radar===1?'(O)':h.radar===0?'(X)':''}`).join(' → ')}</small>` : '');
       $('#curPart').textContent = s.part_no ? `${s.part_no} ${s.part_name||''}` : '-';
       $('#curRadar').textContent = s.radar_txt || '-';
       $('#curConf').textContent = s.confidence ? s.confidence + '%' : '-';
@@ -173,7 +174,7 @@ async function loadSessions() {
   $('#dateCounts').textContent = `총 ${c.total||0} · 판정 ${c.judged||0} · 미등록 ${c.unknown||0} · 미인식 ${c.unrecognized||0} · 보류 ${c.abstain||0}`;
   $('#rows').innerHTML = r.sessions.map((s,i)=>`<tr class="row" data-i="${i}">
     <td>${s.started_at.slice(11,16)}<br><small class="muted">${Math.round(s.dwell_s/60)}분${s.final?'':' · 진행'}${s.uploaded?' · ↑':''}</small></td>
-    <td>${stTag(s.status)}${s.conflict?'<br><small class="warn">CNN 불일치</small>':''}${s.source?`<br><small class="muted">${s.source}</small>`:''}</td>
+    <td>${stTag(s.status)}${s.final?'':'<br><small class="warn">잠정</small>'}${s.conflict?'<br><small class="warn">CNN 불일치</small>':''}${s.source?`<br><small class="muted">${s.source}</small>`:''}${(s.n_changes||0)>0?`<br><small class="muted">변경 ${s.n_changes}회</small>`:''}</td>
     <td><b>${s.pred_class||s.class||'-'}</b><br><small>${s.part_no||'-'} ${s.part_name||''}</small><br><small class="muted">레이더 ${s.radar_txt||'-'}</small></td>
     <td>${s.confidence?s.confidence+'%':'-'}<br><small class="muted">D ${fmt(s.D_mm,0)} / 마진 ${fmt(s.margin_mm,0)}</small><br><small class="muted">${s.n_judged||0}/${s.window||0}f · ${s.saved_pairs||0}장</small></td>
     <td><div class="imgs">

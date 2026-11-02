@@ -57,6 +57,9 @@ from factory_camera import FactoryCamera, require_cuda_ready   # noqa: E402
 VERSION = '0.1.0'
 UNKNOWN_LABEL = '미등록 도어 (unknown)'
 STATUS_LABEL = {'judged': '판정', 'unknown': '미등록 도어', 'unrecognized': '미인식(기종 외)', 'abstain': '보류'}
+# CNN 폴백을 돌리는 홀 게이트 실패 종류 — 6점은 잡혔는데 기하가 안 맞는 경우만. 홀 자체가 없는(no_corner/no_frame) 맨 밑판·
+# 조립 전 상태에서 CNN 이 E23(외판 단일 솔리드 클래스)으로 오판한 사례(2026-11-02 s_145702) 차단
+CNN_GATES = {'near_border', 'latch_offset', 'not_collinear', 'same_side', 'D_range', 'pose_warn'}
 
 
 def _env(name, default):
@@ -109,6 +112,7 @@ CFG = dict(
     RETAIN_SESSION_DAYS=_env('RETAIN_SESSION_DAYS', 90),
     RETAIN_METRICS_DAYS=_env('RETAIN_METRICS_DAYS', 14),
     IDLE_HZ=_env('IDLE_HZ', 2.0),            # 판정 중이 아닐 때 검출기 실행 빈도
+    LOCKED_HZ=_env('LOCKED_HZ', 2.0),        # 잠정 판정 뒤 계속 재판정하는 빈도 (브라켓 추가 조립·레이더 브라켓 반영, 이탈 시 최종)
     LOOP_HZ=_env('LOOP_HZ', 10.0),
     METRICS_HZ=_env('METRICS_HZ', 1.0),
     HEARTBEAT_S=_env('HEARTBEAT_S', 600.0),
@@ -395,8 +399,17 @@ class SceneGates:
 # ── 세션 ─────────────────────────────────────────────────
 
 class DoorSession:
-    def __init__(self, cfg, camera_type, calib, models):
+    """도어 1개의 체류. 판정은 **잠정**(lock) 으로 먼저 내고 체류 내내 깨끗한 프레임으로 계속 재평가하다가
+    이탈(finalize) 때 마지막 윈도로 **최종** 확정한다 — 현장은 밑판을 먼저 올리고 브라켓을 차례로 올린 뒤 용접하므로
+    초기 잠정 판정은 브라켓이 덜 올라간 상태일 수 있다(2026-11-02 사용자 지적)."""
+
+    def __init__(self, cfg, camera_type, calib, models, geom_on=True):
         self.cfg = cfg
+        self.geom_on = geom_on
+        self.provisional = False
+        self.pred_history = []          # [{ts, status, pred_class, radar, source}] 잠정 판정 변경 이력
+        self.final_at = None
+        self.saved_at_clean = -1        # 프레임을 저장한 시점의 n_clean (이탈 시 윈도가 바뀌었으면 다시 저장)
         self.started_at = datetime.now()
         self.t0 = time.monotonic()
         day = self.started_at.strftime('%Y%m%d')
@@ -436,9 +449,10 @@ class DoorSession:
         self.opts.append(opt)
         self.n_clean += 1
 
-    def evaluate(self, geom_on):
-        """18 과 같은 집계 규칙. 반환 (result dict, lock 여부)."""
+    def evaluate(self, geom_on=None):
+        """18 과 같은 집계 규칙. 반환 (result dict, lock 여부). lock 은 아직 잠정 판정이 없을 때만 True."""
         cfg = self.cfg
+        geom_on = self.geom_on if geom_on is None else geom_on
         hrs = [f['hr'] for f in self.frames]
         agg = hole_classifier.aggregate(hrs)
         vote = cnn_vote(self.cnn_votes)
@@ -539,17 +553,20 @@ class DoorSession:
         self.cands.append((ts, rp, dp, hr['gate'] if hr else None, hr['points'] if hr else None))
         self.last_cand_ts = ts
 
-    def lock(self, result):
-        """클래스(+레이더) 확정 → 판정 프레임 저장, 상태 judged/unknown."""
-        self.locked = True
-        self.judged_at = now_str()
-        self.status = 'unknown' if result['pred_class'] == UNKNOWN else 'judged'
+    @staticmethod
+    def _key(result):
+        return (result.get('pred_class'), result.get('radar'), result.get('source'))
+
+    def _save_window(self, result):
+        """현재 윈도의 판정 프레임을 rgb/depth_NNNN 으로 저장(기존 저장분 교체) + thumb."""
         src = result['source']
         if src == 'hole':
             sel = [f for f in self.frames if f['hr']['gate'] == 'ok']
         else:
             sel = [f for f, v in zip(self.frames, self.cnn_votes) if v]
         sel = sel[-self.cfg['MAX_SAVE']:]
+        for p in list(self.dir.glob('rgb_*.png')) + list(self.dir.glob('depth_*.png')):
+            p.unlink()
         self.saved = []
         for i, f in enumerate(sel):
             self._save_pair(i, f['rgb'], f['depth'])
@@ -562,6 +579,17 @@ class DoorSession:
         if sel:
             best = max(sel, key=lambda f: (f['hr'].get('margin_mm') or 0))
             self._thumb(best['rgb'], best['hr']['points'])
+        self.saved_at_clean = self.n_clean
+
+    def lock(self, result):
+        """잠정 판정: 클래스(+레이더) 가 처음 확정됨 → 판정 프레임 저장, 상태 judged/unknown. 이후 update() 로 계속 재평가."""
+        self.locked = True
+        self.provisional = True
+        self.judged_at = now_str()
+        self.status = 'unknown' if result['pred_class'] == UNKNOWN else 'judged'
+        self.pred_history.append({'ts': now_str(), 'status': self.status, 'pred_class': result['pred_class'],
+                                  'radar': result['radar'], 'source': result['source'], 'confidence': result['confidence']})
+        self._save_window(result)
         for _, rp, dp, _, _ in self.cands:            # 후보는 불필요
             for p in (rp, dp):
                 if p and p.exists():
@@ -569,6 +597,22 @@ class DoorSession:
         self.cands = []
         self.result = result
         self.write(final=False)
+
+    def update(self, result):
+        """잠정 판정 뒤 재평가 결과 반영. 클래스·레이더·출처가 바뀌면 이력에 남기고 result.json 갱신. 반환 = 변경 여부."""
+        if not result.get('pred_class'):
+            return False                                # 윈도가 아직 새 판정을 못 냈으면 이전 잠정값 유지
+        if self._key(result) == self._key(self.result):
+            return False
+        self.status = 'unknown' if result['pred_class'] == UNKNOWN else 'judged'
+        self.pred_history.append({'ts': now_str(), 'status': self.status, 'pred_class': result['pred_class'],
+                                  'radar': result['radar'], 'source': result['source'], 'confidence': result['confidence']})
+        log.info('잠정 판정 변경 %s → %s (radar %s→%s, %s, %d번째)', self.result.get('pred_class'), result['pred_class'],
+                 self.result.get('radar'), result['radar'], result['source'], len(self.pred_history))
+        self._save_window(result)
+        self.result = result
+        self.write(final=False)
+        return True
 
     def unresolved(self):
         """JUDGE_TIMEOUT_S 경과 — 도어를 봤으면 보류, 아니면 미인식(기종 외 부품)."""
@@ -604,9 +648,30 @@ class DoorSession:
                 self._thumb(rgb, chosen[0][4])
 
     def finalize(self, reason):
-        """이탈/서비스 종료 → 최종 result.json·meta.json. 폐기한 세션은 None 반환."""
+        """이탈/서비스 종료 → 최종 result.json·meta.json. 폐기한 세션은 None 반환.
+        잠정 판정이 있으면 **마지막 윈도(이탈 전 마지막 깨끗한 프레임들)** 로 최종 판정·프레임을 확정한다."""
         self.ended_at = now_str()
-        if self.status is None:
+        if self.locked:
+            result, _ = self.evaluate()
+            if result.get('pred_class'):
+                changed = self._key(result) != self._key(self.result)
+                self.status = 'unknown' if result['pred_class'] == UNKNOWN else 'judged'
+                if changed:
+                    self.pred_history.append({'ts': now_str(), 'status': self.status, 'pred_class': result['pred_class'],
+                                              'radar': result['radar'], 'source': result['source'], 'confidence': result['confidence'],
+                                              'final': True})
+                    log.info('최종 판정이 잠정과 다름 %s → %s', self.result.get('pred_class'), result['pred_class'])
+                if changed or self.saved_at_clean != self.n_clean:
+                    self._save_window(result)
+                self.result = result
+            self.provisional = False
+            self.final_at = now_str()
+            for _, rp, dp, _, _ in self.cands:
+                for p in (rp, dp):
+                    if p and p.exists():
+                        p.unlink()
+            self.cands = []
+        elif self.status is None:
             if self.dwell < self.cfg['MIN_DWELL_S'] and not self.door_seen and not self.cands:
                 shutil.rmtree(self.dir, ignore_errors=True)
                 return None
@@ -630,9 +695,15 @@ class DoorSession:
     def write(self, final, reason=''):
         r = dict(self.last_live or {})
         r.pop('frame', None)
+        if self.status in ('abstain', 'unrecognized'):     # 잠금 전 윈도의 부분 집계값이 판정처럼 남지 않게
+            for k in ('pred_class', 'group', 'part_no', 'part_name', 'radar', 'radar_txt', 'source', 'confidence'):
+                r[k] = None
+            r['class'] = STATUS_LABEL[self.status]
         r.update({
             'session_dir': self.rel, 'status': self.status, 'status_label': STATUS_LABEL.get(self.status, self.status),
             'final': final, 'stop_reason': reason if final else '',
+            'provisional': self.provisional and not final, 'pred_history': self.pred_history,
+            'n_changes': max(0, len(self.pred_history) - 1), 'final_at': self.final_at,
             'started_at': self.started_at.strftime('%Y-%m-%d %H:%M:%S'), 'ended_at': self.ended_at,
             'judged_at': self.judged_at, 'dwell_s': round(self.dwell, 1),
             'n_processed': self.n_processed, 'n_clean': self.n_clean, 'max_pts': self.max_pts,
@@ -753,14 +824,17 @@ class Monitor(threading.Thread):
                 log.info('재판정 요청 — 윈도 초기화')
                 log_event('reset', session_dir=self.session.rel)
                 self.session.frames.clear(); self.session.cnn_votes.clear(); self.session.opts.clear()
-                self.session.locked = False; self.session.status = None; self.session.class_resolved_at = None
-                self.session.saved = []
+                self.session.locked = False; self.session.provisional = False; self.session.status = None
+                self.session.class_resolved_at = None; self.session.saved = []
                 self._set_state('JUDGING')
 
         # 검출기: 판정 중이면 깨끗한 프레임마다, 아니면 IDLE_HZ 로 (점유 신호 pts 용)
         hr = None
-        judging = self.state == 'JUDGING' and not (self.session and self.session.locked)
-        run_det = (judging and is_static and not intruded) or (now - self.last_det_t >= 1.0 / cfg['IDLE_HZ'])
+        locked = bool(self.session and self.session.locked)
+        judging = self.state in ('JUDGING', 'UNRESOLVED') and not locked
+        # 잠정 판정 전: 깨끗한 프레임마다 / 잠정 판정 후: LOCKED_HZ 로 계속 재판정 / 빈 지그: IDLE_HZ (점유 신호 pts 용)
+        run_det = (judging and is_static and not intruded) or \
+            (now - self.last_det_t >= 1.0 / (cfg['LOCKED_HZ'] if locked else cfg['IDLE_HZ']))
         if run_det:
             hr = self._classify(rgb, depth, torch)
         pts = self.last_pts if now - self.last_hr_t < 2.0 else 0
@@ -785,11 +859,11 @@ class Monitor(threading.Thread):
                 s.max_pts = max(s.max_pts, self.last_pts)
                 if self.last_pts >= cfg['OCC_PTS'] or hr['gate'] == 'ok':
                     s.door_seen = True
-            if self.state == 'JUDGING':
+            if self.state in ('JUDGING', 'JUDGED', 'UNRESOLVED'):
                 if hr is not None and clean:
                     cv = opt = None
-                    door_like = self.last_pts >= cfg['OCC_PTS']
-                    if self.cnn is not None and hr['gate'] != 'ok' and door_like:
+                    # CNN 폴백: 6점은 잡혔는데 기하가 안 맞는 프레임만 (홀이 없는 맨 밑판·조립 전 상태는 제외)
+                    if self.cnn is not None and hr['gate'] in CNN_GATES and self.last_pts >= cfg['OCC_PTS']:
                         p, q, _ = self.cnn.predict(rgb)
                         cv = (p, q)
                     if self.geom is not None and hr['gate'] == 'ok' and hr['pred'] in CAD_D and GROUP[hr['pred']] != 'FRT':
@@ -797,19 +871,26 @@ class Monitor(threading.Thread):
                             opt = rc.decide_option(self.net, self.dev, rgb, depth, hr['pred'], self.source.calib,
                                                    self.geom, det=hr['points'])
                     s.push(rgb, depth, hr, cv, opt, ts)
-                    s.add_candidate(rgb, depth, ts, hr)
-                    result, lock = s.evaluate(self.geom is not None)
-                    if lock:
+                    if not s.locked:
+                        s.add_candidate(rgb, depth, ts, hr)
+                    result, lock = s.evaluate()
+                    if lock and not s.locked:
                         s.lock(result)
-                        log.info('판정 확정 [%s] %s part=%s radar=%s src=%s conf=%.0f D=%s margin=%s (%d/%d, %.0fs)',
+                        log.info('잠정 판정 [%s] %s part=%s radar=%s src=%s conf=%.0f D=%s margin=%s (%d/%d, %.0fs) — 이탈 시 최종',
                                  s.status, result['pred_class'], result['part_no'], result['radar_txt'], result['source'],
                                  result['confidence'], result['D_mm'], result['margin_mm'], result['n_judged'],
                                  result['window'], s.dwell)
                         log_event('judged', session_dir=s.rel, status=s.status, pred_class=result['pred_class'],
                                   part_no=result['part_no'], radar=result['radar'], source=result['source'],
-                                  confidence=result['confidence'], D_mm=result['D_mm'], dwell_s=round(s.dwell, 1))
+                                  confidence=result['confidence'], D_mm=result['D_mm'], dwell_s=round(s.dwell, 1), provisional=True)
                         self._set_state('JUDGED')
-                elif is_static or (not s.cands and s.dwell >= cfg['CAND_EVERY_S']):
+                    elif s.locked and s.update(result):
+                        log_event('judged_update', session_dir=s.rel, status=s.status, pred_class=result['pred_class'],
+                                  part_no=result['part_no'], radar=result['radar'], source=result['source'],
+                                  confidence=result['confidence'], dwell_s=round(s.dwell, 1), n_changes=len(s.pred_history) - 1)
+                        if self.state != 'JUDGED':
+                            self._set_state('JUDGED')
+                elif not s.locked and (is_static or (not s.cands and s.dwell >= cfg['CAND_EVERY_S'])):
                     s.add_candidate(rgb, depth, ts, hr)        # 깨끗하지 않아도 정지 프레임은 후보로(미확정 세션 증거)
                 if self.state == 'JUDGING' and s.dwell >= cfg['JUDGE_TIMEOUT_S']:
                     s.unresolved()
@@ -845,7 +926,8 @@ class Monitor(threading.Thread):
 
     def _enter(self):
         with self.lock:
-            self.session = DoorSession(self.cfg, self.source.camera_type, self.source.calib, self.models)
+            self.session = DoorSession(self.cfg, self.source.camera_type, self.source.calib, self.models,
+                                       geom_on=self.geom is not None)
         log.info('점유 감지 → 세션 시작 %s', self.session.rel)
         log_event('enter', session_dir=self.session.rel)
         self._set_state('JUDGING')
@@ -878,8 +960,14 @@ class Monitor(threading.Thread):
                 cur = dict(s.last_live or {})
                 cur.update(session_dir=s.rel, status=s.status, status_label=STATUS_LABEL.get(s.status),
                            started_at=s.started_at.strftime('%H:%M:%S'), dwell_s=round(s.dwell, 1),
-                           locked=s.locked, n_processed=s.n_processed, n_clean=s.n_clean, max_pts=s.max_pts,
+                           locked=s.locked, provisional=s.provisional, pred_history=s.pred_history,
+                           n_processed=s.n_processed, n_clean=s.n_clean, max_pts=s.max_pts,
                            saved_pairs=len(s.saved), judged_at=s.judged_at)
+                if s.locked and s.result:               # 화면의 클래스·품번은 잠정 판정값(윈도가 비어도 유지)
+                    for k in ('class', 'pred_class', 'group', 'part_no', 'part_name', 'radar', 'radar_txt', 'source',
+                              'confidence', 'D_mm', 'margin_mm', 'n_judged', 'window', 'gate_counts', 'candidates', 'conflict'):
+                        if cur.get(k) in (None, 0, '보류', '-') and s.result.get(k) not in (None, ''):
+                            cur[k] = s.result[k]
             last = self.last_result
         return {'state': self.state, 'state_for_s': round(time.monotonic() - self.state_since, 1),
                 'session': cur, 'last_result': last, 'metrics': self.last_metrics,
