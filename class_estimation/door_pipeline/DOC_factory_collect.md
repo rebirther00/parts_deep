@@ -4,6 +4,8 @@
 장비: ZED X mini + Zed Box(zedbox-weld) + LTE 라우터 + 16" 터치모니터.
 개발자는 세종에서 tailscale(주) / ZeroTier(백업)로 원격 확인.
 
+> **2026-11-02**: 수집 서비스는 `systemctl disable --now door-capture` 로 중지했고 키오스크도 내렸다. 후속은 실시간 추론 서비스로 교체 — 설계·구현 순서는 `DOC_infer_service_plan.md`.
+
 ## 구성 요소
 
 | 파일 | 역할 |
