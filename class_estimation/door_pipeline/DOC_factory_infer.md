@@ -58,6 +58,7 @@ datasets_factory_infer/
 - 당일 실시간: `http://100.70.228.127:5000` (tailscale) — 라이브·지표·현재 세션·오늘 목록(판정 이미지 | 작업자 라벨 대표 | 2순위 후보).
   헤더에 **"그림자 모드"** 배지가 있으면 NAS 업로드가 꺼진 상태.
 - 전체 통계·확정: 학습 PC webapp `/inference` (3단계 구현 후).
+- **VLM 독립 2차 의견(2026-11-03~)**: 학습 PC cron(`vlm/cron_audit_infer.py`, ingest 2분 뒤)이 새 세션의 원본 rgb 2장을 Claude 에 보내 형상군·레이더·이상(호스·손·공구·밑판만 등)을 독립 판정해 `/inference` 'VLM 2차 의견' 열과 대시보드 'VLM ≠ 판정' 카드에 띄운다. 판정 결과는 Claude 에 주지 않는다. 무료 API 크레딧 한도(11/17)까지만 돌고 자동 중지 — 연장은 `VLM_AUDIT_UNTIL`. 제드 박스 무관.
 - SSH: `tail -f logs/infer_$(date +%Y%m%d).log`, `journalctl -u door-infer -f`, `tail datasets_factory_infer/events.jsonl`.
 
 ## 운영 명령어

@@ -124,6 +124,12 @@ python 20_session_drift.py --print                    # 표만
   운영 설정은 `~/.config/door-infer.env`(`DOOR_INFER_UPLOAD=0` 그림자 모드 기본 → NAS 연동 시 1). 업로드 `deploy/nas_sync_infer.sh` → `nas:Guest/weld_infer`.
 - Jetson 실측: 홀 판별기 117ms/프레임(FP16)·CNN 46ms·GPU 342MB. 리플레이 검증: `--replay "빈지그:20,도어:45,빈지그:25"` (폴더:초).
 
+## F. VLM(Claude API) 독립 2차 감사·인스트럭션 셋 (2026-11-03, `vlm/`)
+
+API 크레딧으로 돌린 보조 작업. 홀 판별기 결과를 주지 않고 대표 이미지 15장 + 원본 RGB 만으로 Claude Opus 5.5 가 형상군·레이더·이상을 판정한다.
+`vlm/audit_sessions.py --source collect|infer`(결과 `report/vlm_audit/`, DB `vlm_audits`), `vlm/build_instruction_set.py`(`DOC_instruction_set.md`). 결과 요약은 `report/vlm_audit/README.md`:
+확정 339세션 형상군 100%·레이더 100%·클래스 95.3%(FRT 인접 폭만 불일치), 추론 세션 오판(11/2 s_145702) 적발, 인스트럭션 셋 v0 1,356쌍. 키 `~/.config/anthropic/api_key`.
+
 ## 산출물/데이터 위치
 
 - `artifacts/` — CNN 모델 run별 산출물. *.pth는 기본 git 미추적이며, **정식 배포 run**(`rgbe_noaux_448_seed916_datasets_factory_v2`, DB models #10, 2026-09-23 교체)의 `model.pth`만 Gitea LFS로 추적

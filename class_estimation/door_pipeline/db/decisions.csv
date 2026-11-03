@@ -378,3 +378,6 @@ session_dir,class_input,class_db,split,valid,n_images,n_local,option_radar,optio
 20261029/E30_door_LH_FRT/s_105319,E30_door_LH_FRT,E30_door_LH_FRT,,1,13,0,,,,110982-02414-H,
 20261029/E30_door_LH_RR/s_102515,E30_door_LH_RR,E30_door_LH_RR,,1,104,0,,,,,
 20261029/E38_door_LH_FRT/s_095115,E38_door_LH_FRT,E38_door_LH_FRT,,1,16,0,,,,110982-02447-L,
+20261102/s_144415,Unknown,Unknown,,1,2,0,,,,,
+20261102/s_144648,E30_E38_door_RH,E30_E38_door_RH,,1,10,0,1,auto,2026-11-02 14:48:35,110982-02327-N,
+20261102/s_145702,E23_door_LH_FRT,E23_door_LH_FRT,,1,10,0,,,,110982-02444-B,

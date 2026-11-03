@@ -24,6 +24,7 @@ import re
 import sqlite3
 import statistics
 import time
+from collections import Counter
 from pathlib import Path
 
 from flask import (Flask, Response, abort, flash, g, redirect, render_template_string,
@@ -187,6 +188,8 @@ DASH = """
     <div class="lbl">미등록·미인식·보류 (확정 전)</div></a>
   <div class="card"><div class="num {{ 'ok' if inf.agree_pct is not none and inf.agree_pct >= 99 }}">{{ ('%.1f%%' % inf.agree_pct) if inf.agree_pct is not none else '—' }}</div>
     <div class="lbl">판정 = 확정 일치율 (확정 {{ inf.confirmed }}건)</div></div>
+  <a class="card" href="{{ url_for('inference', vlm='diff') }}"><div class="num {{ 'flag' if inf.vlm_diff }}">{{ inf.vlm_diff }}</div>
+    <div class="lbl">VLM 2차 의견 ≠ 판정 (Claude 독립 감사 {{ inf.vlm_n }}세션 · 마지막 {{ inf.vlm_at }})</div></a>
 </div>
 
 <h2>할 일 <span class="muted small">유효 세션 기준 — 카드를 누르면 해당 목록</span></h2>
@@ -1531,12 +1534,62 @@ def ref_image_name(cls, radar):
     return next((n for n in names if (REF_DIR / n).exists()), None)
 
 
+VLM_GROUP = {c: ('FRT' if 'FRT' in c else 'RH' if c.endswith('RH') else 'LH_RR') for c in INFER_CLASSES}
+VLM_ANOM_LABEL = {'hose_or_cable_over_door': '호스·케이블', 'worker_or_hand': '작업자·손', 'tool_or_object_on_door': '공구·물체',
+                  'empty_jig': '빈 지그', 'non_door_part': '도어 아님', 'bottom_plate_only': '밑판만', 'bracket_missing': '브래킷 없음',
+                  'door_tilted_or_shifted': '기울어짐', 'poor_lighting': '조명', 'other': '기타'}
+
+
+def _vlm_vote(vals):
+    vals = [v for v in vals if v not in (None, 'unsure', 'none')]
+    if not vals:
+        return 'unsure'
+    c = Counter(vals).most_common()
+    return c[0][0] if len(c) == 1 or c[0][1] > c[1][1] else 'tie'
+
+
+def vlm_map(con):
+    """vlm_audits(source=infer, vlm/cron_audit_infer.py) → {session_dir: 세션 요약}. 프레임 다수결·이상 태그 합집합·판정과의 일치."""
+    try:
+        rows = con.execute("""SELECT session_dir, frame, run_id, ref_class, ref_radar, vlm_group, vlm_class, vlm_class_conf, vlm_radar,
+                                     vlm_anomalies, vlm_description, vlm_reasoning, cost_usd, created_at, error
+                              FROM vlm_audits WHERE source='infer' ORDER BY id""").fetchall()
+    except sqlite3.OperationalError:
+        return {}
+    by = {}
+    for r in rows:
+        by.setdefault(r["session_dir"], []).append(dict(r))
+    out = {}
+    for sd, rs in by.items():
+        ok = [r for r in rs if r["vlm_class"]]
+        g, c, rd = _vlm_vote([r["vlm_group"] for r in ok]), _vlm_vote([r["vlm_class"] for r in ok]), _vlm_vote([r["vlm_radar"] for r in ok])
+        anom = sorted({a for r in ok for a in json.loads(r["vlm_anomalies"] or "[]")})
+        ref_c, ref_r = rs[-1]["ref_class"], rs[-1]["ref_radar"]
+        agree = None
+        if ref_c in INFER_CLASSES:
+            agree = (g == VLM_GROUP[ref_c]) and (c in (ref_c, 'unsure', 'tie'))
+            if ref_r in (0, 1) and rd in ('O', 'X'):
+                agree = agree and (rd == ('O' if ref_r else 'X'))
+        confs = [r["vlm_class_conf"] for r in ok]
+        out[sd] = dict(group=g, cls=c, radar=rd, conf=(Counter(confs).most_common(1)[0][0] if confs else None),
+                       anom=[VLM_ANOM_LABEL.get(a, a) for a in anom], desc=(ok[0]["vlm_description"] if ok else (rs[0]["error"] or "")),
+                       n=len(rs), agree=agree, at=rs[-1]["created_at"], frames=rs, cost=sum(r["cost_usd"] or 0 for r in rs))
+    return out
+
+
 def infer_status(con):
     """대시보드 카드: 하트비트·오늘/7일 도어 수·확정 대기·미확정·판정-확정 일치율."""
     N = lambda **kw: type("I", (), kw)
     today = dt.date.today()
     st = dict(hb_at="—", hb_msg="미러 없음 (ingest_infer 미실행)", hb_warn=True, today=today.strftime("%Y%m%d"),
-              today_n=0, today_judged=0, today_issue=0, week_n=0, last_at="—", todo=0, issue=0, confirmed=0, agree_pct=None)
+              today_n=0, today_judged=0, today_issue=0, week_n=0, last_at="—", todo=0, issue=0, confirmed=0, agree_pct=None,
+              vlm_n=0, vlm_diff=0, vlm_at="—")
+    try:
+        vm = vlm_map(con)
+        st.update(vlm_n=len(vm), vlm_diff=sum(1 for v in vm.values() if v["agree"] is False),
+                  vlm_at=max((v["at"] for v in vm.values()), default="—")[5:16] if vm else "—")
+    except Exception:
+        pass
     try:
         hb = json.loads((INFER_MIRROR / "heartbeat.json").read_text(encoding="utf-8"))
         t = dt.datetime.strptime(hb["ts"][:19], "%Y-%m-%d %H:%M:%S")
@@ -1588,6 +1641,7 @@ INFERENCE = """
   <div class="card"><div class="num {{ 'flag' if c.issue }}">{{ c.issue }}</div><div class="lbl">미등록·미인식·보류</div></div>
   <div class="card"><div class="num {{ 'flag' if c.todo }}">{{ c.todo }}</div><div class="lbl">확정 대기</div></div>
   <div class="card"><div class="num">{{ c.confirmed }}</div><div class="lbl">확정됨{% if c.agree is not none %} · 일치 {{ '%.1f%%' % c.agree }}{% endif %}</div></div>
+  <div class="card"><div class="num {{ 'flag' if c.vlm_diff }}">{{ c.vlm_diff }}</div><div class="lbl">VLM 2차 의견 ≠ 판정 (감사 {{ c.vlm_n }})</div></div>
 </div>
 <form class="filters" method="get">
   <input type="text" name="date" value="{{ cur.date }}" placeholder="날짜 YYYYMMDD (앞부분만도 됨)" style="width:200px">
@@ -1599,11 +1653,14 @@ INFERENCE = """
       <option value="{{ v }}" {{ 'selected' if v == cur.confirm }}>{{ lab }}</option>{% endfor %}</select>
   <select name="cls" onchange="this.form.submit()"><option value="">클래스 전체</option>
     {% for k in clss %}<option {{ 'selected' if k == cur.cls }}>{{ k }}</option>{% endfor %}</select>
+  <select name="vlm" onchange="this.form.submit()">
+    {% for v, lab in [('', 'VLM 전체'), ('diff', 'VLM ≠ 판정'), ('anom', 'VLM 이상 태그'), ('none', 'VLM 미감사')] %}
+      <option value="{{ v }}" {{ 'selected' if v == cur.vlm }}>{{ lab }}</option>{% endfor %}</select>
   <button class="ghost">필터</button> <a class="small" href="{{ url_for('inference') }}">초기화</a>
   <span class="muted small" style="margin-left:auto">최근 {{ limit }}개까지 표시</span>
 </form>
 <div class="tbl tall wrap"><table>
-<tr><th>시각 · 세션</th><th>상태</th><th>판정</th><th>판정 이미지 | 라벨 대표 | 2순위</th><th>확정</th><th>{{ '' if readonly else '확정 버튼' }}</th></tr>
+<tr><th>시각 · 세션</th><th>상태</th><th>판정</th><th>판정 이미지 | 라벨 대표 | 2순위</th><th>확정</th><th>VLM 2차 의견 <span class="muted small">(Claude, 판정 결과 모름)</span></th><th>{{ '' if readonly else '확정 버튼' }}</th></tr>
 {% for r in rows %}
 <tr>
   <td><b>{{ (r.started_at or '')[5:16] }}</b><br><a href="{{ url_for('inference_detail', sid=r.session_id) }}" class="small">{{ r.session_dir }}</a>
@@ -1627,6 +1684,13 @@ INFERENCE = """
         <br><span class="muted small">{{ r.confirmed_by }} {{ (r.confirmed_at or '')[:16] }}</span>
       {% else %}<span class="muted">미확정</span>{% endif %}
       {% if r.note %}<br><span class="muted small">{{ r.note }}</span>{% endif %}</td>
+  <td style="max-width:300px">{% if r.vlm %}
+      <b class="{{ 'ok' if r.vlm.agree else ('warn' if r.vlm.agree is false else '') }}">{{ r.vlm.group }} / {{ r.vlm.cls }}</b>
+      <span class="small">· 레이더 {{ r.vlm.radar }} · {{ r.vlm.conf or '—' }}{% if r.vlm.agree is false %} · <span class="warn">≠ 판정</span>{% endif %}</span>
+      {% if r.vlm.anom %}<br>{% for a in r.vlm.anom %}<span class="pill test">{{ a }}</span> {% endfor %}{% endif %}
+      <br><span class="muted small" title="{{ r.vlm.desc }}">{{ r.vlm.desc[:140] }}{{ '…' if r.vlm.desc|length > 140 }}</span>
+      <br><span class="muted small">{{ r.vlm.n }}프레임 · {{ (r.vlm.at or '')[5:16] }}</span>
+    {% else %}<span class="muted">—</span>{% endif %}</td>
   <td>{% if not readonly %}
     <form class="inline" method="post" action="{{ url_for('act_infer_confirm', sid=r.session_id) }}" style="flex-direction:column;align-items:flex-start;gap:4px">
       {% if r.pred_class and r.pred_class != 'unknown' %}<button name="value" value="ok" {{ 'class=ghost' if r.confirmed_class == r.pred_class }}>판정대로 확정</button>{% endif %}
@@ -1654,6 +1718,16 @@ INFER_DETAIL = """
   {% if ref %}<figure style="margin:0"><img src="{{ url_for('ref_image', name=ref) }}" style="width:480px;border-radius:6px"><figcaption class="muted small">작업자 라벨 대표: {{ r.pred_class }}</figcaption></figure>{% endif %}
   {% if ref2 %}<figure style="margin:0"><img src="{{ url_for('ref_image', name=ref2) }}" style="width:480px;border-radius:6px;opacity:.8"><figcaption class="muted small">2순위 후보: {{ second }}</figcaption></figure>{% endif %}
 </div>
+{% if vlm %}
+<h2>VLM 독립 2차 의견 <span class="muted small">Claude Opus 5.5 · 대표 이미지 15장 + 원본 RGB 만 보고 판정(판정 결과·홀 점 미제공) · 세션 다수결
+  <b class="{{ 'ok' if vlm.agree else ('warn' if vlm.agree is false else '') }}">{{ vlm.group }} / {{ vlm.cls }} / 레이더 {{ vlm.radar }}</b>{% if vlm.agree is false %} <span class="warn">≠ 판정</span>{% endif %}
+  · ${{ '%.3f' % vlm.cost }}</span></h2>
+<div class="tbl wrap"><table><tr><th>프레임</th><th>형상군 / 클래스 (확신)</th><th>레이더</th><th>이상</th><th>설명</th><th>근거</th></tr>
+{% for f in vlm.frames %}<tr><td class="small">{{ f.frame.split('/')[-1] }}<br><span class="muted">{{ (f.created_at or '')[5:16] }}</span></td>
+  <td>{{ f.vlm_group }} / {{ f.vlm_class }} <span class="muted small">({{ f.vlm_class_conf }})</span></td><td>{{ f.vlm_radar }}</td>
+  <td class="small">{{ f.vlm_anomalies }}</td><td class="small">{{ f.vlm_description or f.error }}</td><td class="small muted">{{ f.vlm_reasoning }}</td></tr>{% endfor %}
+</table></div>
+{% endif %}
 <h2>후보 (CAD D 거리순)</h2>
 <div class="tbl"><table><tr><th>클래스</th><th class="n">CAD D</th><th class="n">편차 mm</th></tr>
 {% for c in cands %}<tr><td>{{ c['class'] }}</td><td class="n">{{ c['cad_D_mm'] }}</td><td class="n">{{ c['diff_mm'] }}</td></tr>{% endfor %}</table></div>
@@ -1691,20 +1765,23 @@ def inference():
     except sqlite3.OperationalError:
         raw = []
     cur = dict(date=request.args.get("date", "").strip(), status=request.args.get("status", ""),
-               confirm=request.args.get("confirm", ""), cls=request.args.get("cls", ""))
+               confirm=request.args.get("confirm", ""), cls=request.args.get("cls", ""), vlm=request.args.get("vlm", ""))
     limit = int(request.args.get("limit", 300))
+    vm = vlm_map(con)
     rows = []
     for r in raw:
         m = dict(r)
         m["second"] = _second_class(m)
         m["ref"] = ref_image_name(m["pred_class"], m["radar"])
         m["ref2"] = ref_image_name(m["second"], m["radar"])
+        m["vlm"] = vm.get(m["session_dir"])
         rows.append(m)
     clss = sorted({m["pred_class"] for m in rows if m["pred_class"]})
     c = dict(total=len(rows), judged=sum(m["status"] == "judged" for m in rows),
              issue=sum(m["status"] != "judged" for m in rows),
              todo=sum(m["confirmed_class"] is None and m["status"] == "judged" for m in rows),
-             confirmed=sum(m["confirmed_class"] is not None for m in rows), agree=None)
+             confirmed=sum(m["confirmed_class"] is not None for m in rows), agree=None,
+             vlm_n=sum(m["vlm"] is not None for m in rows), vlm_diff=sum(1 for m in rows if m["vlm"] and m["vlm"]["agree"] is False))
     conf = [m for m in rows if m["confirmed_class"] is not None and m["status"] == "judged"]
     if conf:
         c["agree"] = 100.0 * sum(m["confirmed_class"] == m["pred_class"] for m in conf) / len(conf)
@@ -1722,6 +1799,12 @@ def inference():
         rows = [m for m in rows if m["confirmed_class"] is not None and m["confirmed_class"] != m["pred_class"]]
     if cur["cls"]:
         rows = [m for m in rows if m["pred_class"] == cur["cls"]]
+    if cur["vlm"] == "diff":
+        rows = [m for m in rows if m["vlm"] and m["vlm"]["agree"] is False]
+    elif cur["vlm"] == "anom":
+        rows = [m for m in rows if m["vlm"] and m["vlm"]["anom"]]
+    elif cur["vlm"] == "none":
+        rows = [m for m in rows if not m["vlm"]]
     rows = rows[:limit]
     return page("현장 판정", "inference", INFERENCE, rows=rows, cur=cur, c=c, clss=clss, labels=INFER_STATUS_LABEL,
                 classes=list(INFER_CLASSES), limit=limit, readonly=app.config["READONLY"])
@@ -1743,7 +1826,7 @@ def inference_detail(sid):
         cands, raw = [], m.get("result_json") or ""
     return page(f"판정 {m['session_dir']}", "inference", INFER_DETAIL, r=m, sid=sid, labels=INFER_STATUS_LABEL,
                 ref=ref_image_name(m["pred_class"], m["radar"]), ref2=ref_image_name(second, m["radar"]), second=second,
-                cands=cands, raw=raw)
+                cands=cands, raw=raw, vlm=vlm_map(con).get(m["session_dir"]))
 
 
 @app.route("/inference/thumb/<int:sid>")
