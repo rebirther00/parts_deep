@@ -768,7 +768,10 @@ class DoorSession:
             cv2.imwrite(str(dp), np.clip(depth, 0, 65535).astype(np.uint16))
 
     def write(self, final, reason=''):
-        r = dict(self.last_live or {})
+        # 잠금 뒤에는 확정된 self.result(잠정/최종 판정)를 쓴다. last_live 는 마지막 윈도의 부분 집계라 판정 프레임이 2장뿐이면
+        # pred_class 가 None 인데, 그걸 그대로 써서 service_stop 마감 때 판정이 지워졌다(2026-11-03 s_132558·s_142022, 20시 자동 종료도 같은 경로).
+        base = self.result if (self.locked and self.result and self.result.get('pred_class')) else self.last_live
+        r = dict(base or {})
         r.pop('frame', None)
         if self.status in ('abstain', 'unrecognized'):     # 잠금 전 윈도의 부분 집계값이 판정처럼 남지 않게
             for k in ('pred_class', 'group', 'part_no', 'part_name', 'radar', 'radar_txt', 'source', 'confidence'):
