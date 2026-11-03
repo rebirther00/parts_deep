@@ -96,6 +96,8 @@
       <div class="muted" id="svcInfo" style="margin-top:8px;font-size:12px"></div>
       <div class="toolbar" style="margin-top:10px">
         <button id="resetBtn">재판정 (윈도 초기화)</button>
+        <button id="bgBtn" title="지그가 비어 있을 때 누르세요 — 지금 depth 화면을 빈 지그 기준맵으로 등록해 비움 판정 기준이 됩니다">빈 지그 배경 등록</button>
+        <button id="bgViewBtn" title="등록된 빈 지그 배경 · 지금 depth · 차이를 색으로 확인">배경 보기</button>
         <button id="shutdownBtn" class="danger">시스템 종료</button>
       </div>
     </div>
@@ -152,7 +154,7 @@ async function refreshStatus() {
     const su = $('#stUpload'); su.textContent = st.upload.enabled ? (st.upload.pending ? `대기 ${st.upload.pending}` : 'OK') : '꺼짐'; su.title = `마지막 OK ${st.upload.last_ok||'-'} / FAIL ${st.upload.last_fail||'-'}`;
     $('#stMs').textContent = Math.round(st.infer_ms);
     const m = st.service.models;
-    $('#svcInfo').textContent = `v${st.service.version} 시작 ${st.service.started} · 홀 ${m.hole} (${m.hole_sha}) · CNN ${m.cnn||'off'} · 옵션 ${m.option} · ${m.fp16?'FP16':'FP32'} · ${st.camera_type}`;
+    $('#svcInfo').textContent = `v${st.service.version} 시작 ${st.service.started} · 홀 ${m.hole} (${m.hole_sha}) · CNN ${m.cnn||'off'} · 옵션 ${m.option} · ${m.fp16?'FP16':'FP32'} · ${st.camera_type} · 배경 ${(st.background||{}).src||'없음'}`;
   } catch (e) { $('#stateBadge').textContent = '서버 연결 실패'; $('#stateBadge').className = 'badge UNRESOLVED'; }
 }
 
@@ -178,7 +180,7 @@ async function loadSessions() {
     <td><b>${s.pred_class||s.class||'-'}</b><br><small>${s.part_no||'-'} ${s.part_name||''}</small><br><small class="muted">레이더 ${s.radar_txt||'-'}</small></td>
     <td>${s.confidence?s.confidence+'%':'-'}<br><small class="muted">D ${fmt(s.D_mm,0)} / 마진 ${fmt(s.margin_mm,0)}</small><br><small class="muted">${s.n_judged||0}/${s.window||0}f · ${s.saved_pairs||0}장</small></td>
     <td><div class="imgs">
-      <figure><img src="${s.thumb_url||''}" alt="" onerror="this.style.opacity=.2"><figcaption>판정 ${s.started_at.slice(11,19)}</figcaption></figure>
+      <figure><img src="${s.thumb_url||''}" alt="" onerror="this.style.opacity=.2"><figcaption>판정 프레임 ${s.thumb_at||''}${s.final?'':' (잠정)'}</figcaption></figure>
       <figure><img src="${s.ref_url||''}" alt="" onerror="this.style.opacity=.2"><figcaption>라벨 대표: ${s.pred_class||'-'}</figcaption></figure>
       <figure><img src="${s.ref2_url||''}" alt="" onerror="this.style.opacity=.2"><figcaption>2순위: ${s.second_class||'-'}</figcaption></figure>
     </div></td></tr>`).join('') || '<tr><td colspan="5" class="muted">세션 없음</td></tr>';
@@ -186,7 +188,7 @@ async function loadSessions() {
 }
 
 function openModal(s) {
-  $('#mTitle').textContent = `${s.session_dir} — ${s.pred_class||s.class||'-'} ${s.part_no||''} (${s.status||'진행'})`;
+  $('#mTitle').textContent = `${s.session_dir} — ${s.pred_class||s.class||'-'} ${s.part_no||''} (${s.status||'진행'}${s.final?'':' · 잠정'}) · 저장 프레임 ${s.thumb_at||''}`;
   $('#mGrid').innerHTML = (s.frame_urls||[]).map((u,i)=>{ const f=(s.frames||[])[i]||{}; return `<figure><img src="${u}" loading="lazy"><figcaption class="muted">${f.file||''} gate ${f.gate||'-'} ${f.pred||''} D ${fmt(f.D_mm,0)}</figcaption></figure>`; }).join('') || '<span class="muted">저장 프레임 없음</span>';
   const j = Object.assign({}, s); delete j.frames; delete j.frame_urls; delete j.config; delete j.intrinsics;
   $('#mJson').textContent = JSON.stringify(j, null, 1);
@@ -214,6 +216,25 @@ async function drawMetrics() {
 
 $('#dateSel').onchange = e => { curDate = e.target.value; loadSessions(); drawMetrics(); };
 $('#resetBtn').onclick = async () => { await fetch('/api/reset', {method:'POST'}); toast('재판정: 윈도 초기화'); };
+$('#bgBtn').onclick = async () => {
+  if (!confirm('지금 화면에 도어가 없는지(빈 지그) 확인하세요.\n현재 depth 화면을 빈 지그 배경으로 등록합니다.')) return;
+  let r = await (await fetch('/api/bg_learn', {method:'POST'})).json();
+  if (!r.ok && r.need_force) {
+    if (!confirm(`${r.error}\n그래도 지금 화면을 빈 지그로 등록할까요?`)) return;
+    r = await (await fetch('/api/bg_learn?force=1', {method:'POST'})).json();
+  }
+  toast(r.ok ? `빈 지그 배경 등록됨 (등록 전 diff ${r.diff_before}) — diff 가 떨어지면 20초 뒤 세션 마감` : r.error, 6000);
+  if (r.ok) setTimeout(() => openBgView('등록 직후'), 1500);
+};
+function openBgView(note) {
+  $('#mTitle').textContent = '빈 지그 배경 확인 — 왼쪽: 등록된 배경 · 가운데: 지금 depth · 오른쪽: 차이' + (note ? ` (${note})` : '');
+  $('#mGrid').innerHTML = `<img src="/bg.jpg?t=${Date.now()}" style="grid-column:1/-1;width:100%;max-width:1460px">`;
+  $('#mJson').textContent = '색: 빨강 = 가까움 … 파랑 = 멀리, 검정 = 측정 불가. 노란 상자 = 도어 ROI(diff 는 이 안에서만 계산).\n'
+    + '오른쪽 차이 그림: 빨강 = 배경보다 가까움(도어·돌출), 파랑 = 배경보다 멀어짐, 회색 = 같음(±25mm).\n'
+    + '빈 지그인데 오른쪽이 넓게 빨강/파랑이면 배경이 안 맞는 것 → 지그를 비우고 [빈 지그 배경 등록]. 등록 뒤에는 거의 회색이어야 정상.';
+  $('#modal').style.display = 'flex';
+}
+$('#bgViewBtn').onclick = () => openBgView();
 $('#shutdownBtn').onclick = async () => { if (!confirm('장비(Zed Box)를 종료할까요? 1분 후 꺼집니다.')) return; const r = await (await fetch('/api/shutdown', {method:'POST'})).json(); toast(r.ok ? '종료 예약됨 (1분 후)' : r.error, 5000); };
 
 setInterval(() => { $('#preview').src = '/frame.jpg?t=' + Date.now(); }, 700);

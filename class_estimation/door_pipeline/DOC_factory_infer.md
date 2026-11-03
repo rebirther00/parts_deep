@@ -10,7 +10,8 @@
 |---|---|
 | `07_factory_infer.py` | 판정 서비스 (Flask, 포트 5000). 상태기계·게이트·판정·저장·보존 정리·하트비트 |
 | `factory_camera.py` | ZED 상시 구동 카메라 (06 에서 분리, 자동 재연결·CUDA 프로브) |
-| `templates/factory_infer.html` | 개발자용 웹 페이지 (라이브·지표 차트·현재 세션·오늘 도어 목록·재판정·원격 종료) |
+| `templates/factory_infer.html` | 개발자용 웹 페이지 (라이브·지표 차트·현재 세션·오늘 도어 목록·재판정·빈 지그 배경 등록·배경 보기·원격 종료) |
+| `depth_view.py`, `tools/depth_colorize.py` | depth(mm) → 컬러 그림. 웹 `/bg.jpg` 와 CLI 공용 (16비트 depth PNG 는 뷰어에서 검게 보임) |
 | `reference_images/` | 클래스×레이더 대표 이미지 14장(`tools/make_reference_images.py`) + 빈 지그 배경 시드 `empty_jig_depth_small.png` |
 | `deploy/door-infer.service` | systemd 유닛 (부팅 자동시작, 죽으면 5초 후 재시작, door-capture 와 Conflicts) |
 | `deploy/install_infer.sh` | 설치 스크립트 (`sudo bash deploy/install_infer.sh` 1회) |
@@ -27,6 +28,8 @@
   적재 직후의 첫 판정(보통 1~5초)은 브라켓이 덜 올라간 상태일 수 있다. 그래서 잠정 판정 뒤에도 초당 2회 깨끗한 프레임으로 계속 재평가해
   클래스·레이더가 바뀌면 갱신(이력 `pred_history`)하고, **도어가 빠질 때 마지막 깨끗한 프레임 10장**으로 최종 확정·저장한다.
   NAS 에는 최종(`final: true`)만 올라간다. 화면의 "잠정" 표시가 사라지면 최종이다.
+- 잠정 판정 변경 규칙(2026-11-02 오후, 24분 동안 14회 흔들린 사례 반영): ① 홀 판정이 한 번 난 세션은 CNN 폴백이 덮어쓰지 못한다
+  ② 레이더 표가 윈도에서 빠져 '미정'이 되면 이전 확정값을 유지한다 ③ (클래스, 레이더) 변경은 연속 3회(`CHANGE_CONFIRM_N`) 같은 결과가 나와야 반영한다.
 - CNN 폴백은 홀 6점이 잡혔는데 기하가 안 맞는 프레임에서만 돈다. 홀이 없는 맨 밑판은 CNN 을 돌리지 않는다(맨 밑판을 E23 으로 오판한 사례 차단).
 - 저장: 판정 프레임 최대 10쌍 + `result.json` + `thumb.jpg` (미확정은 정지 후보 5장). 하루 수십 MB.
 - 업로드 완료(`.uploaded`) 3일 뒤 png 삭제, 90일 뒤 세션 삭제, 지표 로그 14일 — 서비스가 시간당 1회 정리. 업로드 안 된 세션은 지우지 않는다.
@@ -71,7 +74,15 @@ datasets_factory_infer/
   (sudo 없이: `kill $(systemctl show door-infer -p MainPID --value)` → 5초 내 자동 재시작. SIGTERM 이라 진행 중 세션은 마감된다)
 - **임계값 조정**: 같은 env 파일에 `DOOR_INFER_OCC_ON=0.15` 등 (`07_factory_infer.py` 상단 CFG 가 전체 목록) → 재시작.
   기본값 근거: diff 빈 지그 0.015 / 도어 0.7 (OCC_ON 0.15·OFF 0.08), 침입(ROI) 도어만 ≤0.016 / 작업자 ≥0.033 (INTR_FRAC 0.025).
+- **점유 영역 `OCC_ROI`**(기본 `0.42,0.10,0.66,0.90`, 화면의 초록 상자): diff 는 이 지그 중앙 빈 부분에서만 잰다. 양쪽 세로 바가 도어 기종마다
+  레일을 따라 가로로 움직여 도어 ROI(노랑) 전체로 재면 빈 지그도 15~20% 가 변화로 잡히기 때문(2026-11-03). 가장 작은 E23 도 중앙은 덮는다(사용자 확정).
+  침입 게이트·홀 검출은 도어 ROI 그대로. 도어 ROI 전체 diff 는 지표 `diff_door` 로 남긴다. 중앙에 잡동사니(판·공구)를 두면 점유로 잡히니 비워 둘 것.
 - **재판정**: 웹 [재판정] 또는 `curl -X POST http://localhost:5000/api/reset` — 현재 세션 윈도 초기화 후 다시 판정.
+- **빈 지그 배경 등록**: 지그가 비어 있을 때 웹 [빈 지그 배경 등록] 또는 `curl -X POST http://localhost:5000/api/bg_learn` — 지금 depth(1/4) 를
+  빈 지그 기준맵으로 채택해 `background.npz` 에 저장(재시작 후에도 유지, 이후 EMPTY 에서 EMA 로 추종). 홀이 보이거나 움직이면 거부(웹은 확인 후 강제 `?force=1`).
+  시드(8/27)가 현재 카메라·지그와 안 맞아 빈 지그도 diff≈0.6 으로 읽히면 EMPTY 로 못 들어가 세션이 안 끝난다(2026-11-03: 도어 5대가 세션 하나로) — 이 버튼이 유일한 탈출구.
+- **배경 보기**: 웹 [배경 보기] 또는 `http://localhost:5000/bg.jpg` — [등록된 배경 | 지금 depth | 차이] 를 색으로(가까움=빨강 … 멀리=파랑, 차이: 빨강=배경보다 가까움,
+  파랑=멀어짐, 회색=같음 ±25mm). 16비트 depth PNG 는 뷰어에서 검게 보이므로 파일은 `python tools/depth_colorize.py <depth.png|background.npz> [--ref 기준]` 으로 컬러 PNG 를 만든다(`depth_view.py` 공용).
 - **서비스 종료/복귀**: `sudo systemctl stop door-infer` / `sudo systemctl start door-infer`. 수집 서비스로 되돌리기:
   `sudo systemctl disable --now door-infer && sudo systemctl enable --now door-capture` (키오스크는 `deploy/door-kiosk.desktop` 을 `~/.config/autostart/` 에 복사).
 - **원격 종료**: 웹 [시스템 종료] (1분 후 shutdown, systemd 가 서비스를 먼저 내려 세션 마감) 또는 `sudo shutdown -h +1`.
@@ -91,8 +102,9 @@ datasets_factory_infer/
 | 증상 | 조치 |
 |---|---|
 | 헤더 "카메라 연결 대기" | 10초 간격 자동 재시도. 지속되면 GMSL 케이블 확인 후 재부팅 |
-| 빈 지그인데 "판정 중"이 계속됨 | 배경 기준맵 어긋남(카메라 이동·조명). `:5000` 지표 띠의 diff 확인 → `rm datasets_factory_infer/background.npz` 후 재시작(시드로 복귀), 또는 빈 지그 상태에서 10분 두면 EMA 로 추종 |
+| 빈 지그인데 "판정 중"이 계속됨 | 배경 기준맵 어긋남(카메라 이동·조명). `:5000` 지표 띠의 diff 확인 → 지그를 비우고 웹 [빈 지그 배경 등록](`/api/bg_learn`). EMPTY 로 못 들어가면 EMA 추종도 안 된다(2026-11-03). 시드 복귀는 `rm datasets_factory_infer/background.npz` 후 재시작 |
 | 도어가 있는데 "빈 지그" | diff 가 OCC_ON(0.15) 미만 — 지표 확인 후 env 로 낮춤. pts≥4 면 diff 와 무관하게 점유로 잡힌다 |
+| 빈 지그인데 점유로 잡힘(배경은 맞는데) | 중앙 초록 상자(OCC_ROI) 안에 물건이 놓였거나 세로 바가 상자에 걸침 — [배경 보기]로 확인, 물건 치우기 또는 `DOOR_INFER_OCC_ROI` 조정 |
 | 보류(abstain)가 잦음 | 세션 상세의 gate_counts 확인: `near_border`(도어가 프레임 밖) → 카메라 화각, `pose_warn`(z·tilt) → 거치 상태, 침입(intr)만 높으면 INTR_FRAC 상향 |
 | 미인식(unrecognized)이 우리 도어 | 홀 검출 실패 — 저장 후보 프레임을 보고 조명·가림 확인. 모델 갱신은 `scripts/model_sync.sh pull` |
 | 업로드 "대기 N" 이 안 줄어듦 | `tail logs/nas_sync_infer.log`, `~/bin/rclone lsd nas:Guest/weld_infer` 로 NAS 연결 확인 |

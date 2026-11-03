@@ -8,7 +8,9 @@
                               └─JUDGE_TIMEOUT_S 내 미확정─▶ UNRESOLVED ─이탈─▶ EMPTY
 점유 신호 (빈 지그 = 카메라 정면 평판 ~1475mm, 도어는 그 위 ~30mm — 절대 z 로는 구분 불가):
     diff  = 빈 지그 배경 기준맵(depth 1/4, 시드 reference_images/empty_jig_depth_small.png → EMPTY 에서 EMA 갱신,
-            OUTPUT_ROOT/background.npz 로 보존) 대비 BG_MM 넘게 다른 픽셀 비율 (빈 지그 ≈0.015, 도어 ≈0.7)
+            OUTPUT_ROOT/background.npz 로 보존) 대비 BG_MM 넘게 다른 픽셀 비율. **OCC_ROI(지그 중앙 빈 부분)** 안에서만 잰다 —
+            양쪽 세로 바가 도어 기종마다 레일을 따라 가로로 움직여 도어 ROI 전체로 재면 빈 지그도 변화로 잡힘(2026-11-03).
+            E23(최소 도어)도 중앙은 덮으므로 빈 지그 ≈0, 도어 ≈1. 도어 ROI 전체 값은 diff_door 로 진단만.
     pts   = 홀 검출기 점수 ≥ PTS_SCORE 인 점 수 (볼트 4 + 코너 2)
     점유 = pts ≥ OCC_PTS 또는 diff ≥ OCC_ON / 비움 = pts < 2 이고 diff ≤ OCC_OFF (ENTER_S·LEAVE_S 디바운스)
 게이트 (모두 통과한 프레임만 판정 윈도·저장):
@@ -53,6 +55,7 @@ from hole_classifier import CAD_D, GROUP, UNKNOWN         # noqa: E402
 import cnn_classifier                                     # noqa: E402
 import radar_check as rc                                  # noqa: E402
 from factory_camera import FactoryCamera, require_cuda_ready   # noqa: E402
+import depth_view                                         # noqa: E402
 
 VERSION = '0.1.0'
 UNKNOWN_LABEL = '미등록 도어 (unknown)'
@@ -86,7 +89,7 @@ CFG = dict(
     OPTION_MIN_JUDGED=_env('OPTION_MIN_JUDGED', 3),
     OPTION_WAIT_S=_env('OPTION_WAIT_S', 60.0),      # 클래스 확정 후 레이더 미정이면 이만큼 더 기다렸다 잠금
     JUDGE_TIMEOUT_S=_env('JUDGE_TIMEOUT_S', 600.0),  # 점유 후 이 시간 안에 못 잠그면 미확정
-    OCC_ON=_env('OCC_ON', 0.15),             # 배경 기준맵 대비 차이 픽셀 비율(diff) 이상이면 점유 (빈 지그 ≈0.015, 도어 ≈0.7)
+    OCC_ON=_env('OCC_ON', 0.15),             # 배경 기준맵 대비 차이 픽셀 비율(diff, OCC_ROI 안) 이상이면 점유 (빈 지그 ≈0, 도어 ≈1)
     OCC_OFF=_env('OCC_OFF', 0.08),           # diff 이하(+pts<2)면 비움
     OCC_PTS=_env('OCC_PTS', 4),              # 홀 점 수 이상이면 점유(도어 확실)
     PTS_SCORE=_env('PTS_SCORE', 0.5),
@@ -103,7 +106,8 @@ CFG = dict(
     ENTER_S=_env('ENTER_S', 3.0),
     LEAVE_S=_env('LEAVE_S', 20.0),
     MIN_DWELL_S=_env('MIN_DWELL_S', 10.0),   # 이보다 짧고 도어도 못 본 세션은 폐기
-    ROI=_env('ROI', '0.12,0.05,0.88,0.95'),  # x0,y0,x1,y1 (비율)
+    ROI=_env('ROI', '0.12,0.05,0.88,0.95'),  # x0,y0,x1,y1 (비율) — 침입 게이트·진단 지표용 도어 ROI
+    OCC_ROI=_env('OCC_ROI', '0.42,0.10,0.66,0.90'),  # 점유(diff) 전용: 세로 바가 못 닿는 지그 중앙 빈 부분 (2026-11-03 사용자 확정, E23 기준)
     MAX_SAVE=_env('MAX_SAVE', 10),
     CAND_EVERY_S=_env('CAND_EVERY_S', 60.0),
     CAND_MAX=_env('CAND_MAX', 10),
@@ -113,6 +117,7 @@ CFG = dict(
     RETAIN_METRICS_DAYS=_env('RETAIN_METRICS_DAYS', 14),
     IDLE_HZ=_env('IDLE_HZ', 2.0),            # 판정 중이 아닐 때 검출기 실행 빈도
     LOCKED_HZ=_env('LOCKED_HZ', 2.0),        # 잠정 판정 뒤 계속 재판정하는 빈도 (브라켓 추가 조립·레이더 브라켓 반영, 이탈 시 최종)
+    CHANGE_CONFIRM_N=_env('CHANGE_CONFIRM_N', 3),   # 잠정 판정 변경은 같은 (클래스, 레이더) 가 연속 이 횟수 나와야 반영 (히스테리시스)
     LOOP_HZ=_env('LOOP_HZ', 10.0),
     METRICS_HZ=_env('METRICS_HZ', 1.0),
     HEARTBEAT_S=_env('HEARTBEAT_S', 600.0),
@@ -307,6 +312,7 @@ class SceneGates:
     def __init__(self, cfg):
         x0, y0, x1, y1 = (float(v) for v in cfg['ROI'].split(','))
         self.roi = (x0, y0, x1, y1)
+        self.occ_roi = tuple(float(v) for v in cfg['OCC_ROI'].split(','))   # 점유(diff) 전용 중앙 영역
         self.cfg = cfg
         self.prev_gray = None
         self.bg = None               # (H/4, W/4) float32 mm, 0 = 무효
@@ -314,9 +320,9 @@ class SceneGates:
         self.bg_dirty = False
         self.last_d4 = None
 
-    def _roi(self, a):
+    def _roi(self, a, roi=None):
         h, w = a.shape[:2]
-        x0, y0, x1, y1 = self.roi
+        x0, y0, x1, y1 = roi or self.roi
         return a[int(h * y0):int(h * y1), int(w * x0):int(w * x1)]
 
     def load_background(self):
@@ -356,13 +362,24 @@ class SceneGates:
         self.bg[v] = (1 - a) * self.bg[v] + a * d4[v]
         self.bg_dirty = True
 
+    def set_background(self, d4, src):
+        """현재 depth(1/4) 를 빈 지그 배경으로 즉시 채택 (웹 [빈 지그 배경 등록]). depth 가 비는 픽셀은 기존 값을 남긴다."""
+        if d4 is None:
+            return False
+        bg = d4.astype(np.float32).copy()
+        if self.bg is not None and self.bg.shape == bg.shape:
+            hole = bg <= 0
+            bg[hole] = self.bg[hole]
+        self.bg, self.bg_src, self.bg_dirty = bg, src, True
+        return True
+
     def measure(self, rgb, depth):
         small = cv2.resize(rgb, (480, 300), interpolation=cv2.INTER_AREA)
         gray = cv2.cvtColor(small, cv2.COLOR_BGR2GRAY).astype(np.float32)
         g = self._roi(gray)
         motion = float(np.abs(g - self.prev_gray).mean()) if self.prev_gray is not None and self.prev_gray.shape == g.shape else 0.0
         self.prev_gray = g
-        out = dict(z_med=None, protr=0.0, intr=0.0, diff=None, motion=round(motion, 2), valid=0.0)
+        out = dict(z_med=None, protr=0.0, intr=0.0, diff=None, diff_door=None, motion=round(motion, 2), valid=0.0)
         self.last_d4 = None
         if depth is None:
             return out
@@ -387,8 +404,14 @@ class SceneGates:
             both = valid & (b > 0)
             nb = int(both.sum())
             if nb >= 200:
-                out['diff'] = round(float((np.abs(d - b) > self.cfg['BG_MM'])[both].sum() / nb), 4)
+                out['diff_door'] = round(float((np.abs(d - b) > self.cfg['BG_MM'])[both].sum() / nb), 4)
                 out['intr'] = round(float(((b - d) > self.cfg['INTR_MM'])[both].sum() / nb), 4)
+            # 점유 판정용 diff 는 중앙 빈 부분(OCC_ROI)만 — 세로 바 이동에 영향받지 않는다
+            do, bo = self._roi(d4, self.occ_roi), self._roi(self.bg, self.occ_roi)
+            botho = (do > 0) & (bo > 0)
+            no = int(botho.sum())
+            if no >= 100:
+                out['diff'] = round(float((np.abs(do - bo) > self.cfg['BG_MM'])[botho].sum() / no), 4)
             bothf = vf & (self.bg > 0)
             nf = int(bothf.sum())
             if nf >= 200:
@@ -410,6 +433,8 @@ class DoorSession:
         self.pred_history = []          # [{ts, status, pred_class, radar, source}] 잠정 판정 변경 이력
         self.final_at = None
         self.saved_at_clean = -1        # 프레임을 저장한 시점의 n_clean (이탈 시 윈도가 바뀌었으면 다시 저장)
+        self.hole_judged_once = False   # 홀 판정이 한 번이라도 났으면 CNN 폴백이 덮어쓰지 못한다 (작업 중 기하 실패 프레임의 CNN 표가 흔들림)
+        self._pending = None            # [key, 연속 횟수] — 변경 후보
         self.started_at = datetime.now()
         self.t0 = time.monotonic()
         day = self.started_at.strftime('%Y%m%d')
@@ -555,7 +580,36 @@ class DoorSession:
 
     @staticmethod
     def _key(result):
-        return (result.get('pred_class'), result.get('radar'), result.get('source'))
+        return (result.get('pred_class'), result.get('radar'))
+
+    @staticmethod
+    def _apply_radar(result, radar):
+        """레이더 값을 바꿔 끼우고 표시 문자열·품번을 다시 맞춘다 (윈도에서 표가 빠져 '미정'이 된 경우 이전 확정값 유지용)."""
+        cls = result.get('pred_class')
+        result = dict(result)
+        result['radar'] = radar
+        if cls in CAD_D and GROUP[cls] == 'FRT':
+            result['radar_txt'] = '해당 없음'
+        elif radar in (0, 1):
+            result['radar_txt'] = {1: 'O', 0: 'X'}[radar]
+        part = rc.part_lookup(cls, radar) if cls in CAD_D else None
+        result['part_no'] = f"{part['part_no']}-{part['rev']}" if part else None
+        result['part_name'] = part['name'] if part else None
+        return result
+
+    def _merge(self, result):
+        """재평가 결과를 현재 잠정값에 비춰 '유효한 변경'인지 판단. 반환 (적용할 result 또는 None=유지, changed 여부).
+        규칙: ① 윈도가 판정을 못 내면 유지 ② 홀 판정이 한 번 났으면 CNN 결과는 무시 ③ 레이더 미정(None)은 이전 값 유지
+             ④ (클래스, 레이더) 가 같으면 수치만 갱신(변경 아님)"""
+        if not result.get('pred_class'):
+            return None, False
+        if result.get('source') == 'cnn' and self.hole_judged_once:
+            return None, False
+        cur_cls, cur_radar = self._key(self.result)
+        radar = result.get('radar') if result.get('radar') in (0, 1) else cur_radar
+        if radar != result.get('radar'):
+            result = self._apply_radar(result, radar)
+        return result, (result['pred_class'], radar) != (cur_cls, cur_radar)
 
     def _save_window(self, result):
         """현재 윈도의 판정 프레임을 rgb/depth_NNNN 으로 저장(기존 저장분 교체) + thumb."""
@@ -565,6 +619,8 @@ class DoorSession:
         else:
             sel = [f for f, v in zip(self.frames, self.cnn_votes) if v]
         sel = sel[-self.cfg['MAX_SAVE']:]
+        if not sel:                                   # 현재 윈도에 저장할 판정 프레임이 없으면 기존 저장분 유지
+            return
         for p in list(self.dir.glob('rgb_*.png')) + list(self.dir.glob('depth_*.png')):
             p.unlink()
         self.saved = []
@@ -589,6 +645,7 @@ class DoorSession:
         self.status = 'unknown' if result['pred_class'] == UNKNOWN else 'judged'
         self.pred_history.append({'ts': now_str(), 'status': self.status, 'pred_class': result['pred_class'],
                                   'radar': result['radar'], 'source': result['source'], 'confidence': result['confidence']})
+        self.hole_judged_once = self.hole_judged_once or result['source'] == 'hole'
         self._save_window(result)
         for _, rp, dp, _, _ in self.cands:            # 후보는 불필요
             for p in (rp, dp):
@@ -599,11 +656,29 @@ class DoorSession:
         self.write(final=False)
 
     def update(self, result):
-        """잠정 판정 뒤 재평가 결과 반영. 클래스·레이더·출처가 바뀌면 이력에 남기고 result.json 갱신. 반환 = 변경 여부."""
-        if not result.get('pred_class'):
-            return False                                # 윈도가 아직 새 판정을 못 냈으면 이전 잠정값 유지
-        if self._key(result) == self._key(self.result):
+        """잠정 판정 뒤 재평가 결과 반영. (클래스, 레이더) 변경이 CHANGE_CONFIRM_N 회 연속이면 이력에 남기고 프레임·result.json 갱신.
+        반환 = 변경 여부."""
+        merged, changed = self._merge(result)
+        if merged is None:
             return False
+        if not changed:
+            self._pending = None
+            merged['part_no'] = merged.get('part_no') or self.result.get('part_no')   # 수치(신뢰도·D 등)만 조용히 갱신
+            merged['part_name'] = merged.get('part_name') or self.result.get('part_name')
+            self.result.update({k: merged[k] for k in ('confidence', 'D_mm', 'margin_mm', 'nearest_mm', 'n_judged', 'window',
+                                                       'gate_counts', 'candidates', 'cnn', 'radar_votes', 'conflict')})
+            self.hole_judged_once = self.hole_judged_once or merged.get('source') == 'hole'
+            return False
+        key = self._key(merged)
+        if self._pending and self._pending[0] == key:
+            self._pending[1] += 1
+        else:
+            self._pending = [key, 1]
+        if self._pending[1] < self.cfg['CHANGE_CONFIRM_N']:
+            return False
+        self._pending = None
+        result = merged
+        self.hole_judged_once = self.hole_judged_once or result['source'] == 'hole'
         self.status = 'unknown' if result['pred_class'] == UNKNOWN else 'judged'
         self.pred_history.append({'ts': now_str(), 'status': self.status, 'pred_class': result['pred_class'],
                                   'radar': result['radar'], 'source': result['source'], 'confidence': result['confidence']})
@@ -653,8 +728,8 @@ class DoorSession:
         self.ended_at = now_str()
         if self.locked:
             result, _ = self.evaluate()
-            if result.get('pred_class'):
-                changed = self._key(result) != self._key(self.result)
+            result, changed = self._merge(result)      # 최종도 같은 규칙(CNN 은 홀 판정을 못 덮음, 레이더 미정은 유지)
+            if result is not None:
                 self.status = 'unknown' if result['pred_class'] == UNKNOWN else 'judged'
                 if changed:
                     self.pred_history.append({'ts': now_str(), 'status': self.status, 'pred_class': result['pred_class'],
@@ -712,7 +787,7 @@ class DoorSession:
             'service_version': VERSION,
             'config': {k: self.cfg[k] for k in ('N_FRAMES', 'MIN_JUDGED', 'CNN_MIN_PROB', 'OPTION_MIN_JUDGED', 'OPTION_WAIT_S',
                                                  'JUDGE_TIMEOUT_S', 'OCC_ON', 'OCC_OFF', 'OCC_PTS', 'PTS_SCORE', 'PROTR_MM',
-                                                 'INTR_MM', 'INTR_FRAC', 'MOTION_THR', 'STATIC_FRAMES', 'ENTER_S', 'LEAVE_S', 'ROI')},
+                                                 'INTR_MM', 'INTR_FRAC', 'MOTION_THR', 'STATIC_FRAMES', 'ENTER_S', 'LEAVE_S', 'ROI', 'OCC_ROI')},
         })
         self.result = r
         write_json_atomic(self.dir / 'result.json', r)
@@ -766,6 +841,30 @@ class Monitor(threading.Thread):
 
     def reset(self):
         self.reset_event.set()
+
+    def learn_background(self, force=False):
+        """웹 [빈 지그 배경 등록]: 지금 depth 화면을 빈 지그 기준맵으로 채택해 background.npz 에 저장(재시작 후에도 유지).
+        시드(8/27)가 현재 카메라·지그와 안 맞으면 빈 지그도 diff≈0.6 으로 읽혀 EMPTY 로 못 들어가고, 배경은 EMPTY 에서만
+        학습하므로 스스로 못 빠져나온다(2026-11-03: 도어 5대가 세션 하나로 합쳐짐). 홀이 보이거나 움직이면 force 없이는 거부.
+        등록 뒤 diff 가 떨어지면 LEAVE_S 뒤 세션이 자연히 마감된다."""
+        m = dict(self.last_metrics)
+        d4 = self.gates.last_d4
+        if d4 is None or not m:
+            return {'ok': False, 'error': 'depth 프레임이 아직 없습니다'}
+        pts = int(m.get('pts') or 0)
+        if pts >= 2 and not force:
+            return {'ok': False, 'need_force': True, 'error': f'홀 {pts}점이 보입니다 — 도어가 올라가 있는 것 같습니다'}
+        if not m.get('static') and not force:
+            return {'ok': False, 'need_force': True, 'error': f"움직임 {m.get('motion')} — 정지 상태가 아닙니다"}
+        src = f'manual {now_str()}'
+        self.gates.set_background(d4, src)
+        try:
+            self.gates.save_background()
+        except Exception as e:                      # noqa: BLE001
+            log.warning('배경 기준맵 저장 실패: %s', e)
+        log.info('빈 지그 배경 등록(웹): 등록 전 diff %s, pts %d, z %s, force=%s', m.get('diff'), pts, m.get('z_med'), force)
+        log_event('bg_learn', diff_before=m.get('diff'), pts=pts, z=m.get('z_med'), force=bool(force))
+        return {'ok': True, 'src': src, 'diff_before': m.get('diff'), 'pts': pts, 'z': m.get('z_med')}
 
     def _set_state(self, s):
         if s != self.state:
@@ -916,7 +1015,7 @@ class Monitor(threading.Thread):
             self.last_metrics_log = now
             lh = self.last_hr if now - self.last_hr_t < 2.0 else None
             append_jsonl(OUTPUT_ROOT / 'metrics' / f'metrics_{datetime.now():%Y%m%d}.jsonl', {
-                'ts': now_str(), 'state': self.state, 'z': m['z_med'], 'diff': m.get('diff'), 'protr': m['protr'],
+                'ts': now_str(), 'state': self.state, 'z': m['z_med'], 'diff': m.get('diff'), 'diff_door': m.get('diff_door'), 'protr': m['protr'],
                 'intr': m['intr'], 'intr_full': m.get('intr_full'),
                 'motion': m['motion'], 'pts': pts, 'occ': int(occupied_raw), 'static': int(is_static),
                 'gate': lh['gate'] if lh else None, 'pred': lh['pred'] if lh else None,
@@ -1098,6 +1197,9 @@ def _preview_jpeg(width=800):
         draw_points(img, hr['points'], sc)
     x0, y0, x1, y1 = monitor.gates.roi if monitor else (0, 0, 1, 1)
     cv2.rectangle(img, (int(width * x0), int(img.shape[0] * y0)), (int(width * x1), int(img.shape[0] * y1)), (80, 80, 80), 1)
+    if monitor:                                        # 초록 = 점유(diff) 판정 영역 OCC_ROI (지그 중앙 빈 부분)
+        ox0, oy0, ox1, oy1 = monitor.gates.occ_roi
+        cv2.rectangle(img, (int(width * ox0), int(img.shape[0] * oy0)), (int(width * ox1), int(img.shape[0] * oy1)), (60, 200, 60), 1)
     band = np.zeros((44, width, 3), np.uint8); band[:] = (24, 24, 24)
     m = snap.get('metrics') or {}
     st = snap.get('state', '-')
@@ -1167,9 +1269,14 @@ def _session_entry(d, r):
     second = next((c['class'] for c in cands if c['class'] != pred), None)
     if second is None and r.get('cnn') and len(r['cnn'].get('top', [])) > 1:
         second = r['cnn']['top'][1]['class']
+    # 잠정 판정이 갱신되면 thumb/프레임 파일이 같은 이름으로 바뀌므로 수정 시각을 버전으로 붙여 브라우저 캐시를 무효화한다
+    thumb = d / 'thumb.jpg'
+    tv = int(thumb.stat().st_mtime) if thumb.exists() else 0
     return dict(r, day=day, sess=sess,
-                thumb_url=f'/thumb/{day}/{sess}' if (d / 'thumb.jpg').exists() else None,
-                frame_urls=[f'/view/{day}/{sess}/{f["file"]}' for f in r.get('frames', []) if (d / f['file']).exists()],
+                thumb_url=f'/thumb/{day}/{sess}?v={tv}' if tv else None,
+                thumb_at=time.strftime('%H:%M:%S', time.localtime(tv)) if tv else None,
+                frame_urls=[f'/view/{day}/{sess}/{f["file"]}?v={int((d / f["file"]).stat().st_mtime)}'
+                            for f in r.get('frames', []) if (d / f['file']).exists()],
                 ref_url=f'/ref/{pred}?radar={radar if radar is not None else ""}' if pred in CAD_D else None,
                 second_class=second,
                 ref2_url=f'/ref/{second}?radar={radar if radar is not None else ""}' if second in CAD_D else None,
@@ -1269,6 +1376,28 @@ def ref_image(cls):
 def api_reset():
     monitor.reset()
     return jsonify({'ok': True})
+
+
+@app.route('/bg.jpg')
+def bg_jpg():
+    """[등록된 빈 지그 배경 | 지금 depth | 차이] 확인용 컬러 이미지 — 16비트 depth 는 뷰어에서 검게 보여 눈으로 못 본다.
+    차이: 빨강=배경보다 가까움(도어·돌출), 파랑=멀어짐, 회색=같음(±BG_MM). 빈 지그인데 넓게 빨강/파랑이면 배경이 안 맞는 것."""
+    g = monitor.gates
+    bg, d4 = g.bg, g.last_d4
+    if bg is None and d4 is None:
+        return Response(status=204)
+    img, _ = depth_view.render_compare(bg, d4, bg_mm=CFG['BG_MM'], roi=g.roi, occ_roi=g.occ_roi,
+                                       titles=(f"BG: {g.bg_src or 'none'}", f"NOW {now_str()[11:]}", 'DIFF'))
+    ok, jpg = cv2.imencode('.jpg', img, [cv2.IMWRITE_JPEG_QUALITY, 85])
+    return Response(jpg.tobytes(), mimetype='image/jpeg', headers={'Cache-Control': 'no-store'})
+
+
+@app.route('/api/bg_learn', methods=['POST'])
+def api_bg_learn():
+    """지금 화면(빈 지그)을 배경 기준맵으로 등록. ?force=1 이면 홀·움직임 경고를 무시."""
+    force = request.args.get('force') in ('1', 'true')
+    r = monitor.learn_background(force=force)
+    return jsonify(r), (200 if r.get('ok') else 409)
 
 
 @app.route('/api/shutdown', methods=['POST'])

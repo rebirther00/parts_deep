@@ -113,12 +113,12 @@ python 20_session_drift.py --print                    # 표만
 클래스·레이더·품번을 판정하고 **판정 프레임만** 저장한다. 설계·결정 사항은 `DOC_infer_service_plan.md`, 운영은 `DOC_factory_infer.md`.
 
 - 상태기계: `EMPTY → JUDGING → JUDGED/UNRESOLVED → (이탈) EMPTY`. 점유는 **빈 지그 배경 기준맵**(depth 1/4, 시드 `reference_images/empty_jig_depth_small.png`)
-  대비 차이 픽셀 비율 `diff`(빈 지그 ≈0.01, 도어 ≈0.7) + 홀 검출 점 수 `pts`. 게이트: 정지(프레임 차분) · 침입(도어 ROI 안에서 배경보다 250mm 이상 가까운 픽셀 ≥2.5%) · 기하 게이트 · pose_warn.
+  대비 차이 픽셀 비율 `diff`(지그 중앙 빈 부분 `OCC_ROI` 안에서만 — 세로 바 이동 무관, 빈 지그 ≈0, 도어 ≈1) + 홀 검출 점 수 `pts`. 게이트: 정지(프레임 차분) · 침입(도어 ROI 안에서 배경보다 250mm 이상 가까운 픽셀 ≥2.5%) · 기하 게이트 · pose_warn.
   CNN 폴백은 "도어는 보이는데(pts≥4) 기하 실패"인 프레임에만 → 빈 지그 오판 차단.
 - 판정 집계는 18 과 동일(윈도 10·min_judged 3·CNN 투표·레이더 표 ≥3·품번). 첫 판정은 **잠정**(윈도가 찰 때까지 ≤10s 대기 후), 이후 2Hz 재평가로 갱신하다 **이탈 시 마지막 윈도로 최종** — 밑판→브라켓 순차 조립 공정 대응. CNN 폴백은 6점이 잡힌 기하 실패 프레임만.
 - 저장: `datasets_factory_infer/<날짜>/s_HHMMSS/` — rgb/depth ≤10쌍 + `result.json`(원자적) + `meta.json`(06 호환) + `thumb.jpg`.
   미확정(`unknown`/`unrecognized`/`abstain`)은 정지 후보 5장. `events.jsonl`, `metrics/metrics_<날짜>.jsonl`(1Hz 지표, 임계값 튜닝용), `heartbeat.json`, `background.npz`(학습된 배경).
-- 웹 `:5000`(`templates/factory_infer.html`): 라이브·지표 차트·현재 세션·오늘 도어 목록(판정 이미지 | 작업자 라벨 대표 이미지 | 2순위 후보)·재판정·원격 종료.
+- 웹 `:5000`(`templates/factory_infer.html`): 라이브·지표 차트·현재 세션·오늘 도어 목록(판정 이미지 | 작업자 라벨 대표 이미지 | 2순위 후보)·재판정·빈 지그 배경 등록(`/api/bg_learn`)·배경 보기(`/bg.jpg`, depth 컬러)·원격 종료.
   대표 이미지는 `reference_images/<class>[__radar{0,1}].jpg` (`tools/make_reference_images.py` 가 decisions.csv + 로컬 미러에서 생성).
 - 배포: `deploy/door-infer.service`(door-capture 와 Conflicts) + `deploy/install_infer.sh`(sudo 1회: 수집 서비스·키오스크 제거, 크론 nas_sync_infer 5분 + 20:00 자동 종료).
   운영 설정은 `~/.config/door-infer.env`(`DOOR_INFER_UPLOAD=0` 그림자 모드 기본 → NAS 연동 시 1). 업로드 `deploy/nas_sync_infer.sh` → `nas:Guest/weld_infer`.
