@@ -142,7 +142,7 @@ API 크레딧으로 돌린 보조 작업. 홀 판별기 결과를 주지 않고 
 
 학습 PC ↔ 추론 PC 사이의 모델(pth) 교환은 **Gitea LFS**로 한다 (ros2_ws_ms/dx300_rl과 같은 방식).
 
-- 원격: `origin` fetch = GitHub, push = GitHub **+** Gitea(`http://git.kocetismart.kr:3000/rebirther00/part_deep.git`) 동시(pushurl 2개).
+- 원격: `origin` fetch = GitHub, push = GitHub **+** Gitea(`https://git.kocetismart.kr/rebirther00/part_deep.git`) 동시(pushurl 2개).
 - LFS 저장소는 `.lfsconfig`로 **Gitea 전용**. GitHub에는 포인터 파일만 올라가고 실제 바이너리는 Gitea에만 저장된다(GitHub LFS 용량 미사용).
 - `.gitattributes`: `*.pth *.pt *.onnx *.engine` → LFS. 단 `.gitignore`가 pth를 기본 제외하므로 **배포 모델만** `.gitignore` 하단에 예외 등록:
   `attribute_models/hole_landmarks/model.pth`(홀 판별기) · `artifacts/rgbe_noaux_448_seed916_datasets_factory_v2/model.pth`(CNN 정식 run, 2026-09-23 seed916 으로 교체).
@@ -155,14 +155,14 @@ scripts/model_sync.sh push          # git add 배포 모델 → commit → GitHu
 
 # 추론 PC: 최초 1회
 git lfs install
-git clone http://git.kocetismart.kr:3000/rebirther00/part_deep.git parts_deep   # Gitea에서 clone (LFS 자동 수신)
+git clone https://git.kocetismart.kr/rebirther00/part_deep.git parts_deep   # Gitea에서 clone (LFS 자동 수신)
 #   또는 GitHub clone 후: .lfsconfig 가 Gitea를 가리키므로  git lfs pull  만 하면 됨
 # 추론 PC: 이후 갱신
 scripts/model_sync.sh pull          # git pull + git lfs pull + 배포 모델이 포인터가 아닌 실체인지 검사
 ```
 
-- 추론 PC가 GitHub에 push 권한이 없으면 `git config remote.origin.pushurl http://git.kocetismart.kr:3000/rebirther00/part_deep.git` 로 Gitea 단일 push로 바꿔 쓴다.
-- Gitea 인증은 `credential.helper=store`(`~/.git-credentials`)에 `git.kocetismart.kr:3000` 토큰이 있어야 한다.
+- 추론 PC가 GitHub에 push 권한이 없으면 `git config remote.origin.pushurl https://git.kocetismart.kr/rebirther00/part_deep.git` 로 Gitea 단일 push로 바꿔 쓴다.
+- Gitea 인증은 `credential.helper=store`(`~/.git-credentials`)에 `git.kocetismart.kr`(https, 443) 토큰이 있어야 한다.
 
 ## 유의사항
 
