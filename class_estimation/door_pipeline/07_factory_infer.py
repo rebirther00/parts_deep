@@ -1055,7 +1055,7 @@ class Monitor(threading.Thread):
             log.info('빈 지그 배경 자동 재등록: 평판 높이 비움(z_occ %s ≥ z_plate %s−%s)인데 diff %.2f — 배경맵이 틀려 있었음',
                      zo, round(zp), cfg['Z_EMPTY_TOL_MM'], diff)
             log_event('bg_auto', z_occ=zo, z_plate=round(zp), diff_before=diff)
-        self._timelapse(rgb, m, now)
+        self._timelapse(rgb, dict(m, pts=pts), now)
 
         self.last_metrics = dict(m, pts=pts, occ=occupied_raw, static=is_static, intr_flag=intruded, clean=clean,
                                  occ_for=round(occ_for, 1), empty_for=round(empty_for, 1))
