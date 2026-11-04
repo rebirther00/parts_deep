@@ -20,7 +20,7 @@ OUT = os.path.join(DOOR, 'report', 'hole_analysis', 'samples' + (f'_{tag}' if ta
 os.makedirs(OUT, exist_ok=True)
 E = json.load(open(os.path.join(DOOR, 'attribute_models', 'hole_landmarks', f'eval_classifier_{tag}.json' if tag else 'eval_classifier.json')))
 rows = sum((v['rows'] for v in E.values()), []) if tag else E['datasets_all']['rows'] + E.get('datasets_field', {}).get('rows', [])
-COL = {'bolt': (255, 0, 0), 'corner_hinge': (0, 0, 255), 'corner_latch': (0, 140, 255)}
+COL = {'bolt': (255, 0, 0), 'corner_hinge': (0, 0, 255), 'corner_latch': (0, 140, 255), 'bracket': (255, 0, 255)}
 
 
 def draw(net, dev, row, title):
