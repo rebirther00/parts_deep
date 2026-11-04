@@ -44,5 +44,19 @@ m=d['metrics']; s=d['session'] or {}
 print('state', d['state'], '%.0fs' % d['state_for_s'], '| camera', d['camera_ok'], '| shadow', d['service']['shadow'], '| today', d['today'])
 print('diff', m.get('diff'), 'intr', m.get('intr'), 'intr_full', m.get('intr_full'), 'motion', m.get('motion'), 'pts', m.get('pts'), 'static', m.get('static'), 'clean', m.get('clean'))
 s and print('session', s.get('session_dir'), s.get('status'), s.get('class'), 'judged', s.get('n_judged'), '/', s.get('window'), s.get('gate_counts'))" ;;
-    *) echo "usage: $0 start|stop|restart|status"; exit 2 ;;
+    restart-when-empty)
+        # 빈 지그(EMPTY) 가 될 때까지 기다렸다가 재시작 — 수정본 배포 시 진행 중 세션을 끊지 않는다 (최대 3시간 대기)
+        PORT=${DOOR_INFER_PORT:-5000}
+        for _ in $(seq 1 2160); do
+            st=$(curl -s --max-time 3 http://127.0.0.1:$PORT/api/status | python3 -c "import json,sys; print(json.load(sys.stdin)['state'])" 2>/dev/null)
+            [ "$st" = "EMPTY" ] && break
+            sleep 5
+        done
+        echo "$(date '+%F %T') state=$st → 재시작"
+        if systemctl is-active --quiet door-infer.service 2>/dev/null; then
+            kill -TERM "$(systemctl show door-infer -p MainPID --value)"; sleep 8; systemctl is-active door-infer.service
+        else
+            do_stop; do_start
+        fi ;;
+    *) echo "usage: $0 start|stop|restart|restart-when-empty|status"; exit 2 ;;
 esac
