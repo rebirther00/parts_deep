@@ -77,6 +77,7 @@ def main():
     ap.add_argument("--no-mirror", action="store_true", help="result.json·thumb.jpg 로컬 미러 생략")
     ap.add_argument("--mirror-dir", default=str(MIRROR), help="미러 위치 (기본 datasets_factory_infer/; 테스트용)")
     ap.add_argument("--include-open", action="store_true", help="final=false(진행 중) 세션도 등록")
+    ap.add_argument("--timelapse-days", type=int, default=3, help="타임랩스 미러 일수 (0=안 받음)")
     args = ap.parse_args()
     mirror = Path(args.mirror_dir).resolve()
 
@@ -221,6 +222,23 @@ def main():
             copy("heartbeat.json", mirror / "heartbeat.json")
         except Exception as e:                      # noqa: BLE001
             print(f"  경고: heartbeat.json 미러 실패 — {e}")
+    # 타임랩스(1분 1장) — 최근 N일치 index.jsonl + jpg 를 미러 (webapp 세션 상세에서 세션 구간 프레임 표시). 새 파일만 받는다
+    if not args.no_mirror and args.timelapse_days > 0:
+        import datetime as _dt
+        days = {(_dt.date.today() - _dt.timedelta(days=i)).strftime("%Y%m%d") for i in range(args.timelapse_days)}
+        tl = [f for f in files if f.startswith("timelapse/") and f.split("/")[1] in days]
+        n_tl = 0
+        for rel in tl:
+            dst = mirror / rel
+            if rel.endswith("index.jsonl") or not dst.exists():
+                try:
+                    copy(rel, dst)
+                    n_tl += 1
+                except Exception as e:              # noqa: BLE001
+                    print(f"  경고: 타임랩스 미러 실패 {rel} — {e}")
+                    break
+        if n_tl:
+            print(f"타임랩스 미러 {n_tl}개 파일 (최근 {args.timelapse_days}일)")
     total = cur.execute("SELECT COUNT(*) FROM inference_results").fetchone()[0]
     by = dict(cur.execute("SELECT status, COUNT(*) FROM inference_results GROUP BY status").fetchall())
     print(f"등록·갱신 {n_new}개 / 기존 {n_skip}개 / 진행 중 {n_open}개 — inference_results {total}행 {by}")

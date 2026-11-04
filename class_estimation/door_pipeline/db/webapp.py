@@ -1731,6 +1731,12 @@ INFER_DETAIL = """
 <h2>후보 (CAD D 거리순)</h2>
 <div class="tbl"><table><tr><th>클래스</th><th class="n">CAD D</th><th class="n">편차 mm</th></tr>
 {% for c in cands %}<tr><td>{{ c['class'] }}</td><td class="n">{{ c['cad_D_mm'] }}</td><td class="n">{{ c['diff_mm'] }}</td></tr>{% endfor %}</table></div>
+<h2>세션 구간 타임랩스 <span class="muted small">1분 1장 · {{ tl|length }}장 ({{ (r.started_at or '')[11:16] }}~{{ (r.ended_at or '')[11:16] }}) — 육안 판정 근거. 테두리: 회색 빈 지그 · 주황 판정 중 · 초록 판정 완료</span></h2>
+{% if tl %}<div style="display:flex;gap:6px;overflow-x:auto;padding:4px 0">
+{% for f in tl %}<a href="{{ url_for('inference_tl', day=f.day, name=f.file) }}" target="_blank" style="flex:0 0 auto;text-align:center" title="{{ f.ts }} {{ f.state }} {{ f.pred_class or '' }} z_occ {{ f.z_occ }} diff {{ f.diff }} pts {{ f.pts }}">
+  <img src="{{ url_for('inference_tl', day=f.day, name=f.file) }}" loading="lazy" style="width:180px;height:112px;object-fit:cover;border-radius:4px;border:2px solid {{ {'EMPTY':'#8a93a3','JUDGING':'#d08a2a','JUDGED':'#2F7D4F','UNRESOLVED':'#B45D0E'}.get(f.state, '#ccc') }}">
+  <div class="muted small">{{ f.ts[11:16] }} {{ (f.pred_class or f.state or '')|replace('_door','') }}</div></a>{% endfor %}
+</div>{% else %}<p class="muted small">미러된 타임랩스 없음 — 박스 그림자 모드이거나 ingest_infer 가 아직 안 받음 (datasets_factory_infer/timelapse/&lt;날짜&gt;/)</p>{% endif %}
 <h2>result.json</h2>
 <pre class="notes">{{ raw }}</pre>
 """
@@ -1826,7 +1832,38 @@ def inference_detail(sid):
         cands, raw = [], m.get("result_json") or ""
     return page(f"판정 {m['session_dir']}", "inference", INFER_DETAIL, r=m, sid=sid, labels=INFER_STATUS_LABEL,
                 ref=ref_image_name(m["pred_class"], m["radar"]), ref2=ref_image_name(second, m["radar"]), second=second,
-                cands=cands, raw=raw, vlm=vlm_map(con).get(m["session_dir"]))
+                cands=cands, raw=raw, vlm=vlm_map(con).get(m["session_dir"]), tl=timelapse_frames(m))
+
+
+def timelapse_frames(m):
+    """세션 시작~종료 사이의 타임랩스 프레임 (미러 datasets_factory_infer/timelapse/<day>/index.jsonl)."""
+    day = (m.get("session_dir") or "").split("/")[0]
+    p = INFER_MIRROR / "timelapse" / day / "index.jsonl"
+    if not day or not p.exists():
+        return []
+    t0 = (m.get("started_at") or "")[11:19]
+    t1 = (m.get("ended_at") or "")[11:19] or "23:59:59"
+    out = []
+    for line in p.read_text(encoding="utf-8", errors="ignore").splitlines():
+        try:
+            f = json.loads(line)
+        except ValueError:
+            continue
+        hms = f.get("ts", "")[11:19]
+        if t0 <= hms <= t1 and (p.parent / f.get("file", "")).exists():
+            f["day"] = day
+            out.append(f)
+    return out
+
+
+@app.route("/inference/tl/<day>/<name>")
+def inference_tl(day, name):
+    if not re.fullmatch(r"\d{8}", day) or not re.fullmatch(r"(bg_)?\d{6}\.jpg", name):
+        abort(404)
+    p = INFER_MIRROR / "timelapse" / day / name
+    if not p.exists():
+        abort(404)
+    return send_file(p, max_age=86400)
 
 
 @app.route("/inference/thumb/<int:sid>")

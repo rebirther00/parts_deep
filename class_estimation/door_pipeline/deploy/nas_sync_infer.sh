@@ -34,4 +34,10 @@ done
 for f in events.jsonl heartbeat.json; do
     [ -e "$ROOT/$f" ] && "$RCLONE" copyto "$ROOT/$f" "$DEST/$f" >>"$LOG" 2>&1
 done
+
+# 타임랩스(1분 1장, 육안 판정 근거) — 최근 2일치만 스캔해 새 파일만 올린다 (약 100KB/장, 하루 60~70MB)
+if [ -d "$ROOT/timelapse" ]; then
+    "$RCLONE" copy "$ROOT/timelapse" "$DEST/timelapse" --max-age 2d --transfers 4 --timeout 60s --retries 2 >>"$LOG" 2>&1 \
+        || echo "$(date '+%F %T') FAIL timelapse (다음 주기에 재시도)" >>"$LOG"
+fi
 exit 0

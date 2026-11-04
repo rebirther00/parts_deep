@@ -50,6 +50,10 @@
   #modal .close { float:right; background:#3a4150; color:#fff; border:none; border-radius:8px; padding:6px 12px; cursor:pointer; }
   #toast { position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:#e8eaf0; color:#0f1218; font-weight:700; padding:10px 22px; border-radius:10px; display:none; z-index:30; }
   #metricsChart { width:100%; height:110px; display:block; background:#161b24; border-radius:8px; }
+  .tl { flex:0 0 auto; width:128px; cursor:pointer; scroll-snap-align:start; }
+  .tl img { width:128px; height:80px; object-fit:cover; border-radius:4px; border:2px solid transparent; display:block; background:#000; }
+  .tl.EMPTY img { border-color:#3a4150; } .tl.JUDGING img { border-color:#8a5a00; } .tl.JUDGED img { border-color:#1d7a45; } .tl.UNRESOLVED img { border-color:#9a3a1a; }
+  .tl .t { font-size:10.5px; color:#9aa3b5; text-align:center; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 </style>
 </head>
 <body>
@@ -66,6 +70,8 @@
       <h2>라이브 (점유·정지·침입 지표는 영상 아래 띠)</h2>
       <img id="preview" src="/frame.jpg" alt="camera">
       <canvas id="metricsChart" width="400" height="110" title="오늘 diff(주황)·intr(빨강)·motion/50(회색) 시계열 — 배경은 상태(판정 중/완료/미확정)"></canvas>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px"><h2 style="margin:0">타임랩스 (1분 1장) <span id="tlCount" class="muted"></span></h2><span class="muted" style="font-size:11px">클릭 → 원본 · 10분마다 배경 비교(bg_) 포함</span></div>
+      <div id="tlStrip" style="display:flex;gap:4px;overflow-x:auto;padding:4px 0;scroll-snap-type:x proximity"></div>
     </div>
     <div class="card" style="margin-top:12px">
       <h2>현재 세션</h2>
@@ -187,9 +193,30 @@ async function loadSessions() {
   document.querySelectorAll('tr.row').forEach(tr => tr.onclick = () => openModal(sessionsCache[+tr.dataset.i]));
 }
 
+let tlFrames = [];
+async function loadTimelapse() {
+  try {
+    const r = await (await fetch('/api/timelapse?date=' + (curDate||''))).json();
+    tlFrames = r.frames || [];
+    $('#tlCount').textContent = tlFrames.length ? `${tlFrames.length}장 · ${tlFrames[0].ts.slice(11,16)}~${tlFrames[tlFrames.length-1].ts.slice(11,16)}` : '(없음)';
+    const strip = $('#tlStrip'); const atEnd = strip.scrollLeft + strip.clientWidth >= strip.scrollWidth - 140;
+    strip.innerHTML = tlFrames.map((f,i)=>`<div class="tl ${f.state||''}" data-i="${i}" title="${f.ts.slice(11,19)} ${f.state} ${f.pred_class||''} z_occ ${f.z_occ||'-'} diff ${fmt(f.diff,2)} pts ${f.pts}"><img src="${f.url}" loading="lazy" alt=""><div class="t">${f.ts.slice(11,16)} ${f.pred_class ? f.pred_class.replace('_door','') : (f.state==='EMPTY'?'빈 지그':f.state)}</div></div>`).join('') || '<span class="muted">오늘 타임랩스 없음</span>';
+    strip.querySelectorAll('.tl').forEach(el => el.onclick = () => openTl(tlFrames[+el.dataset.i]));
+    if (atEnd) strip.scrollLeft = strip.scrollWidth;
+  } catch (e) {}
+}
+function openTl(f) {
+  $('#mTitle').textContent = `타임랩스 ${f.ts} · ${f.state} ${f.session_dir||''} ${f.pred_class||''} · z_occ ${f.z_occ||'-'} diff ${fmt(f.diff,3)} pts ${f.pts} intr ${fmt(f.intr,3)}${f.z_empty?' · 평판 높이 비움':''}`;
+  $('#mGrid').innerHTML = `<img src="${f.url}" style="grid-column:1/-1;width:100%;max-width:1200px">` + (f.bg_url ? `<img src="${f.bg_url}" style="grid-column:1/-1;width:100%;max-width:1460px">` : '');
+  $('#mJson').textContent = JSON.stringify(f, null, 1);
+  $('#modal').style.display = 'flex';
+}
 function openModal(s) {
   $('#mTitle').textContent = `${s.session_dir} — ${s.pred_class||s.class||'-'} ${s.part_no||''} (${s.status||'진행'}${s.final?'':' · 잠정'}) · 저장 프레임 ${s.thumb_at||''}`;
-  $('#mGrid').innerHTML = (s.frame_urls||[]).map((u,i)=>{ const f=(s.frames||[])[i]||{}; return `<figure><img src="${u}" loading="lazy"><figcaption class="muted">${f.file||''} gate ${f.gate||'-'} ${f.pred||''} D ${fmt(f.D_mm,0)}</figcaption></figure>`; }).join('') || '<span class="muted">저장 프레임 없음</span>';
+  const t0 = (s.started_at||'').slice(11,19), t1 = (s.ended_at||'').slice(11,19) || '23:59:59';
+  const tl = tlFrames.filter(f => f.ts.slice(0,10) === (s.started_at||'').slice(0,10) && f.ts.slice(11,19) >= t0 && f.ts.slice(11,19) <= t1);
+  $('#mGrid').innerHTML = ((s.frame_urls||[]).map((u,i)=>{ const f=(s.frames||[])[i]||{}; return `<figure><img src="${u}" loading="lazy"><figcaption class="muted">${f.file||''} gate ${f.gate||'-'} ${f.pred||''} D ${fmt(f.D_mm,0)}</figcaption></figure>`; }).join('') || '<span class="muted">저장 프레임 없음</span>')
+    + (tl.length ? `<h3 style="grid-column:1/-1;margin-top:8px">세션 구간 타임랩스 ${tl.length}장 (${t0}~${t1})</h3>` + tl.map(f=>`<figure><img src="${f.url}" loading="lazy"><figcaption class="muted">${f.ts.slice(11,16)} ${f.state} ${f.pred_class||''} · z_occ ${f.z_occ||'-'} diff ${fmt(f.diff,2)} pts ${f.pts}</figcaption></figure>`).join('') : '');
   const j = Object.assign({}, s); delete j.frames; delete j.frame_urls; delete j.config; delete j.intrinsics;
   $('#mJson').textContent = JSON.stringify(j, null, 1);
   $('#modal').style.display = 'flex';
@@ -214,7 +241,7 @@ async function drawMetrics() {
   } catch (e) {}
 }
 
-$('#dateSel').onchange = e => { curDate = e.target.value; loadSessions(); drawMetrics(); };
+$('#dateSel').onchange = e => { curDate = e.target.value; loadSessions(); drawMetrics(); loadTimelapse(); };
 $('#resetBtn').onclick = async () => { await fetch('/api/reset', {method:'POST'}); toast('재판정: 윈도 초기화'); };
 $('#bgBtn').onclick = async () => {
   if (!confirm('지금 화면에 도어가 없는지(빈 지그) 확인하세요.\n현재 depth 화면을 빈 지그 배경으로 등록합니다.')) return;
@@ -241,7 +268,8 @@ setInterval(() => { $('#preview').src = '/frame.jpg?t=' + Date.now(); }, 700);
 setInterval(refreshStatus, 1000);
 setInterval(async () => { const t = dates.length ? dates[0].date : null; await loadDates(); await loadSessions(); }, 15000);
 setInterval(drawMetrics, 30000);
-(async () => { await refreshStatus(); await loadDates(); await loadSessions(); drawMetrics(); })();
+setInterval(loadTimelapse, 60000);
+(async () => { await refreshStatus(); await loadDates(); await loadTimelapse(); await loadSessions(); drawMetrics(); })();
 </script>
 </body>
 </html>

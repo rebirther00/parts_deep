@@ -95,8 +95,14 @@ CFG = dict(
     PTS_SCORE=_env('PTS_SCORE', 0.5),
     BG_MM=_env('BG_MM', 25.0),               # 배경과 이만큼 다르면 '변화' (도어 면은 평판보다 ≈33mm 앞)
     BG_TAU_EMPTY_S=_env('BG_TAU_EMPTY_S', 300.0),     # EMPTY 에서 배경 갱신 시정수 (카메라 드리프트 추종)
-    BG_TAU_ABSORB_S=_env('BG_TAU_ABSORB_S', 1200.0),  # UNRESOLVED 에서 흡수 시정수 (기종 외 부품이 오래 머물면 배경으로)
+    BG_UPDATE_MM=_env('BG_UPDATE_MM', 10.0),  # 배경 갱신은 기존 배경과 이 안쪽으로 같은 픽셀만(보수적). 밑판(≈20~33mm 앞)이 흡수되던 사고(11/3→11/4) 방지
     BG_SAVE_S=_env('BG_SAVE_S', 600.0),
+    Z_PLATE_MM=_env('Z_PLATE_MM', 1468.0),    # 빈 지그 평판 깊이(OCC_ROI 중앙값, 11/3 등록 시 1468). 배경 등록 때 갱신·npz 에 보존
+    Z_EMPTY_TOL_MM=_env('Z_EMPTY_TOL_MM', 15.0),  # OCC_ROI 중앙값이 평판 − 이 값 이상(= 평판 높이)이면 배경맵과 무관하게 '비움' (도어 면은 ≈33mm 앞)
+    TL_EVERY_S=_env('TL_EVERY_S', 60.0),      # 타임랩스: 1분 1장 (육안 판정 근거·세션 경계 검증), timelapse/<날짜>/HHMMSS.jpg + index.jsonl
+    TL_BG_EVERY_S=_env('TL_BG_EVERY_S', 600.0),   # 배경 비교 그림(/bg.jpg 와 동일) 10분 1장 → bg_HHMMSS.jpg
+    TL_WIDTH=_env('TL_WIDTH', 960),
+    TL_RETAIN_DAYS=_env('TL_RETAIN_DAYS', 30),
     PROTR_MM=_env('PROTR_MM', 40.0),         # 진단 지표용 (판정에 안 씀 — 지그 레일·클램프가 평판보다 40mm+ 돌출해 구분 안 됨)
     INTR_MM=_env('INTR_MM', 250.0),          # 배경(없으면 프레임 중앙값)보다 이만큼 가까우면 침입(사람·물체). 도어 ROI 안에서만
     INTR_FRAC=_env('INTR_FRAC', 0.025),      # 실측(T=250, ROI): 도어만 0.007~0.016, 작업자 유입 0.033~0.062 → 중간값
@@ -127,6 +133,8 @@ OUTPUT_ROOT = Path(CFG['OUTPUT_ROOT'])
 LOG_DIR = DOOR_DIR / 'logs'
 REF_DIR = DOOR_DIR / 'reference_images'
 STATES = ('EMPTY', 'JUDGING', 'JUDGED', 'UNRESOLVED')
+import re as _re                                          # noqa: E402
+re_tl = _re.compile(r'(bg_)?\d{6}\.jpg')
 POINT_COLORS = (('bolt', (255, 0, 0)), ('corner_hinge', (0, 0, 255)),
                 ('corner_latch', (0, 140, 255)), ('bracket', (255, 0, 255)))
 
@@ -328,11 +336,14 @@ class SceneGates:
     def load_background(self):
         """학습된 OUTPUT_ROOT/background.npz → 없으면 시드 reference_images/empty_jig_depth_small.png (8/27 빈 지그)."""
         p = OUTPUT_ROOT / 'background.npz'
+        self.z_plate = float(self.cfg['Z_PLATE_MM'])
         try:
             if p.exists():
                 z = np.load(p)
                 self.bg = z['bg'].astype(np.float32)
                 self.bg_src = f"learned {now_str(float(z['ts']))}"
+                if 'z_plate' in z.files and float(z['z_plate']) > 0:
+                    self.z_plate = float(z['z_plate'])
                 return
         except Exception as e:                      # noqa: BLE001
             log.warning('background.npz 로드 실패: %s', e)
@@ -345,25 +356,37 @@ class SceneGates:
         if self.bg is None or not self.bg_dirty:
             return
         tmp = OUTPUT_ROOT / 'background.tmp.npz'      # savez 는 .npz 로 끝나지 않으면 확장자를 덧붙인다
-        np.savez_compressed(tmp, bg=self.bg.astype(np.float32), ts=time.time())
+        np.savez_compressed(tmp, bg=self.bg.astype(np.float32), ts=time.time(), z_plate=float(self.z_plate or 0))
         os.replace(tmp, OUTPUT_ROOT / 'background.npz')
         self.bg_dirty = False
 
+    def occ_median(self, d4):
+        """OCC_ROI(지그 중앙 빈 부분) 유효 depth 중앙값(mm). 없으면 None."""
+        if d4 is None:
+            return None
+        do = self._roi(d4, self.occ_roi)
+        v = do > 0
+        return float(np.median(do[v])) if int(v.sum()) >= 100 else None
+
     def update_background(self, d4, tau, dt):
-        """1/4 해상도 depth 로 EMA 갱신(유효 픽셀만). bg 가 없거나 크기가 다르면 즉시 채택."""
+        """1/4 해상도 depth 로 EMA 갱신 — **기존 배경과 BG_UPDATE_MM 안쪽으로 같은 픽셀만**(카메라 드리프트·온도 변화 추종).
+        밑판·도어처럼 수십 mm 다른 것은 절대 흡수하지 않는다(2026-11-03 오후 EMA 가 밑판을 흡수해 11/4 하루 종일 세션이 안 끝남).
+        bg 가 없거나 크기가 다르면 즉시 채택."""
         if d4 is None:
             return
         if self.bg is None or self.bg.shape != d4.shape:
             self.bg = d4.copy()
             self.bg_src, self.bg_dirty = 'init', True
+            self.z_plate = self.occ_median(d4) or self.z_plate
             return
         a = min(1.0, dt / max(tau, 1e-3))
-        v = d4 > 0
+        v = (d4 > 0) & (self.bg > 0) & (np.abs(d4 - self.bg) < self.cfg['BG_UPDATE_MM'])
         self.bg[v] = (1 - a) * self.bg[v] + a * d4[v]
         self.bg_dirty = True
 
     def set_background(self, d4, src):
-        """현재 depth(1/4) 를 빈 지그 배경으로 즉시 채택 (웹 [빈 지그 배경 등록]). depth 가 비는 픽셀은 기존 값을 남긴다."""
+        """현재 depth(1/4) 를 빈 지그 배경으로 즉시 채택 (웹 [빈 지그 배경 등록]). depth 가 비는 픽셀은 기존 값을 남긴다.
+        평판 깊이 z_plate(OCC_ROI 중앙값)도 함께 갱신 — 배경맵과 독립된 '비움' 기준."""
         if d4 is None:
             return False
         bg = d4.astype(np.float32).copy()
@@ -371,6 +394,9 @@ class SceneGates:
             hole = bg <= 0
             bg[hole] = self.bg[hole]
         self.bg, self.bg_src, self.bg_dirty = bg, src, True
+        zp = self.occ_median(d4)
+        if zp:
+            self.z_plate = zp
         return True
 
     def measure(self, rgb, depth):
@@ -379,12 +405,14 @@ class SceneGates:
         g = self._roi(gray)
         motion = float(np.abs(g - self.prev_gray).mean()) if self.prev_gray is not None and self.prev_gray.shape == g.shape else 0.0
         self.prev_gray = g
-        out = dict(z_med=None, protr=0.0, intr=0.0, diff=None, diff_door=None, motion=round(motion, 2), valid=0.0)
+        out = dict(z_med=None, z_occ=None, protr=0.0, intr=0.0, diff=None, diff_door=None, motion=round(motion, 2), valid=0.0)
         self.last_d4 = None
         if depth is None:
             return out
         d4 = depth[::4, ::4]
         self.last_d4 = d4
+        zo = self.occ_median(d4)
+        out['z_occ'] = round(zo) if zo else None
         d = self._roi(d4)
         valid = d > 0
         n = int(valid.sum())
@@ -942,8 +970,12 @@ class Monitor(threading.Thread):
         pts = self.last_pts if now - self.last_hr_t < 2.0 else 0
 
         diff = m.get('diff')
-        occupied_raw = pts >= cfg['OCC_PTS'] or (diff is not None and diff >= cfg['OCC_ON'])
-        empty_raw = pts < 2 and (diff is None or diff <= cfg['OCC_OFF'])
+        # 평판 높이 기준 비움: OCC_ROI 중앙값이 평판(z_plate) − 허용치 이상이면 배경맵이 틀려도(도어 흡수 등) 비움으로 본다
+        zp, zo = self.gates.z_plate, m.get('z_occ')
+        z_empty = bool(zp and zo and zo >= zp - cfg['Z_EMPTY_TOL_MM'])
+        occupied_raw = pts >= cfg['OCC_PTS'] or (diff is not None and diff >= cfg['OCC_ON'] and not z_empty)
+        empty_raw = pts < 2 and (diff is None or diff <= cfg['OCC_OFF'] or z_empty)
+        m['z_empty'] = z_empty
         self.occ_since = (self.occ_since or now) if occupied_raw else None
         self.empty_since = (self.empty_since or now) if empty_raw else None
         occ_for = now - self.occ_since if self.occ_since else 0.0
@@ -1002,15 +1034,28 @@ class Monitor(threading.Thread):
             if empty_for >= cfg['LEAVE_S']:
                 self._finish('leave')
 
-        # 배경 기준맵 갱신 — EMPTY(정지·도어 없음·비움 판정) 는 드리프트 추종, UNRESOLVED 는 느린 흡수
+        # 배경 기준맵 갱신 — EMPTY(정지·도어 없음·비움 판정) 에서만, 그것도 기존 배경과 거의 같은 픽셀만(update_background 참조).
+        # UNRESOLVED 흡수는 폐지: 기종 외 부품은 치워질 때 비움으로 끝나며, 흡수는 밑판·도어를 배경에 넣는 사고만 냈다.
         dt = now - self.last_step_t
         self.last_step_t = now
         d4 = self.gates.last_d4
-        if d4 is not None and is_static and pts < 2:
-            if self.state == 'EMPTY' and (self.gates.bg is None or (diff is not None and diff <= cfg['OCC_OFF'])):
-                self.gates.update_background(d4, cfg['BG_TAU_EMPTY_S'], dt)
-            elif self.state == 'UNRESOLVED':
-                self.gates.update_background(d4, cfg['BG_TAU_ABSORB_S'], dt)
+        if d4 is not None and is_static and pts < 2 and self.state == 'EMPTY' and \
+                (self.gates.bg is None or (diff is not None and diff <= cfg['OCC_OFF'])):
+            self.gates.update_background(d4, cfg['BG_TAU_EMPTY_S'], dt)
+        # 자가 복구: 평판 높이로는 분명히 비었는데(z_empty, 홀 0, 정지 60초) 배경맵은 '점유'라고 하면 배경맵이 틀린 것(도어 흡수 등)
+        # → 지금 화면을 빈 지그 배경으로 다시 등록 (사용자가 [빈 지그 배경 등록] 을 누르는 것과 같음)
+        if d4 is not None and z_empty and is_static and pts == 0 and diff is not None and diff >= cfg['OCC_ON'] \
+                and empty_for >= 60.0 and now - getattr(self, 'last_bg_auto_t', 0.0) >= 600.0:
+            self.last_bg_auto_t = now
+            self.gates.set_background(d4, f'auto {now_str()}')
+            try:
+                self.gates.save_background()
+            except Exception as e:                      # noqa: BLE001
+                log.warning('배경 기준맵 저장 실패: %s', e)
+            log.info('빈 지그 배경 자동 재등록: 평판 높이 비움(z_occ %s ≥ z_plate %s−%s)인데 diff %.2f — 배경맵이 틀려 있었음',
+                     zo, round(zp), cfg['Z_EMPTY_TOL_MM'], diff)
+            log_event('bg_auto', z_occ=zo, z_plate=round(zp), diff_before=diff)
+        self._timelapse(rgb, m, now)
 
         self.last_metrics = dict(m, pts=pts, occ=occupied_raw, static=is_static, intr_flag=intruded, clean=clean,
                                  occ_for=round(occ_for, 1), empty_for=round(empty_for, 1))
@@ -1018,13 +1063,53 @@ class Monitor(threading.Thread):
             self.last_metrics_log = now
             lh = self.last_hr if now - self.last_hr_t < 2.0 else None
             append_jsonl(OUTPUT_ROOT / 'metrics' / f'metrics_{datetime.now():%Y%m%d}.jsonl', {
-                'ts': now_str(), 'state': self.state, 'z': m['z_med'], 'diff': m.get('diff'), 'diff_door': m.get('diff_door'), 'protr': m['protr'],
+                'ts': now_str(), 'state': self.state, 'z': m['z_med'], 'z_occ': m.get('z_occ'), 'z_empty': int(bool(m.get('z_empty'))),
+                'diff': m.get('diff'), 'diff_door': m.get('diff_door'), 'protr': m['protr'],
                 'intr': m['intr'], 'intr_full': m.get('intr_full'),
                 'motion': m['motion'], 'pts': pts, 'occ': int(occupied_raw), 'static': int(is_static),
                 'gate': lh['gate'] if lh else None, 'pred': lh['pred'] if lh else None,
                 'D': round(lh['D_mm'], 1) if lh and lh['D_mm'] else None,
                 'ms': round(self.last_infer_ms) if lh else None,
             })
+
+    # -- 타임랩스 (1분 1장, 육안 판정 근거·세션 경계 검증) --
+
+    def _timelapse(self, rgb, m, now):
+        cfg = self.cfg
+        if now - getattr(self, 'last_tl_t', 0.0) < cfg['TL_EVERY_S']:
+            return
+        self.last_tl_t = now
+        try:
+            day = datetime.now().strftime('%Y%m%d')
+            tdir = OUTPUT_ROOT / 'timelapse' / day
+            tdir.mkdir(parents=True, exist_ok=True)
+            stamp = datetime.now().strftime('%H%M%S')
+            h, w = rgb.shape[:2]
+            sc = cfg['TL_WIDTH'] / w
+            img = cv2.resize(rgb, (int(cfg['TL_WIDTH']), int(h * sc)), interpolation=cv2.INTER_AREA)
+            hr = self.last_hr if now - self.last_hr_t < 2.0 else None
+            if hr:
+                draw_points(img, hr['points'], sc)
+            cv2.imwrite(str(tdir / f'{stamp}.jpg'), img, [cv2.IMWRITE_JPEG_QUALITY, 80])
+            s = self.session
+            append_jsonl(tdir / 'index.jsonl', {
+                'ts': now_str(), 'file': f'{stamp}.jpg', 'state': self.state,
+                'session_dir': s.rel if s else None, 'status': s.status if s else None,
+                'pred_class': (s.result or {}).get('pred_class') if s else None,
+                'radar': (s.result or {}).get('radar') if s else None,
+                'z_occ': m.get('z_occ'), 'diff': m.get('diff'), 'pts': m.get('pts'), 'intr': m.get('intr'),
+                'z_empty': bool(m.get('z_empty')), 'gate': hr['gate'] if hr else None,
+            })
+            if now - getattr(self, 'last_tlbg_t', 0.0) >= cfg['TL_BG_EVERY_S']:
+                self.last_tlbg_t = now
+                g = self.gates
+                if g.bg is not None or g.last_d4 is not None:
+                    bimg, _ = depth_view.render_compare(g.bg, g.last_d4, bg_mm=cfg['BG_MM'], roi=g.roi, occ_roi=g.occ_roi,
+                                                        titles=(f"BG: {g.bg_src or 'none'} zp {g.z_plate and round(g.z_plate)}",
+                                                                f"NOW {now_str()[11:]} zo {m.get('z_occ')}", 'DIFF'))
+                    cv2.imwrite(str(tdir / f'bg_{stamp}.jpg'), bimg, [cv2.IMWRITE_JPEG_QUALITY, 80])
+        except Exception as e:                          # noqa: BLE001
+            log.warning('타임랩스 저장 실패: %s', e)
 
     def _enter(self):
         with self.lock:
@@ -1113,6 +1198,9 @@ def retention_once():
     for p in (OUTPUT_ROOT / 'metrics').glob('metrics_*.jsonl'):
         if (now - p.stat().st_mtime) / 86400 >= CFG['RETAIN_METRICS_DAYS']:
             p.unlink()
+    for d in (OUTPUT_ROOT / 'timelapse').glob('*'):
+        if d.is_dir() and (now - d.stat().st_mtime) / 86400 >= CFG['TL_RETAIN_DAYS']:
+            shutil.rmtree(d, ignore_errors=True)
     if n_png or n_sess:
         log.info('보존 정리: png %d개 삭제, 세션 %d개 삭제', n_png, n_sess)
 
@@ -1209,7 +1297,9 @@ def _preview_jpeg(width=800):
     col = {'EMPTY': (160, 160, 160), 'JUDGING': (0, 200, 255), 'JUDGED': (0, 220, 0), 'UNRESOLVED': (0, 120, 255)}.get(st, (200, 200, 200))
     cv2.putText(band, f'{st}', (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.8, col, 2)
     dtxt = '-' if m.get('diff') is None else f"{m['diff']:.3f}"
-    txt = (f"z {m.get('z_med') or '-'} diff {dtxt} intr {m.get('intr', 0):.3f} "
+    zp = monitor.gates.z_plate if monitor else None
+    txt = (f"z {m.get('z_med') or '-'} zo {m.get('z_occ') or '-'}/{round(zp) if zp else '-'}{' Z-EMPTY' if m.get('z_empty') else ''} "
+           f"diff {dtxt} intr {m.get('intr', 0):.3f} "
            f"motion {m.get('motion', 0):.1f} pts {m.get('pts', 0)} "
            f"{'OCC' if m.get('occ') else 'empty'} {'static' if m.get('static') else 'moving'}"
            f"{' INTR' if m.get('intr_flag') else ''} | {snap.get('infer_ms', 0):.0f}ms")
@@ -1252,7 +1342,8 @@ def api_status():
         'serial': (source.calib or {}).get('serial'),
         'disk_free_gb': round(disk.free / 1e9, 1), 'disk_warn': disk.free / 1e9 < CFG['DISK_WARN_GB'],
         'today': today_counts(), 'upload': {'enabled': CFG['UPLOAD'], **last_upload_info()},
-        'background': {'src': monitor.gates.bg_src, 'loaded': monitor.gates.bg is not None},
+        'background': {'src': monitor.gates.bg_src, 'loaded': monitor.gates.bg is not None,
+                       'z_plate': round(monitor.gates.z_plate) if monitor.gates.z_plate else None},
         'service': {'version': VERSION, 'started': now_str(monitor.started), 'models': monitor.models,
                     'shadow': not CFG['UPLOAD']},
         'now': datetime.now().strftime('%m/%d %H:%M:%S'),
@@ -1373,6 +1464,43 @@ def ref_image(cls):
         ok, jpg = cv2.imencode('.jpg', img)
         return Response(jpg.tobytes(), mimetype='image/jpeg')
     return send_file(p, mimetype='image/jpeg', max_age=3600)
+
+
+@app.route('/api/timelapse')
+def api_timelapse():
+    """날짜별 타임랩스 목록 (index.jsonl). ?date=YYYYMMDD, ?from=HH:MM:SS&to=HH:MM:SS 로 세션 구간만."""
+    day = request.args.get('date') or datetime.now().strftime('%Y%m%d')
+    if not day.replace('unsynced_', '').isdigit():
+        abort(404)
+    p = OUTPUT_ROOT / 'timelapse' / day / 'index.jsonl'
+    if not p.exists():
+        return jsonify({'date': day, 'frames': []})
+    t0, t1 = request.args.get('from'), request.args.get('to')
+    out = []
+    for l in p.read_text(encoding='utf-8', errors='ignore').splitlines():
+        try:
+            r = json.loads(l)
+        except ValueError:
+            continue
+        hms = r['ts'][11:19]
+        if (t0 and hms < t0) or (t1 and hms > t1):
+            continue
+        r['url'] = f"/tl/{day}/{r['file']}"
+        bgf = f"bg_{r['file']}"
+        if (p.parent / bgf).exists():
+            r['bg_url'] = f'/tl/{day}/{bgf}'
+        out.append(r)
+    return jsonify({'date': day, 'frames': out})
+
+
+@app.route('/tl/<day>/<name>')
+def tl_image(day, name):
+    if not day.replace('unsynced_', '').isdigit() or not re_tl.fullmatch(name):
+        abort(404)
+    p = OUTPUT_ROOT / 'timelapse' / day / name
+    if not p.exists():
+        abort(404)
+    return send_file(p, mimetype='image/jpeg', max_age=86400)
 
 
 @app.route('/api/reset', methods=['POST', 'GET'])

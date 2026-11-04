@@ -73,6 +73,7 @@ python db/ingest_infer.py                  # NAS → DB (+ 썸네일 미러). --
 - 확정 버튼(`/inference`): [판정대로 확정] 또는 클래스·레이더 선택 → `inference_results.confirmed_*` + `images.class_id` 재배정(door_factory_infer 안) + RR/RH 는 `capture_sessions.option_radar/option_source='user'` + notes 이력.
   확정 취소 가능. 대시보드 "현장 판정 서비스" 카드: 하트비트(10분 주기, 60분 넘으면 주황), 오늘/7일 도어, 확정 대기, 미확정, 판정=확정 일치율.
 - `door_factory_infer` 세션은 수집 루틴(pull·drift·레이더 검사 할 일)에서 제외된다. 학습 데이터로 쓰려면 확정된 세션만 골라 별도 뷰를 만든다(미구현, 판정 프레임 ≤10장/세션).
+- 타임랩스(1분 1장): `ingest_infer.py --timelapse-days 3`(기본) 이 NAS `weld_infer/timelapse/<날짜>/` 를 미러(새 파일만) → `/inference/<sid>` 상세에 세션 구간 프레임. 0 이면 안 받음.
 - 대표 이미지 `../reference_images/<class>[__radar{0,1}].jpg` 는 `../tools/make_reference_images.py` 가 `decisions.csv` + 로컬 미러에서 만든다(git 추적, 두 PC 공용).
 
 ## 주의

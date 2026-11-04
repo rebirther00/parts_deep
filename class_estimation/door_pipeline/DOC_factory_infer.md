@@ -35,13 +35,32 @@
 - 업로드 완료(`.uploaded`) 3일 뒤 png 삭제, 90일 뒤 세션 삭제, 지표 로그 14일 — 서비스가 시간당 1회 정리. 업로드 안 된 세션은 지우지 않는다.
 - 전원: 작업자/개발자가 OFF. 안 되면 **매일 20:00 자동 종료**(크론, 1분 예고). 아침 멀티탭 ON 으로 자동 기동(2~3분).
 
+## 비움(이탈) 판정과 배경맵 — 2026-11-04 개정
+
+- 비움 신호는 두 가지 중 하나면 된다(홀 점 수 < 2 전제): ① 배경맵 대비 중앙(OCC_ROI) 차이 `diff ≤ OCC_OFF`, ② **평판 높이** — OCC_ROI depth 중앙값 `z_occ` 가
+  `z_plate − Z_EMPTY_TOL_MM(15)` 이상(= 평판 높이, 도어 면은 ≈33mm 앞). ②는 배경맵이 틀려도 동작하는 독립 신호다.
+- 배경맵 EMA 갱신은 EMPTY 에서, **기존 배경과 BG_UPDATE_MM(10mm) 안쪽으로 같은 픽셀만** 추종한다(보수적). 11/3 오후 EMA 가 밑판(중앙 diff 0.09~0.12 로
+  '비움' 판정 통과)을 흡수해 11/4 하루 종일 빈 지그가 diff ≥ 0.2 로 읽혀 도어 5대가 세션 하나에 합쳐진 사고의 재발 방지. UNRESOLVED 흡수는 폐지.
+- **자가 복구**: 평판 높이로는 비었는데(z_empty·홀 0·정지 60초) 배경맵은 점유(diff ≥ OCC_ON)라고 하면 배경맵이 틀린 것이므로 지금 화면을 빈 지그 배경으로
+  자동 재등록한다(events `bg_auto`, 10분에 1회). `z_plate` 는 등록(수동/자동) 때 OCC_ROI 중앙값으로 갱신해 `background.npz` 에 보존, 없으면 `Z_PLATE_MM`(1468).
+- 확인: 지표 띠의 `zo 1500/1468 Z-EMPTY` (z_occ/z_plate), `/bg.jpg` 오른쪽 DIFF 가 빈 지그에서 회색이어야 정상.
+
+## 타임랩스 (2026-11-04, 육안 판정 근거)
+
+- 상태와 무관하게 **1분 1장** `timelapse/<날짜>/HHMMSS.jpg`(960px, 6점 오버레이) + `index.jsonl`(시각·상태·세션·잠정 클래스·z_occ·diff·pts·게이트),
+  10분마다 배경 비교 그림 `bg_HHMMSS.jpg`(/bg.jpg 와 동일). 하루 약 60~70MB, `TL_RETAIN_DAYS`(30일) 뒤 삭제.
+- `:5000` 지표 차트 아래 스트립(테두리 색 = 상태, 클릭 → 원본·배경 비교), 세션 모달에 **세션 구간 타임랩스** 표시 → 세션 경계·브라켓 조립 시점·오판 원인을 눈으로 확인.
+- NAS: `nas_sync_infer.sh` 가 최근 2일치를 새 파일만 올림(`weld_infer/timelapse/`). 학습 PC: `ingest_infer.py --timelapse-days 3`(기본) 이 미러 →
+  webapp 세션 상세에 세션 구간 타임랩스.
+
 ## 저장 구조
 
 ```
 datasets_factory_infer/
   events.jsonl                       # 상태 전이·판정·마감 (append)
   heartbeat.json                     # 10분마다 (NAS 에도 복사 → 대시보드 "서비스 살아있음")
-  background.npz                     # 학습된 빈 지그 배경 (없으면 reference_images 시드)
+  background.npz                     # 학습된 빈 지그 배경 (없으면 reference_images 시드) + z_plate(평판 높이)
+  timelapse/YYYYMMDD/HHMMSS.jpg      # 1분 1장 + index.jsonl + bg_HHMMSS.jpg(10분)
   metrics/metrics_YYYYMMDD.jsonl     # 1Hz 지표: diff·intr·motion·pts·gate·pred (임계값 튜닝용, 14일)
   20261102/s_143417/
     rgb_0000.png depth_0000.png ...  # 판정 프레임 (≤10쌍)
