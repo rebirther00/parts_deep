@@ -124,6 +124,7 @@ CFG = dict(
     IDLE_HZ=_env('IDLE_HZ', 2.0),            # 판정 중이 아닐 때 검출기 실행 빈도
     LOCKED_HZ=_env('LOCKED_HZ', 2.0),        # 잠정 판정 뒤 계속 재판정하는 빈도 (브라켓 추가 조립·레이더 브라켓 반영, 이탈 시 최종)
     CHANGE_CONFIRM_N=_env('CHANGE_CONFIRM_N', 3),   # 잠정 판정 변경은 같은 (클래스, 레이더) 가 연속 이 횟수 나와야 반영 (히스테리시스)
+    ORPHAN_RESUME_S=_env('ORPHAN_RESUME_S', 900.0),  # 재시작·정전 뒤 이 시간 안에 도어가 그대로 있으면 열린 세션(final=false)을 이어받는다
     LOOP_HZ=_env('LOOP_HZ', 10.0),
     METRICS_HZ=_env('METRICS_HZ', 1.0),
     HEARTBEAT_S=_env('HEARTBEAT_S', 600.0),
@@ -454,7 +455,7 @@ class DoorSession:
     이탈(finalize) 때 마지막 윈도로 **최종** 확정한다 — 현장은 밑판을 먼저 올리고 브라켓을 차례로 올린 뒤 용접하므로
     초기 잠정 판정은 브라켓이 덜 올라간 상태일 수 있다(2026-11-02 사용자 지적)."""
 
-    def __init__(self, cfg, camera_type, calib, models, geom_on=True):
+    def __init__(self, cfg, camera_type, calib, models, geom_on=True, resume_dir=None):
         self.cfg = cfg
         self.geom_on = geom_on
         self.provisional = False
@@ -463,13 +464,17 @@ class DoorSession:
         self.saved_at_clean = -1        # 프레임을 저장한 시점의 n_clean (이탈 시 윈도가 바뀌었으면 다시 저장)
         self.hole_judged_once = False   # 홀 판정이 한 번이라도 났으면 CNN 폴백이 덮어쓰지 못한다 (작업 중 기하 실패 프레임의 CNN 표가 흔들림)
         self._pending = None            # [key, 연속 횟수] — 변경 후보
+        self.resumed = []               # 재시작·정전 뒤 이어받은 이력 [{at, gap_s}]
         self.started_at = datetime.now()
         self.t0 = time.monotonic()
-        day = self.started_at.strftime('%Y%m%d')
-        if self.started_at.year < 2020:
-            day = f'unsynced_{day}'
-        self.dir = OUTPUT_ROOT / day / f's_{self.started_at:%H%M%S}'
-        self.dir.mkdir(parents=True, exist_ok=True)
+        if resume_dir is not None:
+            self.dir = Path(resume_dir)
+        else:
+            day = self.started_at.strftime('%Y%m%d')
+            if self.started_at.year < 2020:
+                day = f'unsynced_{day}'
+            self.dir = OUTPUT_ROOT / day / f's_{self.started_at:%H%M%S}'
+            self.dir.mkdir(parents=True, exist_ok=True)
         self.rel = str(self.dir.relative_to(OUTPUT_ROOT))
         self.camera_type, self.calib, self.models = camera_type, calib, models
         self.frames = collections.deque(maxlen=cfg['N_FRAMES'])      # 게이트 통과 프레임 (rgb/depth 보관)
@@ -489,6 +494,37 @@ class DoorSession:
         self.result = {}
         self.ended_at = None
         self.last_live = None
+        if resume_dir is not None:
+            self._resume()
+
+    def _resume(self):
+        """재시작·정전으로 final=false 로 남은 세션을 이어받는다: 시작 시각·잠정 판정·이력·저장 프레임 목록 복원.
+        윈도는 비어 있으므로 새 깨끗한 프레임이 들어올 때까지 이전 잠정값을 유지한다(update 규칙 ①)."""
+        r = load_result(self.dir) or {}
+        try:
+            self.started_at = datetime.strptime(r['started_at'], '%Y-%m-%d %H:%M:%S')
+        except (KeyError, ValueError):
+            day, sess = self.dir.parent.name.replace('unsynced_', ''), self.dir.name[2:]
+            self.started_at = datetime.strptime(day + sess, '%Y%m%d%H%M%S')
+        gap = max(0.0, time.time() - self.started_at.timestamp())
+        self.t0 = time.monotonic() - gap
+        st = r.get('status')
+        self.status = st if st in ('judged', 'unknown') else None
+        self.locked = self.provisional = self.status is not None
+        self.pred_history = list(r.get('pred_history') or [])
+        self.resumed = list(r.get('resumed') or [])
+        self.judged_at = r.get('judged_at')
+        self.saved = list(r.get('frames') or [])
+        self.saved_at_clean = 0
+        self.max_pts = int(r.get('max_pts') or 0)
+        self.door_seen = self.locked or self.max_pts >= self.cfg['OCC_PTS']
+        self.hole_judged_once = r.get('source') == 'hole' or any(h.get('source') == 'hole' for h in self.pred_history)
+        for k in ('final', 'stop_reason', 'ended_at', 'final_at', 'provisional'):
+            r.pop(k, None)
+        self.result = r if self.locked else {}
+        self.last_live = dict(r) if r else None
+        last_ts = max((p.stat().st_mtime for p in self.dir.glob('*') if p.is_file()), default=time.time())
+        self.resumed.append({'at': now_str(), 'gap_s': round(time.time() - last_ts, 1), 'from': now_str(last_ts)})
 
     @property
     def dwell(self):
@@ -808,7 +844,7 @@ class DoorSession:
         r.update({
             'session_dir': self.rel, 'status': self.status, 'status_label': STATUS_LABEL.get(self.status, self.status),
             'final': final, 'stop_reason': reason if final else '',
-            'provisional': self.provisional and not final, 'pred_history': self.pred_history,
+            'provisional': self.provisional and not final, 'pred_history': self.pred_history, 'resumed': self.resumed,
             'n_changes': max(0, len(self.pred_history) - 1), 'final_at': self.final_at,
             'started_at': self.started_at.strftime('%Y-%m-%d %H:%M:%S'), 'ended_at': self.ended_at,
             'judged_at': self.judged_at, 'dwell_s': round(self.dwell, 1),
@@ -986,6 +1022,8 @@ class Monitor(threading.Thread):
         if self.state == 'EMPTY':
             if occ_for >= cfg['ENTER_S']:
                 self._enter()
+            else:
+                self.drop_orphan_if_empty(empty_for)
         else:
             s = self.session
             s.n_processed += 1
@@ -1112,12 +1150,50 @@ class Monitor(threading.Thread):
             log.warning('타임랩스 저장 실패: %s', e)
 
     def _enter(self):
+        orphan = self.take_orphan()
         with self.lock:
             self.session = DoorSession(self.cfg, self.source.camera_type, self.source.calib, self.models,
-                                       geom_on=self.geom is not None)
-        log.info('점유 감지 → 세션 시작 %s', self.session.rel)
-        log_event('enter', session_dir=self.session.rel)
+                                       geom_on=self.geom is not None, resume_dir=orphan)
+        s = self.session
+        if orphan is not None:
+            log.info('열린 세션 이어받음 %s (시작 %s, 공백 %ss, 잠정 %s)', s.rel, s.started_at.strftime('%H:%M:%S'),
+                     s.resumed[-1]['gap_s'], s.result.get('pred_class'))
+            log_event('resume', session_dir=s.rel, gap_s=s.resumed[-1]['gap_s'], pred_class=s.result.get('pred_class'))
+            self._set_state('JUDGED' if s.locked else 'JUDGING')
+            return
+        log.info('점유 감지 → 세션 시작 %s', s.rel)
+        log_event('enter', session_dir=s.rel)
         self._set_state('JUDGING')
+
+    # -- 고아 세션 (재시작·정전으로 final=false 로 남은 것) --
+
+    def take_orphan(self):
+        """ORPHAN_RESUME_S 안의 최신 고아 세션 경로를 돌려주고 후보에서 뺀다 (없으면 None)."""
+        cand = getattr(self, 'orphan_candidate', None)
+        self.orphan_candidate = None
+        if cand and time.time() - cand[1] <= self.cfg['ORPHAN_RESUME_S']:
+            return cand[0]
+        if cand:
+            finalize_orphan(cand[0])
+        return None
+
+    def settle_orphans(self):
+        """시작 시 호출: 이어받을 후보(최신 1개, ORPHAN_RESUME_S 이내)만 남기고 나머지 고아 세션은 마감한다."""
+        orphans = find_orphans()
+        self.orphan_candidate = None
+        for d, mtime in orphans:
+            if self.orphan_candidate is None and time.time() - mtime <= self.cfg['ORPHAN_RESUME_S']:
+                self.orphan_candidate = (d, mtime)
+                log.info('열린 세션 후보 %s (마지막 기록 %s) — 도어가 그대로면 이어받음', d.relative_to(OUTPUT_ROOT), now_str(mtime))
+            else:
+                finalize_orphan(d)
+
+    def drop_orphan_if_empty(self, empty_for):
+        """시작 후 빈 지그가 LEAVE_S 이상 이어지면 후보는 이어받을 수 없으므로 마감."""
+        cand = getattr(self, 'orphan_candidate', None)
+        if cand and empty_for >= self.cfg['LEAVE_S']:
+            self.orphan_candidate = None
+            finalize_orphan(cand[0])
 
     def _finish(self, reason):
         s = self.session
@@ -1176,6 +1252,55 @@ def kick_upload():
 def session_dirs(day=None):
     pat = f'{day}/s_*' if day else '*/s_*'
     return sorted(p for p in OUTPUT_ROOT.glob(pat) if p.is_dir())
+
+
+def find_orphans():
+    """final=false(또는 result.json 없음)인 세션 디렉터리 → [(dir, 마지막 기록 시각)] 최신순."""
+    out = []
+    for d in session_dirs():
+        r = load_result(d)
+        if r is not None and r.get('final'):
+            continue
+        files = [p for p in d.glob('*') if p.is_file()]
+        mtime = max((p.stat().st_mtime for p in files), default=d.stat().st_mtime)
+        out.append((d, mtime))
+    out.sort(key=lambda x: x[1], reverse=True)
+    return out
+
+
+def finalize_orphan(d):
+    """이어받지 못한 고아 세션 마감: result.json 이 있으면 final=true·ended_at=마지막 기록 시각(service_stop(orphan)),
+    없으면(잠금 전에 죽음) 판정 프레임도 없으므로 폐기."""
+    d = Path(d)
+    r = load_result(d)
+    files = [p for p in d.glob('*') if p.is_file()]
+    mtime = max((p.stat().st_mtime for p in files), default=d.stat().st_mtime)
+    if r is None:
+        shutil.rmtree(d, ignore_errors=True)
+        log.info('고아 세션 폐기(판정 전): %s', d.name)
+        log_event('discard', session_dir=str(d.relative_to(OUTPUT_ROOT)), reason='orphan')
+        return
+    try:
+        t0 = datetime.strptime(r['started_at'], '%Y-%m-%d %H:%M:%S').timestamp()
+    except (KeyError, ValueError):
+        t0 = mtime
+    r.update({'final': True, 'provisional': False, 'stop_reason': 'service_stop(orphan)',
+              'ended_at': now_str(mtime), 'final_at': now_str(), 'dwell_s': round(max(0.0, mtime - t0), 1)})
+    if r.get('status') not in ('judged', 'unknown'):
+        r['status'] = 'abstain' if r.get('max_pts', 0) >= CFG['OCC_PTS'] else 'unrecognized'
+        r['status_label'] = STATUS_LABEL[r['status']]
+    write_json_atomic(d / 'result.json', r)
+    meta = {}
+    try:
+        meta = json.loads((d / 'meta.json').read_text(encoding='utf-8'))
+    except (OSError, ValueError):
+        pass
+    meta.update({'finished': True, 'stop_reason': 'service_stop(orphan)', 'ended_at': r['ended_at'], 'status': r['status']})
+    write_json_atomic(d / 'meta.json', meta)
+    log.info('고아 세션 마감: %s [%s] %s (마지막 기록 %s)', d.name, r['status'], r.get('pred_class'), r['ended_at'])
+    log_event('leave', session_dir=str(d.relative_to(OUTPUT_ROOT)), status=r['status'], pred_class=r.get('pred_class'),
+              part_no=r.get('part_no'), saved=len(r.get('frames') or []), dwell_s=r['dwell_s'], reason='service_stop(orphan)')
+    kick_upload()
 
 
 def retention_once():
@@ -1589,6 +1714,10 @@ def main():
     log.info('카메라: %s calib=%s', source.camera_type, source.calib)
 
     monitor = Monitor(source, CFG, net, dev, cnn, geom)
+    try:
+        monitor.settle_orphans()                       # 재시작·정전으로 남은 열린 세션: 최신 1개는 이어받기 후보, 나머지 마감
+    except Exception as e:                              # noqa: BLE001
+        log.warning('고아 세션 정리 실패: %s', e)
     monitor.start()
     threading.Thread(target=housekeeping_loop, args=(monitor,), daemon=True, name='housekeeping').start()
     log_event('service_start', version=VERSION, upload=CFG['UPLOAD'], replay=bool(args.replay))
