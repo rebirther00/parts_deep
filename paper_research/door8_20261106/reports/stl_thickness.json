@@ -1,0 +1,35 @@
+{
+  "file": "/home/koceti/parts_deep/cad/door_stl/E25_door_LH_FRT.stl",
+  "sha256": "9d03db0c2c27440399994d6b02d52cb5224e121ac87712b840203e6a77af45f1",
+  "facets": 73001,
+  "extents_stl_units": [
+    828.0000610351562,
+    72.67875385284424,
+    1140.0
+  ],
+  "reference_plane_unit_normal": [
+    0.00350663452586503,
+    0.9999938059931295,
+    -0.00030247260588524744
+  ],
+  "two_largest_parallel_planes": [
+    {
+      "offset": -10.2611,
+      "area": 258814.58960805315
+    },
+    {
+      "offset": -9.0611,
+      "area": 258808.94609598236
+    }
+  ],
+  "separation_stl_units": 1.200000000000001,
+  "normal_parallel_tolerance": 1e-07,
+  "interpretation": "Nominal main-sheet thickness from the two largest parallel plane groups. Not total bent-part depth or a measurement of the manufactured part.",
+  "expected_cad_width_height_mm": [
+    828,
+    1140
+  ],
+  "unit_basis": "STL has no explicit unit. X/Z extents agree with the known 828 x 1140 mm CAD dimensions; interpret STL units as mm.",
+  "nominal_main_sheet_thickness_mm": 1.200000000000001,
+  "scope": "One representative STL checked directly. User states all target door sheets have the same thickness."
+}

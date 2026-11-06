@@ -1,0 +1,26 @@
+{
+  "status": "planned_human_annotations_required",
+  "selection_seed": 20261106,
+  "n_images": 40,
+  "selection": "One randomly selected session per class and CV group; middle sampled frame. No model scores used.",
+  "per_fold": {
+    "field_train_images": 24,
+    "field_validation_images": 8,
+    "field_test_localization_images": 8
+  },
+  "label_budgets_train": [
+    0,
+    8,
+    16,
+    24
+  ],
+  "scope": "Retrospective follow-up motivated by the failed first LAB-only transfer trial.",
+  "rules": [
+    "No VLM or teacher-generated coordinates. A human clicks the original image.",
+    "Never train a shared model on all 40 and call the downstream folds independent.",
+    "For each fold, field point training and checkpoint selection follow the frozen train/val groups.",
+    "The 8 test images with point annotations are for localization evaluation only.",
+    "The LAB-only v1 remains a recorded baseline. Do not overwrite its failed results.",
+    "This plan is not implemented training and is not a completed experiment."
+  ]
+}

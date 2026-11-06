@@ -1,0 +1,20 @@
+{
+  "recorded_at": "2026-11-06T16:44:17+09:00",
+  "packages": {
+    "torch": "2.9.1+cu130",
+    "torchvision": "0.24.1+cu130",
+    "numpy": "2.3.5",
+    "opencv-python": "4.13.0.92",
+    "scikit-learn": "1.8.0",
+    "scipy": "1.16.3",
+    "matplotlib": "3.10.8",
+    "python-docx": "1.2.0",
+    "timm": "1.0.26",
+    "opencv-python-headless": "4.13.0.92",
+    "mobile-sam": "1.0",
+    "mobile_sam": "1.0"
+  },
+  "python": "3.12.3 (main, Aug 31 2026, 10:18:26) [GCC 13.3.0]",
+  "cuda_gpu": "NVIDIA GeForce RTX 5090",
+  "opencv_runtime_version": "4.13.0"
+}

@@ -1,0 +1,6 @@
+{
+  "source": "/home/koceti/parts_deep/class_estimation/door_pipeline/DOC_dataset_spec.md",
+  "sha256": "260c9251663fc16d50e4a4e5de12735b32e926044c41be82fd77a9e516ab6563",
+  "table_scope": "Specification table CAD D values for the eight geometric shape classes; radar options merged.",
+  "note": "Use the listed CAD D directly, not width minus 106: the source notes a 2 mm difference between specification width and that convention. Operational scale constants are not imported."
+}

@@ -1,0 +1,66 @@
+[
+  {
+    "source": "/home/koceti/parts_deep/class_estimation/door_pipeline/labels/holes/field__E25_door_RH_s_091317__0000.json",
+    "reason": "non_lab_or_out_of_scope"
+  },
+  {
+    "source": "/home/koceti/parts_deep/class_estimation/door_pipeline/labels/holes/field__E25_door_RH_s_091317__0001.json",
+    "reason": "non_lab_or_out_of_scope"
+  },
+  {
+    "source": "/home/koceti/parts_deep/class_estimation/door_pipeline/labels/holes/field__E25_door_RH_s_091317__0002.json",
+    "reason": "non_lab_or_out_of_scope"
+  },
+  {
+    "source": "/home/koceti/parts_deep/class_estimation/door_pipeline/labels/holes/field__E25_door_RH_s_091317__0003.json",
+    "reason": "non_lab_or_out_of_scope"
+  },
+  {
+    "source": "/home/koceti/parts_deep/class_estimation/door_pipeline/labels/holes/field__E25_door_RH_s_091317__0004.json",
+    "reason": "non_lab_or_out_of_scope"
+  },
+  {
+    "source": "/home/koceti/parts_deep/class_estimation/door_pipeline/labels/holes/field__E25_door_RH_s_091317__0005.json",
+    "reason": "non_lab_or_out_of_scope"
+  },
+  {
+    "source": "/home/koceti/parts_deep/class_estimation/door_pipeline/labels/holes/field__E25_door_RH_s_091317__0006.json",
+    "reason": "non_lab_or_out_of_scope"
+  },
+  {
+    "source": "/home/koceti/parts_deep/class_estimation/door_pipeline/labels/holes/field__E25_door_RH_s_091317__0007.json",
+    "reason": "non_lab_or_out_of_scope"
+  },
+  {
+    "source": "/home/koceti/parts_deep/class_estimation/door_pipeline/labels/holes/field__E25_door_RH_s_091317__0008.json",
+    "reason": "non_lab_or_out_of_scope"
+  },
+  {
+    "source": "/home/koceti/parts_deep/class_estimation/door_pipeline/labels/holes/field__E25_door_RH_s_091317__0009.json",
+    "reason": "non_lab_or_out_of_scope"
+  },
+  {
+    "source": "/home/koceti/parts_deep/class_estimation/door_pipeline/labels/holes/field__E25_door_RH_s_091317__0010.json",
+    "reason": "non_lab_or_out_of_scope"
+  },
+  {
+    "source": "/home/koceti/parts_deep/class_estimation/door_pipeline/labels/holes/field__E25_door_RH_s_091317__0011.json",
+    "reason": "non_lab_or_out_of_scope"
+  },
+  {
+    "source": "/home/koceti/parts_deep/class_estimation/door_pipeline/labels/holes/field__E25_door_RH_s_091317__0012.json",
+    "reason": "non_lab_or_out_of_scope"
+  },
+  {
+    "source": "/home/koceti/parts_deep/class_estimation/door_pipeline/labels/holes/field__E25_door_RH_s_091317__0013.json",
+    "reason": "non_lab_or_out_of_scope"
+  },
+  {
+    "source": "/home/koceti/parts_deep/class_estimation/door_pipeline/labels/holes/field__E25_door_RH_s_091317__0014.json",
+    "reason": "non_lab_or_out_of_scope"
+  },
+  {
+    "source": "/home/koceti/parts_deep/class_estimation/door_pipeline/labels/holes/field__E25_door_RH_s_091317__0015.json",
+    "reason": "non_lab_or_out_of_scope"
+  }
+]

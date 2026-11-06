@@ -1,0 +1,12 @@
+{
+  "run": "holes_lab_s42",
+  "subset": "LAB checkpoint-selection validation",
+  "not_independent_test": true,
+  "images": 24,
+  "visible_gt_points": 138,
+  "matched_points": 137,
+  "median_error_original_px_when_matched": 2.308575696151781,
+  "pck8_original_px_all_visible": 0.9927536231884058,
+  "pck16_original_px_all_visible": 0.9927536231884058,
+  "note": "Missing detections count as failures in PCK. Unordered bolt detections are matched by minimum-cost assignment. Diagnostic only; not used to retune the frozen first-fold model."
+}

@@ -1,0 +1,65 @@
+{
+  "recorded_at": "2026-11-06T17:46:24+09:00",
+  "snapshot": "v1",
+  "data_audit": {
+    "time": "2026-11-06T16:25:22+09:00",
+    "snapshot": "v1",
+    "frames": 7104,
+    "sessions": 361,
+    "partition_checks": 6,
+    "source_hash_check": true,
+    "passed": true,
+    "additional_checks": {
+      "eligible_session_notes_uncertainty_keywords": 0,
+      "terms": [
+        "의심",
+        "미정",
+        "suspect",
+        "pending",
+        "오라벨",
+        "불확실"
+      ],
+      "interpretation": "Keyword scan of frozen metadata only; not an independent visual audit."
+    }
+  },
+  "safeguard_tests": {
+    "runner": "python -m unittest discover -s tests -v",
+    "passed": 13,
+    "failed": 0
+  },
+  "formal_runs": [
+    "rgb_f0_s42",
+    "rgbe_f0_s42",
+    "holes_lab_s42"
+  ],
+  "formal_comparison": "comparison_f0_s42",
+  "completed_test_folds": [
+    0
+  ],
+  "completed_seeds": [
+    42
+  ],
+  "full_cv_complete": false,
+  "prospective_evaluation_complete": false,
+  "original_reference_integrity": {
+    "/home/koceti/parts_deep/class_estimation/door_pipeline/hole_classifier.py": true,
+    "/home/koceti/parts_deep/class_estimation/door_pipeline/16_train_hole_landmarks.py": true,
+    "/home/koceti/parts_deep/class_estimation/door_pipeline/db/decisions.csv": true,
+    "/home/koceti/parts_deep/class_estimation/door_pipeline/02_train.py": true
+  },
+  "stl_thickness_report": "stl_thickness.json",
+  "training_code_for_first_formal_runs": "code_versions/f35334876fd3c39f25656601317d3ca422b1af5e70fe53f0a9ed9c752995920d/learning.py",
+  "source_archive": "code_versions/3d446e4b4f9edf6107948ed254b18c6e0fbe4b51b5a62fae424bfc6e2ea1660a",
+  "source_hashes": {
+    "run.py": "e2f27b6e62e8f02a37a71635afbeb465e9871760d02490d00a20114bc93172e3",
+    "door8/__init__.py": "05272ac1a83d724d6bd7ce0c157f70e86ab9ab7a245bf0c953bbc8661ab2da69",
+    "door8/core.py": "76014d1d7e6d44e56a580dc3c3407b6fbd425cbcc022846c1bd528bff059165e",
+    "door8/data.py": "33618dba7d05709a0e3bc54b04ae2da75ae618f1412c143f936c4b6b8e8a7402",
+    "door8/evaluate.py": "39767cbd808456f8f98a8ce1a551ea783240c202a42f43fda16b45c920401cb1",
+    "door8/features.py": "564c03cde12343cf91ae6f73ea9b1978a557a7724a5e25410bd397985c7d4af7",
+    "door8/geometry.py": "e6a95c4798d765ad5fbbdd91d9d72c61e9942814a9fef1465311d9db8eced4f3",
+    "door8/learning.py": "d1e807db1d1d3fb2969efca749079b7504d2de10cc1713f78fe25dba11136a84",
+    "door8/metrics.py": "35a6fd9c67b7e1a5b383f12ebcc023177bbe3235bc88c044f23aa8c277155fe9",
+    "door8/suite.py": "29c9377c0ea9664fb758556e9c9b1853202b3a968abe4bac1d3446fc8f63b408"
+  }
+}

@@ -1,0 +1,9 @@
+__pycache__/
+*.pyc
+cache/
+pretrained/
+runs/
+features/
+data/snapshots/*/source.sqlite
+data/snapshots/*/source.sqlite-*
+

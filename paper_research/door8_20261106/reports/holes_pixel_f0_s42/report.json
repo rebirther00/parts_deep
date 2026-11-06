@@ -1,0 +1,19 @@
+{
+  "method": "holes_pixel",
+  "fold": "0",
+  "feature_set": "holes_lab_s42_full",
+  "features_sha256": "f5aa5ba2f6fb81070d070100d85642b5efb51a45f8f3f23c31d3a2672fed8dcf",
+  "weights_sha256": "1bb2a7e6c5a3a0e79a62d24a1003a5dc666e2e950d26fc44a5e450a01bd2b65d",
+  "subset": "test",
+  "pilot": false,
+  "snapshot_sha256": "086cc09bbcdcb4a0b30dca920db94db350b8f1a0ec8f67ca2960612cf87bc559",
+  "gates": true,
+  "pose_gate": false,
+  "calibration_failure": null,
+  "scope": "retrospective_development_not_pristine_blind_test",
+  "status": "complete",
+  "created_at": "2026-11-06T17:35:42+09:00",
+  "n": 1478,
+  "predictions_sha256": "a6593284c06b6f6d6455f3e7840123a45202c36006d79567472c19aff1383582",
+  "evaluation_code_sha256": "39767cbd808456f8f98a8ce1a551ea783240c202a42f43fda16b45c920401cb1"
+}

@@ -1,0 +1,21 @@
+{
+  "time": "2026-11-06T16:25:22+09:00",
+  "snapshot": "v1",
+  "frames": 7104,
+  "sessions": 361,
+  "partition_checks": 6,
+  "source_hash_check": true,
+  "passed": true,
+  "additional_checks": {
+    "eligible_session_notes_uncertainty_keywords": 0,
+    "terms": [
+      "의심",
+      "미정",
+      "suspect",
+      "pending",
+      "오라벨",
+      "불확실"
+    ],
+    "interpretation": "Keyword scan of frozen metadata only; not an independent visual audit."
+  }
+}

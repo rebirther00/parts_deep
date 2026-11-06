@@ -1,0 +1,27 @@
+{
+  "version": "door8-v1-20261106",
+  "scope": "retrospective_development_not_pristine_blind_test",
+  "classes": ["E25_door_LH_FRT", "E25_door_LH_RR", "E25_door_RH", "E30_E38_door_RH", "E30_door_LH_FRT", "E30_door_LH_RR", "E38_door_LH_FRT", "E38_door_LH_RR"],
+  "cad_hole_distance_mm": [724, 1037, 886, 1087, 765, 1158, 812, 1352],
+  "cad_bbox_mm": [[828,1140], [1141,1140], [990,1140], [1191,1140], [869,1140], [1262,1140], [916,1140], [1456,1140]],
+  "dataset_id": 5,
+  "max_frames_per_session": 20,
+  "split_seed": 20261106,
+  "folds": 5,
+  "seeds": [42,123,456],
+  "temporal_test_since": "20261003",
+  "cnn": {"image_size":448, "epochs":40, "patience":8, "batch_size":32, "learning_rate":0.0003},
+  "holes": {"width":1280, "height":768, "stride":4, "epochs":80, "batch_size":4, "learning_rate":0.0001, "sigma":2.0, "peak_threshold":0.15},
+  "geometry": {"bolt_pitch_mm":[157,96], "unknown_distance_mm":30, "valid_distance_mm":[400,1500], "pose_z_mm":[1400,1500], "pose_tilt_deg":15},
+  "mask": {"bbox_fraction":[0.08,0.05,0.92,0.95], "min_area_fraction":0.03},
+  "notes": [
+    "Original worker class labels only; E23 and all confirmed class-correction sessions excluded.",
+    "All outputs are confined to this research directory. Source RGB/depth and SQLite are read-only inputs.",
+    "Prior results informed this protocol: retrospective CV must not be described as a new blind experiment.",
+    "Hole model: fresh ImageNet initialization plus auxiliary manually annotated LAB images only. The old 16 field images, radar models, pseudo-labels and VLM are excluded.",
+    "Pixel/depth calibration and mask class centers are fit to fold TRAIN sessions only. Validation selects checkpoints and CNN rejection thresholds.",
+    "Geometry gates are inherited, prespecified engineering choices informed by earlier work, not newly validated limits.",
+    "Future prospective evaluation requires a frozen model/protocol and independently recorded human ground truth.",
+    "Session is the observed grouping unit; physical-instance and production-lot identity are not established."
+  ]
+}

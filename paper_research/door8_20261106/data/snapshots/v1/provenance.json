@@ -1,0 +1,14 @@
+{
+  "created_at": "2026-11-06T16:14:57+09:00",
+  "source_db": "/home/koceti/parts_deep/class_estimation/door_pipeline/db/door_pipeline.db",
+  "snapshot_db_sha256": "543957fac6643a082fb2daecfd49876a16395ebd50ba14a7a8f1f090d2358e0c",
+  "source_git_commit": "41186b4aff384db4f9b4658f87adb5e621e9022a",
+  "source_files": {
+    "/home/koceti/parts_deep/class_estimation/door_pipeline/hole_classifier.py": "04771205271869f75b1b96441e11c7d30a405cb3a174be436aa7e84bb8352190",
+    "/home/koceti/parts_deep/class_estimation/door_pipeline/16_train_hole_landmarks.py": "09af1238535a16cb5fa07d79ff18d856236918718bb8b211b33e01147addf61b",
+    "/home/koceti/parts_deep/class_estimation/door_pipeline/db/decisions.csv": "0a07c09cb01c7d0a582ac018978c10632d30ae5e2dd64630cbb0c6d0158ea743",
+    "/home/koceti/parts_deep/class_estimation/door_pipeline/02_train.py": "8b22bce0935663eb85cacedf5127665a0986590cc170353c168c7e2a8bbbf661"
+  },
+  "human_review": "User states all worker-vs-hole class disagreements and radar options were visually reviewed. Corrected class sessions excluded from this study.",
+  "source_policy": "Original files are referenced for reading only; no operational module is imported or executed."
+}

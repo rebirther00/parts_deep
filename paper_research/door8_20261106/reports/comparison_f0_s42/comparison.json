@@ -1,0 +1,233 @@
+{
+  "snapshot_sha256": "086cc09bbcdcb4a0b30dca920db94db350b8f1a0ec8f67ca2960612cf87bc559",
+  "table": [
+    {
+      "report": "rgb_f0_s42_test",
+      "method": "rgb",
+      "fold": "0",
+      "frame_accuracy_all": 1.0,
+      "frame_macro_f1": 1.0,
+      "frame_coverage": 1.0,
+      "session_accuracy_all": 1.0,
+      "session_macro_f1": 1.0,
+      "session_coverage": 1.0
+    },
+    {
+      "report": "rgbe_f0_s42_test",
+      "method": "rgbe",
+      "fold": "0",
+      "frame_accuracy_all": 0.9905277401894452,
+      "frame_macro_f1": 0.9688057040998218,
+      "frame_coverage": 1.0,
+      "session_accuracy_all": 0.9864864864864865,
+      "session_macro_f1": 0.9517543859649122,
+      "session_coverage": 1.0
+    },
+    {
+      "report": "holes_pixel_f0_s42",
+      "method": "holes_pixel",
+      "fold": "0",
+      "frame_accuracy_all": 0.0,
+      "frame_macro_f1": 0.0,
+      "frame_coverage": 0.0,
+      "session_accuracy_all": 0.0,
+      "session_macro_f1": 0.0,
+      "session_coverage": 0.0
+    },
+    {
+      "report": "holes_depth_f0_s42",
+      "method": "holes_depth",
+      "fold": "0",
+      "frame_accuracy_all": 0.0,
+      "frame_macro_f1": 0.0,
+      "frame_coverage": 0.0,
+      "session_accuracy_all": 0.0,
+      "session_macro_f1": 0.0,
+      "session_coverage": 0.0
+    },
+    {
+      "report": "mask_f0",
+      "method": "mobile_sam_dimensions",
+      "fold": "0",
+      "frame_accuracy_all": 0.30581867388362655,
+      "frame_macro_f1": 0.31173714786210727,
+      "frame_coverage": 1.0,
+      "session_accuracy_all": 0.35135135135135137,
+      "session_macro_f1": 0.3584569147069147,
+      "session_coverage": 1.0
+    }
+  ],
+  "paired_session_tests": [
+    {
+      "a": "rgb_f0_s42_test",
+      "b": "rgbe_f0_s42_test",
+      "session_accuracy_difference": 0.013513513513513514,
+      "group_bootstrap95_difference": [
+        0.0,
+        0.04054054054054054
+      ],
+      "discordant_a_only_b_only": [
+        1,
+        0
+      ],
+      "exact_mcnemar_p_session": 1.0,
+      "groups": 74,
+      "note": "Bootstrap resamples groups. McNemar assumes independent sessions. No frame-wise significance claim.",
+      "holm_adjusted_p": 1.0
+    },
+    {
+      "a": "rgb_f0_s42_test",
+      "b": "holes_pixel_f0_s42",
+      "session_accuracy_difference": 1.0,
+      "group_bootstrap95_difference": [
+        1.0,
+        1.0
+      ],
+      "discordant_a_only_b_only": [
+        74,
+        0
+      ],
+      "exact_mcnemar_p_session": 1.0587911840678754e-22,
+      "groups": 74,
+      "note": "Bootstrap resamples groups. McNemar assumes independent sessions. No frame-wise significance claim.",
+      "holm_adjusted_p": 1.0587911840678754e-21
+    },
+    {
+      "a": "rgb_f0_s42_test",
+      "b": "holes_depth_f0_s42",
+      "session_accuracy_difference": 1.0,
+      "group_bootstrap95_difference": [
+        1.0,
+        1.0
+      ],
+      "discordant_a_only_b_only": [
+        74,
+        0
+      ],
+      "exact_mcnemar_p_session": 1.0587911840678754e-22,
+      "groups": 74,
+      "note": "Bootstrap resamples groups. McNemar assumes independent sessions. No frame-wise significance claim.",
+      "holm_adjusted_p": 1.0587911840678754e-21
+    },
+    {
+      "a": "rgb_f0_s42_test",
+      "b": "mask_f0",
+      "session_accuracy_difference": 0.6486486486486487,
+      "group_bootstrap95_difference": [
+        0.5405405405405406,
+        0.7567567567567568
+      ],
+      "discordant_a_only_b_only": [
+        48,
+        0
+      ],
+      "exact_mcnemar_p_session": 7.105427357601002e-15,
+      "groups": 74,
+      "note": "Bootstrap resamples groups. McNemar assumes independent sessions. No frame-wise significance claim.",
+      "holm_adjusted_p": 4.263256414560601e-14
+    },
+    {
+      "a": "rgbe_f0_s42_test",
+      "b": "holes_pixel_f0_s42",
+      "session_accuracy_difference": 0.9864864864864865,
+      "group_bootstrap95_difference": [
+        0.9594594594594594,
+        1.0
+      ],
+      "discordant_a_only_b_only": [
+        73,
+        0
+      ],
+      "exact_mcnemar_p_session": 2.117582368135751e-22,
+      "groups": 74,
+      "note": "Bootstrap resamples groups. McNemar assumes independent sessions. No frame-wise significance claim.",
+      "holm_adjusted_p": 1.6940658945086007e-21
+    },
+    {
+      "a": "rgbe_f0_s42_test",
+      "b": "holes_depth_f0_s42",
+      "session_accuracy_difference": 0.9864864864864865,
+      "group_bootstrap95_difference": [
+        0.9594594594594594,
+        1.0
+      ],
+      "discordant_a_only_b_only": [
+        73,
+        0
+      ],
+      "exact_mcnemar_p_session": 2.117582368135751e-22,
+      "groups": 74,
+      "note": "Bootstrap resamples groups. McNemar assumes independent sessions. No frame-wise significance claim.",
+      "holm_adjusted_p": 1.6940658945086007e-21
+    },
+    {
+      "a": "rgbe_f0_s42_test",
+      "b": "mask_f0",
+      "session_accuracy_difference": 0.6351351351351351,
+      "group_bootstrap95_difference": [
+        0.5135135135135135,
+        0.7567567567567568
+      ],
+      "discordant_a_only_b_only": [
+        48,
+        1
+      ],
+      "exact_mcnemar_p_session": 1.7763568394002505e-13,
+      "groups": 74,
+      "note": "Bootstrap resamples groups. McNemar assumes independent sessions. No frame-wise significance claim.",
+      "holm_adjusted_p": 8.881784197001252e-13
+    },
+    {
+      "a": "holes_pixel_f0_s42",
+      "b": "holes_depth_f0_s42",
+      "session_accuracy_difference": 0.0,
+      "group_bootstrap95_difference": [
+        0.0,
+        0.0
+      ],
+      "discordant_a_only_b_only": [
+        0,
+        0
+      ],
+      "exact_mcnemar_p_session": 1.0,
+      "groups": 74,
+      "note": "Bootstrap resamples groups. McNemar assumes independent sessions. No frame-wise significance claim.",
+      "holm_adjusted_p": 1.0
+    },
+    {
+      "a": "holes_pixel_f0_s42",
+      "b": "mask_f0",
+      "session_accuracy_difference": -0.35135135135135137,
+      "group_bootstrap95_difference": [
+        -0.4594594594594595,
+        -0.24324324324324326
+      ],
+      "discordant_a_only_b_only": [
+        0,
+        26
+      ],
+      "exact_mcnemar_p_session": 2.9802322387695312e-08,
+      "groups": 74,
+      "note": "Bootstrap resamples groups. McNemar assumes independent sessions. No frame-wise significance claim.",
+      "holm_adjusted_p": 1.1920928955078125e-07
+    },
+    {
+      "a": "holes_depth_f0_s42",
+      "b": "mask_f0",
+      "session_accuracy_difference": -0.35135135135135137,
+      "group_bootstrap95_difference": [
+        -0.4594594594594595,
+        -0.24324324324324326
+      ],
+      "discordant_a_only_b_only": [
+        0,
+        26
+      ],
+      "exact_mcnemar_p_session": 2.9802322387695312e-08,
+      "groups": 74,
+      "note": "Bootstrap resamples groups. McNemar assumes independent sessions. No frame-wise significance claim.",
+      "holm_adjusted_p": 1.1920928955078125e-07
+    }
+  ],
+  "note": "Exploratory session-level comparisons; raw and Holm-adjusted p values are reported. Physical-instance independence is unverified."
+}

@@ -1,0 +1,2012 @@
+{
+  "snapshot": "v1",
+  "snapshot_sha256": "086cc09bbcdcb4a0b30dca920db94db350b8f1a0ec8f67ca2960612cf87bc559",
+  "jobs": [
+    {
+      "args": [
+        "extract",
+        "--kind",
+        "mobile_sam",
+        "--features",
+        "mobile_sam_full"
+      ],
+      "completion_marker": "features/mobile_sam_full/features.json"
+    },
+    {
+      "args": [
+        "train-holes",
+        "--seed",
+        "42",
+        "--run",
+        "holes_lab_s42"
+      ],
+      "completion_marker": "runs/holes_lab_s42/run.json"
+    },
+    {
+      "args": [
+        "extract",
+        "--kind",
+        "holes",
+        "--run",
+        "holes_lab_s42",
+        "--features",
+        "holes_lab_s42_full"
+      ],
+      "completion_marker": "features/holes_lab_s42_full/features.json"
+    },
+    {
+      "args": [
+        "train-cnn",
+        "--kind",
+        "rgb",
+        "--fold",
+        "0",
+        "--seed",
+        "42",
+        "--run",
+        "rgb_f0_s42"
+      ],
+      "completion_marker": "runs/rgb_f0_s42/run.json"
+    },
+    {
+      "args": [
+        "eval-cnn",
+        "--run",
+        "rgb_f0_s42",
+        "--report",
+        "rgb_f0_s42_test"
+      ],
+      "completion_marker": "reports/rgb_f0_s42_test/report.json"
+    },
+    {
+      "args": [
+        "train-cnn",
+        "--kind",
+        "rgbe",
+        "--fold",
+        "0",
+        "--seed",
+        "42",
+        "--run",
+        "rgbe_f0_s42"
+      ],
+      "completion_marker": "runs/rgbe_f0_s42/run.json"
+    },
+    {
+      "args": [
+        "eval-cnn",
+        "--run",
+        "rgbe_f0_s42",
+        "--report",
+        "rgbe_f0_s42_test"
+      ],
+      "completion_marker": "reports/rgbe_f0_s42_test/report.json"
+    },
+    {
+      "args": [
+        "eval-geometry",
+        "--features",
+        "holes_lab_s42_full",
+        "--mode",
+        "pixel",
+        "--fold",
+        "0",
+        "--report",
+        "holes_pixel_f0_s42"
+      ],
+      "completion_marker": "reports/holes_pixel_f0_s42/report.json"
+    },
+    {
+      "args": [
+        "eval-geometry",
+        "--features",
+        "holes_lab_s42_full",
+        "--mode",
+        "depth",
+        "--fold",
+        "0",
+        "--report",
+        "holes_depth_f0_s42"
+      ],
+      "completion_marker": "reports/holes_depth_f0_s42/report.json"
+    },
+    {
+      "args": [
+        "eval-geometry",
+        "--features",
+        "mobile_sam_full",
+        "--mode",
+        "mask",
+        "--fold",
+        "0",
+        "--report",
+        "mask_f0"
+      ],
+      "completion_marker": "reports/mask_f0/report.json"
+    },
+    {
+      "args": [
+        "compare",
+        "--reports",
+        "rgb_f0_s42_test",
+        "rgbe_f0_s42_test",
+        "holes_pixel_f0_s42",
+        "holes_depth_f0_s42",
+        "mask_f0",
+        "--output",
+        "comparison_f0_s42"
+      ],
+      "completion_marker": "reports/comparison_f0_s42/comparison.json"
+    },
+    {
+      "args": [
+        "train-cnn",
+        "--kind",
+        "rgb",
+        "--fold",
+        "1",
+        "--seed",
+        "42",
+        "--run",
+        "rgb_f1_s42"
+      ],
+      "completion_marker": "runs/rgb_f1_s42/run.json"
+    },
+    {
+      "args": [
+        "eval-cnn",
+        "--run",
+        "rgb_f1_s42",
+        "--report",
+        "rgb_f1_s42_test"
+      ],
+      "completion_marker": "reports/rgb_f1_s42_test/report.json"
+    },
+    {
+      "args": [
+        "train-cnn",
+        "--kind",
+        "rgbe",
+        "--fold",
+        "1",
+        "--seed",
+        "42",
+        "--run",
+        "rgbe_f1_s42"
+      ],
+      "completion_marker": "runs/rgbe_f1_s42/run.json"
+    },
+    {
+      "args": [
+        "eval-cnn",
+        "--run",
+        "rgbe_f1_s42",
+        "--report",
+        "rgbe_f1_s42_test"
+      ],
+      "completion_marker": "reports/rgbe_f1_s42_test/report.json"
+    },
+    {
+      "args": [
+        "eval-geometry",
+        "--features",
+        "holes_lab_s42_full",
+        "--mode",
+        "pixel",
+        "--fold",
+        "1",
+        "--report",
+        "holes_pixel_f1_s42"
+      ],
+      "completion_marker": "reports/holes_pixel_f1_s42/report.json"
+    },
+    {
+      "args": [
+        "eval-geometry",
+        "--features",
+        "holes_lab_s42_full",
+        "--mode",
+        "depth",
+        "--fold",
+        "1",
+        "--report",
+        "holes_depth_f1_s42"
+      ],
+      "completion_marker": "reports/holes_depth_f1_s42/report.json"
+    },
+    {
+      "args": [
+        "eval-geometry",
+        "--features",
+        "mobile_sam_full",
+        "--mode",
+        "mask",
+        "--fold",
+        "1",
+        "--report",
+        "mask_f1"
+      ],
+      "completion_marker": "reports/mask_f1/report.json"
+    },
+    {
+      "args": [
+        "compare",
+        "--reports",
+        "rgb_f1_s42_test",
+        "rgbe_f1_s42_test",
+        "holes_pixel_f1_s42",
+        "holes_depth_f1_s42",
+        "mask_f1",
+        "--output",
+        "comparison_f1_s42"
+      ],
+      "completion_marker": "reports/comparison_f1_s42/comparison.json"
+    },
+    {
+      "args": [
+        "train-cnn",
+        "--kind",
+        "rgb",
+        "--fold",
+        "2",
+        "--seed",
+        "42",
+        "--run",
+        "rgb_f2_s42"
+      ],
+      "completion_marker": "runs/rgb_f2_s42/run.json"
+    },
+    {
+      "args": [
+        "eval-cnn",
+        "--run",
+        "rgb_f2_s42",
+        "--report",
+        "rgb_f2_s42_test"
+      ],
+      "completion_marker": "reports/rgb_f2_s42_test/report.json"
+    },
+    {
+      "args": [
+        "train-cnn",
+        "--kind",
+        "rgbe",
+        "--fold",
+        "2",
+        "--seed",
+        "42",
+        "--run",
+        "rgbe_f2_s42"
+      ],
+      "completion_marker": "runs/rgbe_f2_s42/run.json"
+    },
+    {
+      "args": [
+        "eval-cnn",
+        "--run",
+        "rgbe_f2_s42",
+        "--report",
+        "rgbe_f2_s42_test"
+      ],
+      "completion_marker": "reports/rgbe_f2_s42_test/report.json"
+    },
+    {
+      "args": [
+        "eval-geometry",
+        "--features",
+        "holes_lab_s42_full",
+        "--mode",
+        "pixel",
+        "--fold",
+        "2",
+        "--report",
+        "holes_pixel_f2_s42"
+      ],
+      "completion_marker": "reports/holes_pixel_f2_s42/report.json"
+    },
+    {
+      "args": [
+        "eval-geometry",
+        "--features",
+        "holes_lab_s42_full",
+        "--mode",
+        "depth",
+        "--fold",
+        "2",
+        "--report",
+        "holes_depth_f2_s42"
+      ],
+      "completion_marker": "reports/holes_depth_f2_s42/report.json"
+    },
+    {
+      "args": [
+        "eval-geometry",
+        "--features",
+        "mobile_sam_full",
+        "--mode",
+        "mask",
+        "--fold",
+        "2",
+        "--report",
+        "mask_f2"
+      ],
+      "completion_marker": "reports/mask_f2/report.json"
+    },
+    {
+      "args": [
+        "compare",
+        "--reports",
+        "rgb_f2_s42_test",
+        "rgbe_f2_s42_test",
+        "holes_pixel_f2_s42",
+        "holes_depth_f2_s42",
+        "mask_f2",
+        "--output",
+        "comparison_f2_s42"
+      ],
+      "completion_marker": "reports/comparison_f2_s42/comparison.json"
+    },
+    {
+      "args": [
+        "train-cnn",
+        "--kind",
+        "rgb",
+        "--fold",
+        "3",
+        "--seed",
+        "42",
+        "--run",
+        "rgb_f3_s42"
+      ],
+      "completion_marker": "runs/rgb_f3_s42/run.json"
+    },
+    {
+      "args": [
+        "eval-cnn",
+        "--run",
+        "rgb_f3_s42",
+        "--report",
+        "rgb_f3_s42_test"
+      ],
+      "completion_marker": "reports/rgb_f3_s42_test/report.json"
+    },
+    {
+      "args": [
+        "train-cnn",
+        "--kind",
+        "rgbe",
+        "--fold",
+        "3",
+        "--seed",
+        "42",
+        "--run",
+        "rgbe_f3_s42"
+      ],
+      "completion_marker": "runs/rgbe_f3_s42/run.json"
+    },
+    {
+      "args": [
+        "eval-cnn",
+        "--run",
+        "rgbe_f3_s42",
+        "--report",
+        "rgbe_f3_s42_test"
+      ],
+      "completion_marker": "reports/rgbe_f3_s42_test/report.json"
+    },
+    {
+      "args": [
+        "eval-geometry",
+        "--features",
+        "holes_lab_s42_full",
+        "--mode",
+        "pixel",
+        "--fold",
+        "3",
+        "--report",
+        "holes_pixel_f3_s42"
+      ],
+      "completion_marker": "reports/holes_pixel_f3_s42/report.json"
+    },
+    {
+      "args": [
+        "eval-geometry",
+        "--features",
+        "holes_lab_s42_full",
+        "--mode",
+        "depth",
+        "--fold",
+        "3",
+        "--report",
+        "holes_depth_f3_s42"
+      ],
+      "completion_marker": "reports/holes_depth_f3_s42/report.json"
+    },
+    {
+      "args": [
+        "eval-geometry",
+        "--features",
+        "mobile_sam_full",
+        "--mode",
+        "mask",
+        "--fold",
+        "3",
+        "--report",
+        "mask_f3"
+      ],
+      "completion_marker": "reports/mask_f3/report.json"
+    },
+    {
+      "args": [
+        "compare",
+        "--reports",
+        "rgb_f3_s42_test",
+        "rgbe_f3_s42_test",
+        "holes_pixel_f3_s42",
+        "holes_depth_f3_s42",
+        "mask_f3",
+        "--output",
+        "comparison_f3_s42"
+      ],
+      "completion_marker": "reports/comparison_f3_s42/comparison.json"
+    },
+    {
+      "args": [
+        "train-cnn",
+        "--kind",
+        "rgb",
+        "--fold",
+        "4",
+        "--seed",
+        "42",
+        "--run",
+        "rgb_f4_s42"
+      ],
+      "completion_marker": "runs/rgb_f4_s42/run.json"
+    },
+    {
+      "args": [
+        "eval-cnn",
+        "--run",
+        "rgb_f4_s42",
+        "--report",
+        "rgb_f4_s42_test"
+      ],
+      "completion_marker": "reports/rgb_f4_s42_test/report.json"
+    },
+    {
+      "args": [
+        "train-cnn",
+        "--kind",
+        "rgbe",
+        "--fold",
+        "4",
+        "--seed",
+        "42",
+        "--run",
+        "rgbe_f4_s42"
+      ],
+      "completion_marker": "runs/rgbe_f4_s42/run.json"
+    },
+    {
+      "args": [
+        "eval-cnn",
+        "--run",
+        "rgbe_f4_s42",
+        "--report",
+        "rgbe_f4_s42_test"
+      ],
+      "completion_marker": "reports/rgbe_f4_s42_test/report.json"
+    },
+    {
+      "args": [
+        "eval-geometry",
+        "--features",
+        "holes_lab_s42_full",
+        "--mode",
+        "pixel",
+        "--fold",
+        "4",
+        "--report",
+        "holes_pixel_f4_s42"
+      ],
+      "completion_marker": "reports/holes_pixel_f4_s42/report.json"
+    },
+    {
+      "args": [
+        "eval-geometry",
+        "--features",
+        "holes_lab_s42_full",
+        "--mode",
+        "depth",
+        "--fold",
+        "4",
+        "--report",
+        "holes_depth_f4_s42"
+      ],
+      "completion_marker": "reports/holes_depth_f4_s42/report.json"
+    },
+    {
+      "args": [
+        "eval-geometry",
+        "--features",
+        "mobile_sam_full",
+        "--mode",
+        "mask",
+        "--fold",
+        "4",
+        "--report",
+        "mask_f4"
+      ],
+      "completion_marker": "reports/mask_f4/report.json"
+    },
+    {
+      "args": [
+        "compare",
+        "--reports",
+        "rgb_f4_s42_test",
+        "rgbe_f4_s42_test",
+        "holes_pixel_f4_s42",
+        "holes_depth_f4_s42",
+        "mask_f4",
+        "--output",
+        "comparison_f4_s42"
+      ],
+      "completion_marker": "reports/comparison_f4_s42/comparison.json"
+    },
+    {
+      "args": [
+        "train-cnn",
+        "--kind",
+        "rgb",
+        "--fold",
+        "temporal",
+        "--seed",
+        "42",
+        "--run",
+        "rgb_ftemporal_s42"
+      ],
+      "completion_marker": "runs/rgb_ftemporal_s42/run.json"
+    },
+    {
+      "args": [
+        "eval-cnn",
+        "--run",
+        "rgb_ftemporal_s42",
+        "--report",
+        "rgb_ftemporal_s42_test"
+      ],
+      "completion_marker": "reports/rgb_ftemporal_s42_test/report.json"
+    },
+    {
+      "args": [
+        "train-cnn",
+        "--kind",
+        "rgbe",
+        "--fold",
+        "temporal",
+        "--seed",
+        "42",
+        "--run",
+        "rgbe_ftemporal_s42"
+      ],
+      "completion_marker": "runs/rgbe_ftemporal_s42/run.json"
+    },
+    {
+      "args": [
+        "eval-cnn",
+        "--run",
+        "rgbe_ftemporal_s42",
+        "--report",
+        "rgbe_ftemporal_s42_test"
+      ],
+      "completion_marker": "reports/rgbe_ftemporal_s42_test/report.json"
+    },
+    {
+      "args": [
+        "eval-geometry",
+        "--features",
+        "holes_lab_s42_full",
+        "--mode",
+        "pixel",
+        "--fold",
+        "temporal",
+        "--report",
+        "holes_pixel_ftemporal_s42"
+      ],
+      "completion_marker": "reports/holes_pixel_ftemporal_s42/report.json"
+    },
+    {
+      "args": [
+        "eval-geometry",
+        "--features",
+        "holes_lab_s42_full",
+        "--mode",
+        "depth",
+        "--fold",
+        "temporal",
+        "--report",
+        "holes_depth_ftemporal_s42"
+      ],
+      "completion_marker": "reports/holes_depth_ftemporal_s42/report.json"
+    },
+    {
+      "args": [
+        "eval-geometry",
+        "--features",
+        "mobile_sam_full",
+        "--mode",
+        "mask",
+        "--fold",
+        "temporal",
+        "--report",
+        "mask_ftemporal"
+      ],
+      "completion_marker": "reports/mask_ftemporal/report.json"
+    },
+    {
+      "args": [
+        "compare",
+        "--reports",
+        "rgb_ftemporal_s42_test",
+        "rgbe_ftemporal_s42_test",
+        "holes_pixel_ftemporal_s42",
+        "holes_depth_ftemporal_s42",
+        "mask_ftemporal",
+        "--output",
+        "comparison_ftemporal_s42"
+      ],
+      "completion_marker": "reports/comparison_ftemporal_s42/comparison.json"
+    },
+    {
+      "args": [
+        "train-holes",
+        "--seed",
+        "123",
+        "--run",
+        "holes_lab_s123"
+      ],
+      "completion_marker": "runs/holes_lab_s123/run.json"
+    },
+    {
+      "args": [
+        "extract",
+        "--kind",
+        "holes",
+        "--run",
+        "holes_lab_s123",
+        "--features",
+        "holes_lab_s123_full"
+      ],
+      "completion_marker": "features/holes_lab_s123_full/features.json"
+    },
+    {
+      "args": [
+        "train-cnn",
+        "--kind",
+        "rgb",
+        "--fold",
+        "0",
+        "--seed",
+        "123",
+        "--run",
+        "rgb_f0_s123"
+      ],
+      "completion_marker": "runs/rgb_f0_s123/run.json"
+    },
+    {
+      "args": [
+        "eval-cnn",
+        "--run",
+        "rgb_f0_s123",
+        "--report",
+        "rgb_f0_s123_test"
+      ],
+      "completion_marker": "reports/rgb_f0_s123_test/report.json"
+    },
+    {
+      "args": [
+        "train-cnn",
+        "--kind",
+        "rgbe",
+        "--fold",
+        "0",
+        "--seed",
+        "123",
+        "--run",
+        "rgbe_f0_s123"
+      ],
+      "completion_marker": "runs/rgbe_f0_s123/run.json"
+    },
+    {
+      "args": [
+        "eval-cnn",
+        "--run",
+        "rgbe_f0_s123",
+        "--report",
+        "rgbe_f0_s123_test"
+      ],
+      "completion_marker": "reports/rgbe_f0_s123_test/report.json"
+    },
+    {
+      "args": [
+        "eval-geometry",
+        "--features",
+        "holes_lab_s123_full",
+        "--mode",
+        "pixel",
+        "--fold",
+        "0",
+        "--report",
+        "holes_pixel_f0_s123"
+      ],
+      "completion_marker": "reports/holes_pixel_f0_s123/report.json"
+    },
+    {
+      "args": [
+        "eval-geometry",
+        "--features",
+        "holes_lab_s123_full",
+        "--mode",
+        "depth",
+        "--fold",
+        "0",
+        "--report",
+        "holes_depth_f0_s123"
+      ],
+      "completion_marker": "reports/holes_depth_f0_s123/report.json"
+    },
+    {
+      "args": [
+        "compare",
+        "--reports",
+        "rgb_f0_s123_test",
+        "rgbe_f0_s123_test",
+        "holes_pixel_f0_s123",
+        "holes_depth_f0_s123",
+        "mask_f0",
+        "--output",
+        "comparison_f0_s123"
+      ],
+      "completion_marker": "reports/comparison_f0_s123/comparison.json"
+    },
+    {
+      "args": [
+        "train-cnn",
+        "--kind",
+        "rgb",
+        "--fold",
+        "1",
+        "--seed",
+        "123",
+        "--run",
+        "rgb_f1_s123"
+      ],
+      "completion_marker": "runs/rgb_f1_s123/run.json"
+    },
+    {
+      "args": [
+        "eval-cnn",
+        "--run",
+        "rgb_f1_s123",
+        "--report",
+        "rgb_f1_s123_test"
+      ],
+      "completion_marker": "reports/rgb_f1_s123_test/report.json"
+    },
+    {
+      "args": [
+        "train-cnn",
+        "--kind",
+        "rgbe",
+        "--fold",
+        "1",
+        "--seed",
+        "123",
+        "--run",
+        "rgbe_f1_s123"
+      ],
+      "completion_marker": "runs/rgbe_f1_s123/run.json"
+    },
+    {
+      "args": [
+        "eval-cnn",
+        "--run",
+        "rgbe_f1_s123",
+        "--report",
+        "rgbe_f1_s123_test"
+      ],
+      "completion_marker": "reports/rgbe_f1_s123_test/report.json"
+    },
+    {
+      "args": [
+        "eval-geometry",
+        "--features",
+        "holes_lab_s123_full",
+        "--mode",
+        "pixel",
+        "--fold",
+        "1",
+        "--report",
+        "holes_pixel_f1_s123"
+      ],
+      "completion_marker": "reports/holes_pixel_f1_s123/report.json"
+    },
+    {
+      "args": [
+        "eval-geometry",
+        "--features",
+        "holes_lab_s123_full",
+        "--mode",
+        "depth",
+        "--fold",
+        "1",
+        "--report",
+        "holes_depth_f1_s123"
+      ],
+      "completion_marker": "reports/holes_depth_f1_s123/report.json"
+    },
+    {
+      "args": [
+        "compare",
+        "--reports",
+        "rgb_f1_s123_test",
+        "rgbe_f1_s123_test",
+        "holes_pixel_f1_s123",
+        "holes_depth_f1_s123",
+        "mask_f1",
+        "--output",
+        "comparison_f1_s123"
+      ],
+      "completion_marker": "reports/comparison_f1_s123/comparison.json"
+    },
+    {
+      "args": [
+        "train-cnn",
+        "--kind",
+        "rgb",
+        "--fold",
+        "2",
+        "--seed",
+        "123",
+        "--run",
+        "rgb_f2_s123"
+      ],
+      "completion_marker": "runs/rgb_f2_s123/run.json"
+    },
+    {
+      "args": [
+        "eval-cnn",
+        "--run",
+        "rgb_f2_s123",
+        "--report",
+        "rgb_f2_s123_test"
+      ],
+      "completion_marker": "reports/rgb_f2_s123_test/report.json"
+    },
+    {
+      "args": [
+        "train-cnn",
+        "--kind",
+        "rgbe",
+        "--fold",
+        "2",
+        "--seed",
+        "123",
+        "--run",
+        "rgbe_f2_s123"
+      ],
+      "completion_marker": "runs/rgbe_f2_s123/run.json"
+    },
+    {
+      "args": [
+        "eval-cnn",
+        "--run",
+        "rgbe_f2_s123",
+        "--report",
+        "rgbe_f2_s123_test"
+      ],
+      "completion_marker": "reports/rgbe_f2_s123_test/report.json"
+    },
+    {
+      "args": [
+        "eval-geometry",
+        "--features",
+        "holes_lab_s123_full",
+        "--mode",
+        "pixel",
+        "--fold",
+        "2",
+        "--report",
+        "holes_pixel_f2_s123"
+      ],
+      "completion_marker": "reports/holes_pixel_f2_s123/report.json"
+    },
+    {
+      "args": [
+        "eval-geometry",
+        "--features",
+        "holes_lab_s123_full",
+        "--mode",
+        "depth",
+        "--fold",
+        "2",
+        "--report",
+        "holes_depth_f2_s123"
+      ],
+      "completion_marker": "reports/holes_depth_f2_s123/report.json"
+    },
+    {
+      "args": [
+        "compare",
+        "--reports",
+        "rgb_f2_s123_test",
+        "rgbe_f2_s123_test",
+        "holes_pixel_f2_s123",
+        "holes_depth_f2_s123",
+        "mask_f2",
+        "--output",
+        "comparison_f2_s123"
+      ],
+      "completion_marker": "reports/comparison_f2_s123/comparison.json"
+    },
+    {
+      "args": [
+        "train-cnn",
+        "--kind",
+        "rgb",
+        "--fold",
+        "3",
+        "--seed",
+        "123",
+        "--run",
+        "rgb_f3_s123"
+      ],
+      "completion_marker": "runs/rgb_f3_s123/run.json"
+    },
+    {
+      "args": [
+        "eval-cnn",
+        "--run",
+        "rgb_f3_s123",
+        "--report",
+        "rgb_f3_s123_test"
+      ],
+      "completion_marker": "reports/rgb_f3_s123_test/report.json"
+    },
+    {
+      "args": [
+        "train-cnn",
+        "--kind",
+        "rgbe",
+        "--fold",
+        "3",
+        "--seed",
+        "123",
+        "--run",
+        "rgbe_f3_s123"
+      ],
+      "completion_marker": "runs/rgbe_f3_s123/run.json"
+    },
+    {
+      "args": [
+        "eval-cnn",
+        "--run",
+        "rgbe_f3_s123",
+        "--report",
+        "rgbe_f3_s123_test"
+      ],
+      "completion_marker": "reports/rgbe_f3_s123_test/report.json"
+    },
+    {
+      "args": [
+        "eval-geometry",
+        "--features",
+        "holes_lab_s123_full",
+        "--mode",
+        "pixel",
+        "--fold",
+        "3",
+        "--report",
+        "holes_pixel_f3_s123"
+      ],
+      "completion_marker": "reports/holes_pixel_f3_s123/report.json"
+    },
+    {
+      "args": [
+        "eval-geometry",
+        "--features",
+        "holes_lab_s123_full",
+        "--mode",
+        "depth",
+        "--fold",
+        "3",
+        "--report",
+        "holes_depth_f3_s123"
+      ],
+      "completion_marker": "reports/holes_depth_f3_s123/report.json"
+    },
+    {
+      "args": [
+        "compare",
+        "--reports",
+        "rgb_f3_s123_test",
+        "rgbe_f3_s123_test",
+        "holes_pixel_f3_s123",
+        "holes_depth_f3_s123",
+        "mask_f3",
+        "--output",
+        "comparison_f3_s123"
+      ],
+      "completion_marker": "reports/comparison_f3_s123/comparison.json"
+    },
+    {
+      "args": [
+        "train-cnn",
+        "--kind",
+        "rgb",
+        "--fold",
+        "4",
+        "--seed",
+        "123",
+        "--run",
+        "rgb_f4_s123"
+      ],
+      "completion_marker": "runs/rgb_f4_s123/run.json"
+    },
+    {
+      "args": [
+        "eval-cnn",
+        "--run",
+        "rgb_f4_s123",
+        "--report",
+        "rgb_f4_s123_test"
+      ],
+      "completion_marker": "reports/rgb_f4_s123_test/report.json"
+    },
+    {
+      "args": [
+        "train-cnn",
+        "--kind",
+        "rgbe",
+        "--fold",
+        "4",
+        "--seed",
+        "123",
+        "--run",
+        "rgbe_f4_s123"
+      ],
+      "completion_marker": "runs/rgbe_f4_s123/run.json"
+    },
+    {
+      "args": [
+        "eval-cnn",
+        "--run",
+        "rgbe_f4_s123",
+        "--report",
+        "rgbe_f4_s123_test"
+      ],
+      "completion_marker": "reports/rgbe_f4_s123_test/report.json"
+    },
+    {
+      "args": [
+        "eval-geometry",
+        "--features",
+        "holes_lab_s123_full",
+        "--mode",
+        "pixel",
+        "--fold",
+        "4",
+        "--report",
+        "holes_pixel_f4_s123"
+      ],
+      "completion_marker": "reports/holes_pixel_f4_s123/report.json"
+    },
+    {
+      "args": [
+        "eval-geometry",
+        "--features",
+        "holes_lab_s123_full",
+        "--mode",
+        "depth",
+        "--fold",
+        "4",
+        "--report",
+        "holes_depth_f4_s123"
+      ],
+      "completion_marker": "reports/holes_depth_f4_s123/report.json"
+    },
+    {
+      "args": [
+        "compare",
+        "--reports",
+        "rgb_f4_s123_test",
+        "rgbe_f4_s123_test",
+        "holes_pixel_f4_s123",
+        "holes_depth_f4_s123",
+        "mask_f4",
+        "--output",
+        "comparison_f4_s123"
+      ],
+      "completion_marker": "reports/comparison_f4_s123/comparison.json"
+    },
+    {
+      "args": [
+        "train-cnn",
+        "--kind",
+        "rgb",
+        "--fold",
+        "temporal",
+        "--seed",
+        "123",
+        "--run",
+        "rgb_ftemporal_s123"
+      ],
+      "completion_marker": "runs/rgb_ftemporal_s123/run.json"
+    },
+    {
+      "args": [
+        "eval-cnn",
+        "--run",
+        "rgb_ftemporal_s123",
+        "--report",
+        "rgb_ftemporal_s123_test"
+      ],
+      "completion_marker": "reports/rgb_ftemporal_s123_test/report.json"
+    },
+    {
+      "args": [
+        "train-cnn",
+        "--kind",
+        "rgbe",
+        "--fold",
+        "temporal",
+        "--seed",
+        "123",
+        "--run",
+        "rgbe_ftemporal_s123"
+      ],
+      "completion_marker": "runs/rgbe_ftemporal_s123/run.json"
+    },
+    {
+      "args": [
+        "eval-cnn",
+        "--run",
+        "rgbe_ftemporal_s123",
+        "--report",
+        "rgbe_ftemporal_s123_test"
+      ],
+      "completion_marker": "reports/rgbe_ftemporal_s123_test/report.json"
+    },
+    {
+      "args": [
+        "eval-geometry",
+        "--features",
+        "holes_lab_s123_full",
+        "--mode",
+        "pixel",
+        "--fold",
+        "temporal",
+        "--report",
+        "holes_pixel_ftemporal_s123"
+      ],
+      "completion_marker": "reports/holes_pixel_ftemporal_s123/report.json"
+    },
+    {
+      "args": [
+        "eval-geometry",
+        "--features",
+        "holes_lab_s123_full",
+        "--mode",
+        "depth",
+        "--fold",
+        "temporal",
+        "--report",
+        "holes_depth_ftemporal_s123"
+      ],
+      "completion_marker": "reports/holes_depth_ftemporal_s123/report.json"
+    },
+    {
+      "args": [
+        "compare",
+        "--reports",
+        "rgb_ftemporal_s123_test",
+        "rgbe_ftemporal_s123_test",
+        "holes_pixel_ftemporal_s123",
+        "holes_depth_ftemporal_s123",
+        "mask_ftemporal",
+        "--output",
+        "comparison_ftemporal_s123"
+      ],
+      "completion_marker": "reports/comparison_ftemporal_s123/comparison.json"
+    },
+    {
+      "args": [
+        "train-holes",
+        "--seed",
+        "456",
+        "--run",
+        "holes_lab_s456"
+      ],
+      "completion_marker": "runs/holes_lab_s456/run.json"
+    },
+    {
+      "args": [
+        "extract",
+        "--kind",
+        "holes",
+        "--run",
+        "holes_lab_s456",
+        "--features",
+        "holes_lab_s456_full"
+      ],
+      "completion_marker": "features/holes_lab_s456_full/features.json"
+    },
+    {
+      "args": [
+        "train-cnn",
+        "--kind",
+        "rgb",
+        "--fold",
+        "0",
+        "--seed",
+        "456",
+        "--run",
+        "rgb_f0_s456"
+      ],
+      "completion_marker": "runs/rgb_f0_s456/run.json"
+    },
+    {
+      "args": [
+        "eval-cnn",
+        "--run",
+        "rgb_f0_s456",
+        "--report",
+        "rgb_f0_s456_test"
+      ],
+      "completion_marker": "reports/rgb_f0_s456_test/report.json"
+    },
+    {
+      "args": [
+        "train-cnn",
+        "--kind",
+        "rgbe",
+        "--fold",
+        "0",
+        "--seed",
+        "456",
+        "--run",
+        "rgbe_f0_s456"
+      ],
+      "completion_marker": "runs/rgbe_f0_s456/run.json"
+    },
+    {
+      "args": [
+        "eval-cnn",
+        "--run",
+        "rgbe_f0_s456",
+        "--report",
+        "rgbe_f0_s456_test"
+      ],
+      "completion_marker": "reports/rgbe_f0_s456_test/report.json"
+    },
+    {
+      "args": [
+        "eval-geometry",
+        "--features",
+        "holes_lab_s456_full",
+        "--mode",
+        "pixel",
+        "--fold",
+        "0",
+        "--report",
+        "holes_pixel_f0_s456"
+      ],
+      "completion_marker": "reports/holes_pixel_f0_s456/report.json"
+    },
+    {
+      "args": [
+        "eval-geometry",
+        "--features",
+        "holes_lab_s456_full",
+        "--mode",
+        "depth",
+        "--fold",
+        "0",
+        "--report",
+        "holes_depth_f0_s456"
+      ],
+      "completion_marker": "reports/holes_depth_f0_s456/report.json"
+    },
+    {
+      "args": [
+        "compare",
+        "--reports",
+        "rgb_f0_s456_test",
+        "rgbe_f0_s456_test",
+        "holes_pixel_f0_s456",
+        "holes_depth_f0_s456",
+        "mask_f0",
+        "--output",
+        "comparison_f0_s456"
+      ],
+      "completion_marker": "reports/comparison_f0_s456/comparison.json"
+    },
+    {
+      "args": [
+        "train-cnn",
+        "--kind",
+        "rgb",
+        "--fold",
+        "1",
+        "--seed",
+        "456",
+        "--run",
+        "rgb_f1_s456"
+      ],
+      "completion_marker": "runs/rgb_f1_s456/run.json"
+    },
+    {
+      "args": [
+        "eval-cnn",
+        "--run",
+        "rgb_f1_s456",
+        "--report",
+        "rgb_f1_s456_test"
+      ],
+      "completion_marker": "reports/rgb_f1_s456_test/report.json"
+    },
+    {
+      "args": [
+        "train-cnn",
+        "--kind",
+        "rgbe",
+        "--fold",
+        "1",
+        "--seed",
+        "456",
+        "--run",
+        "rgbe_f1_s456"
+      ],
+      "completion_marker": "runs/rgbe_f1_s456/run.json"
+    },
+    {
+      "args": [
+        "eval-cnn",
+        "--run",
+        "rgbe_f1_s456",
+        "--report",
+        "rgbe_f1_s456_test"
+      ],
+      "completion_marker": "reports/rgbe_f1_s456_test/report.json"
+    },
+    {
+      "args": [
+        "eval-geometry",
+        "--features",
+        "holes_lab_s456_full",
+        "--mode",
+        "pixel",
+        "--fold",
+        "1",
+        "--report",
+        "holes_pixel_f1_s456"
+      ],
+      "completion_marker": "reports/holes_pixel_f1_s456/report.json"
+    },
+    {
+      "args": [
+        "eval-geometry",
+        "--features",
+        "holes_lab_s456_full",
+        "--mode",
+        "depth",
+        "--fold",
+        "1",
+        "--report",
+        "holes_depth_f1_s456"
+      ],
+      "completion_marker": "reports/holes_depth_f1_s456/report.json"
+    },
+    {
+      "args": [
+        "compare",
+        "--reports",
+        "rgb_f1_s456_test",
+        "rgbe_f1_s456_test",
+        "holes_pixel_f1_s456",
+        "holes_depth_f1_s456",
+        "mask_f1",
+        "--output",
+        "comparison_f1_s456"
+      ],
+      "completion_marker": "reports/comparison_f1_s456/comparison.json"
+    },
+    {
+      "args": [
+        "train-cnn",
+        "--kind",
+        "rgb",
+        "--fold",
+        "2",
+        "--seed",
+        "456",
+        "--run",
+        "rgb_f2_s456"
+      ],
+      "completion_marker": "runs/rgb_f2_s456/run.json"
+    },
+    {
+      "args": [
+        "eval-cnn",
+        "--run",
+        "rgb_f2_s456",
+        "--report",
+        "rgb_f2_s456_test"
+      ],
+      "completion_marker": "reports/rgb_f2_s456_test/report.json"
+    },
+    {
+      "args": [
+        "train-cnn",
+        "--kind",
+        "rgbe",
+        "--fold",
+        "2",
+        "--seed",
+        "456",
+        "--run",
+        "rgbe_f2_s456"
+      ],
+      "completion_marker": "runs/rgbe_f2_s456/run.json"
+    },
+    {
+      "args": [
+        "eval-cnn",
+        "--run",
+        "rgbe_f2_s456",
+        "--report",
+        "rgbe_f2_s456_test"
+      ],
+      "completion_marker": "reports/rgbe_f2_s456_test/report.json"
+    },
+    {
+      "args": [
+        "eval-geometry",
+        "--features",
+        "holes_lab_s456_full",
+        "--mode",
+        "pixel",
+        "--fold",
+        "2",
+        "--report",
+        "holes_pixel_f2_s456"
+      ],
+      "completion_marker": "reports/holes_pixel_f2_s456/report.json"
+    },
+    {
+      "args": [
+        "eval-geometry",
+        "--features",
+        "holes_lab_s456_full",
+        "--mode",
+        "depth",
+        "--fold",
+        "2",
+        "--report",
+        "holes_depth_f2_s456"
+      ],
+      "completion_marker": "reports/holes_depth_f2_s456/report.json"
+    },
+    {
+      "args": [
+        "compare",
+        "--reports",
+        "rgb_f2_s456_test",
+        "rgbe_f2_s456_test",
+        "holes_pixel_f2_s456",
+        "holes_depth_f2_s456",
+        "mask_f2",
+        "--output",
+        "comparison_f2_s456"
+      ],
+      "completion_marker": "reports/comparison_f2_s456/comparison.json"
+    },
+    {
+      "args": [
+        "train-cnn",
+        "--kind",
+        "rgb",
+        "--fold",
+        "3",
+        "--seed",
+        "456",
+        "--run",
+        "rgb_f3_s456"
+      ],
+      "completion_marker": "runs/rgb_f3_s456/run.json"
+    },
+    {
+      "args": [
+        "eval-cnn",
+        "--run",
+        "rgb_f3_s456",
+        "--report",
+        "rgb_f3_s456_test"
+      ],
+      "completion_marker": "reports/rgb_f3_s456_test/report.json"
+    },
+    {
+      "args": [
+        "train-cnn",
+        "--kind",
+        "rgbe",
+        "--fold",
+        "3",
+        "--seed",
+        "456",
+        "--run",
+        "rgbe_f3_s456"
+      ],
+      "completion_marker": "runs/rgbe_f3_s456/run.json"
+    },
+    {
+      "args": [
+        "eval-cnn",
+        "--run",
+        "rgbe_f3_s456",
+        "--report",
+        "rgbe_f3_s456_test"
+      ],
+      "completion_marker": "reports/rgbe_f3_s456_test/report.json"
+    },
+    {
+      "args": [
+        "eval-geometry",
+        "--features",
+        "holes_lab_s456_full",
+        "--mode",
+        "pixel",
+        "--fold",
+        "3",
+        "--report",
+        "holes_pixel_f3_s456"
+      ],
+      "completion_marker": "reports/holes_pixel_f3_s456/report.json"
+    },
+    {
+      "args": [
+        "eval-geometry",
+        "--features",
+        "holes_lab_s456_full",
+        "--mode",
+        "depth",
+        "--fold",
+        "3",
+        "--report",
+        "holes_depth_f3_s456"
+      ],
+      "completion_marker": "reports/holes_depth_f3_s456/report.json"
+    },
+    {
+      "args": [
+        "compare",
+        "--reports",
+        "rgb_f3_s456_test",
+        "rgbe_f3_s456_test",
+        "holes_pixel_f3_s456",
+        "holes_depth_f3_s456",
+        "mask_f3",
+        "--output",
+        "comparison_f3_s456"
+      ],
+      "completion_marker": "reports/comparison_f3_s456/comparison.json"
+    },
+    {
+      "args": [
+        "train-cnn",
+        "--kind",
+        "rgb",
+        "--fold",
+        "4",
+        "--seed",
+        "456",
+        "--run",
+        "rgb_f4_s456"
+      ],
+      "completion_marker": "runs/rgb_f4_s456/run.json"
+    },
+    {
+      "args": [
+        "eval-cnn",
+        "--run",
+        "rgb_f4_s456",
+        "--report",
+        "rgb_f4_s456_test"
+      ],
+      "completion_marker": "reports/rgb_f4_s456_test/report.json"
+    },
+    {
+      "args": [
+        "train-cnn",
+        "--kind",
+        "rgbe",
+        "--fold",
+        "4",
+        "--seed",
+        "456",
+        "--run",
+        "rgbe_f4_s456"
+      ],
+      "completion_marker": "runs/rgbe_f4_s456/run.json"
+    },
+    {
+      "args": [
+        "eval-cnn",
+        "--run",
+        "rgbe_f4_s456",
+        "--report",
+        "rgbe_f4_s456_test"
+      ],
+      "completion_marker": "reports/rgbe_f4_s456_test/report.json"
+    },
+    {
+      "args": [
+        "eval-geometry",
+        "--features",
+        "holes_lab_s456_full",
+        "--mode",
+        "pixel",
+        "--fold",
+        "4",
+        "--report",
+        "holes_pixel_f4_s456"
+      ],
+      "completion_marker": "reports/holes_pixel_f4_s456/report.json"
+    },
+    {
+      "args": [
+        "eval-geometry",
+        "--features",
+        "holes_lab_s456_full",
+        "--mode",
+        "depth",
+        "--fold",
+        "4",
+        "--report",
+        "holes_depth_f4_s456"
+      ],
+      "completion_marker": "reports/holes_depth_f4_s456/report.json"
+    },
+    {
+      "args": [
+        "compare",
+        "--reports",
+        "rgb_f4_s456_test",
+        "rgbe_f4_s456_test",
+        "holes_pixel_f4_s456",
+        "holes_depth_f4_s456",
+        "mask_f4",
+        "--output",
+        "comparison_f4_s456"
+      ],
+      "completion_marker": "reports/comparison_f4_s456/comparison.json"
+    },
+    {
+      "args": [
+        "train-cnn",
+        "--kind",
+        "rgb",
+        "--fold",
+        "temporal",
+        "--seed",
+        "456",
+        "--run",
+        "rgb_ftemporal_s456"
+      ],
+      "completion_marker": "runs/rgb_ftemporal_s456/run.json"
+    },
+    {
+      "args": [
+        "eval-cnn",
+        "--run",
+        "rgb_ftemporal_s456",
+        "--report",
+        "rgb_ftemporal_s456_test"
+      ],
+      "completion_marker": "reports/rgb_ftemporal_s456_test/report.json"
+    },
+    {
+      "args": [
+        "train-cnn",
+        "--kind",
+        "rgbe",
+        "--fold",
+        "temporal",
+        "--seed",
+        "456",
+        "--run",
+        "rgbe_ftemporal_s456"
+      ],
+      "completion_marker": "runs/rgbe_ftemporal_s456/run.json"
+    },
+    {
+      "args": [
+        "eval-cnn",
+        "--run",
+        "rgbe_ftemporal_s456",
+        "--report",
+        "rgbe_ftemporal_s456_test"
+      ],
+      "completion_marker": "reports/rgbe_ftemporal_s456_test/report.json"
+    },
+    {
+      "args": [
+        "eval-geometry",
+        "--features",
+        "holes_lab_s456_full",
+        "--mode",
+        "pixel",
+        "--fold",
+        "temporal",
+        "--report",
+        "holes_pixel_ftemporal_s456"
+      ],
+      "completion_marker": "reports/holes_pixel_ftemporal_s456/report.json"
+    },
+    {
+      "args": [
+        "eval-geometry",
+        "--features",
+        "holes_lab_s456_full",
+        "--mode",
+        "depth",
+        "--fold",
+        "temporal",
+        "--report",
+        "holes_depth_ftemporal_s456"
+      ],
+      "completion_marker": "reports/holes_depth_ftemporal_s456/report.json"
+    },
+    {
+      "args": [
+        "compare",
+        "--reports",
+        "rgb_ftemporal_s456_test",
+        "rgbe_ftemporal_s456_test",
+        "holes_pixel_ftemporal_s456",
+        "holes_depth_ftemporal_s456",
+        "mask_ftemporal",
+        "--output",
+        "comparison_ftemporal_s456"
+      ],
+      "completion_marker": "reports/comparison_ftemporal_s456/comparison.json"
+    },
+    {
+      "args": [
+        "collect-oof",
+        "--reports",
+        "rgb_f0_s42_test",
+        "rgb_f1_s42_test",
+        "rgb_f2_s42_test",
+        "rgb_f3_s42_test",
+        "rgb_f4_s42_test",
+        "--output",
+        "rgb_oof_s42"
+      ],
+      "completion_marker": "reports/rgb_oof_s42/report.json"
+    },
+    {
+      "args": [
+        "collect-oof",
+        "--reports",
+        "rgbe_f0_s42_test",
+        "rgbe_f1_s42_test",
+        "rgbe_f2_s42_test",
+        "rgbe_f3_s42_test",
+        "rgbe_f4_s42_test",
+        "--output",
+        "rgbe_oof_s42"
+      ],
+      "completion_marker": "reports/rgbe_oof_s42/report.json"
+    },
+    {
+      "args": [
+        "collect-oof",
+        "--reports",
+        "holes_pixel_f0_s42",
+        "holes_pixel_f1_s42",
+        "holes_pixel_f2_s42",
+        "holes_pixel_f3_s42",
+        "holes_pixel_f4_s42",
+        "--output",
+        "holes_pixel_oof_s42"
+      ],
+      "completion_marker": "reports/holes_pixel_oof_s42/report.json"
+    },
+    {
+      "args": [
+        "collect-oof",
+        "--reports",
+        "holes_depth_f0_s42",
+        "holes_depth_f1_s42",
+        "holes_depth_f2_s42",
+        "holes_depth_f3_s42",
+        "holes_depth_f4_s42",
+        "--output",
+        "holes_depth_oof_s42"
+      ],
+      "completion_marker": "reports/holes_depth_oof_s42/report.json"
+    },
+    {
+      "args": [
+        "collect-oof",
+        "--reports",
+        "mask_f0",
+        "mask_f1",
+        "mask_f2",
+        "mask_f3",
+        "mask_f4",
+        "--output",
+        "mask_oof"
+      ],
+      "completion_marker": "reports/mask_oof/report.json"
+    },
+    {
+      "args": [
+        "compare",
+        "--reports",
+        "rgb_oof_s42",
+        "rgbe_oof_s42",
+        "holes_pixel_oof_s42",
+        "holes_depth_oof_s42",
+        "mask_oof",
+        "--output",
+        "comparison_oof_s42"
+      ],
+      "completion_marker": "reports/comparison_oof_s42/comparison.json"
+    },
+    {
+      "args": [
+        "collect-oof",
+        "--reports",
+        "rgb_f0_s123_test",
+        "rgb_f1_s123_test",
+        "rgb_f2_s123_test",
+        "rgb_f3_s123_test",
+        "rgb_f4_s123_test",
+        "--output",
+        "rgb_oof_s123"
+      ],
+      "completion_marker": "reports/rgb_oof_s123/report.json"
+    },
+    {
+      "args": [
+        "collect-oof",
+        "--reports",
+        "rgbe_f0_s123_test",
+        "rgbe_f1_s123_test",
+        "rgbe_f2_s123_test",
+        "rgbe_f3_s123_test",
+        "rgbe_f4_s123_test",
+        "--output",
+        "rgbe_oof_s123"
+      ],
+      "completion_marker": "reports/rgbe_oof_s123/report.json"
+    },
+    {
+      "args": [
+        "collect-oof",
+        "--reports",
+        "holes_pixel_f0_s123",
+        "holes_pixel_f1_s123",
+        "holes_pixel_f2_s123",
+        "holes_pixel_f3_s123",
+        "holes_pixel_f4_s123",
+        "--output",
+        "holes_pixel_oof_s123"
+      ],
+      "completion_marker": "reports/holes_pixel_oof_s123/report.json"
+    },
+    {
+      "args": [
+        "collect-oof",
+        "--reports",
+        "holes_depth_f0_s123",
+        "holes_depth_f1_s123",
+        "holes_depth_f2_s123",
+        "holes_depth_f3_s123",
+        "holes_depth_f4_s123",
+        "--output",
+        "holes_depth_oof_s123"
+      ],
+      "completion_marker": "reports/holes_depth_oof_s123/report.json"
+    },
+    {
+      "args": [
+        "compare",
+        "--reports",
+        "rgb_oof_s123",
+        "rgbe_oof_s123",
+        "holes_pixel_oof_s123",
+        "holes_depth_oof_s123",
+        "mask_oof",
+        "--output",
+        "comparison_oof_s123"
+      ],
+      "completion_marker": "reports/comparison_oof_s123/comparison.json"
+    },
+    {
+      "args": [
+        "collect-oof",
+        "--reports",
+        "rgb_f0_s456_test",
+        "rgb_f1_s456_test",
+        "rgb_f2_s456_test",
+        "rgb_f3_s456_test",
+        "rgb_f4_s456_test",
+        "--output",
+        "rgb_oof_s456"
+      ],
+      "completion_marker": "reports/rgb_oof_s456/report.json"
+    },
+    {
+      "args": [
+        "collect-oof",
+        "--reports",
+        "rgbe_f0_s456_test",
+        "rgbe_f1_s456_test",
+        "rgbe_f2_s456_test",
+        "rgbe_f3_s456_test",
+        "rgbe_f4_s456_test",
+        "--output",
+        "rgbe_oof_s456"
+      ],
+      "completion_marker": "reports/rgbe_oof_s456/report.json"
+    },
+    {
+      "args": [
+        "collect-oof",
+        "--reports",
+        "holes_pixel_f0_s456",
+        "holes_pixel_f1_s456",
+        "holes_pixel_f2_s456",
+        "holes_pixel_f3_s456",
+        "holes_pixel_f4_s456",
+        "--output",
+        "holes_pixel_oof_s456"
+      ],
+      "completion_marker": "reports/holes_pixel_oof_s456/report.json"
+    },
+    {
+      "args": [
+        "collect-oof",
+        "--reports",
+        "holes_depth_f0_s456",
+        "holes_depth_f1_s456",
+        "holes_depth_f2_s456",
+        "holes_depth_f3_s456",
+        "holes_depth_f4_s456",
+        "--output",
+        "holes_depth_oof_s456"
+      ],
+      "completion_marker": "reports/holes_depth_oof_s456/report.json"
+    },
+    {
+      "args": [
+        "compare",
+        "--reports",
+        "rgb_oof_s456",
+        "rgbe_oof_s456",
+        "holes_pixel_oof_s456",
+        "holes_depth_oof_s456",
+        "mask_oof",
+        "--output",
+        "comparison_oof_s456"
+      ],
+      "completion_marker": "reports/comparison_oof_s456/comparison.json"
+    }
+  ],
+  "scope": "All CV; optional retrospective temporal split. No future prospective results.",
+  "resume_policy": "Skip completed matching artifacts only; incomplete directories cause a stop, never overwrite."
+}

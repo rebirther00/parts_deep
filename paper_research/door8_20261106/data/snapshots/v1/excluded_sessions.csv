@@ -1,0 +1,40 @@
+session_id,session_dir,original_label,current_label,reason,n_images,notes
+1,20260729/Unknown/s_152242,Unknown,Unknown,previously_invalid_or_partially_invalid_session;class_out_of_scope;no_local_sample,5,"[2026-08-28 16:43] invalidate (5장): 설치 전 사무실 시험 촬영(도어 없음), 홀 검출 no_corner 전부"
+2,20260729/Unknown/s_163642,Unknown,Unknown,previously_invalid_or_partially_invalid_session;class_out_of_scope;no_local_sample,44,"[2026-08-28 16:43] invalidate (44장): 설치 전 사무실 시험 촬영(도어 없음), 홀 검출 no_corner 전부"
+3,20260804/Unknown/s_093254,Unknown,Unknown,previously_invalid_or_partially_invalid_session;class_out_of_scope;no_local_sample,1,"[2026-08-28 16:43] invalidate (1장): 설치 전 사무실 시험 촬영(도어 없음), 홀 검출 no_corner 전부"
+4,20260810/E25_door_RH/s_091317,E25_door_RH,E25_door_RH,previously_invalid_or_partially_invalid_session;no_local_sample,16,"[2026-09-07 21:39] invalidate (16장): 프로토콜 이전 세션(지그·카메라 설치 전, 도어 기울어짐·근접) — 8/27 이후만 학습·평가 (사용자 결정 2026-09-07)"
+5,20260811/Unknown/s_124933,Unknown,Unknown,previously_invalid_or_partially_invalid_session;class_out_of_scope;no_local_sample,11,"[2026-08-28 16:43] invalidate (11장): 설치 전 사무실 시험 촬영(도어 없음), 홀 검출 no_corner 전부"
+9,20260827/E30_door_LH_RR/s_111705,E30_door_LH_RR,E30_door_LH_RR,previously_invalid_or_partially_invalid_session;no_local_sample,31,"[2026-09-11 16:26] invalidate (31장): 초기 세팅 중 시험 촬영(작업자·노트북·가방 프레임 내 유입) — 학습·평가 제외, 사용자 결정 2026-09-11"
+10,20260827/E30_door_LH_RR/s_122816,E30_door_LH_RR,E30_door_LH_RR,previously_invalid_or_partially_invalid_session;no_local_sample,9,"[2026-09-23 18:29] invalidate (9장): 빈 지그 촬영(도어 없음, 9프레임 전부 홀 미검출) — 2026-09-23 사용자 확인"
+77,20260903/E25_door_LH_FRT/s_124446,E25_door_LH_FRT,E23_door_LH_FRT,E23_out_of_scope;human_confirmed_worker_class_error,61,"[2026-09-07 13:06] relabel E25_door_LH_FRT → Unknown (61장)
+[2026-09-07 13:06] 홀 판별기 D≈460mm(CAD E25_LH_FRT 724) 일관 측정 + 육안 확인: 8종 외 더 좁은 도어 → Unknown 확정(사용자 확인 2026-09-07)
+[2026-09-07 13:27] relabel Unknown → E23_door_LH_FRT (61장)
+[2026-09-07 13:27] 사용자 확인: 460mm 도어 = E23 (9번째 클래스, CAD 미확보, 실측 D≈460mm) → E23_door_LH_FRT"
+78,20260903/E25_door_LH_FRT/s_132914,E25_door_LH_FRT,E23_door_LH_FRT,E23_out_of_scope;human_confirmed_worker_class_error,72,"[2026-09-07 13:06] relabel E25_door_LH_FRT → Unknown (72장)
+[2026-09-07 13:06] 홀 판별기 D≈460mm(CAD E25_LH_FRT 724) 일관 측정 + 육안 확인: 8종 외 더 좁은 도어 → Unknown 확정(사용자 확인 2026-09-07)
+[2026-09-07 13:27] relabel Unknown → E23_door_LH_FRT (72장)
+[2026-09-07 13:27] 사용자 확인: 460mm 도어 = E23 (9번째 클래스, CAD 미확보, 실측 D≈460mm) → E23_door_LH_FRT"
+79,20260903/E25_door_LH_FRT/s_141947,E25_door_LH_FRT,E23_door_LH_FRT,E23_out_of_scope;human_confirmed_worker_class_error,69,"[2026-09-07 13:06] relabel E25_door_LH_FRT → Unknown (69장)
+[2026-09-07 13:06] 홀 판별기 D≈460mm(CAD E25_LH_FRT 724) 일관 측정 + 육안 확인: 8종 외 더 좁은 도어 → Unknown 확정(사용자 확인 2026-09-07)
+[2026-09-07 13:27] relabel Unknown → E23_door_LH_FRT (69장)
+[2026-09-07 13:27] 사용자 확인: 460mm 도어 = E23 (9번째 클래스, CAD 미확보, 실측 D≈460mm) → E23_door_LH_FRT"
+81,20260903/E30_door_LH_RR/s_151736,E30_door_LH_RR,E25_door_LH_RR,human_confirmed_worker_class_error,3,"[2026-09-07 13:06] relabel E30_door_LH_RR → E25_door_LH_RR (3장)
+[2026-09-07 13:06] 7~15초 수동종료 짧은 세션, 클래스 오선택. 홀 판별기 D + 육안 대조로 정정(사용자 확인 2026-09-07)
+[2026-09-23 14:23] 옵션 확정(자동 판정 일괄 승인): 레이더 O"
+84,20260903/E30_door_LH_RR/s_183159,E30_door_LH_RR,E30_E38_door_RH,human_confirmed_worker_class_error,7,"[2026-09-07 13:06] relabel E30_door_LH_RR → E30_E38_door_RH (7장)
+[2026-09-07 13:06] 7~15초 수동종료 짧은 세션, 클래스 오선택. 홀 판별기 D + 육안 대조로 정정(사용자 확인 2026-09-07)
+[2026-09-23 14:23] 옵션 확정(자동 판정 일괄 승인): 레이더 O"
+103,20260905/E25_door_LH_FRT/s_150506,E25_door_LH_FRT,E23_door_LH_FRT,E23_out_of_scope;human_confirmed_worker_class_error,149,"[2026-09-07 13:06] relabel E25_door_LH_FRT → Unknown (149장)
+[2026-09-07 13:06] 홀 판별기 D≈460mm(CAD E25_LH_FRT 724) 일관 측정 + 육안 확인: 8종 외 더 좁은 도어 → Unknown 확정(사용자 확인 2026-09-07)
+[2026-09-07 13:27] relabel Unknown → E23_door_LH_FRT (149장)
+[2026-09-07 13:27] 사용자 확인: 460mm 도어 = E23 (9번째 클래스, CAD 미확보, 실측 D≈460mm) → E23_door_LH_FRT"
+100,20260905/E30_door_LH_RR/s_123451,E30_door_LH_RR,E30_E38_door_RH,human_confirmed_worker_class_error,1,"[2026-09-07 13:06] relabel E30_door_LH_RR → E30_E38_door_RH (1장)
+[2026-09-07 13:06] 7~15초 수동종료 짧은 세션, 클래스 오선택. 홀 판별기 D + 육안 대조로 정정(사용자 확인 2026-09-07)
+[2026-09-23 18:29] 옵션 확정(cli): 레이더 X (자동 판정 None)
+[2026-10-02 20:01] 옵션 확정: 레이더 X (자동 판정 None)"
+409,20260912/E25_door_LH_FRT/s_094850,E25_door_LH_FRT,E23_door_LH_FRT,E23_out_of_scope;human_confirmed_worker_class_error,55,[2026-09-16 11:16] relabel E25_door_LH_FRT → E23_door_LH_FRT (55장)
+410,20260912/E25_door_LH_FRT/s_103329,E25_door_LH_FRT,E23_door_LH_FRT,E23_out_of_scope;human_confirmed_worker_class_error,62,[2026-09-16 11:16] relabel E25_door_LH_FRT → E23_door_LH_FRT (62장)
+427,20260914/E30_door_LH_RR/s_170035,E30_door_LH_RR,E30_E38_door_RH,human_confirmed_worker_class_error,57,"[2026-09-16 11:16] relabel E30_door_LH_RR → E30_E38_door_RH (57장)
+[2026-09-23 14:23] 옵션 확정(자동 판정 일괄 승인): 레이더 X"
+1720,20261029/E30_door_LH_FRT/s_075858,E30_door_LH_FRT,E38_door_LH_FRT,human_confirmed_worker_class_error,92,"[2026-11-04 16:02] relabel E30_door_LH_FRT → E38_door_LH_FRT (92장)
+[2026-11-04 16:02] 사용자 육안 판별: 작업자 기종 오선택(E30→E38 앞문). 근거: 홀 판별기 픽셀 D 812.3(E38 CAD 812, E30 765), depth 경로 825, 같은 날 E38 811.5·E30 764.2, CNN 11:9 불확실"

@@ -1,0 +1,18 @@
+{
+  "created_at": "2026-11-06T16:14:57+09:00",
+  "files": {
+    "excluded_annotations.json": "d46d2f516096039b1c97111a526cd292eee127ad70910ec97b230348c2af5810",
+    "provenance.json": "40145dcf0597eae11ee29263b46b445f649563190dbffe1a4d865bfcd9416847",
+    "summary.json": "8ce80769ebfd9fd506173139aeb2de182b403e9a995ad716836cec23b3318ce7",
+    "source.sqlite-shm": "fd4c9fda9cd3f9ae7c962b0ddf37232294d55580e1aa165aa06129b8549389eb",
+    "splits.json": "a8a8872b8aeb18b08a91a3ab4ec90b73e4f3fa5f0f20a4de38e312f2637e19b9",
+    "annotations_lab.jsonl": "3bbc28cd11d0e1ba7642384653524c58d897b0763b4ae07a347d67ca94e03e52",
+    "source.sqlite-wal": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "sessions.csv": "dbec79ace5c208abd573858e4cf9d8c3f8c806d8fe39ca8a46a649e7820e1bfc",
+    "excluded_sessions.csv": "a8a8d7657ac91d9fc683e7ca079cb75f6968f46cde17bfc8aad63e79053fe382",
+    "protocol.json": "7aaf141f1d36ae0e3b4197cf6e6fd359b62511135a46b5bd2743d4d94c9ddfb4",
+    "frames.jsonl": "9c7316c9755f61f4eb0f0e5917d7ba61360c8188f63ff557060148da7099cfeb",
+    "field_annotation_queue.jsonl": "965009bc17834affbf2291e1e2e8f8a99f380f1cbd52d4b9dd1d743c27caa0dc",
+    "annotations_lab_split.json": "b1b0ba9fb1d2fc373c1ae375ad47a773ba7f69be7eba2c8c000cc69062cb1dc9"
+  }
+}

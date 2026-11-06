@@ -1,0 +1,318 @@
+{
+  "created_at": "2026-11-06T16:14:57+09:00",
+  "snapshot": "v1",
+  "protocol_sha256": "3473437e736f1e22467554fb13f66d3c4e677fd61beab1e739dff47678e62f88",
+  "eligible_sessions": 361,
+  "excluded_sessions": 18,
+  "source_pairs": 36142,
+  "local_pairs_before_sampling": 7376,
+  "selected_frames": 7104,
+  "classes": {
+    "E25_door_LH_FRT": {
+      "sessions": 9,
+      "frames": 180
+    },
+    "E25_door_LH_RR": {
+      "sessions": 70,
+      "frames": 1388
+    },
+    "E25_door_RH": {
+      "sessions": 68,
+      "frames": 1343
+    },
+    "E30_E38_door_RH": {
+      "sessions": 70,
+      "frames": 1398
+    },
+    "E30_door_LH_FRT": {
+      "sessions": 44,
+      "frames": 867
+    },
+    "E30_door_LH_RR": {
+      "sessions": 50,
+      "frames": 984
+    },
+    "E38_door_LH_FRT": {
+      "sessions": 21,
+      "frames": 410
+    },
+    "E38_door_LH_RR": {
+      "sessions": 29,
+      "frames": 534
+    }
+  },
+  "auxiliary_lab_annotations": 118,
+  "excluded_nonlab_annotations": 16,
+  "exact_duplicate_group_joins": [],
+  "split_counts": {
+    "0": {
+      "train": {
+        "frames": 4171,
+        "sessions": 214,
+        "classes": {
+          "E25_door_LH_RR": 831,
+          "E25_door_RH": 783,
+          "E30_E38_door_RH": 839,
+          "E30_door_LH_RR": 586,
+          "E38_door_LH_RR": 294,
+          "E38_door_LH_FRT": 231,
+          "E30_door_LH_FRT": 507,
+          "E25_door_LH_FRT": 100
+        }
+      },
+      "val": {
+        "frames": 1455,
+        "sessions": 73,
+        "classes": {
+          "E25_door_LH_RR": 279,
+          "E30_door_LH_FRT": 180,
+          "E25_door_RH": 280,
+          "E30_E38_door_RH": 279,
+          "E38_door_LH_FRT": 79,
+          "E38_door_LH_RR": 120,
+          "E30_door_LH_RR": 198,
+          "E25_door_LH_FRT": 40
+        }
+      },
+      "test": {
+        "frames": 1478,
+        "sessions": 74,
+        "classes": {
+          "E25_door_RH": 280,
+          "E30_E38_door_RH": 280,
+          "E38_door_LH_RR": 120,
+          "E38_door_LH_FRT": 100,
+          "E25_door_LH_RR": 278,
+          "E30_door_LH_RR": 200,
+          "E30_door_LH_FRT": 180,
+          "E25_door_LH_FRT": 40
+        }
+      }
+    },
+    "1": {
+      "train": {
+        "frames": 4247,
+        "sessions": 215,
+        "classes": {
+          "E25_door_LH_RR": 834,
+          "E25_door_RH": 799,
+          "E30_E38_door_RH": 839,
+          "E30_door_LH_RR": 599,
+          "E38_door_LH_RR": 309,
+          "E38_door_LH_FRT": 259,
+          "E30_door_LH_FRT": 508,
+          "E25_door_LH_FRT": 100
+        }
+      },
+      "val": {
+        "frames": 1402,
+        "sessions": 73,
+        "classes": {
+          "E25_door_RH": 264,
+          "E38_door_LH_RR": 105,
+          "E30_E38_door_RH": 280,
+          "E38_door_LH_FRT": 72,
+          "E30_door_LH_FRT": 179,
+          "E25_door_LH_RR": 275,
+          "E30_door_LH_RR": 187,
+          "E25_door_LH_FRT": 40
+        }
+      },
+      "test": {
+        "frames": 1455,
+        "sessions": 73,
+        "classes": {
+          "E25_door_LH_RR": 279,
+          "E30_door_LH_FRT": 180,
+          "E25_door_RH": 280,
+          "E30_E38_door_RH": 279,
+          "E38_door_LH_FRT": 79,
+          "E38_door_LH_RR": 120,
+          "E30_door_LH_RR": 198,
+          "E25_door_LH_FRT": 40
+        }
+      }
+    },
+    "2": {
+      "train": {
+        "frames": 4288,
+        "sessions": 216,
+        "classes": {
+          "E25_door_LH_RR": 834,
+          "E30_door_LH_FRT": 519,
+          "E25_door_RH": 820,
+          "E30_E38_door_RH": 839,
+          "E30_door_LH_RR": 597,
+          "E38_door_LH_FRT": 258,
+          "E38_door_LH_RR": 321,
+          "E25_door_LH_FRT": 100
+        }
+      },
+      "val": {
+        "frames": 1414,
+        "sessions": 72,
+        "classes": {
+          "E25_door_LH_RR": 279,
+          "E30_E38_door_RH": 279,
+          "E38_door_LH_RR": 108,
+          "E38_door_LH_FRT": 80,
+          "E30_door_LH_RR": 200,
+          "E25_door_LH_FRT": 40,
+          "E25_door_RH": 259,
+          "E30_door_LH_FRT": 169
+        }
+      },
+      "test": {
+        "frames": 1402,
+        "sessions": 73,
+        "classes": {
+          "E25_door_RH": 264,
+          "E38_door_LH_RR": 105,
+          "E30_E38_door_RH": 280,
+          "E38_door_LH_FRT": 72,
+          "E30_door_LH_FRT": 179,
+          "E25_door_LH_RR": 275,
+          "E30_door_LH_RR": 187,
+          "E25_door_LH_FRT": 40
+        }
+      }
+    },
+    "3": {
+      "train": {
+        "frames": 4335,
+        "sessions": 220,
+        "classes": {
+          "E25_door_LH_RR": 832,
+          "E30_door_LH_FRT": 539,
+          "E25_door_RH": 824,
+          "E30_E38_door_RH": 839,
+          "E38_door_LH_RR": 345,
+          "E38_door_LH_FRT": 251,
+          "E30_door_LH_RR": 585,
+          "E25_door_LH_FRT": 120
+        }
+      },
+      "val": {
+        "frames": 1355,
+        "sessions": 69,
+        "classes": {
+          "E25_door_LH_RR": 277,
+          "E25_door_RH": 260,
+          "E30_door_LH_RR": 199,
+          "E30_E38_door_RH": 280,
+          "E38_door_LH_FRT": 79,
+          "E30_door_LH_FRT": 159,
+          "E38_door_LH_RR": 81,
+          "E25_door_LH_FRT": 20
+        }
+      },
+      "test": {
+        "frames": 1414,
+        "sessions": 72,
+        "classes": {
+          "E25_door_LH_RR": 279,
+          "E30_E38_door_RH": 279,
+          "E38_door_LH_RR": 108,
+          "E38_door_LH_FRT": 80,
+          "E30_door_LH_RR": 200,
+          "E25_door_LH_FRT": 40,
+          "E25_door_RH": 259,
+          "E30_door_LH_FRT": 169
+        }
+      }
+    },
+    "4": {
+      "train": {
+        "frames": 4271,
+        "sessions": 218,
+        "classes": {
+          "E25_door_LH_RR": 833,
+          "E30_door_LH_FRT": 528,
+          "E25_door_RH": 803,
+          "E30_E38_door_RH": 838,
+          "E38_door_LH_RR": 333,
+          "E38_door_LH_FRT": 231,
+          "E30_door_LH_RR": 585,
+          "E25_door_LH_FRT": 120
+        }
+      },
+      "val": {
+        "frames": 1478,
+        "sessions": 74,
+        "classes": {
+          "E25_door_RH": 280,
+          "E30_E38_door_RH": 280,
+          "E38_door_LH_RR": 120,
+          "E38_door_LH_FRT": 100,
+          "E25_door_LH_RR": 278,
+          "E30_door_LH_RR": 200,
+          "E30_door_LH_FRT": 180,
+          "E25_door_LH_FRT": 40
+        }
+      },
+      "test": {
+        "frames": 1355,
+        "sessions": 69,
+        "classes": {
+          "E25_door_LH_RR": 277,
+          "E25_door_RH": 260,
+          "E30_door_LH_RR": 199,
+          "E30_E38_door_RH": 280,
+          "E38_door_LH_FRT": 79,
+          "E30_door_LH_FRT": 159,
+          "E38_door_LH_RR": 81,
+          "E25_door_LH_FRT": 20
+        }
+      }
+    },
+    "temporal": {
+      "train": {
+        "frames": 3802,
+        "sessions": 193,
+        "classes": {
+          "E25_door_LH_RR": 757,
+          "E30_door_LH_FRT": 359,
+          "E25_door_RH": 686,
+          "E30_E38_door_RH": 738,
+          "E30_door_LH_RR": 458,
+          "E38_door_LH_RR": 406,
+          "E38_door_LH_FRT": 318,
+          "E25_door_LH_FRT": 80
+        }
+      },
+      "val": {
+        "frames": 685,
+        "sessions": 35,
+        "classes": {
+          "E38_door_LH_RR": 68,
+          "E30_E38_door_RH": 140,
+          "E38_door_LH_FRT": 60,
+          "E30_door_LH_FRT": 59,
+          "E30_door_LH_RR": 80,
+          "E25_door_RH": 120,
+          "E25_door_LH_RR": 138,
+          "E25_door_LH_FRT": 20
+        }
+      },
+      "test": {
+        "frames": 2617,
+        "sessions": 133,
+        "classes": {
+          "E25_door_LH_RR": 493,
+          "E25_door_RH": 537,
+          "E30_E38_door_RH": 520,
+          "E30_door_LH_RR": 446,
+          "E30_door_LH_FRT": 449,
+          "E38_door_LH_FRT": 32,
+          "E38_door_LH_RR": 60,
+          "E25_door_LH_FRT": 80
+        }
+      }
+    }
+  },
+  "limitations": [
+    "Physical instance IDs and lots are unavailable; sessions are not guaranteed independent physical parts.",
+    "This is retrospectively reconstructed data. Prior method development has seen this field period.",
+    "Uniform sampling applies to the locally mirrored sample, not necessarily the complete NAS capture."
+  ]
+}

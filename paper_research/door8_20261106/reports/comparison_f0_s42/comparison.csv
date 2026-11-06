@@ -1,0 +1,6 @@
+report,method,fold,frame_accuracy_all,frame_macro_f1,frame_coverage,session_accuracy_all,session_macro_f1,session_coverage
+rgb_f0_s42_test,rgb,0,1.0,1.0,1.0,1.0,1.0,1.0
+rgbe_f0_s42_test,rgbe,0,0.9905277401894452,0.9688057040998218,1.0,0.9864864864864865,0.9517543859649122,1.0
+holes_pixel_f0_s42,holes_pixel,0,0.0,0.0,0.0,0.0,0.0,0.0
+holes_depth_f0_s42,holes_depth,0,0.0,0.0,0.0,0.0,0.0,0.0
+mask_f0,mobile_sam_dimensions,0,0.30581867388362655,0.31173714786210727,1.0,0.35135135135135137,0.3584569147069147,1.0

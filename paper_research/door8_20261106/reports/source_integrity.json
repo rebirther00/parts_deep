@@ -1,0 +1,11 @@
+{
+  "checked_at": "2026-11-06T17:46:24+09:00",
+  "matches_snapshot": {
+    "/home/koceti/parts_deep/class_estimation/door_pipeline/hole_classifier.py": true,
+    "/home/koceti/parts_deep/class_estimation/door_pipeline/16_train_hole_landmarks.py": true,
+    "/home/koceti/parts_deep/class_estimation/door_pipeline/db/decisions.csv": true,
+    "/home/koceti/parts_deep/class_estimation/door_pipeline/02_train.py": true
+  },
+  "all_match": true,
+  "scope": "Listed original reference files only. This research never writes to the operational DB or original images."
+}

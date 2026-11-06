@@ -1,0 +1,19 @@
+{
+  "method": "mobile_sam_dimensions",
+  "fold": "0",
+  "feature_set": "mobile_sam_full",
+  "features_sha256": "41691cc8d518c22b60b0dc041639740deb223efd5793897d00c88d2f2fe40d22",
+  "weights_sha256": "6dbb90523a35330fedd7f1d3dfc66f995213d81b29a5ca8108dbcdd4e37d6c2f",
+  "subset": "test",
+  "pilot": false,
+  "snapshot_sha256": "086cc09bbcdcb4a0b30dca920db94db350b8f1a0ec8f67ca2960612cf87bc559",
+  "gates": true,
+  "pose_gate": false,
+  "calibration_failure": null,
+  "scope": "retrospective_development_not_pristine_blind_test",
+  "status": "complete",
+  "created_at": "2026-11-06T17:35:45+09:00",
+  "n": 1478,
+  "predictions_sha256": "7a6c0db3129e54ea19dddc69f6c94852bf3efe3747bbb6f5b36caea30f34c6f7",
+  "evaluation_code_sha256": "39767cbd808456f8f98a8ce1a551ea783240c202a42f43fda16b45c920401cb1"
+}

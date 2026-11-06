@@ -1,0 +1,1 @@
+sample_id,session_id,physical_instance_id,production_lot_id,captured_at,rgb_path,depth_path,model_sha256,code_sha256,protocol_sha256,predicted_class,abstain_reason,inference_ms,human_class,human_verified,verification_basis,reviewer,verified_at,prediction_visible_during_review,notes
