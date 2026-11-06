@@ -57,7 +57,7 @@ import radar_check as rc                                  # noqa: E402
 from factory_camera import FactoryCamera, require_cuda_ready   # noqa: E402
 import depth_view                                         # noqa: E402
 
-VERSION = '0.1.0'
+VERSION = '0.2.0'      # 0.2.0 (2026-11-06): 레이더 옵션 규칙 v2 — 피크 시차 보정·허용치 25/10, 규칙 O 는 피크 동반+판 전체 높이 전제, 프레임별 옵션 근거 기록
 UNKNOWN_LABEL = '미등록 도어 (unknown)'
 STATUS_LABEL = {'judged': '판정', 'unknown': '미등록 도어', 'unrecognized': '미인식(기종 외)', 'abstain': '보류'}
 # CNN 폴백을 돌리는 홀 게이트 실패 종류 — 6점은 잡혔는데 기하가 안 맞는 경우만. 홀 자체가 없는(no_corner/no_frame) 맨 밑판·
@@ -171,6 +171,17 @@ def append_jsonl(path, obj):
     Path(path).parent.mkdir(parents=True, exist_ok=True)
     with open(path, 'a', encoding='utf-8') as f:
         f.write(json.dumps(obj, ensure_ascii=False, default=_json_default) + '\n')
+
+
+def opt_compact(o):
+    """rc.decide_option 결과 → result.json 용 요약 (status·src·점수·홀 고리 높이·판 전체 높이·피크 동반·피크 점수·CAD 거리·간격). None → None."""
+    if not o:
+        return None
+    info = o.get('info') or {}
+    r = lambda x, n=2: (round(float(x), n) if x is not None else None)
+    return {'status': o.get('status'), 'src': o.get('src'), 'score': r(o.get('score'), 3), 'h': r(o.get('h_mm'), 1),
+            'h_plate': r(info.get('h_plate'), 1), 'support': info.get('support'), 'peaks': info.get('scores'),
+            'd': info.get('dist_mm'), 'pitch': info.get('pitch_mm'), 'rule': info.get('rule')}
 
 
 def log_event(event, **kw):
@@ -488,7 +499,7 @@ class DoorSession:
         self.n_clean = 0
         self.door_seen = False
         self.max_pts = 0
-        self.cands = []                 # (ts, rgb_path, depth_path)
+        self.cands = []                 # (ts, rgb_path, depth_path, gate, points, opt)
         self.last_cand_ts = None
         self.saved = []                 # result['frames']
         self.result = {}
@@ -533,7 +544,7 @@ class DoorSession:
     # -- 판정 --
 
     def push(self, rgb, depth, hr, cv, opt, ts):
-        self.frames.append(dict(rgb=rgb, depth=depth, hr=hr, ts=ts))
+        self.frames.append(dict(rgb=rgb, depth=depth, hr=hr, ts=ts, opt=opt))
         self.cnn_votes.append(cv)
         self.opts.append(opt)
         self.n_clean += 1
@@ -626,7 +637,7 @@ class DoorSession:
         draw_points(th, det, sc)
         cv2.imwrite(str(self.dir / 'thumb.jpg'), th, [cv2.IMWRITE_JPEG_QUALITY, 80])
 
-    def add_candidate(self, rgb, depth, ts, hr=None):
+    def add_candidate(self, rgb, depth, ts, hr=None, opt=None):
         """미확정 대비 후보 프레임 (CAND_EVERY_S 간격, 최대 CAND_MAX)."""
         if len(self.cands) >= self.cfg['CAND_MAX']:
             return
@@ -639,7 +650,7 @@ class DoorSession:
             cv2.imwrite(str(dp), np.clip(depth, 0, 65535).astype(np.uint16))
         else:
             dp = None
-        self.cands.append((ts, rp, dp, hr['gate'] if hr else None, hr['points'] if hr else None))
+        self.cands.append((ts, rp, dp, hr['gate'] if hr else None, hr['points'] if hr else None, opt))
         self.last_cand_ts = ts
 
     @staticmethod
@@ -711,7 +722,7 @@ class DoorSession:
                                   'radar': result['radar'], 'source': result['source'], 'confidence': result['confidence']})
         self.hole_judged_once = self.hole_judged_once or result['source'] == 'hole'
         self._save_window(result)
-        for _, rp, dp, _, _ in self.cands:            # 후보는 불필요
+        for _, rp, dp, *_ in self.cands:              # 후보는 불필요
             for p in (rp, dp):
                 if p and p.exists():
                     p.unlink()
@@ -768,15 +779,16 @@ class DoorSession:
         else:
             chosen = list(c)
         self.saved = []
-        for i, (ts, rp, dp, gate, pts) in enumerate(chosen):
+        for i, (ts, rp, dp, gate, pts, opt) in enumerate(chosen):
             os.replace(rp, self.dir / f'rgb_{i:04d}.png')
             if dp and dp.exists():
                 os.replace(dp, self.dir / f'depth_{i:04d}.png')
             self.saved.append({'file': f'rgb_{i:04d}.png', 'ts': now_str(ts), 'gate': gate, 'pred': None,
                                'D_mm': None, 'margin_mm': None,
                                'points': {k: [[round(float(p[0]), 1), round(float(p[1]), 1), round(float(p[2]), 2)] for p in v]
-                                          for k, v in (pts or {}).items()}})
-        for ts, rp, dp, _, _ in c:
+                                          for k, v in (pts or {}).items()},
+                               'option': opt_compact(opt)})
+        for ts, rp, dp, *_ in c:
             for p in (rp, dp):
                 if p and p.exists():
                     p.unlink()
@@ -805,7 +817,7 @@ class DoorSession:
                 self.result = result
             self.provisional = False
             self.final_at = now_str()
-            for _, rp, dp, _, _ in self.cands:
+            for _, rp, dp, *_ in self.cands:
                 for p in (rp, dp):
                     if p and p.exists():
                         p.unlink()
@@ -817,11 +829,11 @@ class DoorSession:
             self.status = 'abstain' if self.door_seen else 'unrecognized'
             if not self.cands and self.frames:            # 후보가 없으면 윈도 프레임이라도 남긴다
                 for f in list(self.frames)[-self.cfg['CAND_KEEP']:]:
-                    self.cands.append((f['ts'], None, None, f['hr']['gate'], f['hr']['points']))
+                    self.cands.append((f['ts'], None, None, f['hr']['gate'], f['hr']['points'], f.get('opt')))
                     i = len(self.cands) - 1
                     rp, dp = self.dir / f'cand_{i:02d}_rgb.png', self.dir / f'cand_{i:02d}_depth.png'
                     self._save_pair_to(rp, dp, f['rgb'], f['depth'])
-                    self.cands[-1] = (f['ts'], rp, dp, f['hr']['gate'], f['hr']['points'])
+                    self.cands[-1] = (f['ts'], rp, dp, f['hr']['gate'], f['hr']['points'], f.get('opt'))
             self._keep_candidates()
         self.write(final=True, reason=reason)
         return self.result
@@ -851,7 +863,8 @@ class DoorSession:
             'n_processed': self.n_processed, 'n_clean': self.n_clean, 'max_pts': self.max_pts,
             'frames': self.saved, 'saved_pairs': len(self.saved),
             'camera': self.camera_type, 'intrinsics': self.calib, 'models': self.models,
-            'service_version': VERSION,
+            'option_frames': [opt_compact(o) for o in self.opts if o],     # 마지막 윈도의 프레임별 레이더 근거(피크/규칙·점수·높이·동반)
+            'service_version': VERSION, 'radar_rule': rc.RULE_VERSION,
             'config': {k: self.cfg[k] for k in ('N_FRAMES', 'MIN_JUDGED', 'CNN_MIN_PROB', 'OPTION_MIN_JUDGED', 'OPTION_WAIT_S',
                                                  'JUDGE_TIMEOUT_S', 'OCC_ON', 'OCC_OFF', 'OCC_PTS', 'PTS_SCORE', 'PROTR_MM',
                                                  'INTR_MM', 'INTR_FRAC', 'MOTION_THR', 'STATIC_FRAMES', 'ENTER_S', 'LEAVE_S', 'ROI', 'OCC_ROI')},
@@ -1044,7 +1057,7 @@ class Monitor(threading.Thread):
                                                    self.geom, det=hr['points'])
                     s.push(rgb, depth, hr, cv, opt, ts)
                     if not s.locked:
-                        s.add_candidate(rgb, depth, ts, hr)
+                        s.add_candidate(rgb, depth, ts, hr, opt)
                     result, lock = s.evaluate()
                     if lock and not s.locked:
                         s.lock(result)

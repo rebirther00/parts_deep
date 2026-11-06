@@ -5,7 +5,7 @@
   python partno/infer_partno.py <dir> --cls E25_door_RH        # 형상군을 지정(홀 판정 대신)하고 옵션만 검사
   python partno/infer_partno.py <dir> --frames --json out.json # 프레임별 표 + JSON 저장
 
-프레임: hole_classifier.classify(픽셀 폭 D → 9종 판정) + radar_check.check_frame(브래킷 홀 투영 점수).
+프레임: hole_classifier.classify(픽셀 폭 D → 9종 판정) + radar_check.decide_option(브래킷 피크 → 규칙 하이브리드, 서비스와 동일).
 세션(폴더): 클래스 = D 중앙값 최근접(hole_classifier.aggregate), 레이더 = 표 다수결(radar_check.aggregate) → part_numbers.json 조회.
 FRT 는 옵션 없음(레이더 검사 생략). 학습 모델은 홀 랜드마크 검출기 하나만 쓴다(레이더 판정은 규칙).
 """
@@ -46,7 +46,7 @@ def infer_dir(net, dev, geom, files, cls_fixed=None):
         intr = intrinsics_for_image(f, rgb.shape)
         r = hc.classify(net, dev, rgb, depth, intrinsics=intr)
         cls = cls_fixed or r['pred']
-        opt = rc.check_frame(net, dev, rgb, depth, cls, intr, geom, det=r['points']) if cls in geom else dict(status='n/a')
+        opt = rc.decide_option(net, dev, rgb, depth, cls, intr, geom, det=r['points']) if cls in geom else dict(status='n/a')   # 서비스와 같은 하이브리드(피크→규칙)
         rows.append(dict(image=f, cls=r['pred'], D_mm=r['D_mm'], gate=r['gate'], margin_mm=r.get('margin_mm'),
                          radar=opt['status'], score=opt.get('score'), used_cls=cls))
     agg = hc.aggregate([dict(gate=x['gate'], D_mm=x['D_mm']) for x in rows])

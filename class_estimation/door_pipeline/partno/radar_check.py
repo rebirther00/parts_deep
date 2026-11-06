@@ -15,8 +15,13 @@
   ③ radar_bracket.json 의 홀 2개(도어 XY, 6홀 평면보다 z_plate≈70mm 카메라 쪽) 투영 — depth 평면 깊이로 시차 보정
   ④ 밝기 점수 = (주변 고리 밝기 − 홀 안 밝기)/고리 밝기 (회색조). 두 홀에 같은 오프셋(±12px 탐색)을 주어 min(홀1,홀2) 최대화
      판 높이 h = 홀 주변 고리의 depth 가 6홀 평면보다 카메라 쪽인 거리(mm): 브래킷 판 ≈70, 브래킷 없는 보강재 ≈29 (조명 무관 단서)
-  ⑤ 점수 ≥ 0.30 → 레이더. h 가 있으면: 점수 ≥ 0.08 이고 h ≥ 37(판 높이) → 레이더, 점수 ≤ 0.12 이고 h < 49 → 없음.
-     점수 ≤ 0.04(홀 흔적 없음) → 없음. h 가 없으면 점수 ≤ 0.12 → 없음. 나머지 미정. 판이 프레임 밖이거나 아핀 잔차 > 12px 면 미판정
+  ⑤ 레이더(규칙)는 두 전제 위에서만: (a) 브래킷 피크 동반 — 4채널 검출기 피크 1개 이상이 시차 제거 후 CAD 홀 ≤ TOL_MM (3채널 모델이면 제한 없음)
+     (b) 판 전체 높이 — 판 안쪽 격자(홀 주변 제외) depth 중앙값 h_plate ≥ 37mm (depth 없으면 생략).
+     전제 충족 시 점수 ≥ 0.30 → 레이더, 점수 ≥ 0.08 이고 홀 고리 높이 h ≥ 37 → 레이더.
+     없음: 점수 ≤ 0.12 이고 h < 49, 점수 ≤ 0.04(홀 흔적 없음), h 가 없으면 점수 ≤ 0.12. 나머지 미정. 판이 프레임 밖이거나 아핀 잔차 > 12px 면 미판정.
+     (2026-11-06: 보강재 위에 놓인 바 클램프·렌치가 CAD 홀 자리의 어두움+높이를 흉내내 현장 2세션이 O 로 잠긴 사례 대응 — 전제 (a)(b) 추가)
+하이브리드(decide_option, 실시간 07/18·DB 검사 공통): ① 4채널 브래킷 피크 2개(≥0.30)를 판 높이 시차를 제거하고 도어 프레임에 놓아
+     CAD 홀 ≤ TOL_MM·간격 PITCH_MM±PITCH_TOL 이면 radar, 최대 피크 < 0.12 면 none → ② 미정 프레임만 위 규칙.
 세션 판정: 판정 프레임 ≥ MIN_JUDGED(3) 이고 다수 표 비율 ≥ MIN_AGREE(80%) 일 때만 auto_flag(1/0), 아니면 NULL(미정).
 확정값(capture_sessions.option_radar)은 option_source 가 NULL/auto 일 때만 갱신 — 사용자 확정('user')은 덮어쓰지 않는다.
 FRT 클래스는 옵션이 없으므로 검사하지 않는다.
@@ -80,6 +85,99 @@ def project(A, xy, z_up, K, Z0):
     return p
 
 
+def pixel_to_door(Ai, p, z_up, K, Z0):
+    """(radial 근사) 픽셀 → 도어 XY. 평면보다 z_up(mm) 카메라 쪽 점은 주점 기준 (Z0−z_up)/Z0 배로 시차를 제거한다(project 의 역).
+    광축 ⟂ 도어를 가정하므로 도어가 기울면 70mm×tan(tilt) 만큼 어긋난다 — depth 평면이 있으면 to_door(3D) 를 쓴다."""
+    px = np.array(p[:2], float)
+    if z_up and K and Z0:
+        pp = np.array([K['cx'], K['cy']]); px = pp + (px - pp) * max(Z0 - z_up, 1.0) / Z0
+    q = Ai @ np.array([px[0], px[1], 1.0])
+    return q[:2] / q[2]
+
+
+NO_FRAME = dict(to3d=None, z0=None, M=None, n=None)
+
+
+def door_frame(det, g, depth, intr, fit):
+    """depth 평면 + 6점 → 도어 XY ↔ 카메라 3D 프레임 dict(to3d, z0, M, n). depth 없음·평면 실패면 NO_FRAME, 6점 3D 아핀만 실패면 M·n 없음.
+    M(3×3): [x,y,1] → 카메라 3D(mm, 깊이 단위), n: 도어 평면 단위 법선(카메라에서 멀어지는 쪽, n_z>0). 판 위 점 = M·[x,y,1] − n·z_up.
+    2026-11-06: 이전 radial 근사(project/pixel_to_door)는 도어 기울기를 무시해 카메라 재장착(9/22)·세션별로 브래킷 피크-CAD 거리가
+    10~30mm 요동했다(E38_LH_RR 최대 33mm) → 평면 법선을 쓰면 기울기 무관."""
+    if depth is None or not det.get('corner_hinge') or not det.get('corner_latch'):
+        return dict(NO_FRAME)
+    pf = hc.plane_from_depth(depth, det['bolt'] + [det['corner_hinge'][0], det['corner_latch'][0]], intr)
+    if not pf:
+        return dict(NO_FRAME)
+    to3d = pf[0]; A, _, named = fit
+    z0 = float(to3d((A @ np.array([*np.mean(g['holes'], 0), 1.0])))[2])
+    X = np.array([[*g['lm'][k], 1.0] for k in LM6]); Y = np.array([to3d(named[k]) for k in LM6])
+    M = np.linalg.lstsq(X, Y, rcond=None)[0].T
+    n = np.cross(M[:, 0], M[:, 1]); n /= (np.linalg.norm(n) + 1e-9)
+    if n[2] < 0:
+        n = -n
+    return dict(to3d=to3d, z0=z0, M=M, n=n)
+
+
+def to_px(frame, A, xy, z_up, K, Z0):
+    """도어 XY 의 평면보다 z_up 카메라 쪽 점 → 픽셀. 3D 프레임(M·n)이 있으면 법선 방향으로 띄워 투영, 없으면 radial 근사(project)."""
+    if frame is None or frame.get('M') is None:
+        return project(A, xy, z_up, K, Z0)
+    X = frame['M'] @ np.array([xy[0], xy[1], 1.0]) - frame['n'] * z_up
+    return np.array([K['fx'] * X[0] / X[2] + K['cx'], K['fy'] * X[1] / X[2] + K['cy']])
+
+
+def to_door(frame, A, p, z_up, K, Z0):
+    """픽셀 → 도어 XY (평면보다 z_up 카메라 쪽, 즉 브래킷 판 위의 점으로 해석). 3D 프레임이 있으면 광선-판 평면 교차, 없으면 radial 근사."""
+    if frame is None or frame.get('M') is None:
+        Ai = np.linalg.inv(np.vstack([A, [0, 0, 1]]))
+        return pixel_to_door(Ai, p, z_up, K, Z0)
+    M, n = frame['M'], frame['n']
+    r = np.array([(p[0] - K['cx']) / K['fx'], (p[1] - K['cy']) / K['fy'], 1.0])
+    d = float(n @ (M @ np.array([0.0, 0.0, 1.0]))) - z_up
+    X = r * (d / float(n @ r))
+    return np.linalg.lstsq(M[:, :2], X - M[:, 2], rcond=None)[0]
+
+
+def peak_support(det, g, frame, A, K, Z0):
+    """브래킷 채널 피크 가운데 하나라도(≥ PEAK_OFF) 판 위 점으로 풀었을 때 CAD 홀 ≤ TOL_MM 이면 True. 브래킷 채널이 없는 3채널 모델이면 None(제한 없음)."""
+    pk = det.get('bracket')
+    if pk is None:
+        return None
+    for p in pk:
+        if p[2] < PEAK_OFF:
+            continue
+        q = to_door(frame, A, p, g['z_plate'], K, Z0)
+        if min(np.linalg.norm(q - np.array(e)) for e in g['holes']) <= TOL_MM:
+            return True
+    return False
+
+
+def plate_height(depth, frame, A, g, K, Z0, dxy=(0, 0)):
+    """판 전체 높이(mm): 판 사각 안쪽 격자점(홀 주변 제외)의 depth 가 6홀 평면보다 카메라 쪽인 거리의 중앙값.
+    브래킷 판은 판 전체가 솟아 있고(실측 50~70), 보강재 위에 놓인 공구는 홀 자리 근처만 높다 → 격자 중앙값으로 구분. 유효점 < 60% 면 None."""
+    to3d = frame['to3d']
+    x0, y0, x1, y1 = g['plate']; nx, ny = PLATE_GRID
+    xs = np.linspace(x0 + PLATE_INSET_MM, x1 - PLATE_INSET_MM, nx); ys = np.linspace(y0 + PLATE_INSET_MM, y1 - PLATE_INSET_MM, ny)
+    excl = g['r_mm'] + 12.0
+    H, W = depth.shape; vals, n_pts = [], 0
+    for x in xs:
+        for y in ys:
+            if min(math.hypot(x - e[0], y - e[1]) for e in g['holes']) <= excl:
+                continue
+            n_pts += 1
+            p = to_px(frame, A, (x, y), g['z_plate'], K, Z0)
+            u, v = int(round(p[0] + dxy[0])), int(round(p[1] + dxy[1]))
+            if u < 3 or v < 3 or u >= W - 3 or v >= H - 3:
+                continue
+            patch = depth[v - 2:v + 3, u - 2:u + 3].astype(np.float32); patch = patch[patch > 0]
+            if patch.size < 8:
+                continue
+            vals.append(float(to3d((u, v))[2]) - float(np.median(patch)))
+    if n_pts == 0 or len(vals) < 0.6 * n_pts:
+        return None
+    return float(np.median(vals))
+
+
 def hole_score(gray, u, v, r):
     """홀 안(0.65r) 대비 고리(1.35~1.9r) 밝기 대비. 범위 밖이면 None."""
     h, w = gray.shape; R = int(r * 1.9) + 2
@@ -93,8 +191,9 @@ def hole_score(gray, u, v, r):
     mr = float(ring.mean()); return (mr - float(inner.mean())) / max(mr, 1.0)
 
 
-def check_frame(net, dev, rgb, depth, cls, intr, geom, det=None):
-    """단일 프레임 검사. 반환 dict(status, score, s1, s2, dxy, holes_px, r_px, plate_px, resid, z0, depth_open)."""
+def check_frame(net, dev, rgb, depth, cls, intr, geom, det=None, plane=None):
+    """단일 프레임 규칙 검사. 반환 dict(status, score, s1, s2, dxy, holes_px, r_px, plate_px, resid, z0, h_mm, h_plate, support).
+    plane=door_frame(...) dict 를 주면 depth 평면을 다시 맞추지 않는다(decide_option 이 피크 경로와 공유)."""
     g = geom.get(cls)
     if g is None:
         return dict(status='no_geom')
@@ -109,17 +208,16 @@ def check_frame(net, dev, rgb, depth, cls, intr, geom, det=None):
     A, resid, _ = fit
     h, w = rgb.shape[:2]
     K = intr or dict(cx=w / 2.0, cy=h / 2.0, fx=hc.FX_APPROX, fy=hc.FX_APPROX)
-    z0, to3d = None, None
-    if depth is not None:
-        pf = hc.plane_from_depth(depth, det['bolt'] + [hinge, latch], intr)
-        if pf:
-            to3d = pf[0]; z0 = float(to3d((A @ np.array([*np.mean(g['holes'], 0), 1.0])))[2])
+    frame = plane if plane is not None else door_frame(det, g, depth, intr, fit)
+    to3d, z0 = frame['to3d'], frame['z0']
     Z0 = z0 or Z_NOMINAL
-    scale = math.sqrt(abs(np.linalg.det(A[:, :2]))) * Z0 / max(Z0 - g['z_plate'], 1.0)   # px/mm (판 높이 시차 배율 포함)
-    holes = [project(A, xy, g['z_plate'], K, Z0) for xy in g['holes']]
-    r_px = g['r_mm'] * scale
+    zp = g['z_plate']
+    holes = [to_px(frame, A, xy, zp, K, Z0) for xy in g['holes']]
+    c0 = g['holes'][0]                                   # 홀 반지름(px) = 홀 중심에서 r_mm 떨어진 판 위 점의 투영 거리
+    r_px = float(np.mean([np.linalg.norm(to_px(frame, A, (c0[0] + g['r_mm'], c0[1]), zp, K, Z0) - holes[0]),
+                          np.linalg.norm(to_px(frame, A, (c0[0], c0[1] + g['r_mm']), zp, K, Z0) - holes[0])]))
     x0, y0, x1, y1 = g['plate']
-    plate = np.array([project(A, xy, g['z_plate'], K, Z0) for xy in ((x0, y0), (x1, y0), (x1, y1), (x0, y1))])
+    plate = np.array([to_px(frame, A, xy, zp, K, Z0) for xy in ((x0, y0), (x1, y0), (x1, y1), (x0, y1))])
     if plate[:, 0].min() < 0 or plate[:, 1].min() < 0 or plate[:, 0].max() >= w or plate[:, 1].max() >= h:
         return dict(status='plate_outside', holes_px=holes, r_px=r_px, plate_px=plate, resid=resid)
     gray = cv2.cvtColor(rgb, cv2.COLOR_BGR2GRAY)
@@ -149,21 +247,27 @@ def check_frame(net, dev, rgb, depth, cls, intr, geom, det=None):
                 zp = float(to3d((u, v))[2]); vals.append(zp - float(np.median(patch[m])))
         if vals:
             h_mm = float(np.mean(vals))
-    status = decide(score, h_mm, g)
+    h_plate = plate_height(depth, frame, A, g, K, Z0, dxy) if (depth is not None and to3d is not None) else None
+    support = peak_support(det, g, frame, A, K, Z0)
+    status = decide(score, h_mm, g, support, h_plate)
     return dict(status=status, score=float(score), s1=float(s1), s2=float(s2), dxy=dxy, holes_px=holes, r_px=float(r_px),
-                plate_px=plate, resid=resid, z0=z0, h_mm=h_mm)
+                plate_px=plate, resid=resid, z0=z0, h_mm=h_mm, h_plate=h_plate, support=support)
 
 
-def decide(score, h_mm, g):
-    """프레임 판정. 밝기 점수(어두운 홀)와 판 높이(depth)를 함께 본다.
-    높이가 있으면: 판 높이 쪽(≥ H_SPLIT)이고 홀이 조금이라도 어두우면 radar, 보강재 높이 쪽(< H_SPLIT)이고 홀 어둡지 않으면 none.
-    높이가 없으면(depth 없음/평면 실패): 밝기만으로 THR_ON/THR_OFF."""
-    if score >= THR_ON:
-        return 'radar'                                   # 홀 2개가 뚜렷이 어두움
+def decide(score, h_mm, g, support=None, h_plate=None):
+    """프레임 규칙 판정. 밝기 점수(어두운 홀)와 홀 고리 높이 h(depth)를 함께 본다.
+    radar 는 두 전제 위에서만(2026-11-06): support — 브래킷 피크가 CAD 홀 근처에 하나라도 있음(None=3채널 모델, 제한 없음),
+    h_plate — 판 전체 높이가 판 쪽(≥ lo; None=depth 없음, 생략). 보강재 위 공구는 홀 자리만 어둡고 높아 둘 다 못 넘는다.
+    전제 충족 시: 점수 ≥ THR_ON → radar, 점수 ≥ THR_DARK_MIN 이고 h ≥ lo → radar.
+    none: 점수 ≤ THR_OFF 이고 h < hi / h 없으면 점수 ≤ THR_OFF / 점수 ≤ THR_FLAT. 나머지 unsure."""
+    lo = g['z_strip'] + H_SPLIT_FRAC * (g['z_plate'] - g['z_strip'])     # ≈ 35~37mm: 이 위면 판 높이로 본다
+    hi = g['z_strip'] + 0.5 * (g['z_plate'] - g['z_strip'])              # ≈ 48~50mm: 이 아래면 판이 아니다
+    if support is not False and (h_plate is None or h_plate >= lo):
+        if score >= THR_ON:
+            return 'radar'                               # 홀 2개가 뚜렷이 어두움 (+ 피크 동반 + 판 전체 높이)
+        if h_mm is not None and score >= THR_DARK_MIN and h_mm >= lo:
+            return 'radar'                               # 약하게 어두운 홀 + 판 높이 (조명이 밝아 홀이 회색인 세션)
     if h_mm is not None:
-        lo = g['z_strip'] + H_SPLIT_FRAC * (g['z_plate'] - g['z_strip'])     # ≈ 35~37mm: 이 위면 판 높이로 본다
-        hi = g['z_strip'] + 0.5 * (g['z_plate'] - g['z_strip'])              # ≈ 48~50mm: 이 아래면 판이 아니다
-        if score >= THR_DARK_MIN and h_mm >= lo: return 'radar'             # 약하게 어두운 홀 + 판 높이
         if score <= THR_OFF and h_mm < hi: return 'none'                     # 홀 흔적 없음 + 판 높이 아님
     elif score <= THR_OFF:
         return 'none'
@@ -180,10 +284,11 @@ def aggregate(frames):
         top = max(n_radar, n_none); agree = top / len(judged)
         if agree >= MIN_AGREE:
             flag = 1 if n_radar > n_none else 0
-    scores = [f['score'] for f in judged]; hs = [f['h_mm'] for f in judged if f.get('h_mm') is not None]
+    scores = [f['score'] for f in judged if f.get('score') is not None]; hs = [f['h_mm'] for f in judged if f.get('h_mm') is not None]
     return dict(n_frames=len(frames), n_judged=len(judged), n_radar=n_radar, n_none=n_none,
                 score_med=float(np.median(scores)) if scores else None, h_med=float(np.median(hs)) if hs else None, auto_flag=flag, agree=agree,
-                reasons=dict(collections.Counter(f['status'] for f in frames if f['status'] not in ('radar', 'none', 'unsure'))))
+                reasons=dict(collections.Counter(f['status'] for f in frames if f['status'] not in ('radar', 'none', 'unsure'))),
+                src=dict(collections.Counter(f.get('src') for f in judged if f.get('src'))))
 
 
 def montage(frames_rgb, title, path, n=6, tile=(320, 130)):
@@ -202,7 +307,11 @@ def montage(frames_rgb, title, path, n=6, tile=(320, 130)):
         for p in f['holes_px']:
             cv2.circle(crop, (int(p[0] + dx - x0), int(p[1] + dy - y0)), int(f['r_px']), col, 2)
         crop = cv2.resize(crop, tile)
-        cv2.putText(crop, f"{f['status']} {f.get('score', 0):.2f} h{f['h_mm']:.0f}" if f.get('h_mm') is not None else f"{f['status']} {f.get('score', 0):.2f}", (4, 16), 0, 0.5, col, 1)
+        txt = f"{f['status']}{'/' + f['src'][0] if f.get('src') else ''} {f.get('score') or 0:.2f}"
+        if f.get('h_mm') is not None: txt += f" h{f['h_mm']:.0f}"
+        if f.get('h_plate') is not None: txt += f" P{f['h_plate']:.0f}"
+        if f.get('support') is not None: txt += ' S' if f['support'] else ' s'
+        cv2.putText(crop, txt, (4, 16), 0, 0.5, col, 1)
         tiles.append(crop)
     if not tiles:
         tiles = [np.full((tile[1], tile[0], 3), 40, np.uint8)]
@@ -218,13 +327,16 @@ def montage(frames_rgb, title, path, n=6, tile=(320, 130)):
 
 # ── 4채널 검출기 브래킷 피크 판정 + 하이브리드 (2026-09-23 정식 채택, door_partno 연구 결과) ─────────────
 PEAK_ON, PEAK_OFF = 0.30, 0.12          # 브래킷 히트맵 피크 점수 임계
-TOL_MM, PITCH_TOL = 40.0, 20.0          # 피크를 도어 프레임에 놓았을 때 CAD 브래킷 홀과의 허용 거리 / 홀 간격(91.6) 허용
+TOL_MM, PITCH_TOL = 25.0, 12.0          # 피크(판 위 점으로 3D 역투영)와 CAD 브래킷 홀의 허용 거리 / 홀 간격 허용. 2026-11-06: 40/20 → 25/12 (수집 623프레임 최대 거리 12.0, 간격 편차 최대 9.9)
+PITCH_MM = 91.6                         # 홀 간격 기준(mm, CAD). SX-10 실측은 93.2(E25_RH·E30_LH_RR), 검출기 피크 간격 중앙값은 클래스별 87~93(E25_RH 가 낮음) → CAD 값 ±PITCH_TOL 로 포괄
+RULE_VERSION = '2026-11-06'             # 옵션 판정 규칙 버전 (result.json 에 기록)
+PLATE_INSET_MM, PLATE_GRID = 25.0, (7, 3)   # 판 전체 높이 검사: 판 사각 안쪽 25mm 격자 7×3, 홀 중심 ±(r+12mm) 제외
 
 
-def radar_from_peaks(det, cls, geom):
+def radar_from_peaks(det, cls, geom, K=None, Z0=None, frame=None):
     """4채널 검출기의 브래킷 피크 2개로 판정: 'radar' | 'none' | 'unsure' | 'n/a'(브래킷 채널 없음/FRT).
-    피크 2개(점수 ≥ PEAK_ON)가 6점 아핀으로 도어 프레임에 놓였을 때 CAD 홀 위치 ≤ TOL_MM·간격 91.6±PITCH_TOL 이면 radar,
-    최대 피크 < PEAK_OFF 면 none, 그 사이 unsure."""
+    피크 2개(점수 ≥ PEAK_ON)를 판 위 점으로 도어 프레임에 풀었을 때(frame=door_frame 3D, 없으면 K·Z0 radial 근사, K 도 없으면 보정 없음)
+    CAD 홀 ≤ TOL_MM 이고 간격 PITCH_MM±PITCH_TOL 이면 radar, 최대 피크 < PEAK_OFF 면 none, 그 사이 unsure."""
     g = geom.get(cls); pk = det.get('bracket')
     info = dict(n_peaks=len(pk or []), scores=[round(p[2], 3) for p in (pk or [])], dist_mm=None, pitch_mm=None)
     if g is None or pk is None:
@@ -235,28 +347,40 @@ def radar_from_peaks(det, cls, geom):
     fit = door_affine(det, g['lm'])
     if fit is None or fit[1] > MAX_RESID_PX:
         return 'unsure', info
-    Ai = np.linalg.inv(np.vstack([fit[0], [0, 0, 1]]))
-    P = []
-    for p in pk[:2]:
-        q = Ai @ np.array([p[0], p[1], 1.0]); P.append(q[:2] / q[2])
+    P = [to_door(frame, fit[0], p, g['z_plate'], K, Z0 or Z_NOMINAL) for p in pk[:2]]
     d = [min(np.linalg.norm(p - np.array(e)) for e in g['holes']) for p in P]
     pitch = float(np.linalg.norm(P[0] - P[1]))
-    info.update(dist_mm=[round(float(x), 1) for x in d], pitch_mm=round(pitch, 1))
-    return ('radar' if (max(d) <= TOL_MM and abs(pitch - g['pitch_mm']) <= PITCH_TOL) else 'unsure'), info
+    info.update(dist_mm=[round(float(x), 1) for x in d], pitch_mm=round(pitch, 1), geom='3d' if (frame and frame.get('M') is not None) else ('radial' if K else 'none'))
+    return ('radar' if (max(d) <= TOL_MM and abs(pitch - PITCH_MM) <= PITCH_TOL) else 'unsure'), info
 
 
-def decide_option(net, dev, rgb, depth, cls, intr, geom, det=None):
-    """하이브리드 프레임 판정: ① 브래킷 피크(4채널 모델) → ② 규칙(투영 + 밝기 + depth 판 높이) 순.
-    블라인드 35세션에서 피크 판정률 97.1%·규칙 99.8%, 둘 다 오판 0 → 피크가 보류한 프레임을 규칙이 메운다.
-    반환 dict(status, src('peaks'|'rule'), score, h_mm, info)."""
+def decide_option(net, dev, rgb, depth, cls, intr, geom, det=None, full=False):
+    """하이브리드 프레임 판정: ① 브래킷 피크(4채널 모델, 3D 프레임) → ② 규칙(투영 + 밝기 + depth 높이 + 피크 동반 + 판 전체 높이) 순.
+    블라인드 35세션(9/23)에서 피크 판정률 97.1%·규칙 99.8%, 둘 다 오판 0 → 피크가 보류한 프레임을 규칙이 메운다.
+    반환 dict(status, src('peaks'|'rule'), score, h_mm, info). full=True 면 규칙 검사를 항상 돌려 몽타주용 필드(plate_px 등)도 함께 돌려준다."""
     det = det or hc.detect(net, dev, rgb)
-    st, info = radar_from_peaks(det, cls, geom)
-    if st in ('radar', 'none'):
+    g = geom.get(cls)
+    h, w = rgb.shape[:2]
+    K = intr or dict(cx=w / 2.0, cy=h / 2.0, fx=hc.FX_APPROX, fy=hc.FX_APPROX)
+    frame = None
+    if g is not None:
+        fit = door_affine(det, g['lm'])
+        if fit is not None and fit[1] <= MAX_RESID_PX:
+            frame = door_frame(det, g, depth, intr, fit)
+    st, info = radar_from_peaks(det, cls, geom, K, frame['z0'] if frame else None, frame)
+    if st in ('radar', 'none') and not full:
         return dict(status=st, src='peaks', score=None, h_mm=None, info=info)
-    f = check_frame(net, dev, rgb, depth, cls, intr, geom, det=det)
-    if f.get('status') in ('radar', 'none'):
-        return dict(status=f['status'], src='rule', score=f.get('score'), h_mm=f.get('h_mm'), info=info)
-    return dict(status='unsure', src='rule' if st != 'n/a' else 'none', score=f.get('score'), h_mm=f.get('h_mm'), info=dict(info, rule=f.get('status')))
+    f = check_frame(net, dev, rgb, depth, cls, intr, geom, det=det, plane=frame)
+    info = dict(info, rule=f.get('status'), support=f.get('support'), h_plate=f.get('h_plate'))
+    if st in ('radar', 'none'):
+        out = dict(status=st, src='peaks', score=f.get('score'), h_mm=f.get('h_mm'), info=info)
+    elif f.get('status') in ('radar', 'none'):
+        out = dict(status=f['status'], src='rule', score=f.get('score'), h_mm=f.get('h_mm'), info=info)
+    else:
+        out = dict(status='unsure', src='rule' if st != 'n/a' else 'none', score=f.get('score'), h_mm=f.get('h_mm'), info=info)
+    if full:
+        out.update({k: v for k, v in f.items() if k not in ('status', 'score', 'h_mm')})
+    return out
 
 
 def option_vote(statuses, min_judged=MIN_JUDGED, min_agree=MIN_AGREE):
@@ -300,7 +424,7 @@ def run_session(net, dev, geom, r, crop_path):
         if rgb is None:
             continue
         intr = intrinsics_for_image(str(bd.MIRROR / rp), rgb.shape)
-        f = check_frame(net, dev, rgb, depth, r['cls'], intr, geom)
+        f = decide_option(net, dev, rgb, depth, r['cls'], intr, geom, full=True)    # 실시간 서비스와 같은 하이브리드
         frames.append(f); keep.append((rgb, f))
     agg = aggregate(frames)
     title = f"{r['session_dir']} {r['cls']}  radar {agg['n_radar']} / none {agg['n_none']} / judged {agg['n_judged']} of {agg['n_frames']}  -> {agg['auto_flag']}"
@@ -379,8 +503,9 @@ if __name__ == '__main__':
         con.execute("""INSERT OR REPLACE INTO session_radar_check (session_id, class_name, n_frames, n_judged, n_radar, n_none, score_med, auto_flag, agree, crop_path, params, checked_at)
                        VALUES (?,?,?,?,?,?,?,?,?,?,?, datetime('now','localtime'))""",
                     (r['sid'], r['cls'], agg['n_frames'], agg['n_judged'], agg['n_radar'], agg['n_none'], agg['score_med'], agg['auto_flag'], agg['agree'],
-                     os.path.relpath(crop, DOOR), json.dumps(dict(thr_on=THR_ON, thr_off=THR_OFF, thr_dark_min=THR_DARK_MIN, thr_flat=THR_FLAT, min_judged=MIN_JUDGED, min_agree=MIN_AGREE,
-                                                                   h_med=agg['h_med'], reasons=agg['reasons']))))
+                     os.path.relpath(crop, DOOR), json.dumps(dict(rule=RULE_VERSION, thr_on=THR_ON, thr_off=THR_OFF, thr_dark_min=THR_DARK_MIN, thr_flat=THR_FLAT, min_judged=MIN_JUDGED, min_agree=MIN_AGREE,
+                                                                   peak_on=PEAK_ON, tol_mm=TOL_MM, pitch_mm=PITCH_MM, pitch_tol=PITCH_TOL,
+                                                                   h_med=agg['h_med'], reasons=agg['reasons'], src=agg.get('src')))))
         if r['option_source'] != 'user':
             con.execute("UPDATE capture_sessions SET option_radar=?, option_source=?, option_note=?, option_at=datetime('now','localtime') WHERE id=?",
                         (agg['auto_flag'], 'auto' if agg['auto_flag'] is not None else None,
