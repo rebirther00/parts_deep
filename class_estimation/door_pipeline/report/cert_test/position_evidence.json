@@ -1,0 +1,54 @@
+{
+ "updated": "2026-11-06",
+ "definition": {
+  "name": "부품 위치 추정 오차 (Mean Position Error)",
+  "plan_ref": "협약계획서 p.11 표 7, p.16 평가방법, p.19 상세",
+  "text": "굴착기 부품의 특징점(핀·홀 등)에 대해 모델이 예측한 3D 좌표와 실제 측정 좌표(3D 스캐너·레이저 트래커)를 비교한다. 복수의 기준점을 대상으로 시스템 좌표값과 실측 좌표값을 정합(align)한 뒤, 각 점의 유클리드 거리의 평균을 지표로 쓴다.",
+  "targets": {"1단계-2차년도(2026.6~2027.3)": "10mm 이하 · 자체 평가(관련분야 전문가 제3자 입회)", "2단계-1차년도": "5mm · 자체 평가", "2단계-2차년도(최종)": "3mm 이하 · 공인 시험기관 평가"},
+  "weight": "전체 평가 항목 중 5%",
+  "feature_points": "래치 각공 볼트홀 4 + 좌우 모서리 프레임 홀 2 (레이더 도어는 브래킷 홀 2 추가) — 자세 추정 파이프라인(pos_pipeline)의 랜드마크와 동일"
+ },
+ "equipment": [
+  {"item": "카메라", "spec": "ZED X Mini S/N 54910212, GMSL, 1920×1200, 실측 intrinsics(fx 1269.746) 적용, depth 스케일 ×1.0139 보정", "status": "완료", "evidence": "pos_pipeline/pose_utils·camera_utils, 연구노트 2026-08·09"},
+  {"item": "3D 정밀 측정 장치", "spec": "Trimble SX-10 레이저 트래커(측정자 운용), 홀당 3회 반복, 반복 산포 중앙값 0.4~0.7mm", "status": "완료(3회 측정)", "evidence": "pos_pipeline/gt/sx10_3doors_report_20261008.pdf, GT_SAMPLE_20261002.md·20261008.md"},
+  {"item": "정합 절차", "spec": "공통 타겟 4개 이상을 트래커·카메라 양쪽에서 측정해 카메라 좌표계로 변환 → 홀별 유클리드 거리 → 평균", "status": "절차서 준비, 측정 예정", "evidence": "pos_pipeline/GT_TRACKER_PROTOCOL.md, 05_evaluate_tracker_gt.py"},
+  {"item": "측정용 지그", "spec": "래치 볼트 전용 프리즘 지그·브래킷 홀 센터링 지그(2차 측정에서 볼트 4홀 2~4mm 밀림 확인 → 제작 결정)", "status": "제작 예정", "evidence": "GT_SAMPLE_20261008.md 문제·조치"}
+ ],
+ "gt_measurements": [
+  {"door": "E25 RH 레이더 (02424C)", "date": "2026-10-02 측정 / 10-06 분석", "holes": "23개 × 3회", "repeat_med_mm": 0.65, "fit6_rms_mm": 0.73, "corner_d_minus_cad_mm": -0.86, "pixel_d_vs_real_mm": "+1.1", "depth3d_bias_mm": "+5~9", "bracket_pitch_mm": 93.2, "plate_height_mm": 70.6, "note": "픽셀 폭 D 스케일 독립 확인"},
+  {"door": "E38 LH FRT (110982-02447L)", "date": "2026-10-08 측정 / 10-09 분석", "holes": "19개 × 3회", "repeat_med_mm": 0.44, "fit6_rms_mm": "0.7~1.6 (볼트 지그 밀림 구간 제외)", "corner_d_minus_cad_mm": null, "pixel_d_vs_real_mm": "+0.6~1.2", "depth3d_bias_mm": "4~13, 방향 기종마다 다름", "bracket_pitch_mm": null, "plate_height_mm": null, "note": "프리즘 지그가 래치 볼트 홀에 맞지 않아 볼트 4홀 2~4mm 밀림"},
+  {"door": "E30 LH RR 레이더 (02360H)", "date": "2026-10-08 측정 / 10-09 분석", "holes": "23개 × 3회", "repeat_med_mm": 0.64, "fit6_rms_mm": 0.85, "corner_d_minus_cad_mm": -1.55, "pixel_d_vs_real_mm": "+0.6~1.2", "depth3d_bias_mm": "힌지 쪽 −, 래치 쪽 +", "bracket_pitch_mm": 93.2, "plate_height_mm": "68.3~69.5", "note": "실물은 구 도면 02360H 와 일치, 02360K 교체 건 종결"}
+ ],
+ "current_self_eval": [
+  {"metric": "현장 6점 강체 정합 잔차 RMS 중앙값 (CAD 기준, 공통 평가 집합 83세션)", "value": "4.6mm", "target": "10mm", "status": "충족", "source": "연차보고서 초안 v0.2 표·pos_pipeline DB 로깅"},
+  {"metric": "factory_v2 세션별 잔차 중앙값 범위", "value": "3~4.9mm", "target": "10mm", "status": "충족", "source": "pos_pipeline 03 평가"},
+  {"metric": "합성 GT 절대 오차 (현장 조건)", "value": "면내 0.8mm · 법선 1.4mm · 회전 0.35°", "target": "—", "status": "기하 체인 검증", "source": "pos_pipeline 합성 GT 검증(9월)"},
+  {"metric": "실물 vs CAD 6점 정합 RMS (트래커 3장)", "value": "0.7~1.6mm", "target": "—", "status": "CAD 참값 사용 타당", "source": "GT_SAMPLE_20261002·20261008"},
+  {"metric": "깊이 기반 3D 측정 편향 (긴 구간 650~1,070mm)", "value": "4~13mm, 기종별 방향 상이", "target": "—", "status": "주의", "source": "GT_SAMPLE_20261008"},
+  {"metric": "개략 축별 평가", "value": "도어 면 안 2~3mm · 깊이 ±1.4%(±20mm) · 기울기 ≈2°", "target": "최종 3mm", "status": "깊이 축 미달", "source": "연구노트 노트 4"}
+ ],
+ "planned_campaign": {
+  "title": "트래커·카메라 동시 측정 캠페인 (계획서 정의 그대로의 평균 위치 오차)",
+  "where": "세종 실험실 (실물 도어 보유, 학습 PC)",
+  "design": [
+   "도어 3장(E25 RH 레이더·E38 LH FRT·E30 LH RR 레이더, 실측 완료 도어) × 거리 1.45m 고정·기울기 0/±5/±10° × 반복 3회",
+   "공통 타겟 4개 이상을 트래커와 카메라 양쪽에서 측정해 좌표계 정합(반사 허용 없음, 강체 변환)",
+   "홀 6점(+브래킷 2점)의 예측 3D 좌표 vs 트래커 좌표 유클리드 거리 → 도어별·전체 평균 위치 오차",
+   "측정점 30개 이상, 원자료(트래커 CSV·카메라 캡처·intrinsics·판정 json)·사진·영상·시각 봉인",
+   "전용 지그(래치 볼트 프리즘·브래킷 센터링) 제작 후 수행"
+  ],
+  "live_demo": "입회 당일: GT 를 이미 잰 도어를 같은 지그에 두고 카메라 캡처 → 자세 추정 → 사전 GT 대비 오차 표를 그 자리에서 1회 산출",
+  "witness": "관련분야 전문성이 인정되는 제3자(주관기관 담당자 또는 외부 전문가) + 내부 품질평가위원 3인",
+  "risk": "깊이 축 편향(4~13mm)이 정합 뒤에도 남아 평균 오차가 5~7mm 로 나올 수 있음 → 사전 리허설로 수치 확인, 필요 시 픽셀 폭 기반 깊이 보정판을 공식 결과로 채택. 이 결과가 최종 3mm(2단계) 과제의 출발점.",
+  "status": "예정 — 측정자·장비 일정 확보 후"
+ },
+ "checklist": [
+  "평가 절차서(지표 정의·수식·장비·정합 방법·결과 양식) 서명본",
+  "장비 교정 증빙: SX-10 측정자 보고서·카메라 intrinsics 기록",
+  "GT 원자료: 트래커 CSV(홀별 3회), 사진·영상·시각",
+  "예측 원자료: 카메라 캡처(rgb·depth·intrinsics)·판정 json",
+  "정합·오차 산출 스크립트 실행 로그와 결과 표(홀별·도어별·전체 평균)",
+  "라이브 1회 시연 기록",
+  "입회자·평가위원 확인 서명"
+ ]
+}

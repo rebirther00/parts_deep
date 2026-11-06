@@ -1,0 +1,342 @@
+{
+ "kind": "cert_eval",
+ "tag": "rehearsal_20261106",
+ "started_at": "2026-11-06 17:37:52",
+ "finished_at": "2026-11-06 17:42:04",
+ "elapsed_s": 252.1,
+ "split_file": "report/cert_test/split_20261106.json",
+ "split_sha256": "09f594bca5f18a61c4d1f0f25023bf733d432f9ecd094da22eac63655e71f664",
+ "split_seed": 20261106,
+ "n_sessions": 111,
+ "n_frames": 2188,
+ "classes": [
+  "E25_door_LH_FRT",
+  "E25_door_LH_RR",
+  "E25_door_RH",
+  "E30_E38_door_RH",
+  "E30_door_LH_FRT",
+  "E30_door_LH_RR",
+  "E38_door_LH_FRT",
+  "E38_door_LH_RR"
+ ],
+ "hole": {
+  "judged": 2181,
+  "judged_rate": 99.68,
+  "correct": 2181,
+  "accuracy_all": 99.68,
+  "accuracy_judged": 100.0,
+  "unknown": 0,
+  "gates": {
+   "ok": 2181,
+   "pose_warn": 7
+  }
+ },
+ "hybrid": {
+  "correct": 2188,
+  "accuracy": 100.0,
+  "from_hole": 2181,
+  "from_cnn": 7,
+  "cnn_correct_when_used": 7
+ },
+ "cnn_alone": {
+  "correct": 2113,
+  "accuracy": 96.57
+ },
+ "per_class": {
+  "E25_door_LH_FRT": {
+   "n": 80,
+   "hole_correct": 80,
+   "hybrid_correct": 80
+  },
+  "E25_door_LH_RR": {
+   "n": 440,
+   "hole_correct": 440,
+   "hybrid_correct": 440
+  },
+  "E25_door_RH": {
+   "n": 399,
+   "hole_correct": 392,
+   "hybrid_correct": 399
+  },
+  "E30_E38_door_RH": {
+   "n": 426,
+   "hole_correct": 426,
+   "hybrid_correct": 426
+  },
+  "E30_door_LH_FRT": {
+   "n": 269,
+   "hole_correct": 269,
+   "hybrid_correct": 269
+  },
+  "E30_door_LH_RR": {
+   "n": 305,
+   "hole_correct": 305,
+   "hybrid_correct": 305
+  },
+  "E38_door_LH_FRT": {
+   "n": 120,
+   "hole_correct": 120,
+   "hybrid_correct": 120
+  },
+  "E38_door_LH_RR": {
+   "n": 149,
+   "hole_correct": 149,
+   "hybrid_correct": 149
+  }
+ },
+ "env": {
+  "host": "koceti-5090",
+  "os": "Linux-7.0.0-38-generic-x86_64-with-glibc2.39",
+  "python": "3.12.3",
+  "torch": "2.9.1+cu130",
+  "cuda": "13.0",
+  "gpu": "NVIDIA GeForce RTX 5090",
+  "git": "09c7016",
+  "hole_model": "attribute_models/hole_landmarks_bracket/model.pth",
+  "hole_model_sha256": "c8e3761d8b5eaf265f1337e9ca88e604f1c554810837a7e1944a01e93d37cb59",
+  "cnn_model": "artifacts/rgbe_noaux_448_seed916_datasets_factory_v2/model.pth",
+  "cnn_model_sha256": "318893c46669a096b3a17273147d720e123ca0e956fbc69d30393a25679b7579",
+  "scale_mode": "pixel"
+ },
+ "sessions": {
+  "n": 111,
+  "correct": 111
+ },
+ "confusion": {
+  "hole": {
+   "rows": [
+    "E25_door_LH_FRT",
+    "E25_door_LH_RR",
+    "E25_door_RH",
+    "E30_E38_door_RH",
+    "E30_door_LH_FRT",
+    "E30_door_LH_RR",
+    "E38_door_LH_FRT",
+    "E38_door_LH_RR"
+   ],
+   "cols": [
+    "E25_door_LH_FRT",
+    "E25_door_LH_RR",
+    "E25_door_RH",
+    "E30_E38_door_RH",
+    "E30_door_LH_FRT",
+    "E30_door_LH_RR",
+    "E38_door_LH_FRT",
+    "E38_door_LH_RR",
+    "unknown",
+    "보류"
+   ],
+   "M": [
+    [
+     80,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0
+    ],
+    [
+     0,
+     440,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0
+    ],
+    [
+     0,
+     0,
+     392,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     7
+    ],
+    [
+     0,
+     0,
+     0,
+     426,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0
+    ],
+    [
+     0,
+     0,
+     0,
+     0,
+     269,
+     0,
+     0,
+     0,
+     0,
+     0
+    ],
+    [
+     0,
+     0,
+     0,
+     0,
+     0,
+     305,
+     0,
+     0,
+     0,
+     0
+    ],
+    [
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     120,
+     0,
+     0,
+     0
+    ],
+    [
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     149,
+     0,
+     0
+    ]
+   ]
+  },
+  "hybrid": {
+   "rows": [
+    "E25_door_LH_FRT",
+    "E25_door_LH_RR",
+    "E25_door_RH",
+    "E30_E38_door_RH",
+    "E30_door_LH_FRT",
+    "E30_door_LH_RR",
+    "E38_door_LH_FRT",
+    "E38_door_LH_RR"
+   ],
+   "cols": [
+    "E25_door_LH_FRT",
+    "E25_door_LH_RR",
+    "E25_door_RH",
+    "E30_E38_door_RH",
+    "E30_door_LH_FRT",
+    "E30_door_LH_RR",
+    "E38_door_LH_FRT",
+    "E38_door_LH_RR",
+    "unknown"
+   ],
+   "M": [
+    [
+     80,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0
+    ],
+    [
+     0,
+     440,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0
+    ],
+    [
+     0,
+     0,
+     399,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0
+    ],
+    [
+     0,
+     0,
+     0,
+     426,
+     0,
+     0,
+     0,
+     0,
+     0
+    ],
+    [
+     0,
+     0,
+     0,
+     0,
+     269,
+     0,
+     0,
+     0,
+     0
+    ],
+    [
+     0,
+     0,
+     0,
+     0,
+     0,
+     305,
+     0,
+     0,
+     0
+    ],
+    [
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     120,
+     0,
+     0
+    ],
+    [
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     149,
+     0
+    ]
+   ]
+  }
+ }
+}

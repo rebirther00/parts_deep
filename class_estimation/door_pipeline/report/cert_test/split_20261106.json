@@ -1,0 +1,3801 @@
+{
+ "kind": "cert_split",
+ "created_at": "2026-11-06 17:37:51",
+ "seed": 20261106,
+ "test_frac": 0.3,
+ "dataset": "door_factory_collect",
+ "rule": "테스트 풀 = CNN train/val 제외 세션(홀 판별기·4채널 검출기도 현장 train/val 외 세션은 미학습), 클래스 비율대로 시드 추출, 세션당 표본 ≤20장",
+ "totals": {
+  "sessions": 372,
+  "train_val_sessions": 127,
+  "pool_sessions": 245,
+  "test_sessions": 111,
+  "test_frames": 2188,
+  "train_val_frames": 2521
+ },
+ "per_class": {
+  "E25_door_LH_FRT": {
+   "total": 15,
+   "train_val": 6,
+   "pool": 9,
+   "test": 4,
+   "test_frames": 80
+  },
+  "E25_door_LH_RR": {
+   "total": 70,
+   "train_val": 23,
+   "pool": 47,
+   "test": 21,
+   "test_frames": 440
+  },
+  "E25_door_RH": {
+   "total": 68,
+   "train_val": 22,
+   "pool": 46,
+   "test": 20,
+   "test_frames": 399
+  },
+  "E30_E38_door_RH": {
+   "total": 70,
+   "train_val": 26,
+   "pool": 44,
+   "test": 21,
+   "test_frames": 426
+  },
+  "E30_door_LH_FRT": {
+   "total": 45,
+   "train_val": 11,
+   "pool": 34,
+   "test": 14,
+   "test_frames": 269
+  },
+  "E30_door_LH_RR": {
+   "total": 54,
+   "train_val": 17,
+   "pool": 37,
+   "test": 16,
+   "test_frames": 305
+  },
+  "E38_door_LH_FRT": {
+   "total": 21,
+   "train_val": 10,
+   "pool": 11,
+   "test": 6,
+   "test_frames": 120
+  },
+  "E38_door_LH_RR": {
+   "total": 29,
+   "train_val": 12,
+   "pool": 17,
+   "test": 9,
+   "test_frames": 149
+  }
+ },
+ "shortfall": {},
+ "test": [
+  {
+   "session_dir": "20260828/E30_E38_door_RH/s_143127",
+   "class_name": "E30_E38_door_RH",
+   "n_frames": 26,
+   "n_valid": 68,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": "test",
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260828/E38_door_LH_RR/s_122530",
+   "class_name": "E38_door_LH_RR",
+   "n_frames": 8,
+   "n_valid": 8,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": "test",
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260831/E38_door_LH_FRT/s_164555",
+   "class_name": "E38_door_LH_FRT",
+   "n_frames": 20,
+   "n_valid": 52,
+   "option_radar": null,
+   "option_source": null,
+   "db_split": "test",
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260907/E30_door_LH_RR/s_143122",
+   "class_name": "E30_door_LH_RR",
+   "n_frames": 20,
+   "n_valid": 51,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": "test",
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260909/E30_E38_door_RH/s_082559",
+   "class_name": "E30_E38_door_RH",
+   "n_frames": 20,
+   "n_valid": 149,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": "test",
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260909/E30_door_LH_RR/s_125031",
+   "class_name": "E30_door_LH_RR",
+   "n_frames": 19,
+   "n_valid": 130,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": "test",
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260909/E30_door_LH_RR/s_132535",
+   "class_name": "E30_door_LH_RR",
+   "n_frames": 20,
+   "n_valid": 149,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": "test",
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260910/E25_door_LH_RR/s_095138",
+   "class_name": "E25_door_LH_RR",
+   "n_frames": 20,
+   "n_valid": 51,
+   "option_radar": 1,
+   "option_source": "user",
+   "db_split": "test",
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260910/E30_door_LH_FRT/s_144140",
+   "class_name": "E30_door_LH_FRT",
+   "n_frames": 20,
+   "n_valid": 60,
+   "option_radar": null,
+   "option_source": null,
+   "db_split": "test",
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260916/E25_door_LH_RR/s_125051",
+   "class_name": "E25_door_LH_RR",
+   "n_frames": 30,
+   "n_valid": 146,
+   "option_radar": 1,
+   "option_source": "user",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260916/E25_door_RH/s_132345",
+   "class_name": "E25_door_RH",
+   "n_frames": 20,
+   "n_valid": 149,
+   "option_radar": 1,
+   "option_source": "user",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260917/E25_door_LH_RR/s_092119",
+   "class_name": "E25_door_LH_RR",
+   "n_frames": 20,
+   "n_valid": 61,
+   "option_radar": 1,
+   "option_source": "user",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260917/E25_door_LH_RR/s_153907",
+   "class_name": "E25_door_LH_RR",
+   "n_frames": 20,
+   "n_valid": 66,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260917/E25_door_RH/s_074245",
+   "class_name": "E25_door_RH",
+   "n_frames": 20,
+   "n_valid": 149,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260917/E30_E38_door_RH/s_133729",
+   "class_name": "E30_E38_door_RH",
+   "n_frames": 20,
+   "n_valid": 64,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260917/E38_door_LH_RR/s_170221",
+   "class_name": "E38_door_LH_RR",
+   "n_frames": 20,
+   "n_valid": 74,
+   "option_radar": 1,
+   "option_source": "user",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260917/E38_door_LH_RR/s_173807",
+   "class_name": "E38_door_LH_RR",
+   "n_frames": 20,
+   "n_valid": 55,
+   "option_radar": 1,
+   "option_source": "user",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260918/E30_door_LH_FRT/s_132636",
+   "class_name": "E30_door_LH_FRT",
+   "n_frames": 20,
+   "n_valid": 149,
+   "option_radar": null,
+   "option_source": null,
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260922/E25_door_LH_RR/s_144307",
+   "class_name": "E25_door_LH_RR",
+   "n_frames": 20,
+   "n_valid": 53,
+   "option_radar": 1,
+   "option_source": "user",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260922/E25_door_RH/s_154542",
+   "class_name": "E25_door_RH",
+   "n_frames": 20,
+   "n_valid": 78,
+   "option_radar": 1,
+   "option_source": "user",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260922/E30_E38_door_RH/s_084434",
+   "class_name": "E30_E38_door_RH",
+   "n_frames": 20,
+   "n_valid": 149,
+   "option_radar": 1,
+   "option_source": "user",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260922/E30_E38_door_RH/s_094707",
+   "class_name": "E30_E38_door_RH",
+   "n_frames": 20,
+   "n_valid": 149,
+   "option_radar": 1,
+   "option_source": "user",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260922/E30_E38_door_RH/s_103147",
+   "class_name": "E30_E38_door_RH",
+   "n_frames": 20,
+   "n_valid": 69,
+   "option_radar": 1,
+   "option_source": "user",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260922/E38_door_LH_FRT/s_122130",
+   "class_name": "E38_door_LH_FRT",
+   "n_frames": 20,
+   "n_valid": 53,
+   "option_radar": null,
+   "option_source": null,
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260922/E38_door_LH_RR/s_080559",
+   "class_name": "E38_door_LH_RR",
+   "n_frames": 1,
+   "n_valid": 1,
+   "option_radar": 1,
+   "option_source": "user",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260922/E38_door_LH_RR/s_081005",
+   "class_name": "E38_door_LH_RR",
+   "n_frames": 20,
+   "n_valid": 69,
+   "option_radar": 1,
+   "option_source": "user",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260923/E25_door_LH_FRT/s_082712",
+   "class_name": "E25_door_LH_FRT",
+   "n_frames": 20,
+   "n_valid": 149,
+   "option_radar": null,
+   "option_source": null,
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260923/E25_door_LH_RR/s_092451",
+   "class_name": "E25_door_LH_RR",
+   "n_frames": 19,
+   "n_valid": 87,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260923/E25_door_RH/s_103648",
+   "class_name": "E25_door_RH",
+   "n_frames": 20,
+   "n_valid": 65,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260923/E30_E38_door_RH/s_134541",
+   "class_name": "E30_E38_door_RH",
+   "n_frames": 20,
+   "n_valid": 49,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260923/E38_door_LH_FRT/s_143114",
+   "class_name": "E38_door_LH_FRT",
+   "n_frames": 20,
+   "n_valid": 53,
+   "option_radar": null,
+   "option_source": null,
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260923/E38_door_LH_RR/s_151700",
+   "class_name": "E38_door_LH_RR",
+   "n_frames": 20,
+   "n_valid": 136,
+   "option_radar": 1,
+   "option_source": "user",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260929/E25_door_LH_FRT/s_103125",
+   "class_name": "E25_door_LH_FRT",
+   "n_frames": 20,
+   "n_valid": 149,
+   "option_radar": null,
+   "option_source": null,
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260929/E25_door_LH_RR/s_085250",
+   "class_name": "E25_door_LH_RR",
+   "n_frames": 20,
+   "n_valid": 149,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260929/E30_E38_door_RH/s_074439",
+   "class_name": "E30_E38_door_RH",
+   "n_frames": 20,
+   "n_valid": 47,
+   "option_radar": 1,
+   "option_source": "user",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260930/E25_door_RH/s_134449",
+   "class_name": "E25_door_RH",
+   "n_frames": 20,
+   "n_valid": 149,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260930/E30_E38_door_RH/s_152159",
+   "class_name": "E30_E38_door_RH",
+   "n_frames": 20,
+   "n_valid": 149,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260930/E30_door_LH_RR/s_170603",
+   "class_name": "E30_door_LH_RR",
+   "n_frames": 20,
+   "n_valid": 149,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260930/E38_door_LH_FRT/s_093559",
+   "class_name": "E38_door_LH_FRT",
+   "n_frames": 20,
+   "n_valid": 79,
+   "option_radar": null,
+   "option_source": null,
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260930/E38_door_LH_FRT/s_100257",
+   "class_name": "E38_door_LH_FRT",
+   "n_frames": 20,
+   "n_valid": 149,
+   "option_radar": null,
+   "option_source": null,
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260930/E38_door_LH_FRT/s_155520",
+   "class_name": "E38_door_LH_FRT",
+   "n_frames": 20,
+   "n_valid": 149,
+   "option_radar": null,
+   "option_source": null,
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260930/E38_door_LH_RR/s_073248",
+   "class_name": "E38_door_LH_RR",
+   "n_frames": 20,
+   "n_valid": 149,
+   "option_radar": 1,
+   "option_source": "user",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260930/E38_door_LH_RR/s_083211",
+   "class_name": "E38_door_LH_RR",
+   "n_frames": 20,
+   "n_valid": 149,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261001/E25_door_LH_FRT/s_142956",
+   "class_name": "E25_door_LH_FRT",
+   "n_frames": 20,
+   "n_valid": 53,
+   "option_radar": null,
+   "option_source": null,
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261001/E25_door_RH/s_123341",
+   "class_name": "E25_door_RH",
+   "n_frames": 20,
+   "n_valid": 59,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261001/E30_door_LH_FRT/s_082926",
+   "class_name": "E30_door_LH_FRT",
+   "n_frames": 20,
+   "n_valid": 69,
+   "option_radar": null,
+   "option_source": null,
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261001/E30_door_LH_FRT/s_092402",
+   "class_name": "E30_door_LH_FRT",
+   "n_frames": 20,
+   "n_valid": 60,
+   "option_radar": null,
+   "option_source": null,
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261001/E30_door_LH_RR/s_075245",
+   "class_name": "E30_door_LH_RR",
+   "n_frames": 20,
+   "n_valid": 71,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261001/E30_door_LH_RR/s_170423",
+   "class_name": "E30_door_LH_RR",
+   "n_frames": 20,
+   "n_valid": 149,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261001/E30_door_LH_RR/s_173207",
+   "class_name": "E30_door_LH_RR",
+   "n_frames": 20,
+   "n_valid": 149,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261001/E38_door_LH_RR/s_154644",
+   "class_name": "E38_door_LH_RR",
+   "n_frames": 20,
+   "n_valid": 50,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261002/E25_door_LH_RR/s_144347",
+   "class_name": "E25_door_LH_RR",
+   "n_frames": 36,
+   "n_valid": 153,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261002/E30_E38_door_RH/s_125238",
+   "class_name": "E30_E38_door_RH",
+   "n_frames": 20,
+   "n_valid": 50,
+   "option_radar": 1,
+   "option_source": "user",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261002/E30_E38_door_RH/s_135546",
+   "class_name": "E30_E38_door_RH",
+   "n_frames": 20,
+   "n_valid": 149,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261002/E30_door_LH_FRT/s_081300",
+   "class_name": "E30_door_LH_FRT",
+   "n_frames": 20,
+   "n_valid": 149,
+   "option_radar": null,
+   "option_source": null,
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261006/E25_door_RH/s_100747",
+   "class_name": "E25_door_RH",
+   "n_frames": 20,
+   "n_valid": 74,
+   "option_radar": 1,
+   "option_source": "user",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261006/E25_door_RH/s_104537",
+   "class_name": "E25_door_RH",
+   "n_frames": 20,
+   "n_valid": 52,
+   "option_radar": 1,
+   "option_source": "user",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261006/E30_door_LH_RR/s_164059",
+   "class_name": "E30_door_LH_RR",
+   "n_frames": 20,
+   "n_valid": 40,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261007/E30_E38_door_RH/s_073422",
+   "class_name": "E30_E38_door_RH",
+   "n_frames": 20,
+   "n_valid": 54,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261007/E30_E38_door_RH/s_084742",
+   "class_name": "E30_E38_door_RH",
+   "n_frames": 20,
+   "n_valid": 108,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261007/E30_door_LH_FRT/s_131657",
+   "class_name": "E30_door_LH_FRT",
+   "n_frames": 20,
+   "n_valid": 56,
+   "option_radar": null,
+   "option_source": null,
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261007/E30_door_LH_FRT/s_134255",
+   "class_name": "E30_door_LH_FRT",
+   "n_frames": 20,
+   "n_valid": 149,
+   "option_radar": null,
+   "option_source": null,
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261007/E30_door_LH_RR/s_155359",
+   "class_name": "E30_door_LH_RR",
+   "n_frames": 7,
+   "n_valid": 7,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261008/E30_door_LH_FRT/s_092054",
+   "class_name": "E30_door_LH_FRT",
+   "n_frames": 20,
+   "n_valid": 87,
+   "option_radar": null,
+   "option_source": null,
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261012/E25_door_LH_RR/s_095642",
+   "class_name": "E25_door_LH_RR",
+   "n_frames": 17,
+   "n_valid": 52,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261012/E25_door_LH_RR/s_102508",
+   "class_name": "E25_door_LH_RR",
+   "n_frames": 20,
+   "n_valid": 55,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261012/E25_door_RH/s_132314",
+   "class_name": "E25_door_RH",
+   "n_frames": 19,
+   "n_valid": 94,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261012/E25_door_RH/s_145223",
+   "class_name": "E25_door_RH",
+   "n_frames": 20,
+   "n_valid": 74,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261012/E25_door_RH/s_151706",
+   "class_name": "E25_door_RH",
+   "n_frames": 20,
+   "n_valid": 43,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261012/E30_E38_door_RH/s_081727",
+   "class_name": "E30_E38_door_RH",
+   "n_frames": 20,
+   "n_valid": 35,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261012/E30_E38_door_RH/s_084115",
+   "class_name": "E30_E38_door_RH",
+   "n_frames": 20,
+   "n_valid": 40,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261013/E30_E38_door_RH/s_151915",
+   "class_name": "E30_E38_door_RH",
+   "n_frames": 20,
+   "n_valid": 152,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261013/E30_door_LH_FRT/s_084330",
+   "class_name": "E30_door_LH_FRT",
+   "n_frames": 20,
+   "n_valid": 144,
+   "option_radar": null,
+   "option_source": null,
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261013/E30_door_LH_RR/s_100029",
+   "class_name": "E30_door_LH_RR",
+   "n_frames": 20,
+   "n_valid": 46,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261013/E30_door_LH_RR/s_103523",
+   "class_name": "E30_door_LH_RR",
+   "n_frames": 20,
+   "n_valid": 149,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261013/E30_door_LH_RR/s_131214",
+   "class_name": "E30_door_LH_RR",
+   "n_frames": 20,
+   "n_valid": 149,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261014/E25_door_LH_RR/s_123826",
+   "class_name": "E25_door_LH_RR",
+   "n_frames": 20,
+   "n_valid": 101,
+   "option_radar": 1,
+   "option_source": "user",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261019/E25_door_LH_RR/s_081816",
+   "class_name": "E25_door_LH_RR",
+   "n_frames": 19,
+   "n_valid": 153,
+   "option_radar": 1,
+   "option_source": "user",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261019/E25_door_RH/s_085137",
+   "class_name": "E25_door_RH",
+   "n_frames": 20,
+   "n_valid": 149,
+   "option_radar": 1,
+   "option_source": "user",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261019/E30_door_LH_FRT/s_101132",
+   "class_name": "E30_door_LH_FRT",
+   "n_frames": 20,
+   "n_valid": 149,
+   "option_radar": null,
+   "option_source": null,
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261019/E30_door_LH_FRT/s_104043",
+   "class_name": "E30_door_LH_FRT",
+   "n_frames": 20,
+   "n_valid": 121,
+   "option_radar": null,
+   "option_source": null,
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261020/E25_door_LH_RR/s_081951",
+   "class_name": "E25_door_LH_RR",
+   "n_frames": 19,
+   "n_valid": 153,
+   "option_radar": 1,
+   "option_source": "user",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261020/E25_door_RH/s_074722",
+   "class_name": "E25_door_RH",
+   "n_frames": 20,
+   "n_valid": 117,
+   "option_radar": 1,
+   "option_source": "user",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261020/E30_E38_door_RH/s_103859",
+   "class_name": "E30_E38_door_RH",
+   "n_frames": 20,
+   "n_valid": 146,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261021/E25_door_LH_RR/s_143912",
+   "class_name": "E25_door_LH_RR",
+   "n_frames": 20,
+   "n_valid": 100,
+   "option_radar": 0,
+   "option_source": "auto",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261021/E30_E38_door_RH/s_100707",
+   "class_name": "E30_E38_door_RH",
+   "n_frames": 20,
+   "n_valid": 149,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261021/E30_door_LH_FRT/s_125151",
+   "class_name": "E30_door_LH_FRT",
+   "n_frames": 20,
+   "n_valid": 63,
+   "option_radar": null,
+   "option_source": null,
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261021/E30_door_LH_RR/s_084950",
+   "class_name": "E30_door_LH_RR",
+   "n_frames": 19,
+   "n_valid": 120,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261021/E30_door_LH_RR/s_094012",
+   "class_name": "E30_door_LH_RR",
+   "n_frames": 20,
+   "n_valid": 50,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261022/E25_door_LH_FRT/s_084658",
+   "class_name": "E25_door_LH_FRT",
+   "n_frames": 20,
+   "n_valid": 149,
+   "option_radar": null,
+   "option_source": null,
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261022/E25_door_LH_RR/s_130522",
+   "class_name": "E25_door_LH_RR",
+   "n_frames": 20,
+   "n_valid": 125,
+   "option_radar": 0,
+   "option_source": "auto",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261022/E25_door_LH_RR/s_133851",
+   "class_name": "E25_door_LH_RR",
+   "n_frames": 20,
+   "n_valid": 149,
+   "option_radar": 0,
+   "option_source": "auto",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261022/E25_door_LH_RR/s_143507",
+   "class_name": "E25_door_LH_RR",
+   "n_frames": 20,
+   "n_valid": 149,
+   "option_radar": 0,
+   "option_source": "auto",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261022/E25_door_LH_RR/s_150502",
+   "class_name": "E25_door_LH_RR",
+   "n_frames": 20,
+   "n_valid": 149,
+   "option_radar": 0,
+   "option_source": "auto",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261022/E25_door_RH/s_074119",
+   "class_name": "E25_door_RH",
+   "n_frames": 20,
+   "n_valid": 149,
+   "option_radar": 0,
+   "option_source": "auto",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261022/E25_door_RH/s_085619",
+   "class_name": "E25_door_RH",
+   "n_frames": 20,
+   "n_valid": 149,
+   "option_radar": 0,
+   "option_source": "auto",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261023/E25_door_RH/s_083521",
+   "class_name": "E25_door_RH",
+   "n_frames": 20,
+   "n_valid": 149,
+   "option_radar": 0,
+   "option_source": "auto",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261023/E25_door_RH/s_093311",
+   "class_name": "E25_door_RH",
+   "n_frames": 20,
+   "n_valid": 92,
+   "option_radar": 0,
+   "option_source": "auto",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261023/E25_door_RH/s_105348",
+   "class_name": "E25_door_RH",
+   "n_frames": 20,
+   "n_valid": 149,
+   "option_radar": 0,
+   "option_source": "auto",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261026/E25_door_LH_RR/s_082837",
+   "class_name": "E25_door_LH_RR",
+   "n_frames": 20,
+   "n_valid": 103,
+   "option_radar": 1,
+   "option_source": "auto",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261026/E25_door_RH/s_151706",
+   "class_name": "E25_door_RH",
+   "n_frames": 20,
+   "n_valid": 149,
+   "option_radar": 0,
+   "option_source": "auto",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261027/E25_door_LH_RR/s_134321",
+   "class_name": "E25_door_LH_RR",
+   "n_frames": 20,
+   "n_valid": 149,
+   "option_radar": 0,
+   "option_source": "auto",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261027/E25_door_LH_RR/s_143158",
+   "class_name": "E25_door_LH_RR",
+   "n_frames": 20,
+   "n_valid": 90,
+   "option_radar": 0,
+   "option_source": "auto",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261027/E25_door_RH/s_152335",
+   "class_name": "E25_door_RH",
+   "n_frames": 20,
+   "n_valid": 149,
+   "option_radar": 0,
+   "option_source": "auto",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261027/E30_door_LH_FRT/s_074619",
+   "class_name": "E30_door_LH_FRT",
+   "n_frames": 20,
+   "n_valid": 71,
+   "option_radar": null,
+   "option_source": null,
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261028/E30_E38_door_RH/s_143825",
+   "class_name": "E30_E38_door_RH",
+   "n_frames": 20,
+   "n_valid": 84,
+   "option_radar": 0,
+   "option_source": "auto",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261028/E30_E38_door_RH/s_150546",
+   "class_name": "E30_E38_door_RH",
+   "n_frames": 20,
+   "n_valid": 149,
+   "option_radar": 0,
+   "option_source": "auto",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261028/E30_door_LH_RR/s_080504",
+   "class_name": "E30_door_LH_RR",
+   "n_frames": 20,
+   "n_valid": 149,
+   "option_radar": 0,
+   "option_source": "auto",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261029/E30_E38_door_RH/s_072320",
+   "class_name": "E30_E38_door_RH",
+   "n_frames": 20,
+   "n_valid": 71,
+   "option_radar": 0,
+   "option_source": "auto",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261029/E30_door_LH_FRT/s_105319",
+   "class_name": "E30_door_LH_FRT",
+   "n_frames": 9,
+   "n_valid": 13,
+   "option_radar": null,
+   "option_source": null,
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261029/E30_door_LH_RR/s_102515",
+   "class_name": "E30_door_LH_RR",
+   "n_frames": 20,
+   "n_valid": 104,
+   "option_radar": 0,
+   "option_source": "auto",
+   "db_split": null,
+   "label_corrected": false
+  }
+ ],
+ "train_val": [
+  {
+   "session_dir": "20260827/E25_door_LH_RR/s_151840",
+   "class_name": "E25_door_LH_RR",
+   "n_frames": 20,
+   "n_valid": 149,
+   "option_radar": 1,
+   "option_source": "user",
+   "db_split": "train",
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260828/E25_door_LH_RR/s_173917",
+   "class_name": "E25_door_LH_RR",
+   "n_frames": 20,
+   "n_valid": 149,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": "val",
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260828/E25_door_LH_RR/s_185203",
+   "class_name": "E25_door_LH_RR",
+   "n_frames": 20,
+   "n_valid": 56,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": "val",
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260828/E25_door_RH/s_073428",
+   "class_name": "E25_door_RH",
+   "n_frames": 7,
+   "n_valid": 7,
+   "option_radar": 1,
+   "option_source": "user",
+   "db_split": "val",
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260828/E25_door_RH/s_073451",
+   "class_name": "E25_door_RH",
+   "n_frames": 26,
+   "n_valid": 149,
+   "option_radar": 1,
+   "option_source": "user",
+   "db_split": "train",
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260828/E25_door_RH/s_081059",
+   "class_name": "E25_door_RH",
+   "n_frames": 26,
+   "n_valid": 149,
+   "option_radar": 1,
+   "option_source": "user",
+   "db_split": "train",
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260828/E25_door_RH/s_085518",
+   "class_name": "E25_door_RH",
+   "n_frames": 26,
+   "n_valid": 149,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": "train",
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260828/E30_E38_door_RH/s_153953",
+   "class_name": "E30_E38_door_RH",
+   "n_frames": 26,
+   "n_valid": 113,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": "train",
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260828/E30_door_LH_FRT/s_164849",
+   "class_name": "E30_door_LH_FRT",
+   "n_frames": 20,
+   "n_valid": 71,
+   "option_radar": null,
+   "option_source": null,
+   "db_split": "val",
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260828/E30_door_LH_RR/s_125907",
+   "class_name": "E30_door_LH_RR",
+   "n_frames": 26,
+   "n_valid": 149,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": "train",
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260828/E30_door_LH_RR/s_133831",
+   "class_name": "E30_door_LH_RR",
+   "n_frames": 28,
+   "n_valid": 91,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": "train",
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260828/E38_door_LH_RR/s_122557",
+   "class_name": "E38_door_LH_RR",
+   "n_frames": 34,
+   "n_valid": 65,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": "train",
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260831/E25_door_RH/s_072809",
+   "class_name": "E25_door_RH",
+   "n_frames": 20,
+   "n_valid": 67,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": "val",
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260831/E25_door_RH/s_080246",
+   "class_name": "E25_door_RH",
+   "n_frames": 20,
+   "n_valid": 135,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": "train",
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260831/E30_E38_door_RH/s_134143",
+   "class_name": "E30_E38_door_RH",
+   "n_frames": 20,
+   "n_valid": 52,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": "val",
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260831/E30_E38_door_RH/s_143405",
+   "class_name": "E30_E38_door_RH",
+   "n_frames": 20,
+   "n_valid": 61,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": "val",
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260831/E30_E38_door_RH/s_151323",
+   "class_name": "E30_E38_door_RH",
+   "n_frames": 20,
+   "n_valid": 62,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": "train",
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260831/E30_E38_door_RH/s_153733",
+   "class_name": "E30_E38_door_RH",
+   "n_frames": 20,
+   "n_valid": 63,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": "train",
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260831/E38_door_LH_FRT/s_170923",
+   "class_name": "E38_door_LH_FRT",
+   "n_frames": 20,
+   "n_valid": 149,
+   "option_radar": null,
+   "option_source": null,
+   "db_split": "val",
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260831/E38_door_LH_FRT/s_173924",
+   "class_name": "E38_door_LH_FRT",
+   "n_frames": 20,
+   "n_valid": 149,
+   "option_radar": null,
+   "option_source": null,
+   "db_split": "train",
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260831/E38_door_LH_FRT/s_183313",
+   "class_name": "E38_door_LH_FRT",
+   "n_frames": 20,
+   "n_valid": 149,
+   "option_radar": null,
+   "option_source": null,
+   "db_split": "train",
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260831/E38_door_LH_FRT/s_185734",
+   "class_name": "E38_door_LH_FRT",
+   "n_frames": 20,
+   "n_valid": 149,
+   "option_radar": null,
+   "option_source": null,
+   "db_split": "train",
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260831/E38_door_LH_RR/s_104040",
+   "class_name": "E38_door_LH_RR",
+   "n_frames": 20,
+   "n_valid": 149,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": "val",
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260831/E38_door_LH_RR/s_122439",
+   "class_name": "E38_door_LH_RR",
+   "n_frames": 20,
+   "n_valid": 58,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": "train",
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260901/E30_E38_door_RH/s_133500",
+   "class_name": "E30_E38_door_RH",
+   "n_frames": 20,
+   "n_valid": 68,
+   "option_radar": 1,
+   "option_source": "user",
+   "db_split": "train",
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260901/E30_E38_door_RH/s_143118",
+   "class_name": "E30_E38_door_RH",
+   "n_frames": 20,
+   "n_valid": 61,
+   "option_radar": 1,
+   "option_source": "user",
+   "db_split": "train",
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260901/E30_E38_door_RH/s_154005",
+   "class_name": "E30_E38_door_RH",
+   "n_frames": 20,
+   "n_valid": 73,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": "train",
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260901/E30_door_LH_FRT/s_071357",
+   "class_name": "E30_door_LH_FRT",
+   "n_frames": 20,
+   "n_valid": 66,
+   "option_radar": null,
+   "option_source": null,
+   "db_split": "train",
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260901/E30_door_LH_FRT/s_074126",
+   "class_name": "E30_door_LH_FRT",
+   "n_frames": 20,
+   "n_valid": 61,
+   "option_radar": null,
+   "option_source": null,
+   "db_split": "train",
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260901/E30_door_LH_FRT/s_165431",
+   "class_name": "E30_door_LH_FRT",
+   "n_frames": 19,
+   "n_valid": 64,
+   "option_radar": null,
+   "option_source": null,
+   "db_split": "train",
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260901/E30_door_LH_FRT/s_173308",
+   "class_name": "E30_door_LH_FRT",
+   "n_frames": 20,
+   "n_valid": 77,
+   "option_radar": null,
+   "option_source": null,
+   "db_split": "train",
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260901/E30_door_LH_RR/s_100737",
+   "class_name": "E30_door_LH_RR",
+   "n_frames": 20,
+   "n_valid": 149,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": "train",
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260901/E30_door_LH_RR/s_150706",
+   "class_name": "E30_door_LH_RR",
+   "n_frames": 20,
+   "n_valid": 69,
+   "option_radar": 1,
+   "option_source": "user",
+   "db_split": "train",
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260901/E38_door_LH_FRT/s_162847",
+   "class_name": "E38_door_LH_FRT",
+   "n_frames": 20,
+   "n_valid": 62,
+   "option_radar": null,
+   "option_source": null,
+   "db_split": "train",
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260901/E38_door_LH_RR/s_124406",
+   "class_name": "E38_door_LH_RR",
+   "n_frames": 20,
+   "n_valid": 69,
+   "option_radar": 1,
+   "option_source": "user",
+   "db_split": "train",
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260903/E25_door_LH_FRT/s_132914",
+   "class_name": "E25_door_LH_FRT",
+   "n_frames": 20,
+   "n_valid": 72,
+   "option_radar": null,
+   "option_source": null,
+   "db_split": "val",
+   "label_corrected": true
+  },
+  {
+   "session_dir": "20260903/E25_door_LH_FRT/s_141947",
+   "class_name": "E25_door_LH_FRT",
+   "n_frames": 20,
+   "n_valid": 69,
+   "option_radar": null,
+   "option_source": null,
+   "db_split": "train",
+   "label_corrected": true
+  },
+  {
+   "session_dir": "20260903/E25_door_LH_RR/s_073940",
+   "class_name": "E25_door_LH_RR",
+   "n_frames": 20,
+   "n_valid": 81,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": "train",
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260903/E25_door_LH_RR/s_081004",
+   "class_name": "E25_door_LH_RR",
+   "n_frames": 20,
+   "n_valid": 149,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": "train",
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260903/E25_door_LH_RR/s_084820",
+   "class_name": "E25_door_LH_RR",
+   "n_frames": 20,
+   "n_valid": 149,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": "train",
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260903/E25_door_LH_RR/s_151748",
+   "class_name": "E25_door_LH_RR",
+   "n_frames": 20,
+   "n_valid": 149,
+   "option_radar": 1,
+   "option_source": "user",
+   "db_split": "train",
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260903/E25_door_RH/s_094526",
+   "class_name": "E25_door_RH",
+   "n_frames": 20,
+   "n_valid": 90,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": "train",
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260903/E25_door_RH/s_102021",
+   "class_name": "E25_door_RH",
+   "n_frames": 20,
+   "n_valid": 153,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": "train",
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260903/E25_door_RH/s_121413",
+   "class_name": "E25_door_RH",
+   "n_frames": 20,
+   "n_valid": 77,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": "train",
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260903/E25_door_RH/s_171449",
+   "class_name": "E25_door_RH",
+   "n_frames": 20,
+   "n_valid": 149,
+   "option_radar": 1,
+   "option_source": "user",
+   "db_split": "train",
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260903/E30_E38_door_RH/s_183216",
+   "class_name": "E30_E38_door_RH",
+   "n_frames": 20,
+   "n_valid": 73,
+   "option_radar": 1,
+   "option_source": "user",
+   "db_split": "train",
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260903/E30_E38_door_RH/s_193550",
+   "class_name": "E30_E38_door_RH",
+   "n_frames": 19,
+   "n_valid": 153,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": "train",
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260903/E30_door_LH_RR/s_151736",
+   "class_name": "E30_door_LH_RR",
+   "n_frames": 3,
+   "n_valid": 3,
+   "option_radar": 1,
+   "option_source": "user",
+   "db_split": "train",
+   "label_corrected": true
+  },
+  {
+   "session_dir": "20260903/E30_door_LH_RR/s_183159",
+   "class_name": "E30_door_LH_RR",
+   "n_frames": 7,
+   "n_valid": 7,
+   "option_radar": 1,
+   "option_source": "user",
+   "db_split": "train",
+   "label_corrected": true
+  },
+  {
+   "session_dir": "20260904/E25_door_LH_FRT/s_132137",
+   "class_name": "E25_door_LH_FRT",
+   "n_frames": 20,
+   "n_valid": 152,
+   "option_radar": null,
+   "option_source": null,
+   "db_split": "train",
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260904/E25_door_LH_RR/s_145031",
+   "class_name": "E25_door_LH_RR",
+   "n_frames": 20,
+   "n_valid": 70,
+   "option_radar": 1,
+   "option_source": "user",
+   "db_split": "train",
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260904/E25_door_LH_RR/s_151936",
+   "class_name": "E25_door_LH_RR",
+   "n_frames": 19,
+   "n_valid": 153,
+   "option_radar": 1,
+   "option_source": "user",
+   "db_split": "train",
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260904/E25_door_RH/s_082158",
+   "class_name": "E25_door_RH",
+   "n_frames": 19,
+   "n_valid": 152,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": "train",
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260904/E25_door_RH/s_164143",
+   "class_name": "E25_door_RH",
+   "n_frames": 20,
+   "n_valid": 67,
+   "option_radar": 1,
+   "option_source": "user",
+   "db_split": "train",
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260904/E25_door_RH/s_171428",
+   "class_name": "E25_door_RH",
+   "n_frames": 20,
+   "n_valid": 153,
+   "option_radar": 1,
+   "option_source": "user",
+   "db_split": "train",
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260904/E30_door_LH_FRT/s_075009",
+   "class_name": "E30_door_LH_FRT",
+   "n_frames": 20,
+   "n_valid": 78,
+   "option_radar": null,
+   "option_source": null,
+   "db_split": "train",
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260904/E30_door_LH_RR/s_182626",
+   "class_name": "E30_door_LH_RR",
+   "n_frames": 20,
+   "n_valid": 87,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": "train",
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260904/E38_door_LH_RR/s_185819",
+   "class_name": "E38_door_LH_RR",
+   "n_frames": 20,
+   "n_valid": 149,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": "train",
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260905/E25_door_LH_FRT/s_150506",
+   "class_name": "E25_door_LH_FRT",
+   "n_frames": 20,
+   "n_valid": 149,
+   "option_radar": null,
+   "option_source": null,
+   "db_split": "train",
+   "label_corrected": true
+  },
+  {
+   "session_dir": "20260905/E25_door_LH_RR/s_072121",
+   "class_name": "E25_door_LH_RR",
+   "n_frames": 20,
+   "n_valid": 59,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": "train",
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260905/E25_door_LH_RR/s_142708",
+   "class_name": "E25_door_LH_RR",
+   "n_frames": 20,
+   "n_valid": 149,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": "train",
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260905/E30_E38_door_RH/s_103743",
+   "class_name": "E30_E38_door_RH",
+   "n_frames": 20,
+   "n_valid": 149,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": "train",
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260905/E30_E38_door_RH/s_123457",
+   "class_name": "E30_E38_door_RH",
+   "n_frames": 20,
+   "n_valid": 149,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": "train",
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260905/E30_door_LH_FRT/s_131434",
+   "class_name": "E30_door_LH_FRT",
+   "n_frames": 20,
+   "n_valid": 149,
+   "option_radar": null,
+   "option_source": null,
+   "db_split": "train",
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260905/E30_door_LH_RR/s_094738",
+   "class_name": "E30_door_LH_RR",
+   "n_frames": 20,
+   "n_valid": 62,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": "train",
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260905/E30_door_LH_RR/s_123451",
+   "class_name": "E30_door_LH_RR",
+   "n_frames": 1,
+   "n_valid": 1,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": "train",
+   "label_corrected": true
+  },
+  {
+   "session_dir": "20260905/E38_door_LH_RR/s_084706",
+   "class_name": "E38_door_LH_RR",
+   "n_frames": 20,
+   "n_valid": 74,
+   "option_radar": 1,
+   "option_source": "user",
+   "db_split": "train",
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260907/E25_door_LH_RR/s_130029",
+   "class_name": "E25_door_LH_RR",
+   "n_frames": 20,
+   "n_valid": 64,
+   "option_radar": 1,
+   "option_source": "user",
+   "db_split": "train",
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260907/E30_door_LH_FRT/s_155421",
+   "class_name": "E30_door_LH_FRT",
+   "n_frames": 20,
+   "n_valid": 149,
+   "option_radar": null,
+   "option_source": null,
+   "db_split": "train",
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260907/E30_door_LH_RR/s_145148",
+   "class_name": "E30_door_LH_RR",
+   "n_frames": 20,
+   "n_valid": 153,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": "val",
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260909/E30_E38_door_RH/s_103647",
+   "class_name": "E30_E38_door_RH",
+   "n_frames": 20,
+   "n_valid": 67,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": "val",
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260909/E30_E38_door_RH/s_122107",
+   "class_name": "E30_E38_door_RH",
+   "n_frames": 20,
+   "n_valid": 72,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": "val",
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260909/E30_E38_door_RH/s_151416",
+   "class_name": "E30_E38_door_RH",
+   "n_frames": 20,
+   "n_valid": 149,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": "val",
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260910/E25_door_LH_RR/s_150606",
+   "class_name": "E25_door_LH_RR",
+   "n_frames": 20,
+   "n_valid": 57,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": "val",
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260910/E25_door_RH/s_183831",
+   "class_name": "E25_door_RH",
+   "n_frames": 20,
+   "n_valid": 54,
+   "option_radar": 1,
+   "option_source": "user",
+   "db_split": "val",
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260910/E30_E38_door_RH/s_085608",
+   "class_name": "E30_E38_door_RH",
+   "n_frames": 20,
+   "n_valid": 149,
+   "option_radar": 1,
+   "option_source": "user",
+   "db_split": "train",
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260910/E30_E38_door_RH/s_124958",
+   "class_name": "E30_E38_door_RH",
+   "n_frames": 20,
+   "n_valid": 60,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": "train",
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260910/E30_E38_door_RH/s_135247",
+   "class_name": "E30_E38_door_RH",
+   "n_frames": 20,
+   "n_valid": 153,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": "train",
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260910/E30_E38_door_RH/s_193612",
+   "class_name": "E30_E38_door_RH",
+   "n_frames": 19,
+   "n_valid": 153,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": "train",
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260910/E30_door_LH_RR/s_081310",
+   "class_name": "E30_door_LH_RR",
+   "n_frames": 20,
+   "n_valid": 149,
+   "option_radar": 1,
+   "option_source": "user",
+   "db_split": "val",
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260910/E38_door_LH_FRT/s_190535",
+   "class_name": "E38_door_LH_FRT",
+   "n_frames": 20,
+   "n_valid": 149,
+   "option_radar": null,
+   "option_source": null,
+   "db_split": "val",
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260910/E38_door_LH_RR/s_173049",
+   "class_name": "E38_door_LH_RR",
+   "n_frames": 20,
+   "n_valid": 149,
+   "option_radar": 1,
+   "option_source": "user",
+   "db_split": "val",
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260911/E25_door_LH_RR/s_081146",
+   "class_name": "E25_door_LH_RR",
+   "n_frames": 20,
+   "n_valid": 149,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": "val",
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260911/E25_door_LH_RR/s_084836",
+   "class_name": "E25_door_LH_RR",
+   "n_frames": 20,
+   "n_valid": 153,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": "train",
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260911/E25_door_RH/s_093557",
+   "class_name": "E25_door_RH",
+   "n_frames": 20,
+   "n_valid": 83,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": "val",
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260911/E25_door_RH/s_121954",
+   "class_name": "E25_door_RH",
+   "n_frames": 20,
+   "n_valid": 51,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": "train",
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260911/E30_E38_door_RH/s_074407",
+   "class_name": "E30_E38_door_RH",
+   "n_frames": 20,
+   "n_valid": 69,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": "train",
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260911/E30_E38_door_RH/s_143105",
+   "class_name": "E30_E38_door_RH",
+   "n_frames": 20,
+   "n_valid": 61,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": "train",
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260911/E30_E38_door_RH/s_152046",
+   "class_name": "E30_E38_door_RH",
+   "n_frames": 20,
+   "n_valid": 50,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": "train",
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260911/E30_E38_door_RH/s_154854",
+   "class_name": "E30_E38_door_RH",
+   "n_frames": 20,
+   "n_valid": 77,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": "train",
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260911/E30_door_LH_FRT/s_164447",
+   "class_name": "E30_door_LH_FRT",
+   "n_frames": 20,
+   "n_valid": 52,
+   "option_radar": null,
+   "option_source": null,
+   "db_split": "val",
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260911/E30_door_LH_FRT/s_171006",
+   "class_name": "E30_door_LH_FRT",
+   "n_frames": 20,
+   "n_valid": 149,
+   "option_radar": null,
+   "option_source": null,
+   "db_split": "train",
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260911/E38_door_LH_FRT/s_145644",
+   "class_name": "E38_door_LH_FRT",
+   "n_frames": 19,
+   "n_valid": 69,
+   "option_radar": null,
+   "option_source": null,
+   "db_split": "train",
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260911/E38_door_LH_RR/s_134448",
+   "class_name": "E38_door_LH_RR",
+   "n_frames": 20,
+   "n_valid": 57,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": "train",
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260912/E25_door_LH_FRT/s_094850",
+   "class_name": "E25_door_LH_FRT",
+   "n_frames": 20,
+   "n_valid": 55,
+   "option_radar": null,
+   "option_source": null,
+   "db_split": "train",
+   "label_corrected": true
+  },
+  {
+   "session_dir": "20260912/E25_door_LH_FRT/s_103329",
+   "class_name": "E25_door_LH_FRT",
+   "n_frames": 20,
+   "n_valid": 62,
+   "option_radar": null,
+   "option_source": null,
+   "db_split": "train",
+   "label_corrected": true
+  },
+  {
+   "session_dir": "20260912/E25_door_LH_RR/s_072537",
+   "class_name": "E25_door_LH_RR",
+   "n_frames": 18,
+   "n_valid": 68,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": "train",
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260912/E25_door_LH_RR/s_080202",
+   "class_name": "E25_door_LH_RR",
+   "n_frames": 20,
+   "n_valid": 149,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": "train",
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260912/E25_door_LH_RR/s_142944",
+   "class_name": "E25_door_LH_RR",
+   "n_frames": 20,
+   "n_valid": 80,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": "train",
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260912/E25_door_RH/s_085751",
+   "class_name": "E25_door_RH",
+   "n_frames": 20,
+   "n_valid": 149,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": "train",
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260912/E25_door_RH/s_145852",
+   "class_name": "E25_door_RH",
+   "n_frames": 20,
+   "n_valid": 149,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": "train",
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260912/E30_E38_door_RH/s_132609",
+   "class_name": "E30_E38_door_RH",
+   "n_frames": 20,
+   "n_valid": 55,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": "train",
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260912/E30_door_LH_RR/s_123706",
+   "class_name": "E30_door_LH_RR",
+   "n_frames": 20,
+   "n_valid": 78,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": "train",
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260914/E25_door_LH_RR/s_121607",
+   "class_name": "E25_door_LH_RR",
+   "n_frames": 20,
+   "n_valid": 53,
+   "option_radar": 1,
+   "option_source": "user",
+   "db_split": "train",
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260914/E25_door_LH_RR/s_130854",
+   "class_name": "E25_door_LH_RR",
+   "n_frames": 20,
+   "n_valid": 48,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": "train",
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260914/E25_door_LH_RR/s_134326",
+   "class_name": "E25_door_LH_RR",
+   "n_frames": 20,
+   "n_valid": 55,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": "train",
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260914/E25_door_LH_RR/s_181822",
+   "class_name": "E25_door_LH_RR",
+   "n_frames": 20,
+   "n_valid": 58,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": "train",
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260914/E25_door_RH/s_124221",
+   "class_name": "E25_door_RH",
+   "n_frames": 20,
+   "n_valid": 55,
+   "option_radar": 1,
+   "option_source": "user",
+   "db_split": "train",
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260914/E25_door_RH/s_143126",
+   "class_name": "E25_door_RH",
+   "n_frames": 20,
+   "n_valid": 61,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": "train",
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260914/E25_door_RH/s_145523",
+   "class_name": "E25_door_RH",
+   "n_frames": 20,
+   "n_valid": 52,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": "train",
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260914/E30_E38_door_RH/s_172158",
+   "class_name": "E30_E38_door_RH",
+   "n_frames": 20,
+   "n_valid": 152,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": "train",
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260914/E30_door_LH_RR/s_080437",
+   "class_name": "E30_door_LH_RR",
+   "n_frames": 20,
+   "n_valid": 49,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": "train",
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260914/E30_door_LH_RR/s_084733",
+   "class_name": "E30_door_LH_RR",
+   "n_frames": 20,
+   "n_valid": 94,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": "train",
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260914/E30_door_LH_RR/s_170035",
+   "class_name": "E30_door_LH_RR",
+   "n_frames": 20,
+   "n_valid": 57,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": "train",
+   "label_corrected": true
+  },
+  {
+   "session_dir": "20260914/E38_door_LH_FRT/s_163901",
+   "class_name": "E38_door_LH_FRT",
+   "n_frames": 20,
+   "n_valid": 54,
+   "option_radar": null,
+   "option_source": null,
+   "db_split": "train",
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260914/E38_door_LH_RR/s_101641",
+   "class_name": "E38_door_LH_RR",
+   "n_frames": 20,
+   "n_valid": 149,
+   "option_radar": 1,
+   "option_source": "user",
+   "db_split": "train",
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260914/E38_door_LH_RR/s_152858",
+   "class_name": "E38_door_LH_RR",
+   "n_frames": 20,
+   "n_valid": 59,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": "train",
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260915/E25_door_LH_RR/s_185839",
+   "class_name": "E25_door_LH_RR",
+   "n_frames": 20,
+   "n_valid": 149,
+   "option_radar": 1,
+   "option_source": "user",
+   "db_split": "train",
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260915/E25_door_RH/s_083844",
+   "class_name": "E25_door_RH",
+   "n_frames": 20,
+   "n_valid": 54,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": "train",
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260915/E30_E38_door_RH/s_105440",
+   "class_name": "E30_E38_door_RH",
+   "n_frames": 20,
+   "n_valid": 149,
+   "option_radar": 1,
+   "option_source": "user",
+   "db_split": "train",
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260915/E30_door_LH_RR/s_101116",
+   "class_name": "E30_door_LH_RR",
+   "n_frames": 20,
+   "n_valid": 51,
+   "option_radar": 1,
+   "option_source": "user",
+   "db_split": "train",
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260915/E38_door_LH_FRT/s_080019",
+   "class_name": "E38_door_LH_FRT",
+   "n_frames": 20,
+   "n_valid": 78,
+   "option_radar": null,
+   "option_source": null,
+   "db_split": "train",
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260915/E38_door_LH_RR/s_071053",
+   "class_name": "E38_door_LH_RR",
+   "n_frames": 20,
+   "n_valid": 149,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": "train",
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260915/E38_door_LH_RR/s_193928",
+   "class_name": "E38_door_LH_RR",
+   "n_frames": 20,
+   "n_valid": 45,
+   "option_radar": 1,
+   "option_source": "user",
+   "db_split": "train",
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260916/E30_door_LH_FRT/s_093909",
+   "class_name": "E30_door_LH_FRT",
+   "n_frames": 20,
+   "n_valid": 112,
+   "option_radar": null,
+   "option_source": null,
+   "db_split": "train",
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260916/E30_door_LH_RR/s_075306",
+   "class_name": "E30_door_LH_RR",
+   "n_frames": 19,
+   "n_valid": 63,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": "train",
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260916/E38_door_LH_FRT/s_091851",
+   "class_name": "E38_door_LH_FRT",
+   "n_frames": 20,
+   "n_valid": 48,
+   "option_radar": null,
+   "option_source": null,
+   "db_split": "train",
+   "label_corrected": false
+  }
+ ],
+ "pool_unused": [
+  {
+   "session_dir": "20260827/E25_door_LH_RR/s_134623",
+   "class_name": "E25_door_LH_RR",
+   "n_frames": 20,
+   "n_valid": 86,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": "test",
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260827/E30_door_LH_FRT/s_123607",
+   "class_name": "E30_door_LH_FRT",
+   "n_frames": 149,
+   "n_valid": 149,
+   "option_radar": null,
+   "option_source": null,
+   "db_split": "test",
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260828/E25_door_LH_RR/s_171240",
+   "class_name": "E25_door_LH_RR",
+   "n_frames": 20,
+   "n_valid": 50,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": "test",
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260828/E25_door_RH/s_191838",
+   "class_name": "E25_door_RH",
+   "n_frames": 35,
+   "n_valid": 152,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": "test",
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260831/E30_E38_door_RH/s_125509",
+   "class_name": "E30_E38_door_RH",
+   "n_frames": 20,
+   "n_valid": 149,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": "test",
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260903/E25_door_LH_FRT/s_124446",
+   "class_name": "E25_door_LH_FRT",
+   "n_frames": 20,
+   "n_valid": 61,
+   "option_radar": null,
+   "option_source": null,
+   "db_split": "test",
+   "label_corrected": true
+  },
+  {
+   "session_dir": "20260907/E25_door_RH/s_133914",
+   "class_name": "E25_door_RH",
+   "n_frames": 20,
+   "n_valid": 61,
+   "option_radar": 1,
+   "option_source": "user",
+   "db_split": "test",
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260907/E30_E38_door_RH/s_152807",
+   "class_name": "E30_E38_door_RH",
+   "n_frames": 20,
+   "n_valid": 74,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": "test",
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260909/E25_door_LH_RR/s_143940",
+   "class_name": "E25_door_LH_RR",
+   "n_frames": 20,
+   "n_valid": 99,
+   "option_radar": 1,
+   "option_source": "user",
+   "db_split": "test",
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260909/E30_E38_door_RH/s_074550",
+   "class_name": "E30_E38_door_RH",
+   "n_frames": 20,
+   "n_valid": 75,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": "test",
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260910/E25_door_RH/s_102431",
+   "class_name": "E25_door_RH",
+   "n_frames": 20,
+   "n_valid": 149,
+   "option_radar": 1,
+   "option_source": "user",
+   "db_split": "test",
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260910/E25_door_RH/s_153344",
+   "class_name": "E25_door_RH",
+   "n_frames": 20,
+   "n_valid": 64,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": "test",
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260910/E38_door_LH_FRT/s_131904",
+   "class_name": "E38_door_LH_FRT",
+   "n_frames": 19,
+   "n_valid": 153,
+   "option_radar": null,
+   "option_source": null,
+   "db_split": "test",
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260910/E38_door_LH_RR/s_121448",
+   "class_name": "E38_door_LH_RR",
+   "n_frames": 20,
+   "n_valid": 100,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": "test",
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260916/E25_door_LH_FRT/s_135409",
+   "class_name": "E25_door_LH_FRT",
+   "n_frames": 20,
+   "n_valid": 149,
+   "option_radar": null,
+   "option_source": null,
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260917/E25_door_LH_RR/s_095747",
+   "class_name": "E25_door_LH_RR",
+   "n_frames": 20,
+   "n_valid": 149,
+   "option_radar": 1,
+   "option_source": "user",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260917/E25_door_LH_RR/s_122607",
+   "class_name": "E25_door_LH_RR",
+   "n_frames": 32,
+   "n_valid": 61,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260917/E25_door_LH_RR/s_125429",
+   "class_name": "E25_door_LH_RR",
+   "n_frames": 20,
+   "n_valid": 59,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260917/E25_door_RH/s_103841",
+   "class_name": "E25_door_RH",
+   "n_frames": 20,
+   "n_valid": 116,
+   "option_radar": 1,
+   "option_source": "user",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260918/E25_door_RH/s_080409",
+   "class_name": "E25_door_RH",
+   "n_frames": 20,
+   "n_valid": 149,
+   "option_radar": 1,
+   "option_source": "user",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260918/E30_E38_door_RH/s_095707",
+   "class_name": "E30_E38_door_RH",
+   "n_frames": 20,
+   "n_valid": 63,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260918/E30_E38_door_RH/s_101954",
+   "class_name": "E30_E38_door_RH",
+   "n_frames": 35,
+   "n_valid": 153,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260918/E30_door_LH_FRT/s_130044",
+   "class_name": "E30_door_LH_FRT",
+   "n_frames": 20,
+   "n_valid": 76,
+   "option_radar": null,
+   "option_source": null,
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260918/E30_door_LH_RR/s_105355",
+   "class_name": "E30_door_LH_RR",
+   "n_frames": 20,
+   "n_valid": 149,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260918/E30_door_LH_RR/s_122814",
+   "class_name": "E30_door_LH_RR",
+   "n_frames": 20,
+   "n_valid": 126,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260921/E38_door_LH_RR/s_155719",
+   "class_name": "E38_door_LH_RR",
+   "n_frames": 5,
+   "n_valid": 5,
+   "option_radar": 1,
+   "option_source": "user",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260922/E25_door_LH_RR/s_135225",
+   "class_name": "E25_door_LH_RR",
+   "n_frames": 20,
+   "n_valid": 101,
+   "option_radar": 1,
+   "option_source": "user",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260922/E25_door_RH/s_151323",
+   "class_name": "E25_door_RH",
+   "n_frames": 20,
+   "n_valid": 149,
+   "option_radar": 1,
+   "option_source": "user",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260922/E30_door_LH_RR/s_163059",
+   "class_name": "E30_door_LH_RR",
+   "n_frames": 20,
+   "n_valid": 73,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260922/E38_door_LH_FRT/s_124410",
+   "class_name": "E38_door_LH_FRT",
+   "n_frames": 20,
+   "n_valid": 62,
+   "option_radar": null,
+   "option_source": null,
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260922/E38_door_LH_FRT/s_130857",
+   "class_name": "E38_door_LH_FRT",
+   "n_frames": 20,
+   "n_valid": 149,
+   "option_radar": null,
+   "option_source": null,
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260923/E30_E38_door_RH/s_072354",
+   "class_name": "E30_E38_door_RH",
+   "n_frames": 20,
+   "n_valid": 76,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260923/E30_door_LH_FRT/s_075113",
+   "class_name": "E30_door_LH_FRT",
+   "n_frames": 20,
+   "n_valid": 91,
+   "option_radar": null,
+   "option_source": null,
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260929/E25_door_LH_RR/s_081842",
+   "class_name": "E25_door_LH_RR",
+   "n_frames": 20,
+   "n_valid": 152,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260929/E25_door_LH_RR/s_130359",
+   "class_name": "E25_door_LH_RR",
+   "n_frames": 20,
+   "n_valid": 149,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260929/E25_door_RH/s_094141",
+   "class_name": "E25_door_RH",
+   "n_frames": 20,
+   "n_valid": 71,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260929/E25_door_RH/s_100746",
+   "class_name": "E25_door_RH",
+   "n_frames": 20,
+   "n_valid": 51,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260930/E25_door_LH_RR/s_103920",
+   "class_name": "E25_door_LH_RR",
+   "n_frames": 19,
+   "n_valid": 88,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260930/E25_door_LH_RR/s_121848",
+   "class_name": "E25_door_LH_RR",
+   "n_frames": 20,
+   "n_valid": 53,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260930/E25_door_RH/s_124659",
+   "class_name": "E25_door_RH",
+   "n_frames": 20,
+   "n_valid": 50,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260930/E25_door_RH/s_131955",
+   "class_name": "E25_door_RH",
+   "n_frames": 20,
+   "n_valid": 53,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260930/E30_door_LH_RR/s_164113",
+   "class_name": "E30_door_LH_RR",
+   "n_frames": 20,
+   "n_valid": 53,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260930/E30_door_LH_RR/s_174022",
+   "class_name": "E30_door_LH_RR",
+   "n_frames": 20,
+   "n_valid": 144,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20260930/E38_door_LH_RR/s_144829",
+   "class_name": "E38_door_LH_RR",
+   "n_frames": 20,
+   "n_valid": 57,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261001/E25_door_LH_RR/s_104820",
+   "class_name": "E25_door_LH_RR",
+   "n_frames": 20,
+   "n_valid": 70,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261001/E25_door_LH_RR/s_151004",
+   "class_name": "E25_door_LH_RR",
+   "n_frames": 20,
+   "n_valid": 93,
+   "option_radar": 1,
+   "option_source": "user",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261001/E30_door_LH_FRT/s_094947",
+   "class_name": "E30_door_LH_FRT",
+   "n_frames": 20,
+   "n_valid": 60,
+   "option_radar": null,
+   "option_source": null,
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261001/E30_door_LH_FRT/s_102037",
+   "class_name": "E30_door_LH_FRT",
+   "n_frames": 19,
+   "n_valid": 141,
+   "option_radar": null,
+   "option_source": null,
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261001/E30_door_LH_RR/s_163649",
+   "class_name": "E30_door_LH_RR",
+   "n_frames": 20,
+   "n_valid": 67,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261002/E25_door_LH_RR/s_151003",
+   "class_name": "E25_door_LH_RR",
+   "n_frames": 20,
+   "n_valid": 149,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261002/E25_door_RH/s_154727",
+   "class_name": "E25_door_RH",
+   "n_frames": 20,
+   "n_valid": 60,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261002/E25_door_RH/s_164340",
+   "class_name": "E25_door_RH",
+   "n_frames": 20,
+   "n_valid": 90,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261002/E30_E38_door_RH/s_132105",
+   "class_name": "E30_E38_door_RH",
+   "n_frames": 25,
+   "n_valid": 153,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261002/E30_door_LH_RR/s_074551",
+   "class_name": "E30_door_LH_RR",
+   "n_frames": 20,
+   "n_valid": 45,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261002/E38_door_LH_RR/s_100901",
+   "class_name": "E38_door_LH_RR",
+   "n_frames": 20,
+   "n_valid": 109,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261002/E38_door_LH_RR/s_121505",
+   "class_name": "E38_door_LH_RR",
+   "n_frames": 20,
+   "n_valid": 52,
+   "option_radar": 1,
+   "option_source": "user",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261006/E25_door_LH_RR/s_122550",
+   "class_name": "E25_door_LH_RR",
+   "n_frames": 32,
+   "n_valid": 61,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261006/E25_door_RH/s_080357",
+   "class_name": "E25_door_RH",
+   "n_frames": 20,
+   "n_valid": 81,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261006/E25_door_RH/s_083824",
+   "class_name": "E25_door_RH",
+   "n_frames": 20,
+   "n_valid": 149,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261006/E25_door_RH/s_125302",
+   "class_name": "E25_door_RH",
+   "n_frames": 20,
+   "n_valid": 55,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261006/E30_E38_door_RH/s_170710",
+   "class_name": "E30_E38_door_RH",
+   "n_frames": 20,
+   "n_valid": 149,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261006/E30_door_LH_RR/s_135042",
+   "class_name": "E30_door_LH_RR",
+   "n_frames": 20,
+   "n_valid": 40,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261006/E30_door_LH_RR/s_144823",
+   "class_name": "E30_door_LH_RR",
+   "n_frames": 20,
+   "n_valid": 107,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261006/E30_door_LH_RR/s_152850",
+   "class_name": "E30_door_LH_RR",
+   "n_frames": 20,
+   "n_valid": 49,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261006/E30_door_LH_RR/s_155348",
+   "class_name": "E30_door_LH_RR",
+   "n_frames": 20,
+   "n_valid": 149,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261007/E30_E38_door_RH/s_081224",
+   "class_name": "E30_E38_door_RH",
+   "n_frames": 20,
+   "n_valid": 149,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261007/E30_E38_door_RH/s_094015",
+   "class_name": "E30_E38_door_RH",
+   "n_frames": 20,
+   "n_valid": 121,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261007/E30_door_LH_FRT/s_100901",
+   "class_name": "E30_door_LH_FRT",
+   "n_frames": 20,
+   "n_valid": 149,
+   "option_radar": null,
+   "option_source": null,
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261007/E30_door_LH_FRT/s_104659",
+   "class_name": "E30_door_LH_FRT",
+   "n_frames": 20,
+   "n_valid": 64,
+   "option_radar": null,
+   "option_source": null,
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261007/E30_door_LH_FRT/s_123156",
+   "class_name": "E30_door_LH_FRT",
+   "n_frames": 20,
+   "n_valid": 39,
+   "option_radar": null,
+   "option_source": null,
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261007/E30_door_LH_RR/s_151452",
+   "class_name": "E30_door_LH_RR",
+   "n_frames": 20,
+   "n_valid": 149,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261007/E30_door_LH_RR/s_164351",
+   "class_name": "E30_door_LH_RR",
+   "n_frames": 20,
+   "n_valid": 57,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261007/E30_door_LH_RR/s_171409",
+   "class_name": "E30_door_LH_RR",
+   "n_frames": 20,
+   "n_valid": 149,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261008/E30_E38_door_RH/s_074057",
+   "class_name": "E30_E38_door_RH",
+   "n_frames": 20,
+   "n_valid": 48,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261008/E30_E38_door_RH/s_081830",
+   "class_name": "E30_E38_door_RH",
+   "n_frames": 20,
+   "n_valid": 149,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261008/E30_door_LH_FRT/s_095059",
+   "class_name": "E30_door_LH_FRT",
+   "n_frames": 20,
+   "n_valid": 31,
+   "option_radar": null,
+   "option_source": null,
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261008/E30_door_LH_FRT/s_101517",
+   "class_name": "E30_door_LH_FRT",
+   "n_frames": 20,
+   "n_valid": 49,
+   "option_radar": null,
+   "option_source": null,
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261008/E30_door_LH_FRT/s_104348",
+   "class_name": "E30_door_LH_FRT",
+   "n_frames": 20,
+   "n_valid": 51,
+   "option_radar": null,
+   "option_source": null,
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261012/E25_door_LH_RR/s_093024",
+   "class_name": "E25_door_LH_RR",
+   "n_frames": 20,
+   "n_valid": 31,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261012/E30_E38_door_RH/s_075452",
+   "class_name": "E30_E38_door_RH",
+   "n_frames": 20,
+   "n_valid": 27,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261012/E30_E38_door_RH/s_170928",
+   "class_name": "E30_E38_door_RH",
+   "n_frames": 20,
+   "n_valid": 149,
+   "option_radar": 1,
+   "option_source": "user",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261012/E30_door_LH_RR/s_164001",
+   "class_name": "E30_door_LH_RR",
+   "n_frames": 20,
+   "n_valid": 32,
+   "option_radar": 1,
+   "option_source": "user",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261013/E25_door_RH/s_071934",
+   "class_name": "E25_door_RH",
+   "n_frames": 20,
+   "n_valid": 60,
+   "option_radar": 1,
+   "option_source": "user",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261013/E30_E38_door_RH/s_074704",
+   "class_name": "E30_E38_door_RH",
+   "n_frames": 20,
+   "n_valid": 149,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261013/E30_E38_door_RH/s_082149",
+   "class_name": "E30_E38_door_RH",
+   "n_frames": 20,
+   "n_valid": 142,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261013/E30_door_LH_FRT/s_092635",
+   "class_name": "E30_door_LH_FRT",
+   "n_frames": 20,
+   "n_valid": 101,
+   "option_radar": null,
+   "option_source": null,
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261013/E30_door_LH_RR/s_123821",
+   "class_name": "E30_door_LH_RR",
+   "n_frames": 20,
+   "n_valid": 147,
+   "option_radar": 1,
+   "option_source": "user",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261013/E38_door_LH_FRT/s_155007",
+   "class_name": "E38_door_LH_FRT",
+   "n_frames": 20,
+   "n_valid": 88,
+   "option_radar": null,
+   "option_source": null,
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261013/E38_door_LH_RR/s_144459",
+   "class_name": "E38_door_LH_RR",
+   "n_frames": 20,
+   "n_valid": 78,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261014/E25_door_LH_RR/s_120835",
+   "class_name": "E25_door_LH_RR",
+   "n_frames": 20,
+   "n_valid": 38,
+   "option_radar": 1,
+   "option_source": "user",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261014/E25_door_RH/s_130937",
+   "class_name": "E25_door_RH",
+   "n_frames": 20,
+   "n_valid": 149,
+   "option_radar": 1,
+   "option_source": "user",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261016/E30_door_LH_RR/s_151445",
+   "class_name": "E30_door_LH_RR",
+   "n_frames": 20,
+   "n_valid": 149,
+   "option_radar": 1,
+   "option_source": "user",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261019/E25_door_LH_RR/s_074422",
+   "class_name": "E25_door_LH_RR",
+   "n_frames": 20,
+   "n_valid": 115,
+   "option_radar": 1,
+   "option_source": "user",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261019/E25_door_RH/s_094042",
+   "class_name": "E25_door_RH",
+   "n_frames": 20,
+   "n_valid": 149,
+   "option_radar": 1,
+   "option_source": "user",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261019/E30_door_LH_FRT/s_122000",
+   "class_name": "E30_door_LH_FRT",
+   "n_frames": 20,
+   "n_valid": 78,
+   "option_radar": null,
+   "option_source": null,
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261019/E30_door_LH_FRT/s_124345",
+   "class_name": "E30_door_LH_FRT",
+   "n_frames": 20,
+   "n_valid": 64,
+   "option_radar": null,
+   "option_source": null,
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261019/E30_door_LH_RR/s_152548",
+   "class_name": "E30_door_LH_RR",
+   "n_frames": 20,
+   "n_valid": 153,
+   "option_radar": 1,
+   "option_source": "user",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261020/E30_E38_door_RH/s_085230",
+   "class_name": "E30_E38_door_RH",
+   "n_frames": 20,
+   "n_valid": 98,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261020/E30_E38_door_RH/s_094552",
+   "class_name": "E30_E38_door_RH",
+   "n_frames": 20,
+   "n_valid": 57,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261020/E30_E38_door_RH/s_101620",
+   "class_name": "E30_E38_door_RH",
+   "n_frames": 20,
+   "n_valid": 57,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261021/E25_door_LH_RR/s_150553",
+   "class_name": "E25_door_LH_RR",
+   "n_frames": 20,
+   "n_valid": 149,
+   "option_radar": 0,
+   "option_source": "auto",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261021/E25_door_LH_RR/s_153921",
+   "class_name": "E25_door_LH_RR",
+   "n_frames": 20,
+   "n_valid": 101,
+   "option_radar": 0,
+   "option_source": "auto",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261021/E30_E38_door_RH/s_104105",
+   "class_name": "E30_E38_door_RH",
+   "n_frames": 20,
+   "n_valid": 110,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261021/E30_E38_door_RH/s_122025",
+   "class_name": "E30_E38_door_RH",
+   "n_frames": 20,
+   "n_valid": 75,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261021/E30_door_LH_FRT/s_131627",
+   "class_name": "E30_door_LH_FRT",
+   "n_frames": 20,
+   "n_valid": 149,
+   "option_radar": null,
+   "option_source": null,
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261021/E30_door_LH_FRT/s_134819",
+   "class_name": "E30_door_LH_FRT",
+   "n_frames": 20,
+   "n_valid": 68,
+   "option_radar": null,
+   "option_source": null,
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261021/E30_door_LH_RR/s_082039",
+   "class_name": "E30_door_LH_RR",
+   "n_frames": 20,
+   "n_valid": 77,
+   "option_radar": 0,
+   "option_source": "user",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261022/E25_door_LH_FRT/s_123253",
+   "class_name": "E25_door_LH_FRT",
+   "n_frames": 20,
+   "n_valid": 135,
+   "option_radar": null,
+   "option_source": null,
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261022/E25_door_LH_RR/s_100956",
+   "class_name": "E25_door_LH_RR",
+   "n_frames": 20,
+   "n_valid": 149,
+   "option_radar": 1,
+   "option_source": "auto",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261022/E25_door_LH_RR/s_153652",
+   "class_name": "E25_door_LH_RR",
+   "n_frames": 19,
+   "n_valid": 153,
+   "option_radar": 0,
+   "option_source": "auto",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261022/E25_door_RH/s_081820",
+   "class_name": "E25_door_RH",
+   "n_frames": 20,
+   "n_valid": 153,
+   "option_radar": 0,
+   "option_source": "auto",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261022/E25_door_RH/s_104305",
+   "class_name": "E25_door_RH",
+   "n_frames": 20,
+   "n_valid": 149,
+   "option_radar": 1,
+   "option_source": "auto",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261023/E25_door_RH/s_074356",
+   "class_name": "E25_door_RH",
+   "n_frames": 20,
+   "n_valid": 149,
+   "option_radar": 0,
+   "option_source": "auto",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261023/E25_door_RH/s_100812",
+   "class_name": "E25_door_RH",
+   "n_frames": 20,
+   "n_valid": 84,
+   "option_radar": 0,
+   "option_source": "auto",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261026/E25_door_LH_FRT/s_100727",
+   "class_name": "E25_door_LH_FRT",
+   "n_frames": 20,
+   "n_valid": 149,
+   "option_radar": null,
+   "option_source": null,
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261026/E25_door_LH_RR/s_134139",
+   "class_name": "E25_door_LH_RR",
+   "n_frames": 20,
+   "n_valid": 139,
+   "option_radar": 0,
+   "option_source": "auto",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261026/E25_door_LH_RR/s_142814",
+   "class_name": "E25_door_LH_RR",
+   "n_frames": 20,
+   "n_valid": 115,
+   "option_radar": 0,
+   "option_source": "auto",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261026/E25_door_RH/s_092253",
+   "class_name": "E25_door_RH",
+   "n_frames": 20,
+   "n_valid": 76,
+   "option_radar": 1,
+   "option_source": "auto",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261026/E25_door_RH/s_145419",
+   "class_name": "E25_door_RH",
+   "n_frames": 18,
+   "n_valid": 48,
+   "option_radar": 0,
+   "option_source": "auto",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261026/E30_E38_door_RH/s_123507",
+   "class_name": "E30_E38_door_RH",
+   "n_frames": 20,
+   "n_valid": 85,
+   "option_radar": 0,
+   "option_source": "auto",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261026/E30_E38_door_RH/s_130308",
+   "class_name": "E30_E38_door_RH",
+   "n_frames": 20,
+   "n_valid": 42,
+   "option_radar": 0,
+   "option_source": "auto",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261026/E30_door_LH_RR/s_105058",
+   "class_name": "E30_door_LH_RR",
+   "n_frames": 20,
+   "n_valid": 61,
+   "option_radar": 0,
+   "option_source": "auto",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261027/E25_door_RH/s_145819",
+   "class_name": "E25_door_RH",
+   "n_frames": 20,
+   "n_valid": 111,
+   "option_radar": 0,
+   "option_source": "auto",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261027/E30_door_LH_FRT/s_081034",
+   "class_name": "E30_door_LH_FRT",
+   "n_frames": 20,
+   "n_valid": 149,
+   "option_radar": null,
+   "option_source": null,
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261028/E30_door_LH_FRT/s_100918",
+   "class_name": "E30_door_LH_FRT",
+   "n_frames": 20,
+   "n_valid": 65,
+   "option_radar": null,
+   "option_source": null,
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261028/E30_door_LH_FRT/s_103554",
+   "class_name": "E30_door_LH_FRT",
+   "n_frames": 20,
+   "n_valid": 149,
+   "option_radar": null,
+   "option_source": null,
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261028/E30_door_LH_RR/s_072947",
+   "class_name": "E30_door_LH_RR",
+   "n_frames": 20,
+   "n_valid": 60,
+   "option_radar": 1,
+   "option_source": "auto",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261028/E38_door_LH_RR/s_123625",
+   "class_name": "E38_door_LH_RR",
+   "n_frames": 20,
+   "n_valid": 68,
+   "option_radar": 0,
+   "option_source": "auto",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261028/E38_door_LH_RR/s_133959",
+   "class_name": "E38_door_LH_RR",
+   "n_frames": 20,
+   "n_valid": 149,
+   "option_radar": 0,
+   "option_source": "auto",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261029/E25_door_LH_FRT/s_123610",
+   "class_name": "E25_door_LH_FRT",
+   "n_frames": 20,
+   "n_valid": 95,
+   "option_radar": null,
+   "option_source": null,
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261029/E25_door_LH_RR/s_130348",
+   "class_name": "E25_door_LH_RR",
+   "n_frames": 20,
+   "n_valid": 149,
+   "option_radar": 0,
+   "option_source": "auto",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261029/E25_door_LH_RR/s_134332",
+   "class_name": "E25_door_LH_RR",
+   "n_frames": 19,
+   "n_valid": 146,
+   "option_radar": 0,
+   "option_source": "auto",
+   "db_split": null,
+   "label_corrected": false
+  },
+  {
+   "session_dir": "20261029/E30_door_LH_FRT/s_075858",
+   "class_name": "E30_door_LH_FRT",
+   "n_frames": 20,
+   "n_valid": 92,
+   "option_radar": null,
+   "option_source": null,
+   "db_split": null,
+   "label_corrected": true
+  },
+  {
+   "session_dir": "20261029/E38_door_LH_FRT/s_095115",
+   "class_name": "E38_door_LH_FRT",
+   "n_frames": 12,
+   "n_valid": 16,
+   "option_radar": null,
+   "option_source": null,
+   "db_split": null,
+   "label_corrected": false
+  }
+ ]
+}
