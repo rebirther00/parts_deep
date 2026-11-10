@@ -1,0 +1,25 @@
+{
+  "created_at": "2026-11-09T17:58:22+09:00",
+  "known": "fold-0 test frames",
+  "unknown": "E23 LH FRT, 6 doors, 120 frames",
+  "hole": {
+    "auroc": 1.0,
+    "n_known": 1478,
+    "n_unknown": 120,
+    "unknown_min_distance_mm": 266.53587379174724
+  },
+  "rgb": {
+    "auroc": 1.0,
+    "n_known": 1478,
+    "n_unknown": 120,
+    "unknown_max_conf": 0.9996249675750732,
+    "known_min_conf": 0.9999980926513672
+  },
+  "rgbe": {
+    "auroc": 0.9946944068561119,
+    "n_known": 1478,
+    "n_unknown": 120,
+    "unknown_max_conf": 0.9998807907104492,
+    "known_min_conf": 0.5067370533943176
+  }
+}

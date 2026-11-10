@@ -112,7 +112,7 @@ def check_source(row, full_hash=False):
 def capture_code():
     """Content-addressed source archive for reproducible future runs."""
     import shutil
-    files=[ROOT/'run.py',*sorted((ROOT/'door8').glob('*.py'))]
+    files=[ROOT/'run.py',*sorted((ROOT/'door8').glob('*.py')),*sorted((ROOT/'scripts').glob('*.py'))]
     hashes={str(p.relative_to(ROOT)):sha256(p) for p in files};version=digest(hashes)
     dst=outpath('code_versions/'+version)
     if not dst.exists():

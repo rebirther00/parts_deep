@@ -1,0 +1,53 @@
+{
+  "per_class": {
+    "E25_door_LH_FRT": {
+      "n_measurable": 0,
+      "n_all": 40,
+      "median_abs_cad_residual_mm": null,
+      "p95_abs_cad_residual_mm": null
+    },
+    "E25_door_LH_RR": {
+      "n_measurable": 0,
+      "n_all": 278,
+      "median_abs_cad_residual_mm": null,
+      "p95_abs_cad_residual_mm": null
+    },
+    "E25_door_RH": {
+      "n_measurable": 0,
+      "n_all": 280,
+      "median_abs_cad_residual_mm": null,
+      "p95_abs_cad_residual_mm": null
+    },
+    "E30_E38_door_RH": {
+      "n_measurable": 2,
+      "n_all": 280,
+      "median_abs_cad_residual_mm": 491.02333232144815,
+      "p95_abs_cad_residual_mm": 620.3272667889997
+    },
+    "E30_door_LH_FRT": {
+      "n_measurable": 0,
+      "n_all": 180,
+      "median_abs_cad_residual_mm": null,
+      "p95_abs_cad_residual_mm": null
+    },
+    "E30_door_LH_RR": {
+      "n_measurable": 1,
+      "n_all": 200,
+      "median_abs_cad_residual_mm": 456.5118648929266,
+      "p95_abs_cad_residual_mm": 456.5118648929266
+    },
+    "E38_door_LH_FRT": {
+      "n_measurable": 0,
+      "n_all": 100,
+      "median_abs_cad_residual_mm": null,
+      "p95_abs_cad_residual_mm": null
+    },
+    "E38_door_LH_RR": {
+      "n_measurable": 2,
+      "n_all": 120,
+      "median_abs_cad_residual_mm": 650.3851073660464,
+      "p95_abs_cad_residual_mm": 650.498677518667
+    }
+  },
+  "scope": "Only measurements surviving requested geometry/pose/range gates; CAD reference is not measured physical ground truth."
+}

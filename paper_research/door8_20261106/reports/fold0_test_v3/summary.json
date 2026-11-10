@@ -1,0 +1,964 @@
+{
+  "protocol": "config/fold0_test_v3_protocol.json",
+  "protocol_sha256": "6ec9ab63122bd8a200b0cb09075ec0d6f4a12a125d8b3db558119c3cea408b80",
+  "started_at": "2026-11-09T10:36:52+09:00",
+  "test_frames": 1478,
+  "test_sessions": 74,
+  "operational_reference_provenance": {
+    "label_files": 134,
+    "train": 107,
+    "holdout": 27,
+    "field_label_files": 16,
+    "field_in_train": 13,
+    "field_label_sessions": [
+      "20260810/E25_door_RH/s_091317 (excluded pre-protocol session)"
+    ],
+    "latest_label_time": "2026-08-26 15:17:07",
+    "overlap_with_snapshot_sessions": [],
+    "weights_file_mtime": "2026-08-26T06:49:19",
+    "db_training_session": "door_pipeline training_sessions id 6: 2026-08-26 15:40:49-15:49:19 KST, 107/27, 80 epochs"
+  },
+  "results": {
+    "holes_field8_f0_s42_v2": {
+      "pixel_test": {
+        "calibration_scales": {
+          "54910212": 1475.3372010525288
+        },
+        "valid_train_sessions": 214,
+        "frame": {
+          "n": 1478,
+          "correct": 1478,
+          "abstained": 0,
+          "coverage": 1.0,
+          "accuracy_all": 1.0,
+          "macro_f1": 1.0
+        },
+        "session": {
+          "n": 74,
+          "correct": 74,
+          "abstained": 0,
+          "coverage": 1.0,
+          "accuracy_all": 1.0,
+          "macro_f1": 1.0,
+          "wilson95_accuracy_all": [
+            0.950650220603614,
+            1.0
+          ]
+        },
+        "per_class_session_recall": {
+          "E25_door_LH_FRT": [
+            2,
+            2
+          ],
+          "E25_door_LH_RR": [
+            14,
+            14
+          ],
+          "E25_door_RH": [
+            14,
+            14
+          ],
+          "E30_E38_door_RH": [
+            14,
+            14
+          ],
+          "E30_door_LH_FRT": [
+            9,
+            9
+          ],
+          "E30_door_LH_RR": [
+            10,
+            10
+          ],
+          "E38_door_LH_FRT": [
+            5,
+            5
+          ],
+          "E38_door_LH_RR": [
+            6,
+            6
+          ]
+        },
+        "reasons": {
+          "ok": 1478
+        },
+        "relative_error": {
+          "n": 1478,
+          "frame_p05": -0.008158948331338012,
+          "frame_median": 0.0014611340808716733,
+          "frame_p95": 0.00824576977822411,
+          "frame_abs_max": 0.011403857472363277,
+          "session_median_min": -0.011403857472363277,
+          "session_median_max": 0.008935058946154317,
+          "session_median_sd": 0.004761678053966919,
+          "sessions": 74
+        },
+        "misclassified_pairs": [],
+        "paired_vs_rgb": {
+          "session_accuracy_difference": 0.0,
+          "group_bootstrap95_difference": [
+            0.0,
+            0.0
+          ],
+          "discordant_a_only_b_only": [
+            0,
+            0
+          ],
+          "exact_mcnemar_p_session": 1.0,
+          "groups": 74,
+          "note": "Bootstrap resamples groups. McNemar assumes independent sessions. No frame-wise significance claim."
+        }
+      },
+      "depth_test": {
+        "calibration_scales": {
+          "54910212": 1.0088638411979045
+        },
+        "valid_train_sessions": 214,
+        "frame": {
+          "n": 1478,
+          "correct": 1268,
+          "abstained": 104,
+          "coverage": 0.9296346414073072,
+          "accuracy_all": 0.857916102841678,
+          "macro_f1": 0.8422336509662527
+        },
+        "session": {
+          "n": 74,
+          "correct": 64,
+          "abstained": 4,
+          "coverage": 0.9459459459459459,
+          "accuracy_all": 0.8648648648648649,
+          "macro_f1": 0.8422619047619048,
+          "wilson95_accuracy_all": [
+            0.7688082144747669,
+            0.9249095140738163
+          ]
+        },
+        "per_class_session_recall": {
+          "E25_door_LH_FRT": [
+            1,
+            2
+          ],
+          "E25_door_LH_RR": [
+            14,
+            14
+          ],
+          "E25_door_RH": [
+            10,
+            14
+          ],
+          "E30_E38_door_RH": [
+            14,
+            14
+          ],
+          "E30_door_LH_FRT": [
+            4,
+            9
+          ],
+          "E30_door_LH_RR": [
+            10,
+            10
+          ],
+          "E38_door_LH_FRT": [
+            5,
+            5
+          ],
+          "E38_door_LH_RR": [
+            6,
+            6
+          ]
+        },
+        "reasons": {
+          "ok": 1374,
+          "cad_distance_reject": 104
+        },
+        "relative_error": {
+          "n": 1374,
+          "frame_p05": -0.013329595742712336,
+          "frame_median": 0.0007430022622882948,
+          "frame_p95": 0.03505790467591293,
+          "frame_abs_max": 0.05731078112774646,
+          "session_median_min": -0.017280472814578507,
+          "session_median_max": 0.04915030721704183,
+          "session_median_sd": 0.014577133838574645,
+          "sessions": 70
+        },
+        "misclassified_pairs": [
+          {
+            "true": "E30_door_LH_FRT",
+            "pred": "E38_door_LH_FRT",
+            "frames": 84
+          },
+          {
+            "true": "E25_door_LH_FRT",
+            "pred": "E30_door_LH_FRT",
+            "frames": 22
+          }
+        ],
+        "paired_vs_rgb": {
+          "session_accuracy_difference": -0.13513513513513514,
+          "group_bootstrap95_difference": [
+            -0.21621621621621623,
+            -0.05405405405405406
+          ],
+          "discordant_a_only_b_only": [
+            0,
+            10
+          ],
+          "exact_mcnemar_p_session": 0.001953125,
+          "groups": 74,
+          "note": "Bootstrap resamples groups. McNemar assumes independent sessions. No frame-wise significance claim."
+        }
+      },
+      "localization_test_role_field8": {
+        "all": {
+          "visible_points": 48,
+          "matched": 48,
+          "pck8": 1.0,
+          "pck16": 1.0,
+          "median_error_px_when_matched": 2.5257872918057007,
+          "p95_error_px_when_matched": 4.228543011226724
+        },
+        "per_channel": {
+          "bolt": {
+            "visible_points": 32,
+            "matched": 32,
+            "pck8": 1.0,
+            "pck16": 1.0,
+            "median_error_px_when_matched": 2.52380588076299,
+            "p95_error_px_when_matched": 3.8225654230936175
+          },
+          "hinge": {
+            "visible_points": 8,
+            "matched": 8,
+            "pck8": 1.0,
+            "pck16": 1.0,
+            "median_error_px_when_matched": 3.2294868133355354,
+            "p95_error_px_when_matched": 4.61570499211195
+          },
+          "latch": {
+            "visible_points": 8,
+            "matched": 8,
+            "pck8": 1.0,
+            "pck16": 1.0,
+            "median_error_px_when_matched": 2.3715662126896717,
+            "p95_error_px_when_matched": 2.871386556467277
+          }
+        },
+        "scope": "Eight field checkpoint-selection VAL images; missing detections fail PCK; not independent test."
+      },
+      "test_max_heat_median_bolt_hinge_latch": [
+        0.997,
+        0.948,
+        0.973
+      ]
+    },
+    "holes_field24_f0_s42_v2": {
+      "pixel_test": {
+        "calibration_scales": {
+          "54910212": 1475.37806057511
+        },
+        "valid_train_sessions": 214,
+        "frame": {
+          "n": 1478,
+          "correct": 1478,
+          "abstained": 0,
+          "coverage": 1.0,
+          "accuracy_all": 1.0,
+          "macro_f1": 1.0
+        },
+        "session": {
+          "n": 74,
+          "correct": 74,
+          "abstained": 0,
+          "coverage": 1.0,
+          "accuracy_all": 1.0,
+          "macro_f1": 1.0,
+          "wilson95_accuracy_all": [
+            0.950650220603614,
+            1.0
+          ]
+        },
+        "per_class_session_recall": {
+          "E25_door_LH_FRT": [
+            2,
+            2
+          ],
+          "E25_door_LH_RR": [
+            14,
+            14
+          ],
+          "E25_door_RH": [
+            14,
+            14
+          ],
+          "E30_E38_door_RH": [
+            14,
+            14
+          ],
+          "E30_door_LH_FRT": [
+            9,
+            9
+          ],
+          "E30_door_LH_RR": [
+            10,
+            10
+          ],
+          "E38_door_LH_FRT": [
+            5,
+            5
+          ],
+          "E38_door_LH_RR": [
+            6,
+            6
+          ]
+        },
+        "reasons": {
+          "ok": 1478
+        },
+        "relative_error": {
+          "n": 1478,
+          "frame_p05": -0.007177569552032748,
+          "frame_median": 0.0001253394603661917,
+          "frame_p95": 0.008228442165356675,
+          "frame_abs_max": 0.011376478262796419,
+          "session_median_min": -0.011376478262796419,
+          "session_median_max": 0.008963001442821916,
+          "session_median_sd": 0.004422625010340156,
+          "sessions": 74
+        },
+        "misclassified_pairs": [],
+        "paired_vs_rgb": {
+          "session_accuracy_difference": 0.0,
+          "group_bootstrap95_difference": [
+            0.0,
+            0.0
+          ],
+          "discordant_a_only_b_only": [
+            0,
+            0
+          ],
+          "exact_mcnemar_p_session": 1.0,
+          "groups": 74,
+          "note": "Bootstrap resamples groups. McNemar assumes independent sessions. No frame-wise significance claim."
+        }
+      },
+      "depth_test": {
+        "calibration_scales": {
+          "54910212": 1.0089675803796083
+        },
+        "valid_train_sessions": 214,
+        "frame": {
+          "n": 1478,
+          "correct": 1284,
+          "abstained": 89,
+          "coverage": 0.9397834912043301,
+          "accuracy_all": 0.8687415426251691,
+          "macro_f1": 0.8487176574361763
+        },
+        "session": {
+          "n": 74,
+          "correct": 65,
+          "abstained": 3,
+          "coverage": 0.9594594594594594,
+          "accuracy_all": 0.8783783783783784,
+          "macro_f1": 0.8480952380952381,
+          "wilson95_accuracy_all": [
+            0.7847341343323124,
+            0.9346768434217738
+          ]
+        },
+        "per_class_session_recall": {
+          "E25_door_LH_FRT": [
+            1,
+            2
+          ],
+          "E25_door_LH_RR": [
+            14,
+            14
+          ],
+          "E25_door_RH": [
+            11,
+            14
+          ],
+          "E30_E38_door_RH": [
+            14,
+            14
+          ],
+          "E30_door_LH_FRT": [
+            4,
+            9
+          ],
+          "E30_door_LH_RR": [
+            10,
+            10
+          ],
+          "E38_door_LH_FRT": [
+            5,
+            5
+          ],
+          "E38_door_LH_RR": [
+            6,
+            6
+          ]
+        },
+        "reasons": {
+          "ok": 1389,
+          "cad_distance_reject": 89
+        },
+        "relative_error": {
+          "n": 1389,
+          "frame_p05": -0.013410028034180566,
+          "frame_median": 0.0014054083671222184,
+          "frame_p95": 0.03485987231131364,
+          "frame_abs_max": 0.05790456571619296,
+          "session_median_min": -0.017551395380590862,
+          "session_median_max": 0.04946485456768546,
+          "session_median_sd": 0.014649763892821696,
+          "sessions": 71
+        },
+        "misclassified_pairs": [
+          {
+            "true": "E30_door_LH_FRT",
+            "pred": "E38_door_LH_FRT",
+            "frames": 81
+          },
+          {
+            "true": "E25_door_LH_FRT",
+            "pred": "E30_door_LH_FRT",
+            "frames": 22
+          },
+          {
+            "true": "E30_E38_door_RH",
+            "pred": "E25_door_LH_RR",
+            "frames": 2
+          }
+        ],
+        "paired_vs_rgb": {
+          "session_accuracy_difference": -0.12162162162162163,
+          "group_bootstrap95_difference": [
+            -0.20270270270270271,
+            -0.05405405405405406
+          ],
+          "discordant_a_only_b_only": [
+            0,
+            9
+          ],
+          "exact_mcnemar_p_session": 0.00390625,
+          "groups": 74,
+          "note": "Bootstrap resamples groups. McNemar assumes independent sessions. No frame-wise significance claim."
+        }
+      },
+      "localization_test_role_field8": {
+        "all": {
+          "visible_points": 48,
+          "matched": 48,
+          "pck8": 1.0,
+          "pck16": 1.0,
+          "median_error_px_when_matched": 2.5257872918057007,
+          "p95_error_px_when_matched": 4.062785827769322
+        },
+        "per_channel": {
+          "bolt": {
+            "visible_points": 32,
+            "matched": 32,
+            "pck8": 1.0,
+            "pck16": 1.0,
+            "median_error_px_when_matched": 2.52380588076299,
+            "p95_error_px_when_matched": 4.05589429543155
+          },
+          "hinge": {
+            "visible_points": 8,
+            "matched": 8,
+            "pck8": 1.0,
+            "pck16": 1.0,
+            "median_error_px_when_matched": 3.189943053370393,
+            "p95_error_px_when_matched": 4.328258040651475
+          },
+          "latch": {
+            "visible_points": 8,
+            "matched": 8,
+            "pck8": 1.0,
+            "pck16": 1.0,
+            "median_error_px_when_matched": 2.3715662126896717,
+            "p95_error_px_when_matched": 2.871386556467277
+          }
+        },
+        "scope": "Eight field checkpoint-selection VAL images; missing detections fail PCK; not independent test."
+      },
+      "test_max_heat_median_bolt_hinge_latch": [
+        0.996,
+        0.974,
+        0.981
+      ]
+    },
+    "operational_20260826": {
+      "pixel_test": {
+        "calibration_scales": {
+          "54910212": 1479.5760975741791
+        },
+        "valid_train_sessions": 214,
+        "frame": {
+          "n": 1478,
+          "correct": 1478,
+          "abstained": 0,
+          "coverage": 1.0,
+          "accuracy_all": 1.0,
+          "macro_f1": 1.0
+        },
+        "session": {
+          "n": 74,
+          "correct": 74,
+          "abstained": 0,
+          "coverage": 1.0,
+          "accuracy_all": 1.0,
+          "macro_f1": 1.0,
+          "wilson95_accuracy_all": [
+            0.950650220603614,
+            1.0
+          ]
+        },
+        "per_class_session_recall": {
+          "E25_door_LH_FRT": [
+            2,
+            2
+          ],
+          "E25_door_LH_RR": [
+            14,
+            14
+          ],
+          "E25_door_RH": [
+            14,
+            14
+          ],
+          "E30_E38_door_RH": [
+            14,
+            14
+          ],
+          "E30_door_LH_FRT": [
+            9,
+            9
+          ],
+          "E30_door_LH_RR": [
+            10,
+            10
+          ],
+          "E38_door_LH_FRT": [
+            5,
+            5
+          ],
+          "E38_door_LH_RR": [
+            6,
+            6
+          ]
+        },
+        "reasons": {
+          "ok": 1478
+        },
+        "relative_error": {
+          "n": 1478,
+          "frame_p05": -0.005357642394076989,
+          "frame_median": 0.0020023939049544914,
+          "frame_p95": 0.011376388061804521,
+          "frame_abs_max": 0.014088823387423899,
+          "session_median_min": -0.008563451396458976,
+          "session_median_max": 0.011833902213230107,
+          "session_median_sd": 0.00469868341540181,
+          "sessions": 74
+        },
+        "misclassified_pairs": [],
+        "paired_vs_rgb": {
+          "session_accuracy_difference": 0.0,
+          "group_bootstrap95_difference": [
+            0.0,
+            0.0
+          ],
+          "discordant_a_only_b_only": [
+            0,
+            0
+          ],
+          "exact_mcnemar_p_session": 1.0,
+          "groups": 74,
+          "note": "Bootstrap resamples groups. McNemar assumes independent sessions. No frame-wise significance claim."
+        }
+      },
+      "pixel_val": {
+        "calibration_scales": {
+          "54910212": 1479.5760975741791
+        },
+        "valid_train_sessions": 214,
+        "frame": {
+          "n": 1455,
+          "correct": 1441,
+          "abstained": 14,
+          "coverage": 0.9903780068728523,
+          "accuracy_all": 0.9903780068728523,
+          "macro_f1": 0.9885686869312202
+        },
+        "session": {
+          "n": 73,
+          "correct": 73,
+          "abstained": 0,
+          "coverage": 1.0,
+          "accuracy_all": 1.0,
+          "macro_f1": 1.0,
+          "wilson95_accuracy_all": [
+            0.9500079920442688,
+            0.9999999999999998
+          ]
+        },
+        "per_class_session_recall": {
+          "E25_door_LH_FRT": [
+            2,
+            2
+          ],
+          "E25_door_LH_RR": [
+            14,
+            14
+          ],
+          "E25_door_RH": [
+            14,
+            14
+          ],
+          "E30_E38_door_RH": [
+            14,
+            14
+          ],
+          "E30_door_LH_FRT": [
+            9,
+            9
+          ],
+          "E30_door_LH_RR": [
+            10,
+            10
+          ],
+          "E38_door_LH_FRT": [
+            4,
+            4
+          ],
+          "E38_door_LH_RR": [
+            6,
+            6
+          ]
+        },
+        "reasons": {
+          "ok": 1441,
+          "missing_corner": 4,
+          "same_side": 8,
+          "invalid_bolt_rectangle": 1,
+          "latch_offset": 1
+        },
+        "relative_error": {
+          "n": 1441,
+          "frame_p05": -0.005309219075579574,
+          "frame_median": 0.002740637060793416,
+          "frame_p95": 0.00936754952536778,
+          "frame_abs_max": 0.013920342505562289,
+          "session_median_min": -0.008484595119416127,
+          "session_median_max": 0.011884097564255569,
+          "session_median_sd": 0.004076681474866212,
+          "sessions": 73
+        },
+        "misclassified_pairs": []
+      },
+      "depth_test": {
+        "calibration_scales": {
+          "54910212": 1.009656246522896
+        },
+        "valid_train_sessions": 214,
+        "frame": {
+          "n": 1478,
+          "correct": 1311,
+          "abstained": 93,
+          "coverage": 0.9370771312584574,
+          "accuracy_all": 0.8870094722598105,
+          "macro_f1": 0.8731923486795826
+        },
+        "session": {
+          "n": 74,
+          "correct": 68,
+          "abstained": 3,
+          "coverage": 0.9594594594594594,
+          "accuracy_all": 0.918918918918919,
+          "macro_f1": 0.9004411764705882,
+          "wilson95_accuracy_all": [
+            0.8341805755644218,
+            0.9623101498061737
+          ]
+        },
+        "per_class_session_recall": {
+          "E25_door_LH_FRT": [
+            1,
+            2
+          ],
+          "E25_door_LH_RR": [
+            14,
+            14
+          ],
+          "E25_door_RH": [
+            11,
+            14
+          ],
+          "E30_E38_door_RH": [
+            14,
+            14
+          ],
+          "E30_door_LH_FRT": [
+            7,
+            9
+          ],
+          "E30_door_LH_RR": [
+            10,
+            10
+          ],
+          "E38_door_LH_FRT": [
+            5,
+            5
+          ],
+          "E38_door_LH_RR": [
+            6,
+            6
+          ]
+        },
+        "reasons": {
+          "ok": 1385,
+          "cad_distance_reject": 93
+        },
+        "relative_error": {
+          "n": 1385,
+          "frame_p05": -0.012710786348142,
+          "frame_median": 0.0021806636182106764,
+          "frame_p95": 0.03149196212399769,
+          "frame_abs_max": 0.0546852363363195,
+          "session_median_min": -0.016552812665971695,
+          "session_median_max": 0.040998837893904794,
+          "session_median_sd": 0.013224805024863345,
+          "sessions": 71
+        },
+        "misclassified_pairs": [
+          {
+            "true": "E30_door_LH_FRT",
+            "pred": "E38_door_LH_FRT",
+            "frames": 52
+          },
+          {
+            "true": "E25_door_LH_FRT",
+            "pred": "E30_door_LH_FRT",
+            "frames": 22
+          }
+        ],
+        "paired_vs_rgb": {
+          "session_accuracy_difference": -0.08108108108108109,
+          "group_bootstrap95_difference": [
+            -0.14864864864864866,
+            -0.02702702702702703
+          ],
+          "discordant_a_only_b_only": [
+            0,
+            6
+          ],
+          "exact_mcnemar_p_session": 0.03125,
+          "groups": 74,
+          "note": "Bootstrap resamples groups. McNemar assumes independent sessions. No frame-wise significance claim."
+        }
+      },
+      "depth_val": {
+        "calibration_scales": {
+          "54910212": 1.009656246522896
+        },
+        "valid_train_sessions": 214,
+        "frame": {
+          "n": 1455,
+          "correct": 1257,
+          "abstained": 116,
+          "coverage": 0.920274914089347,
+          "accuracy_all": 0.8639175257731959,
+          "macro_f1": 0.8814224322694542
+        },
+        "session": {
+          "n": 73,
+          "correct": 66,
+          "abstained": 3,
+          "coverage": 0.958904109589041,
+          "accuracy_all": 0.9041095890410958,
+          "macro_f1": 0.8871139277389277,
+          "wilson95_accuracy_all": [
+            0.815043633098338,
+            0.9527710454031942
+          ]
+        },
+        "per_class_session_recall": {
+          "E25_door_LH_FRT": [
+            1,
+            2
+          ],
+          "E25_door_LH_RR": [
+            14,
+            14
+          ],
+          "E25_door_RH": [
+            12,
+            14
+          ],
+          "E30_E38_door_RH": [
+            12,
+            14
+          ],
+          "E30_door_LH_FRT": [
+            7,
+            9
+          ],
+          "E30_door_LH_RR": [
+            10,
+            10
+          ],
+          "E38_door_LH_FRT": [
+            4,
+            4
+          ],
+          "E38_door_LH_RR": [
+            6,
+            6
+          ]
+        },
+        "reasons": {
+          "ok": 1339,
+          "missing_corner": 4,
+          "same_side": 8,
+          "invalid_bolt_rectangle": 1,
+          "distance_range": 1,
+          "cad_distance_reject": 101,
+          "latch_offset": 1
+        },
+        "relative_error": {
+          "n": 1339,
+          "frame_p05": -0.011851094764439607,
+          "frame_median": 0.0017844195789271655,
+          "frame_p95": 0.036408029116548446,
+          "frame_abs_max": 0.05585205210837407,
+          "session_median_min": -0.0125367830006895,
+          "session_median_max": 0.04199369694855282,
+          "session_median_sd": 0.014079866005835346,
+          "sessions": 71
+        },
+        "misclassified_pairs": [
+          {
+            "true": "E30_door_LH_FRT",
+            "pred": "E38_door_LH_FRT",
+            "frames": 43
+          },
+          {
+            "true": "E30_E38_door_RH",
+            "pred": "E30_door_LH_RR",
+            "frames": 28
+          },
+          {
+            "true": "E25_door_LH_FRT",
+            "pred": "E30_door_LH_FRT",
+            "frames": 10
+          },
+          {
+            "true": "E38_door_LH_FRT",
+            "pred": "E30_door_LH_FRT",
+            "frames": 1
+          }
+        ]
+      },
+      "localization_test_role_field8": {
+        "all": {
+          "visible_points": 48,
+          "matched": 48,
+          "pck8": 1.0,
+          "pck16": 1.0,
+          "median_error_px_when_matched": 2.5257872918057007,
+          "p95_error_px_when_matched": 4.423216366620802
+        },
+        "per_channel": {
+          "bolt": {
+            "visible_points": 32,
+            "matched": 32,
+            "pck8": 1.0,
+            "pck16": 1.0,
+            "median_error_px_when_matched": 2.52380588076299,
+            "p95_error_px_when_matched": 4.258730155407095
+          },
+          "hinge": {
+            "visible_points": 8,
+            "matched": 8,
+            "pck8": 1.0,
+            "pck16": 1.0,
+            "median_error_px_when_matched": 3.2294868133355354,
+            "p95_error_px_when_matched": 4.61570499211195
+          },
+          "latch": {
+            "visible_points": 8,
+            "matched": 8,
+            "pck8": 1.0,
+            "pck16": 1.0,
+            "median_error_px_when_matched": 2.3715662126896717,
+            "p95_error_px_when_matched": 2.871386556467277
+          }
+        },
+        "scope": "Eight field checkpoint-selection VAL images; missing detections fail PCK; not independent test."
+      },
+      "test_max_heat_median_bolt_hinge_latch": [
+        1.003,
+        0.772,
+        0.746
+      ]
+    },
+    "rgb_f0_s42": {
+      "frame": {
+        "n": 1478,
+        "correct": 1478,
+        "coverage": 1.0,
+        "accuracy_all": 1.0,
+        "macro_f1": 1.0
+      },
+      "session": {
+        "n": 74,
+        "correct": 74,
+        "coverage": 1.0,
+        "accuracy_all": 1.0,
+        "macro_f1": 1.0,
+        "wilson95_accuracy_all": [
+          0.950650220603614,
+          1.0
+        ]
+      },
+      "misclassified_sessions": []
+    },
+    "rgbe_f0_s42": {
+      "frame": {
+        "n": 1478,
+        "correct": 1464,
+        "coverage": 1.0,
+        "accuracy_all": 0.9905277401894452,
+        "macro_f1": 0.9688057040998218
+      },
+      "session": {
+        "n": 74,
+        "correct": 73,
+        "coverage": 1.0,
+        "accuracy_all": 0.9864864864864865,
+        "macro_f1": 0.9517543859649122,
+        "wilson95_accuracy_all": [
+          0.9273464348015678,
+          0.9976105365965432
+        ]
+      },
+      "misclassified_sessions": [
+        {
+          "session": "20261022/E25_door_LH_FRT/s_123253",
+          "true": "E25_door_LH_FRT",
+          "pred": "E30_door_LH_FRT"
+        }
+      ]
+    }
+  },
+  "development_train_features_rows_sha256": {
+    "holes_field8_f0_s42_v2": "db754fae86663d701a39e421b4d8ec1eebd9983a4ea5b78b4daf3d0d4a5d913e",
+    "holes_field24_f0_s42_v2": "5a29e7f2a770e94438d76b7f246d0b0629a97adf5041a283263a286f26e14e66"
+  },
+  "finished_at": "2026-11-09T10:45:39+09:00"
+}

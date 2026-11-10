@@ -1,0 +1,25 @@
+{
+  "review_date": "2026-11-10",
+  "completed_at": "2026-11-10T10:46:20+09:00",
+  "original_sha256": {
+    "manuscript/논문초안_v5.pdf": "21e769c13d0d3e424c419a6a1f8afd2ae1ddfe488f3262ccd7edbf999f14c143",
+    "manuscript/논문초안_v5.hwpx": "8d80d0381993fb5904476fe2715fa24efbb3df5f0d4c612531cf6dbb079750cd",
+    "manuscript/논문초안_v5.docx": "a9ba357a8eeb2c32965383c319a8531a1dadfeed01c00583e3cfd4bbed4f9b33",
+    "manuscript/논문초안_v5.md": "9f357801cefccabe9a5d8d2a26000425a6ec94207c7f5703cd2f671263de7ac4",
+    "manuscript/v5_차별성_검토.md": "e43227b0dc8c88c4716bf966a83443b08c12074e7732c44d0069a733bc0568b7",
+    "manuscript/v5_작성확인사항.md": "fe4b6dbd6f0040fcdce20709a2969cc61a6d2b19db780de39a48dabdede65e19"
+  },
+  "original_unchanged": true,
+  "native_hwpx": true,
+  "memos_added": 9,
+  "annotated": "manuscript/논문초안_v5_검토메모_20261110.hwpx",
+  "annotated_sha256": "6aa9d35d05ee09f86408e2427d315e309d2c88a9fa55707d4e0768d1dd933f84",
+  "checks": {
+    "all_original_paragraphs_preserved": 510,
+    "tables": 21,
+    "figures": 4,
+    "image_bytes_unchanged": true,
+    "library_validation_issues": 0
+  },
+  "layout_scope": "Native Hancom rendering and memo UI not checked; companion PDF is a DOCX approximation."
+}

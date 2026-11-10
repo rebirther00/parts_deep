@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <!--ANNOTATION_SESSION-->
+  <title>Door8 · 현장 홀 좌표</title>
+  <link rel="stylesheet" href="/style.css">
+  <script src="/boot.js" defer></script>
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <header><strong>Door8 <span>현장 홀 좌표</span></strong><div id="progress">불러오는 중…</div></header>
+  <div id="startup-error" role="alert" hidden></div>
+  <main>
+    <aside>
+      <label for="author">작업자 이름 또는 식별자</label>
+      <input id="author" maxlength="100" autocomplete="name" placeholder="작업자 입력">
+      <label for="items">영상 선택</label>
+      <select id="items" aria-label="영상 선택"></select>
+      <div id="detail" class="muted"></div>
+      <h1>기준점 6개 표시</h1>
+      <p class="hint">선택한 기준점을 영상에서 클릭하세요.<br>표시 후 다음 점이 선택됩니다.</p>
+      <p class="hint">1~4번은 모두 <strong>래치의 사각 구멍 주변 볼트홀 4개</strong>입니다. 영상에서 이 네 홀의 좌상·우상·좌하·우하를 구분하세요. 5~6번은 별도의 프레임 기준 홀입니다.</p>
+      <div id="points"></div>
+      <div class="pair"><button id="invisible">가려짐 · V</button><button id="clear">선택점 지우기</button></div>
+      <p class="hint">보이지 않는 점은 추측하지 않고 가려짐으로 기록하세요.</p>
+      <div class="pair"><button id="previous">이전</button><button id="next">다음</button></div>
+      <button id="save" class="primary">저장 후 다음 · S</button>
+      <div id="notice" role="status" aria-live="polite"></div>
+    </aside>
+    <section class="viewer">
+      <div class="toolbar"><button id="fit">전체 보기 · F</button><span id="dimensions"></span><span id="dirty"></span></div>
+      <div id="canvas-wrap"><canvas id="canvas" tabindex="0" aria-label="좌클릭으로 기준점을 표시하는 원본 영상"></canvas></div>
+      <footer>좌클릭: 표시 · 휠: 확대 · 우클릭 드래그: 이동 · 1~6: 기준점 선택</footer>
+    </section>
+  </main>
+</body>
+</html>

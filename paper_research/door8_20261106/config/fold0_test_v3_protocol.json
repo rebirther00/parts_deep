@@ -1,0 +1,30 @@
+{
+  "version": "fold0-test-v3-20261109",
+  "stage": "first_opening_of_fold0_TEST_for_field_adapted_models",
+  "registered_at": "2026-11-09 (before any field-adapted or operational-reference feature was extracted from fold-0 TEST frames)",
+  "decided_by": "Author (user), 2026-11-09, after reviewing fold-0 VALIDATION development results",
+  "decisions": {
+    "main_hole_model": "holes_field8_f0_s42_v2 (94 LAB + 8 field training coordinates, checkpoint by 8 field VAL coordinates)",
+    "sensitivity_hole_model": "holes_field24_f0_s42_v2 (94 LAB + 24 field training coordinates)",
+    "not_reported_as_test": "holes_field16_f0_s42_v2 (development only; kept as recorded)",
+    "operational_reference": "Deployed 3-channel hole landmark weights frozen 2026-08-26 15:49 KST (door_pipeline training session #6: 107 train / 27 holdout of 134 human labels = LAB + 16 field frames from session 20260810/E25_door_RH/s_091317). The weights were fixed before the first included field session (2026-08-27) and never trained on any snapshot frame. Only the detector weights are borrowed; peak extraction, geometry gate, train-only calibration and CAD decision are the paper pipeline.",
+    "primary_distance_mode": "pixel",
+    "secondary_distance_mode": "depth",
+    "appearance_comparator": "Existing v1 TEST predictions of rgb_f0_s42 (and rgbe_f0_s42) on the identical 1,478 TEST frames",
+    "zero_field_control": "Existing v1 TEST result of holes_lab_s42 (all abstained)",
+    "target_journal": "Journal of the Korean Society of Manufacturing Technology Engineers (KSMTE)"
+  },
+  "weights_sha256": {
+    "holes_field8_f0_s42_v2": "21059b9d55bb0fa5d1a842f0c15779b25cdda6facc8583e3dd2236c35ff312e2",
+    "holes_field24_f0_s42_v2": "5b6fab37456332a421980c8db2f6868adb10d4f1ecfc82712050739c3c972aff",
+    "operational_20260826": "f38744da8d8d681734b310daae5864aff049613dfc11cf282d07577bcaa107a7"
+  },
+  "rules": [
+    "Thresholds, geometry gate, 30 mm CAD reject and peak threshold 0.15 are unchanged from v1/v2.",
+    "Distance scales are fit on fold-0 TRAIN sessions only, separately for each model and mode.",
+    "TEST frames and the 8 TEST-role field coordinates are used only for evaluation; no retuning after viewing TEST.",
+    "Metrics: frame and session accuracy over all inputs (abstentions in denominator), coverage, macro-F1, per-class recall, Wilson 95% interval for session accuracy, relative distance error (measured/CAD - 1), PCK8 on the 8 TEST-role field coordinates.",
+    "Fold-0 TEST is one fold of a retrospective period already observed in development; it is reported as a held-out fold result, not a prospective blind test.",
+    "Temporal-split and unregistered-class (E23) experiments are separate, later protocols."
+  ]
+}

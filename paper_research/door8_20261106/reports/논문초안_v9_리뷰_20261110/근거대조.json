@@ -1,0 +1,315 @@
+{
+  "original_sha256": {
+    "manuscript/논문초안_v9.hwpx": "32590d1aff96bcb416ded955a89da5ccdeae223c0edc8132c53a73f12e8f4f67",
+    "manuscript/논문초안_v9.pdf": "b93cda88caacca5e79b6a8d49cf5ce413a2e4a70ad2768ea2e0ea5c0af389ac1",
+    "manuscript/논문초안_v9.md": "6da23c4169f4d5ab7b10fc46e4dd8a5c8f07887ea7f1f665cb0f59468fb70136",
+    "manuscript/논문초안_v9.docx": "03671f41985c0ca07af5dd9836ff6e01be9dc6c018acf31cc149d7dd48322ca8",
+    "manuscript/v8_검토답변.md": "db80f7f309da6613c667210c95d23d84151289fa458cfaac74187897d2338a2e",
+    "manuscript/v8_작성확인사항.md": "f5ed6611339a27b6c32a3d66003df08b5cf00597b15aea9ec02f2b396ea1253e",
+    "reports/errata_localization_scope_20261110.json": "5a62d41e738d474c43e7ac5402a0a87974ebf83424a52e84a7fcb7afb7ac5a13"
+  },
+  "research_body_abstract_tables_identical_to_v8": true,
+  "native_hwpx": {
+    "validation_issues": 0,
+    "paragraphs": 569,
+    "top_paragraphs": 121,
+    "tables": 22,
+    "figures": 4,
+    "unchanged_images": true,
+    "body_tables": [
+      {
+        "caption": "Table 1 Door shape classes, CAD distance D, field data, and correct-decision band",
+        "pageBreak": "NONE",
+        "keepWithNext": "1"
+      },
+      {
+        "caption": "Table 2 Compared methods and the supervision each uses (per fold)",
+        "pageBreak": "NONE",
+        "keepWithNext": "1"
+      },
+      {
+        "caption": "Table 3 Effect of field point annotations (fold 0, pixel width). Annotation time is converted from the measured mean of 24.6 s per image (training + selection images); PCK8 H / L: hinge / latch corner holes; frozen ref.: 13 + 3 pre-period field images",
+        "pageBreak": "NONE",
+        "keepWithNext": "1"
+      },
+      {
+        "caption": "Table 4 Five-fold out-of-fold identification (361 doors, 7,104 images)",
+        "pageBreak": "NONE",
+        "keepWithNext": "1"
+      },
+      {
+        "caption": "Table 5 Pixel-width versus depth-plane distance with the same detections: test results and re-judgment of the training (calibration) sessions (five-fold OOF; temporal split in parentheses). Residual statistics use measurable images (pixel 7,087, depth 7,086; depth includes values beyond the 30 mm reject). Five-fold training decisions are 1,083 repeated judgments of the 361 doors; per-fold depth rates are given in the text",
+        "pageBreak": "NONE",
+        "keepWithNext": "1"
+      },
+      {
+        "caption": "Table 6 Temporal split: trained on sessions before October 3, tested on the 133 later doors (2,617 images)",
+        "pageBreak": "NONE",
+        "keepWithNext": "1"
+      },
+      {
+        "caption": "Table 7 Doors rejected when their class is unseen by both methods (fold 0, eight runs) and for the out-of-scope E23 class (eight-class models). Parentheses: smallest distance (mm) to a registered CAD value (hole) or accepting class (CNN)",
+        "pageBreak": "NONE",
+        "keepWithNext": "1"
+      },
+      {
+        "caption": "Table 8 Leave-one-class-out results under three exposure conditions (Section 4.4). Seen: no retraining, CNN output masked; unseen: class removed from all training; unequal: hole detector saw the class. Registered decisions are repeated (518 = 74 × 7; 2,527 = 361 × 7)",
+        "pageBreak": "NONE",
+        "keepWithNext": "1"
+      }
+    ],
+    "body_text_matches_md": true,
+    "author_text_matches_md": true,
+    "abstract_words": 150,
+    "keywords": [
+      "Excavator door",
+      "Part identification",
+      "Hole landmark",
+      "CAD dimension",
+      "Decision margin",
+      "Unregistered class"
+    ],
+    "placeholders": [
+      "【우편번호】"
+    ]
+  },
+  "manifest_and_splits": {
+    "per_class": {
+      "E25_door_LH_FRT": {
+        "doors": 9,
+        "images": 180
+      },
+      "E25_door_LH_RR": {
+        "doors": 70,
+        "images": 1388
+      },
+      "E25_door_RH": {
+        "doors": 68,
+        "images": 1343
+      },
+      "E30_E38_door_RH": {
+        "doors": 70,
+        "images": 1398
+      },
+      "E30_door_LH_FRT": {
+        "doors": 44,
+        "images": 867
+      },
+      "E30_door_LH_RR": {
+        "doors": 50,
+        "images": 984
+      },
+      "E38_door_LH_FRT": {
+        "doors": 21,
+        "images": 410
+      },
+      "E38_door_LH_RR": {
+        "doors": 29,
+        "images": 534
+      }
+    },
+    "frames": 7104,
+    "physical_door_groups": 361,
+    "within_split_group_overlap": 0,
+    "OOF_tests_per_group": 1,
+    "partitions": {
+      "0": {
+        "train": 214,
+        "val": 73,
+        "test": 74
+      },
+      "1": {
+        "train": 215,
+        "val": 73,
+        "test": 73
+      },
+      "2": {
+        "train": 216,
+        "val": 72,
+        "test": 73
+      },
+      "3": {
+        "train": 220,
+        "val": 69,
+        "test": 72
+      },
+      "4": {
+        "train": 218,
+        "val": 74,
+        "test": 69
+      },
+      "temporal": {
+        "train": 193,
+        "val": 35,
+        "test": 133
+      }
+    },
+    "identical_rgb_hashes_across_groups": 0
+  },
+  "current_aggregates": {
+    "cv5": {
+      "hole8": {
+        "session": [
+          361,
+          361
+        ],
+        "session_abstained": 0,
+        "frame": [
+          7087,
+          7104
+        ],
+        "frame_abstained": 17,
+        "macro_f1": 1.0
+      },
+      "hole8_depth": {
+        "session": [
+          332,
+          361
+        ],
+        "session_abstained": 13,
+        "frame": [
+          6367,
+          7104
+        ],
+        "frame_abstained": 406,
+        "macro_f1": 0.917678459050423
+      },
+      "ops": {
+        "session": [
+          361,
+          361
+        ],
+        "session_abstained": 0,
+        "frame": [
+          7083,
+          7104
+        ],
+        "frame_abstained": 21,
+        "macro_f1": 1.0
+      },
+      "rgb": {
+        "session": [
+          360,
+          361
+        ],
+        "session_abstained": 0,
+        "frame": [
+          7084,
+          7104
+        ],
+        "frame_abstained": 0,
+        "macro_f1": 0.9912425644415069
+      },
+      "rgbe": {
+        "session": [
+          359,
+          361
+        ],
+        "session_abstained": 0,
+        "frame": [
+          7070,
+          7104
+        ],
+        "frame_abstained": 0,
+        "macro_f1": 0.9815972222222222
+      },
+      "paired_vs_rgb": {}
+    },
+    "temporal": {
+      "hole": {
+        "session": [
+          133,
+          133
+        ],
+        "session_abstained": 0,
+        "frame": [
+          2616,
+          2617
+        ]
+      },
+      "hole_depth": {
+        "session": [
+          108,
+          133
+        ],
+        "session_abstained": 7,
+        "frame": [
+          2067,
+          2617
+        ]
+      },
+      "ops": {
+        "session": [
+          133,
+          133
+        ],
+        "session_abstained": 0,
+        "frame": [
+          2614,
+          2617
+        ]
+      },
+      "rgb": {
+        "session": [
+          132,
+          133
+        ],
+        "session_abstained": 0,
+        "frame": [
+          2597,
+          2617
+        ]
+      },
+      "rgbe": {
+        "session": [
+          132,
+          133
+        ],
+        "session_abstained": 0,
+        "frame": [
+          2597,
+          2617
+        ]
+      }
+    },
+    "extension_v6_sha256": "efd3517832df41111e77ad7c2dfdfe150e66bd6e8dc5f8b0ad984d4a212aaccd",
+    "extension_v6_protocol_sha256": "823c4a909938f63d46ce47043de3d27da8174838d6719b8f76af9a4add542292"
+  },
+  "prior_full_audits": [
+    "reports/논문초안_v6_리뷰_20261110/근거대조.json",
+    "reports/논문초안_v7_리뷰_20261110/근거대조.json",
+    "reports/논문초안_v8_리뷰_20261110/근거대조.json"
+  ],
+  "prior_outlier_reply_corrected": true,
+  "pdf": {
+    "pages": 14,
+    "draft_header_pages": 14,
+    "placeholders": [
+      "【우편번호】"
+    ],
+    "table_captions_by_page": {
+      "3": [
+        "1"
+      ],
+      "5": [
+        "2"
+      ],
+      "7": [
+        "3",
+        "4"
+      ],
+      "8": [
+        "5"
+      ],
+      "9": [
+        "6"
+      ],
+      "10": [
+        "7"
+      ],
+      "11": [
+        "8"
+      ]
+    }
+  }
+}

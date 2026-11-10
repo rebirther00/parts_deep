@@ -1,0 +1,112 @@
+{
+  "protocol_sha256": "d1765f843e0ee5e735d1cf5e21efa64e4004a99f6e300aac9493eb99ec431a5e",
+  "frames": 120,
+  "sessions": 6,
+  "results": {
+    "holes_field8_f0": {
+      "unregistered": {
+        "frame_pred": {
+          "None": 120
+        },
+        "frame_reason": {
+          "cad_distance_reject": 120
+        },
+        "session_pred": {
+          "None": 6
+        },
+        "measured_D_median": 453.86167248968485
+      },
+      "registered": {
+        "frame_pred": {
+          "E23_door_LH_FRT": 120
+        },
+        "frame_reason": {
+          "ok": 120
+        },
+        "session_pred": {
+          "E23_door_LH_FRT": 6
+        },
+        "measured_D_median": 453.86167248968485
+      },
+      "scale": {
+        "54910212": 1475.3372010525288
+      }
+    },
+    "operational_20260826": {
+      "unregistered": {
+        "frame_pred": {
+          "None": 120
+        },
+        "frame_reason": {
+          "cad_distance_reject": 120
+        },
+        "session_pred": {
+          "None": 6
+        },
+        "measured_D_median": 451.5528906414719
+      },
+      "registered": {
+        "frame_pred": {
+          "E23_door_LH_FRT": 120
+        },
+        "frame_reason": {
+          "ok": 120
+        },
+        "session_pred": {
+          "E23_door_LH_FRT": 6
+        },
+        "measured_D_median": 451.5528906414719
+      },
+      "scale": {
+        "54910212": 1479.5760975741791
+      }
+    },
+    "rgb_f0_s42": {
+      "threshold": 0.9999998807907104,
+      "closed_set": {
+        "frame_pred": {
+          "E25_door_LH_FRT": 119,
+          "E30_door_LH_FRT": 1
+        },
+        "session_pred": {
+          "E25_door_LH_FRT": 6
+        }
+      },
+      "thresholded": {
+        "frame_pred": {
+          "None": 120
+        },
+        "session_pred": {
+          "None": 6
+        }
+      },
+      "confidence_median": 0.9874910414218903,
+      "confidence_min": 0.622042179107666
+    },
+    "rgbe_f0_s42": {
+      "threshold": 0.999992847442627,
+      "closed_set": {
+        "frame_pred": {
+          "E30_door_LH_FRT": 42,
+          "E38_door_LH_FRT": 18,
+          "E25_door_LH_FRT": 60
+        },
+        "session_pred": {
+          "E30_door_LH_FRT": 3,
+          "E25_door_LH_FRT": 3
+        }
+      },
+      "thresholded": {
+        "frame_pred": {
+          "None": 120
+        },
+        "session_pred": {
+          "None": 6
+        }
+      },
+      "confidence_median": 0.8114298582077026,
+      "confidence_min": 0.3472229540348053
+    }
+  },
+  "finished_at": "2026-11-09T11:19:11+09:00"
+}

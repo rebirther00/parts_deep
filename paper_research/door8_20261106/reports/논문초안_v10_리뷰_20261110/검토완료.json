@@ -1,0 +1,51 @@
+{
+  "review_date": "2026-11-10",
+  "completed_at": "2026-11-10T16:46:08+09:00",
+  "original_sha256": {
+    "manuscript/논문초안_v10.hwpx": "32b69147bc051944747031c1283dd0483266d95b3956810ef774b3143dbd391d",
+    "manuscript/논문초안_v10.pdf": "629eb17b344fad32422d6471fe4d89d59b108382980397d5d95bfe1d8d86d31f",
+    "manuscript/논문초안_v10.md": "e60404865d2f028bd1898efaa7a148c7d8015d72ee43f2a4ce48c240adb2cde3",
+    "manuscript/논문초안_v10.docx": "21bd634e273476578ca74edbe5651b81e4738b0f33a5f61e4d256167d30be4e5",
+    "manuscript/v10_작성확인사항.md": "ab3a927a96e4c53dff569e57173ff790775c2a82f2630bd0477fb06a45d1b4cb",
+    "figures/v10c_fig1_method.png": "824c30b3f87a7385948d0f063b1aff69fe52508dde27bd7b0ff0617c0dd3c8d9",
+    "figures/v10c_fig1_method.pdf": "98cd0fca5b5a49d6fa8a25c47afe989d9b028b48b75028af3e23c4eaeea96da4",
+    "scripts/build_manuscript_v10_hwpx.py": "1c9d82247c5de45c01178d71f8152013bbe26ae19e2aef67a26a28d3a32faa4d",
+    "scripts/build_manuscript_v10_docx.py": "450c7797a12aeee984cb049e1270711898a9e712d7992ab79179b8d9211ae85b",
+    "scripts/make_figure1_v10col.py": "97be5dac80b84976cde123268df2f4273e53f420e736c8cd212775717b0dcf10"
+  },
+  "original_unchanged": true,
+  "native_hwpx": true,
+  "memos_added": 1,
+  "annotated": "manuscript/논문초안_v10_검토메모_20261110.hwpx",
+  "annotated_sha256": "37a4150704b388959e3f92051ea62beb90e45059396ae45cabe20f3f45efb04f",
+  "checks": {
+    "all_original_paragraphs_preserved": 569,
+    "tables": 22,
+    "figures": 4,
+    "image_bytes_unchanged": true,
+    "library_validation_issues": 0
+  },
+  "layout_scope": "Native Hancom rendering and memo UI not checked; companion PDF is a DOCX approximation.",
+  "original_files_hash_verified": 10,
+  "source_pdf_pages_visually_reviewed": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14
+  ],
+  "report_pdf_pages": 3,
+  "v9_required_editorial_fixes_resolved": 2,
+  "new_major_findings": 0,
+  "minor_proofreading_findings": 1,
+  "new_experiments_required": false
+}

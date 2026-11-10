@@ -1,0 +1,18 @@
+{
+  "record_date": "2026-11-09",
+  "source": "User confirmation of the actual field collection process in this conversation",
+  "question_scope": "Whether the 361 included field sessions contain repeated captures of the same physical door",
+  "verbatim_confirmation_ko": "완전히 각각 다른 실물 도어이다. (현장 실제 작업)",
+  "included_sessions": 361,
+  "distinct_physical_doors": 361,
+  "one_physical_door_per_session": true,
+  "same_door_repeated_across_sessions": false,
+  "interpretation": "Under the confirmed collection process, session-disjoint splits are also physical-door-disjoint splits. Multiple frames within a session remain repeated observations of one door.",
+  "remaining_scope_limits": [
+    "The historical collection period was observed during prior development; reorganizing it does not create a previously unseen blind test.",
+    "The current field adaptation comparison uses checkpoint-selection validation data, not final test data.",
+    "Production lot identifiers were not collected; lot-disjoint generalization is not established.",
+    "Cross-site and cross-camera generalization have not been evaluated."
+  ],
+  "preservation": "This new provenance clarification does not modify the frozen v1 snapshot or historical v1 manuscript."
+}

@@ -1,0 +1,86 @@
+{
+  "pixel": {
+    "scale": {
+      "54910212": 1475.2884131777812
+    },
+    "frame": [
+      1413,
+      1414
+    ],
+    "session": [
+      72,
+      72
+    ],
+    "session_abstained": 0,
+    "wilson": [
+      0.9493488274035422,
+      1.0
+    ],
+    "reasons": {
+      "ok": 1413,
+      "missing_corner": 1
+    }
+  },
+  "depth": {
+    "scale": {
+      "54910212": 1.0070315187465078
+    },
+    "frame": [
+      1298,
+      1414
+    ],
+    "session": [
+      67,
+      72
+    ],
+    "session_abstained": 1,
+    "wilson": [
+      0.8475202051632649,
+      0.9699746184342299
+    ],
+    "reasons": {
+      "ok": 1382,
+      "cad_distance_reject": 31,
+      "missing_corner": 1
+    }
+  },
+  "localization_test_role": {
+    "all": {
+      "visible_points": 48,
+      "matched": 48,
+      "pck8": 1.0,
+      "pck16": 1.0,
+      "median_error_px_when_matched": 2.304222322595744,
+      "p95_error_px_when_matched": 4.007956186903095
+    },
+    "per_channel": {
+      "bolt": {
+        "visible_points": 32,
+        "matched": 32,
+        "pck8": 1.0,
+        "pck16": 1.0,
+        "median_error_px_when_matched": 2.564138559365419,
+        "p95_error_px_when_matched": 3.8231908824723573
+      },
+      "hinge": {
+        "visible_points": 8,
+        "matched": 8,
+        "pck8": 1.0,
+        "pck16": 1.0,
+        "median_error_px_when_matched": 2.1922581632370286,
+        "p95_error_px_when_matched": 4.161663060985052
+      },
+      "latch": {
+        "visible_points": 8,
+        "matched": 8,
+        "pck8": 1.0,
+        "pck16": 1.0,
+        "median_error_px_when_matched": 1.3764532207289921,
+        "p95_error_px_when_matched": 3.004494304718813
+      }
+    },
+    "scope": "Eight field checkpoint-selection VAL images; missing detections fail PCK; not independent test."
+  },
+  "fold": "3",
+  "weights_sha256": "b3f9f8923bfbc4a462df79a89c18983323e0a04acff744f5f078561c6fa5d060"
+}

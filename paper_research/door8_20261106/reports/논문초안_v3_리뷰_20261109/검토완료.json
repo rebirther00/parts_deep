@@ -1,0 +1,15 @@
+{
+  "completed_at": "2026-11-09T14:17:28+09:00",
+  "comments_added": 18,
+  "original_unchanged": true,
+  "original_sha256": "469eef388f7f44ab41f16f901d809b88ce5e67cecde90fbf60835952720dc2cf",
+  "annotated_manuscript": "manuscript/논문초안_v3_검토메모.docx",
+  "annotated_sha256": "b3ee6804b16eb3534c9ec9cdda62229282f9165cc395b46d9f9b6ab5bc2a8c25",
+  "report": "reports/논문초안_v3_리뷰_20261109/검토의견.docx",
+  "checks": [
+    "same manuscript paragraphs and table text",
+    "same embedded image bytes",
+    "all comment ranges matched",
+    "original DOCX and Markdown hashes unchanged"
+  ]
+}

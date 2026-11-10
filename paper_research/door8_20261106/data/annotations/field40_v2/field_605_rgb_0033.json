@@ -1,0 +1,58 @@
+{
+  "frame_id": "605:rgb_0033.png",
+  "session_id": 605,
+  "session_dir": "20260917/E30_E38_door_RH/s_133729",
+  "group_id": "20260917/E30_E38_door_RH/s_133729",
+  "class_name": "E30_E38_door_RH",
+  "rgb": "/home/koceti/parts_deep/class_estimation/door_pipeline/datasets_factory_collect/20260917/E30_E38_door_RH/s_133729/rgb_0033.png",
+  "rgb_sha256": "34124c08068f1acc11d84c2279ba99cdc78757e16030d838a3a7c9fdea54c6be",
+  "annotation_id": "field_605_rgb_0033",
+  "snapshot_sha256": "086cc09bbcdcb4a0b30dca920db94db350b8f1a0ec8f67ca2960612cf87bc559",
+  "cv_group": 3,
+  "roles_by_fold": {
+    "0": "train",
+    "1": "train",
+    "2": "val",
+    "3": "test",
+    "4": "train",
+    "temporal": "train"
+  },
+  "points": {
+    "bolt_tl": [
+      772.813,
+      820.635
+    ],
+    "bolt_tr": [
+      635.176,
+      818.672
+    ],
+    "bolt_bl": [
+      771.007,
+      904.247
+    ],
+    "bolt_br": [
+      633.615,
+      902.677
+    ],
+    "corner_hinge": [
+      1482.176,
+      1027.548
+    ],
+    "corner_latch": [
+      548.2,
+      1024.608
+    ]
+  },
+  "visible": {
+    "bolt_tl": true,
+    "bolt_tr": true,
+    "bolt_bl": true,
+    "bolt_br": true,
+    "corner_hinge": true,
+    "corner_latch": true
+  },
+  "annotation_status": "human_verified",
+  "source": "human_manual_field",
+  "annotator": "이민수",
+  "annotation_time": "2026-11-09T09:16:46+09:00"
+}

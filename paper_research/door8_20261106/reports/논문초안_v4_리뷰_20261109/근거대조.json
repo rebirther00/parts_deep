@@ -1,0 +1,185 @@
+{
+  "checked_at": "2026-11-09T14:59:54+09:00",
+  "original_sha256": {
+    "manuscript/논문초안_v4.hwpx": "2949de626c4c8fe2a8cee4c27ef6033f404a11f85ae02dfc2b14b26a4ed27423",
+    "manuscript/논문초안_v4.md": "3fe302341f3ac4b2fb310eb6faab881b62ea2daef9f521c3d3226680e5f46eac",
+    "manuscript/논문초안_v4.docx": "309da5dabb2719e58705d0eb704631ebfbf1a62a3a6f7ce92798bdb04b3d042b",
+    "manuscript/논문초안_v4.pdf": "11ef81f1cb3776ba6ffd56a76ce78ef32f539159dd1c0d1864ac84c35cfa31a2"
+  },
+  "native_hwpx_read": true,
+  "top_level_paragraphs": 101,
+  "tables": 19,
+  "figures": 4,
+  "abstract_words": 148,
+  "range_strings_preserved": [
+    "−1.14%에서 +1.11%",
+    "1,474~1,475 mm",
+    "0.99955~1.0"
+  ],
+  "field_supervision": {
+    "cv": [
+      8,
+      8
+    ],
+    "temporal": [
+      24,
+      3
+    ]
+  },
+  "reproduced_curve_summaries": {
+    "oof": {
+      "Hole (pixel width)": {
+        "method": "Hole (pixel width)",
+        "max_coverage": 0.9976069819819819,
+        "risk_at_max_coverage": 0.0,
+        "coverage_at_zero_risk": 0.9976069819819819,
+        "steps": 526
+      },
+      "RGB CNN": {
+        "method": "RGB CNN",
+        "max_coverage": 1.0,
+        "risk_at_max_coverage": 0.002815315315315315,
+        "coverage_at_zero_risk": 0.506615990990991,
+        "steps": 437
+      },
+      "RGBE CNN": {
+        "method": "RGBE CNN",
+        "max_coverage": 1.0,
+        "risk_at_max_coverage": 0.004786036036036036,
+        "coverage_at_zero_risk": 0.0,
+        "steps": 755
+      }
+    },
+    "temporal": {
+      "Hole (pixel width)": {
+        "method": "Hole (pixel width)",
+        "max_coverage": 0.9996178830722201,
+        "risk_at_max_coverage": 0.0,
+        "coverage_at_zero_risk": 0.9996178830722201,
+        "steps": 119
+      },
+      "RGB CNN": {
+        "method": "RGB CNN",
+        "max_coverage": 1.0,
+        "risk_at_max_coverage": 0.007642338555598013,
+        "coverage_at_zero_risk": 0.757355750859763,
+        "steps": 138
+      },
+      "RGBE CNN": {
+        "method": "RGBE CNN",
+        "max_coverage": 1.0,
+        "risk_at_max_coverage": 0.007642338555598013,
+        "coverage_at_zero_risk": 0.7649980894153611,
+        "steps": 261
+      }
+    }
+  },
+  "validation_thresholds": [
+    {
+      "kind": "rgb",
+      "split": "f0",
+      "threshold": 0.9999998807907104,
+      "achieved_validation_coverage": 0.9601374570446736
+    },
+    {
+      "kind": "rgb",
+      "split": "f1",
+      "threshold": 0.9999237060546875,
+      "achieved_validation_coverage": 0.9500713266761769
+    },
+    {
+      "kind": "rgb",
+      "split": "f2",
+      "threshold": 0.9999994039535522,
+      "achieved_validation_coverage": 0.9504950495049505
+    },
+    {
+      "kind": "rgb",
+      "split": "f3",
+      "threshold": 0.9999988079071045,
+      "achieved_validation_coverage": 0.9549815498154982
+    },
+    {
+      "kind": "rgb",
+      "split": "f4",
+      "threshold": 0.9999898672103882,
+      "achieved_validation_coverage": 0.9506089309878214
+    },
+    {
+      "kind": "rgb",
+      "split": "temporal",
+      "threshold": 0.9999995231628418,
+      "achieved_validation_coverage": 0.9562043795620438
+    },
+    {
+      "kind": "rgbe",
+      "split": "f0",
+      "threshold": 0.999992847442627,
+      "achieved_validation_coverage": 0.9505154639175257
+    },
+    {
+      "kind": "rgbe",
+      "split": "f1",
+      "threshold": 0.9995474219322205,
+      "achieved_validation_coverage": 0.9500713266761769
+    },
+    {
+      "kind": "rgbe",
+      "split": "f2",
+      "threshold": 1.0,
+      "achieved_validation_coverage": 0.9603960396039604
+    },
+    {
+      "kind": "rgbe",
+      "split": "f3",
+      "threshold": 0.9999935626983643,
+      "achieved_validation_coverage": 0.9520295202952029
+    },
+    {
+      "kind": "rgbe",
+      "split": "f4",
+      "threshold": 0.9999991655349731,
+      "achieved_validation_coverage": 0.952638700947226
+    },
+    {
+      "kind": "rgbe",
+      "split": "temporal",
+      "threshold": 0.9999985694885254,
+      "achieved_validation_coverage": 0.9562043795620438
+    }
+  ],
+  "pooled_oof_marker_policy": {
+    "rgb": {
+      "min_accepted_confidence": 0.999923825263977,
+      "max_rejected_confidence": 0.9999997615814209,
+      "reproducible_by_single_raw_threshold": false
+    },
+    "rgbe": {
+      "min_accepted_confidence": 0.9995680451393127,
+      "max_rejected_confidence": 0.9999998807907104,
+      "reproducible_by_single_raw_threshold": false
+    }
+  },
+  "oof_rgb_first_attainable_points": [
+    {
+      "threshold": 1.0,
+      "coverage": 0.506615990990991,
+      "risk": 0.0
+    },
+    {
+      "threshold": 0.9999998807907104,
+      "coverage": 0.5851632882882883,
+      "risk": 0.002646139042578783
+    },
+    {
+      "threshold": 0.9999997615814209,
+      "coverage": 0.6310529279279279,
+      "risk": 0.004461298237787196
+    }
+  ],
+  "risk_definition": "Misclassified accepted frames / all accepted frames; coverage denominator includes abstentions.",
+  "pdf_scope": "Supplied PDF is a LibreOffice rendering of companion DOCX; it is not a native Hancom HWPX rendering.",
+  "agency_source": "https://www.keit.re.kr/",
+  "agency_current_name": "한국산업기술기획평가원",
+  "scientific_scope": "Stored-output review; no new training, prospective data collection, or additional seed evaluation."
+}

@@ -1,0 +1,50 @@
+{
+  "version": "extension-v5-20261109",
+  "registered_at": "2026-11-09, before any model below was trained and before any listed analysis was computed",
+  "requested_by": "Author (user), 2026-11-09: differentiation = decoupling of class-agnostic hole perception from CAD class knowledge + decision-margin reliability; experiments = leave-one-class-out unknown rejection and training-residual reliability prediction",
+  "common": {
+    "snapshot": "v1",
+    "seed": 42,
+    "decision": "Unchanged v1 geometry gate, peak threshold 0.15, 30 mm CAD reject (a past development setting, fixed since v1); pixel width primary; scale median of TRAIN session medians per camera",
+    "session_rule": "majority of judged frames; tie or no judged frame = abstain",
+    "band": "correct-decision band of each class = inside both the midpoint to each neighbouring CAD value and the 30 mm reject boundary (Table 1)"
+  },
+  "loco": {
+    "question": "When one registered class is removed (unregistered), are its doors rejected, including near-dimension siblings 41-50 mm away, and what does each method cost on the other doors?",
+    "classes": ["E25_door_LH_FRT", "E30_door_LH_FRT", "E38_door_LH_FRT", "E25_door_RH", "E25_door_LH_RR", "E30_E38_door_RH", "E30_door_LH_RR", "E38_door_LH_RR"],
+    "primary_split": "fold 0 TEST (74 doors, 1,478 images) for every method",
+    "hole": {
+      "detector": "unchanged holes_field8_f0_s42_v2 (fold 0) and holes_field8_f{k}_s42_v3 (folds 1-4); these detectors saw one field image of class c among their 8 field training images (disclosed; the E23 doors are the evidence for detection on a class never seen in training)",
+      "cad": "registered list = 8 classes minus c",
+      "scale": "pixel scale S refit on the split's TRAIN sessions excluding class c, same rule",
+      "additional": "five-fold OOF (361 doors) as well, since no retraining is needed",
+      "registration": "re-adding CAD c gives back the closed-set decision already reported (fold0_test_v3, extension_v3); not recomputed"
+    },
+    "cnn": {
+      "runs": "rgb_loco_{c}_f0_s42 and rgbe_loco_{c}_f0_s42 for the 8 classes (16 runs)",
+      "training": "Same recipe as rgb_f0_s42/rgbe_f0_s42 (config/protocol.json cnn: 448, Adam 3e-4, max 40 epochs, patience 8, sqrt class weights, ReduceLROnPlateau, checkpoint by VAL session balanced accuracy) on fold-0 TRAIN sessions without class c, selected on fold-0 VAL sessions without class c; 7 outputs",
+      "threshold": "same pre-specified v1 rule: confidence at the 5th percentile of the 7-class model's VAL frame confidences; accept when confidence >= threshold",
+      "registration": "adding class c requires retraining with class-c data; not run"
+    },
+    "metrics": {
+      "primary": "per excluded class c: class-c TEST doors rejected (session abstained) by hole (30 mm) and by CNN (val threshold); known TEST doors (other 7 classes) correct / wrong / abstained under the same rule",
+      "secondary": "frame-level unknown rejection; threshold-free frame AUROC of known vs unknown (CNN: max softmax; hole: minus distance to the nearest registered CAD value, gate-failed frames lowest); closed-set CNN argmax destination of class-c doors",
+      "pooled": "sum over the 8 runs (each fold-0 test door is unknown in exactly one run)"
+    }
+  },
+  "margin": {
+    "question": "Do the TRAIN sessions, already labelled for scale calibration, predict the TEST reliability of each distance representation before deployment?",
+    "splits": ["0", "1", "2", "3", "4", "temporal"],
+    "modes": ["pixel", "depth"],
+    "detectors": "holes_field8_f0_s42_v2, holes_field8_f{k}_s42_v3, holes_field_temporal_s42 (existing features only)",
+    "train_prediction": "apply the unchanged decision (train-fitted scale, 8 CAD values) to the split's TRAIN sessions: predicted door failure rate = (wrong + abstained) / train doors; frame out-of-band rate among measured frames; per-class margin utilisation U_c = max over train doors of (door median residual / band edge on its side)",
+    "test_observation": "existing TEST predictions (reports/fold0_test_v3, reports/extension_v3): observed door failure rate, frame out-of-band rate, per-class U_c",
+    "comparison": "per split and pooled (five folds: sums of train-door decisions and of test-door decisions; temporal separate); Wilson 95% intervals; descriptive agreement only",
+    "disclosure": "TRAIN sessions include the 8 (or 24) field images used to train the detector; S and K are fit on the same TRAIN sessions (one scalar each)"
+  },
+  "rules": [
+    "No threshold, gate, CAD value or scale rule is changed after viewing any output of this protocol.",
+    "All runs and reports use new names; nothing existing is overwritten.",
+    "Seeds other than 42 and a hole detector retrained without class c are not part of this protocol."
+  ]
+}

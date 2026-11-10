@@ -1,0 +1,280 @@
+{
+  "created_at": "2026-11-09T14:12:27+09:00",
+  "manuscript": "manuscript/논문초안_v3.docx",
+  "original_sha256": "469eef388f7f44ab41f16f901d809b88ce5e67cecde90fbf60835952720dc2cf",
+  "original_md_sha256": "2d3150ad3e897d32572842f0c924c1e3b70504b4b6d0a16f47a056ae2bef0a84",
+  "scope": "Review of stored artifacts and code; no retraining or new inference; no full external replication.",
+  "split_checks": [
+    {
+      "fold": "0",
+      "field_training": 8,
+      "field_validation": 8,
+      "test_frames": 1478,
+      "field_training_disjoint_from_test": true,
+      "cnn_training_matches_split": true
+    },
+    {
+      "fold": "1",
+      "field_training": 8,
+      "field_validation": 8,
+      "test_frames": 1455,
+      "field_training_disjoint_from_test": true,
+      "cnn_training_matches_split": true
+    },
+    {
+      "fold": "2",
+      "field_training": 8,
+      "field_validation": 8,
+      "test_frames": 1402,
+      "field_training_disjoint_from_test": true,
+      "cnn_training_matches_split": true
+    },
+    {
+      "fold": "3",
+      "field_training": 8,
+      "field_validation": 8,
+      "test_frames": 1414,
+      "field_training_disjoint_from_test": true,
+      "cnn_training_matches_split": true
+    },
+    {
+      "fold": "4",
+      "field_training": 8,
+      "field_validation": 8,
+      "test_frames": 1355,
+      "field_training_disjoint_from_test": true,
+      "cnn_training_matches_split": true
+    },
+    {
+      "fold": "temporal",
+      "field_training": 24,
+      "field_validation": 3,
+      "test_frames": 2617,
+      "field_training_disjoint_from_test": true,
+      "cnn_training_matches_split": true
+    }
+  ],
+  "oof": {
+    "hole_pixel": {
+      "frame": {
+        "n": 7104,
+        "correct": 7087,
+        "abstained": 17,
+        "coverage": 0.9976069819819819,
+        "accuracy_all": 0.9976069819819819
+      },
+      "session": {
+        "n": 361,
+        "correct": 361,
+        "abstained": 0,
+        "coverage": 1.0,
+        "accuracy_all": 1.0
+      }
+    },
+    "hole_depth": {
+      "frame": {
+        "n": 7104,
+        "correct": 6367,
+        "abstained": 406,
+        "coverage": 0.9428490990990991,
+        "accuracy_all": 0.8962556306306306
+      },
+      "session": {
+        "n": 361,
+        "correct": 332,
+        "abstained": 13,
+        "coverage": 0.96398891966759,
+        "accuracy_all": 0.9196675900277008
+      }
+    },
+    "rgb": {
+      "frame": {
+        "n": 7104,
+        "correct": 7084,
+        "abstained": 0,
+        "coverage": 1.0,
+        "accuracy_all": 0.9971846846846847
+      },
+      "session": {
+        "n": 361,
+        "correct": 360,
+        "abstained": 0,
+        "coverage": 1.0,
+        "accuracy_all": 0.997229916897507
+      }
+    },
+    "rgbe": {
+      "frame": {
+        "n": 7104,
+        "correct": 7070,
+        "abstained": 0,
+        "coverage": 1.0,
+        "accuracy_all": 0.995213963963964
+      },
+      "session": {
+        "n": 361,
+        "correct": 359,
+        "abstained": 0,
+        "coverage": 1.0,
+        "accuracy_all": 0.9944598337950139
+      }
+    }
+  },
+  "temporal": {
+    "hole_pixel": {
+      "frame": {
+        "n": 2617,
+        "correct": 2616,
+        "abstained": 1,
+        "coverage": 0.9996178830722201,
+        "accuracy_all": 0.9996178830722201
+      },
+      "session": {
+        "n": 133,
+        "correct": 133,
+        "abstained": 0,
+        "coverage": 1.0,
+        "accuracy_all": 1.0
+      }
+    },
+    "hole_depth": {
+      "frame": {
+        "n": 2617,
+        "correct": 2067,
+        "abstained": 227,
+        "coverage": 0.9132594573939625,
+        "accuracy_all": 0.7898356897210547
+      },
+      "session": {
+        "n": 133,
+        "correct": 108,
+        "abstained": 7,
+        "coverage": 0.9473684210526315,
+        "accuracy_all": 0.8120300751879699
+      }
+    },
+    "rgb": {
+      "frame": {
+        "n": 2617,
+        "correct": 2597,
+        "abstained": 0,
+        "coverage": 1.0,
+        "accuracy_all": 0.992357661444402
+      },
+      "session": {
+        "n": 133,
+        "correct": 132,
+        "abstained": 0,
+        "coverage": 1.0,
+        "accuracy_all": 0.9924812030075187
+      }
+    },
+    "rgbe": {
+      "frame": {
+        "n": 2617,
+        "correct": 2597,
+        "abstained": 0,
+        "coverage": 1.0,
+        "accuracy_all": 0.992357661444402
+      },
+      "session": {
+        "n": 133,
+        "correct": 132,
+        "abstained": 0,
+        "coverage": 1.0,
+        "accuracy_all": 0.9924812030075187
+      }
+    }
+  },
+  "test_localization": [
+    {
+      "fold": "0",
+      "points": 48,
+      "pck8": 1.0,
+      "scope_metadata": "Eight field checkpoint-selection VAL images; missing detections fail PCK; not independent test."
+    },
+    {
+      "fold": "1",
+      "points": 48,
+      "pck8": 1.0,
+      "scope_metadata": "Eight field checkpoint-selection VAL images; missing detections fail PCK; not independent test."
+    },
+    {
+      "fold": "2",
+      "points": 48,
+      "pck8": 1.0,
+      "scope_metadata": "Eight field checkpoint-selection VAL images; missing detections fail PCK; not independent test."
+    },
+    {
+      "fold": "3",
+      "points": 48,
+      "pck8": 1.0,
+      "scope_metadata": "Eight field checkpoint-selection VAL images; missing detections fail PCK; not independent test."
+    },
+    {
+      "fold": "4",
+      "points": 48,
+      "pck8": 1.0,
+      "scope_metadata": "Eight field checkpoint-selection VAL images; missing detections fail PCK; not independent test."
+    }
+  ],
+  "annotation_time_confirmed_seconds": 983.0,
+  "proportional_train8_minutes": 3.2766666666666664,
+  "proportional_train8_plus_val8_minutes": 6.553333333333333,
+  "depth_error_stats": {
+    "oof": {
+      "frames_measured": 7086,
+      "frames_total": 7104,
+      "p5": -1.289423996201919,
+      "median": -0.01629138540617525,
+      "p95": 4.046413929100895,
+      "min": -2.2907033004793576,
+      "max": 10.08269733224254,
+      "abs_max_mm": 89.3326983636689,
+      "door_median_min": -1.7280472814578507,
+      "door_median_max": 8.238816579166752,
+      "between_door_std": 1.660819668628936,
+      "within_door_std_median": 0.1860669236399778,
+      "doors": 361
+    },
+    "temporal": {
+      "frames_measured": 2616,
+      "frames_total": 2617,
+      "p5": -1.1961667169544028,
+      "median": 0.49390509661296766,
+      "p95": 5.43010076139836,
+      "min": -2.5959550852156843,
+      "max": 10.266219405852684,
+      "abs_max_mm": 90.95870393585483,
+      "door_median_min": -1.602202820609605,
+      "door_median_max": 8.41926466542471,
+      "between_door_std": 2.1061204541368506,
+      "within_door_std_median": 0.23469458922021652,
+      "doors": 133
+    }
+  },
+  "malformed_subscripts": [
+    {
+      "paragraph": 65,
+      "subscript_text": "+1.11%(절대 최대 14.6 mm)였다. 이는 가장 좁은 판정 여유 ±2.22%의 절반 수준이며, 판정 여유를 벗어난 영상은 없었다. 학습 세션만으로 구한 S는 폴드별로 1,474"
+    }
+  ],
+  "lab_only_all_frame_geometry_gates": {
+    "missing_corner": 6349,
+    "latch_offset": 734,
+    "ok": 3,
+    "same_side": 1,
+    "invalid_bolt_rectangle": 17
+  },
+  "illustrative_wilson95": {
+    "six_of_six": [
+      0.6096657120978346,
+      1.0
+    ],
+    "nine_of_nine": [
+      0.7008549515804559,
+      1.0
+    ]
+  },
+  "note": "Correct TEST point inputs were used, but localization scope strings inherit an outdated VAL description. Correct this metadata separately; it is not evidence of split leakage."
+}

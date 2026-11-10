@@ -1,0 +1,25 @@
+{
+  "passed": true,
+  "checks": [
+    "plain_forwarded_url_without_token",
+    "stale_url_token_ignored",
+    "blocked_storage_load_and_save",
+    "connection_failure_visible_at_top",
+    "real_40_image_queue_read_only",
+    "incomplete_save_rejected",
+    "human_name_shortcuts_safe",
+    "original_coordinate_click",
+    "zoom_and_pan_coordinate_mapping",
+    "invisible_point",
+    "save_and_next",
+    "reload_persistence",
+    "edit_existing_label",
+    "no_browser_script_errors"
+  ],
+  "screenshot": "/home/koceti/parts_deep/paper_research/door8_20261106/reports/annotation_web_preview.png",
+  "recorded_at": "2026-11-09T09:00:18+09:00",
+  "synthetic_labels_only": true,
+  "real_saved_labels": 0,
+  "source_image_unchanged": true,
+  "history_verified": true
+}

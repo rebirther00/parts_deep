@@ -1,0 +1,138 @@
+{
+  "scale": {
+    "54910212": 1474.1836219861748
+  },
+  "counts": {
+    "E38_door_LH_FRT": 6,
+    "abstained": 13,
+    "E30_door_LH_FRT": 1
+  },
+  "reasons": {
+    "ok": 7,
+    "missing_corner": 11,
+    "invalid_bolt_rectangle": 2
+  },
+  "predictions": [
+    {
+      "frame_id": "58:rgb_0000.png",
+      "pred": "E38_door_LH_FRT",
+      "measurement": 812.7046947896055,
+      "reason": "ok"
+    },
+    {
+      "frame_id": "58:rgb_0008.png",
+      "pred": "E38_door_LH_FRT",
+      "measurement": 812.7046947896055,
+      "reason": "ok"
+    },
+    {
+      "frame_id": "58:rgb_0016.png",
+      "pred": "E38_door_LH_FRT",
+      "measurement": 812.7046947896055,
+      "reason": "ok"
+    },
+    {
+      "frame_id": "58:rgb_0023.png",
+      "pred": "E38_door_LH_FRT",
+      "measurement": 812.7046947896055,
+      "reason": "ok"
+    },
+    {
+      "frame_id": "58:rgb_0031.png",
+      "pred": "E38_door_LH_FRT",
+      "measurement": 812.7046947896055,
+      "reason": "ok"
+    },
+    {
+      "frame_id": "58:rgb_0039.png",
+      "pred": null,
+      "measurement": null,
+      "reason": "missing_corner"
+    },
+    {
+      "frame_id": "58:rgb_0047.png",
+      "pred": null,
+      "measurement": null,
+      "reason": "missing_corner"
+    },
+    {
+      "frame_id": "58:rgb_0055.png",
+      "pred": null,
+      "measurement": null,
+      "reason": "missing_corner"
+    },
+    {
+      "frame_id": "58:rgb_0062.png",
+      "pred": null,
+      "measurement": null,
+      "reason": "missing_corner"
+    },
+    {
+      "frame_id": "58:rgb_0070.png",
+      "pred": null,
+      "measurement": null,
+      "reason": "missing_corner"
+    },
+    {
+      "frame_id": "58:rgb_0078.png",
+      "pred": null,
+      "measurement": null,
+      "reason": "invalid_bolt_rectangle"
+    },
+    {
+      "frame_id": "58:rgb_0086.png",
+      "pred": null,
+      "measurement": null,
+      "reason": "missing_corner"
+    },
+    {
+      "frame_id": "58:rgb_0093.png",
+      "pred": null,
+      "measurement": null,
+      "reason": "invalid_bolt_rectangle"
+    },
+    {
+      "frame_id": "58:rgb_0101.png",
+      "pred": null,
+      "measurement": null,
+      "reason": "missing_corner"
+    },
+    {
+      "frame_id": "58:rgb_0109.png",
+      "pred": null,
+      "measurement": null,
+      "reason": "missing_corner"
+    },
+    {
+      "frame_id": "58:rgb_0117.png",
+      "pred": "E38_door_LH_FRT",
+      "measurement": 812.7046947896055,
+      "reason": "ok"
+    },
+    {
+      "frame_id": "58:rgb_0125.png",
+      "pred": null,
+      "measurement": null,
+      "reason": "missing_corner"
+    },
+    {
+      "frame_id": "58:rgb_0132.png",
+      "pred": null,
+      "measurement": null,
+      "reason": "missing_corner"
+    },
+    {
+      "frame_id": "58:rgb_0140.png",
+      "pred": "E30_door_LH_FRT",
+      "measurement": 764.1188926450905,
+      "reason": "ok"
+    },
+    {
+      "frame_id": "58:rgb_0148.png",
+      "pred": null,
+      "measurement": null,
+      "reason": "missing_corner"
+    }
+  ],
+  "actual_geometry_function_agrees": true
+}

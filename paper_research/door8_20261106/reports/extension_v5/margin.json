@@ -1,0 +1,676 @@
+{
+  "created_at": "2026-11-09T15:50:45+09:00",
+  "protocol_sha256": "52baa7f2258313dbaea008c7dd3a4845ab51b6127efb723f601326df9dbccad5",
+  "bands": {
+    "E25_door_LH_FRT": [
+      -0.04143646408839779,
+      0.028314917127071824
+    ],
+    "E30_door_LH_FRT": [
+      -0.02679738562091503,
+      0.03071895424836601
+    ],
+    "E38_door_LH_FRT": [
+      -0.02894088669950739,
+      0.03694581280788178
+    ],
+    "E25_door_RH": [
+      -0.033860045146726865,
+      0.033860045146726865
+    ],
+    "E25_door_LH_RR": [
+      -0.02892960462873674,
+      0.024108003857280617
+    ],
+    "E30_E38_door_RH": [
+      -0.022999080036798528,
+      0.027598896044158234
+    ],
+    "E30_door_LH_RR": [
+      -0.025906735751295335,
+      0.025906735751295335
+    ],
+    "E38_door_LH_RR": [
+      -0.022189349112426034,
+      0.022189349112426034
+    ]
+  },
+  "splits": {
+    "0:pixel": {
+      "scale": {
+        "54910212": 1475.3372010525288
+      },
+      "train": {
+        "doors": 214,
+        "failed": 0,
+        "frames_measured": 4169,
+        "frames_out_of_band": 0,
+        "utilisation": {
+          "E25_door_LH_RR": 0.35467112721645216,
+          "E25_door_RH": 0.24830887145869557,
+          "E30_E38_door_RH": 0.2097817789284474,
+          "E30_door_LH_RR": 0.1414811362348991,
+          "E38_door_LH_RR": 0.45198117142759386,
+          "E38_door_LH_FRT": 0.2606192142704339,
+          "E30_door_LH_FRT": 0.21155525423449706,
+          "E25_door_LH_FRT": 0.16847762072236483
+        }
+      },
+      "test": {
+        "doors": 74,
+        "failed": 0,
+        "frames_measured": 1478,
+        "frames_out_of_band": 0,
+        "utilisation": {
+          "E25_door_RH": 0.24830887145869557,
+          "E30_E38_door_RH": 0.49583972289835526,
+          "E38_door_LH_RR": 0.20452510944862168,
+          "E38_door_LH_FRT": 0.2535106851239713,
+          "E25_door_LH_RR": 0.19634607324238185,
+          "E30_door_LH_RR": 0.14288441518247522,
+          "E30_door_LH_FRT": 0.21052326120342316,
+          "E25_door_LH_FRT": 0.11398399651938865
+        }
+      }
+    },
+    "0:depth": {
+      "scale": {
+        "54910212": 1.0088638411979045
+      },
+      "train": {
+        "doors": 214,
+        "failed": 14,
+        "frames_measured": 4169,
+        "frames_out_of_band": 338,
+        "utilisation": {
+          "E25_door_LH_RR": 0.49641111311607783,
+          "E25_door_RH": 2.445976043026274,
+          "E30_E38_door_RH": 1.488529768181741,
+          "E30_door_LH_RR": 0.46637661895631405,
+          "E38_door_LH_RR": 0.5828906363282,
+          "E38_door_LH_FRT": 0.4653744606528152,
+          "E30_door_LH_FRT": 1.700988259175603,
+          "E25_door_LH_FRT": 1.1286431874712823
+        }
+      },
+      "test": {
+        "doors": 74,
+        "failed": 10,
+        "frames_measured": 1478,
+        "frames_out_of_band": 210,
+        "utilisation": {
+          "E25_door_RH": 1.9373577268578746,
+          "E30_E38_door_RH": 0.7513549579778735,
+          "E38_door_LH_RR": 0.6193551234460603,
+          "E38_door_LH_FRT": 0.5596615629908992,
+          "E25_door_LH_RR": 0.4782895117345155,
+          "E30_door_LH_RR": 0.4934675627450025,
+          "E30_door_LH_FRT": 1.5999993625973192,
+          "E25_door_LH_FRT": 1.1144567644182921
+        }
+      }
+    },
+    "1:pixel": {
+      "scale": {
+        "54910212": 1474.7142049471586
+      },
+      "train": {
+        "doors": 215,
+        "failed": 0,
+        "frames_measured": 4246,
+        "frames_out_of_band": 0,
+        "utilisation": {
+          "E25_door_LH_RR": 0.21307811134752236,
+          "E25_door_RH": 0.2595365684369101,
+          "E30_E38_door_RH": 0.5139908034961638,
+          "E30_door_LH_RR": 0.1338093342110916,
+          "E38_door_LH_RR": 0.4708207799496521,
+          "E38_door_LH_FRT": 0.27166620041571604,
+          "E30_door_LH_FRT": 0.19771956324795908,
+          "E25_door_LH_FRT": 0.17812571267396107
+        }
+      },
+      "test": {
+        "doors": 73,
+        "failed": 0,
+        "frames_measured": 1441,
+        "frames_out_of_band": 0,
+        "utilisation": {
+          "E25_door_LH_RR": 0.21133352688947663,
+          "E30_door_LH_FRT": 0.19771956324795908,
+          "E25_door_RH": 0.23573286707686794,
+          "E30_E38_door_RH": 0.22023943567696774,
+          "E38_door_LH_FRT": 0.2791088016036516,
+          "E38_door_LH_RR": 0.06765385695985279,
+          "E30_door_LH_RR": 0.13189750416020884,
+          "E25_door_LH_FRT": 0.10089079211680199
+        }
+      }
+    },
+    "1:depth": {
+      "scale": {
+        "54910212": 1.0084293161179443
+      },
+      "train": {
+        "doors": 215,
+        "failed": 17,
+        "frames_measured": 4246,
+        "frames_out_of_band": 419,
+        "utilisation": {
+          "E25_door_LH_RR": 0.4939494024641798,
+          "E25_door_RH": 2.147610307300527,
+          "E30_E38_door_RH": 0.8565059652836872,
+          "E30_door_LH_RR": 0.5098803266662866,
+          "E38_door_LH_RR": 0.6349154609274097,
+          "E38_door_LH_FRT": 0.6912695944399485,
+          "E30_door_LH_FRT": 1.6346722957194828,
+          "E25_door_LH_FRT": 1.098858904693652
+        }
+      },
+      "test": {
+        "doors": 73,
+        "failed": 7,
+        "frames_measured": 1440,
+        "frames_out_of_band": 192,
+        "utilisation": {
+          "E25_door_LH_RR": 0.4590057161473964,
+          "E30_door_LH_FRT": 1.2657122068318283,
+          "E25_door_RH": 1.8406986596776542,
+          "E30_E38_door_RH": 1.4694008010195028,
+          "E38_door_LH_FRT": 0.7351554903637301,
+          "E38_door_LH_RR": 0.43024571115798665,
+          "E30_door_LH_RR": 0.5302997249231262,
+          "E25_door_LH_FRT": 0.958913855806084
+        }
+      }
+    },
+    "2:pixel": {
+      "scale": {
+        "54910212": 1475.3139687312205
+      },
+      "train": {
+        "doors": 216,
+        "failed": 0,
+        "frames_measured": 4274,
+        "frames_out_of_band": 0,
+        "utilisation": {
+          "E25_door_LH_RR": 0.1991065647258575,
+          "E30_door_LH_FRT": 0.21103930362782214,
+          "E25_door_RH": 0.2547246933290078,
+          "E30_E38_door_RH": 0.49651659990113334,
+          "E30_door_LH_RR": 0.1422743260865721,
+          "E38_door_LH_FRT": 0.2577239618031544,
+          "E38_door_LH_RR": 0.4526837245169891,
+          "E25_door_LH_FRT": 0.11529521842453336
+        }
+      },
+      "test": {
+        "doors": 73,
+        "failed": 0,
+        "frames_measured": 1401,
+        "frames_out_of_band": 0,
+        "utilisation": {
+          "E25_door_RH": 0.2467776737520115,
+          "E38_door_LH_RR": 0.21602219227557057,
+          "E30_E38_door_RH": 0.20492906171463693,
+          "E38_door_LH_FRT": 0.2611592237387882,
+          "E30_door_LH_FRT": 0.20786618241260504,
+          "E25_door_LH_RR": 0.3540123513645603,
+          "E30_door_LH_RR": 0.14032052613327375,
+          "E25_door_LH_FRT": 0.16885499833314382
+        }
+      }
+    },
+    "2:depth": {
+      "scale": {
+        "54910212": 1.0077354091337953
+      },
+      "train": {
+        "doors": 216,
+        "failed": 18,
+        "frames_measured": 4273,
+        "frames_out_of_band": 469,
+        "utilisation": {
+          "E25_door_LH_RR": 0.51819043232484,
+          "E30_door_LH_FRT": 1.5199494737448505,
+          "E25_door_RH": 2.1258104372399282,
+          "E30_E38_door_RH": 1.398385807126448,
+          "E30_door_LH_RR": 0.5554377273919444,
+          "E38_door_LH_FRT": 0.7160248698447815,
+          "E38_door_LH_RR": 0.6690702281615435,
+          "E25_door_LH_FRT": 1.073707453317437
+        }
+      },
+      "test": {
+        "doors": 73,
+        "failed": 4,
+        "frames_measured": 1401,
+        "frames_out_of_band": 101,
+        "utilisation": {
+          "E25_door_RH": 1.5135666372247814,
+          "E38_door_LH_RR": 0.38828287172149584,
+          "E30_E38_door_RH": 1.4452557264804817,
+          "E38_door_LH_FRT": 0.47967099545406694,
+          "E30_door_LH_FRT": 0.8500037354768812,
+          "E25_door_LH_RR": 0.5289483617503671,
+          "E30_door_LH_RR": 0.4561190450591573,
+          "E25_door_LH_FRT": 0.4862670878529059
+        }
+      }
+    },
+    "3:pixel": {
+      "scale": {
+        "54910212": 1475.2884131777812
+      },
+      "train": {
+        "doors": 220,
+        "failed": 0,
+        "frames_measured": 4320,
+        "frames_out_of_band": 0,
+        "utilisation": {
+          "E25_door_LH_RR": 0.3462315656888453,
+          "E30_door_LH_FRT": 0.21047175796047612,
+          "E25_door_RH": 0.24732402336523357,
+          "E30_E38_door_RH": 0.49726116460417763,
+          "E38_door_LH_RR": 0.21679910015141107,
+          "E38_door_LH_FRT": 0.26175323415398327,
+          "E30_door_LH_RR": 0.14160322808107606,
+          "E25_door_LH_FRT": 0.169881332702505
+        }
+      },
+      "test": {
+        "doors": 72,
+        "failed": 0,
+        "frames_measured": 1413,
+        "frames_out_of_band": 0,
+        "utilisation": {
+          "E25_door_LH_RR": 0.19795661969724945,
+          "E30_E38_door_RH": 0.20165725498951295,
+          "E38_door_LH_RR": 0.20809000774566974,
+          "E38_door_LH_FRT": 0.25434781739137124,
+          "E30_door_LH_RR": 0.1393764063877455,
+          "E25_door_LH_FRT": 0.16879829361479023,
+          "E25_door_RH": 0.24813825479241414,
+          "E30_door_LH_FRT": 0.208253126678996
+        }
+      }
+    },
+    "3:depth": {
+      "scale": {
+        "54910212": 1.0070315187465078
+      },
+      "train": {
+        "doors": 220,
+        "failed": 19,
+        "frames_measured": 4319,
+        "frames_out_of_band": 448,
+        "utilisation": {
+          "E25_door_LH_RR": 0.5587785201676346,
+          "E30_door_LH_FRT": 1.537969526826244,
+          "E25_door_RH": 1.8801999108714407,
+          "E30_E38_door_RH": 1.42779098665634,
+          "E38_door_LH_RR": 0.7000813855233757,
+          "E38_door_LH_FRT": 0.6966190125847546,
+          "E30_door_LH_RR": 0.5830686459821959,
+          "E25_door_LH_FRT": 1.0316148804201908
+        }
+      },
+      "test": {
+        "doors": 72,
+        "failed": 5,
+        "frames_measured": 1413,
+        "frames_out_of_band": 115,
+        "utilisation": {
+          "E25_door_LH_RR": 0.530957306295312,
+          "E30_E38_door_RH": 0.6932777684673564,
+          "E38_door_LH_RR": 0.4195588661461403,
+          "E38_door_LH_FRT": 0.40321733932204107,
+          "E30_door_LH_RR": 0.3001128694995427,
+          "E25_door_LH_FRT": 1.0482349592676055,
+          "E25_door_RH": 1.189273120223115,
+          "E30_door_LH_FRT": 1.309259119697029
+        }
+      }
+    },
+    "4:pixel": {
+      "scale": {
+        "54910212": 1474.1836219861748
+      },
+      "train": {
+        "doors": 218,
+        "failed": 0,
+        "frames_measured": 4250,
+        "frames_out_of_band": 1,
+        "utilisation": {
+          "E25_door_LH_RR": 0.3149093836672918,
+          "E30_door_LH_FRT": 0.18593621207190672,
+          "E25_door_RH": 0.2700688991859133,
+          "E30_E38_door_RH": 0.23924299104132993,
+          "E38_door_LH_RR": 0.25038557598190053,
+          "E38_door_LH_FRT": 0.2874328765842136,
+          "E30_door_LH_RR": 0.14749757406297234,
+          "E25_door_LH_FRT": 0.18843747364540267
+        }
+      },
+      "test": {
+        "doors": 69,
+        "failed": 0,
+        "frames_measured": 1354,
+        "frames_out_of_band": 0,
+        "utilisation": {
+          "E25_door_LH_RR": 0.22543808501221332,
+          "E25_door_RH": 0.22502234483645334,
+          "E30_door_LH_RR": 0.1476489685434611,
+          "E30_E38_door_RH": 0.24361514115966418,
+          "E38_door_LH_FRT": 0.28400024665588103,
+          "E30_door_LH_FRT": 0.18593621207190672,
+          "E38_door_LH_RR": 0.48686578438425715,
+          "E25_door_LH_FRT": 0.07354582536677876
+        }
+      }
+    },
+    "4:depth": {
+      "scale": {
+        "54910212": 1.0084607008489332
+      },
+      "train": {
+        "doors": 218,
+        "failed": 17,
+        "frames_measured": 4248,
+        "frames_out_of_band": 436,
+        "utilisation": {
+          "E25_door_LH_RR": 0.5105144249774833,
+          "E30_door_LH_FRT": 1.4796400706955761,
+          "E25_door_RH": 1.8416750945535603,
+          "E30_E38_door_RH": 1.4769828656811448,
+          "E38_door_LH_RR": 0.42885651903355476,
+          "E38_door_LH_FRT": 0.7360207495300946,
+          "E30_door_LH_RR": 0.5291149048441552,
+          "E25_door_LH_FRT": 1.1054105363089615
+        }
+      },
+      "test": {
+        "doors": 69,
+        "failed": 3,
+        "frames_measured": 1354,
+        "frames_out_of_band": 101,
+        "utilisation": {
+          "E25_door_LH_RR": 0.4928889780513747,
+          "E25_door_RH": 2.433197163047247,
+          "E30_door_LH_RR": 0.48161475279519067,
+          "E30_E38_door_RH": 0.8576602897467003,
+          "E38_door_LH_FRT": 0.4639550309604373,
+          "E30_door_LH_FRT": 1.1198105852554099,
+          "E38_door_LH_RR": 0.6010821877264024,
+          "E25_door_LH_FRT": 0.02459315561148195
+        }
+      }
+    },
+    "temporal:pixel": {
+      "scale": {
+        "54910212": 1476.8410632258065
+      },
+      "train": {
+        "doors": 193,
+        "failed": 0,
+        "frames_measured": 3786,
+        "frames_out_of_band": 0,
+        "utilisation": {
+          "E25_door_LH_RR": 0.39731465263887833,
+          "E30_door_LH_FRT": 0.24495349242002515,
+          "E25_door_RH": 0.2786663281390533,
+          "E30_E38_door_RH": 0.4520244834773509,
+          "E30_door_LH_RR": 0.1804205532785711,
+          "E38_door_LH_RR": 0.40650388132666193,
+          "E38_door_LH_FRT": 0.2222247929749536,
+          "E25_door_LH_FRT": 0.1455121886767624
+        }
+      },
+      "test": {
+        "doors": 133,
+        "failed": 0,
+        "frames_measured": 2616,
+        "frames_out_of_band": 0,
+        "utilisation": {
+          "E25_door_LH_RR": 0.11681817474153924,
+          "E25_door_RH": 0.2778681079069042,
+          "E30_E38_door_RH": 0.3628262468228997,
+          "E30_door_LH_RR": 0.18237637560623532,
+          "E30_door_LH_FRT": 0.24392044744279595,
+          "E38_door_LH_FRT": 0.2256636107432475,
+          "E38_door_LH_RR": 0.24887552640000143,
+          "E25_door_LH_FRT": 0.15197119102699813
+        }
+      }
+    },
+    "temporal:depth": {
+      "scale": {
+        "54910212": 1.0101419350797367
+      },
+      "train": {
+        "doors": 193,
+        "failed": 8,
+        "frames_measured": 3786,
+        "frames_out_of_band": 217,
+        "utilisation": {
+          "E25_door_LH_RR": 0.4537384208456584,
+          "E30_door_LH_FRT": 1.1796477423743532,
+          "E25_door_RH": 1.9772268311497916,
+          "E30_E38_door_RH": 0.7132397803661293,
+          "E30_door_LH_RR": 0.4645852820167128,
+          "E38_door_LH_RR": 0.5269523156790926,
+          "E38_door_LH_FRT": 0.779740757501104,
+          "E25_door_LH_FRT": 1.0205214888314151
+        }
+      },
+      "test": {
+        "doors": 133,
+        "failed": 25,
+        "frames_measured": 2616,
+        "frames_out_of_band": 549,
+        "utilisation": {
+          "E25_door_LH_RR": 0.4357344727109937,
+          "E25_door_RH": 2.4864894978554304,
+          "E30_E38_door_RH": 1.5894104560304607,
+          "E30_door_LH_RR": 0.42008806793774034,
+          "E30_door_LH_FRT": 1.7443836667380341,
+          "E38_door_LH_FRT": 0.3894182047893879,
+          "E38_door_LH_RR": 0.5630463980983192,
+          "E25_door_LH_FRT": 1.160610579843587
+        }
+      }
+    }
+  },
+  "five_fold:pixel": {
+    "train": {
+      "doors": 1083,
+      "failed": 0,
+      "rate": 0.0,
+      "wilson": [
+        0.0,
+        0.0035345162714554533
+      ],
+      "frames_measured": 21259,
+      "frames_out_of_band": 1,
+      "frame_rate": 4.7038901171268636e-05,
+      "max_utilisation": 0.5139908034961638,
+      "utilisation": {
+        "E25_door_LH_FRT": 0.18843747364540267,
+        "E25_door_LH_RR": 0.35467112721645216,
+        "E25_door_RH": 0.2700688991859133,
+        "E30_E38_door_RH": 0.5139908034961638,
+        "E30_door_LH_FRT": 0.21155525423449706,
+        "E30_door_LH_RR": 0.14749757406297234,
+        "E38_door_LH_FRT": 0.2874328765842136,
+        "E38_door_LH_RR": 0.4708207799496521
+      }
+    },
+    "test": {
+      "doors": 361,
+      "failed": 0,
+      "rate": 0.0,
+      "wilson": [
+        0.0,
+        0.010529118135617526
+      ],
+      "frames_measured": 7087,
+      "frames_out_of_band": 0,
+      "frame_rate": 0.0,
+      "max_utilisation": 0.49583972289835526,
+      "utilisation": {
+        "E25_door_LH_FRT": 0.16885499833314382,
+        "E25_door_LH_RR": 0.3540123513645603,
+        "E25_door_RH": 0.24830887145869557,
+        "E30_E38_door_RH": 0.49583972289835526,
+        "E30_door_LH_FRT": 0.21052326120342316,
+        "E30_door_LH_RR": 0.1476489685434611,
+        "E38_door_LH_FRT": 0.28400024665588103,
+        "E38_door_LH_RR": 0.48686578438425715
+      }
+    }
+  },
+  "temporal:pixel": {
+    "train": {
+      "doors": 193,
+      "failed": 0,
+      "rate": 0.0,
+      "wilson": [
+        0.0,
+        0.01951549660172641
+      ],
+      "frames_measured": 3786,
+      "frames_out_of_band": 0,
+      "frame_rate": 0.0,
+      "max_utilisation": 0.4520244834773509,
+      "utilisation": {
+        "E25_door_LH_FRT": 0.1455121886767624,
+        "E25_door_LH_RR": 0.39731465263887833,
+        "E25_door_RH": 0.2786663281390533,
+        "E30_E38_door_RH": 0.4520244834773509,
+        "E30_door_LH_FRT": 0.24495349242002515,
+        "E30_door_LH_RR": 0.1804205532785711,
+        "E38_door_LH_FRT": 0.2222247929749536,
+        "E38_door_LH_RR": 0.40650388132666193
+      }
+    },
+    "test": {
+      "doors": 133,
+      "failed": 0,
+      "rate": 0.0,
+      "wilson": [
+        0.0,
+        0.02807233168807166
+      ],
+      "frames_measured": 2616,
+      "frames_out_of_band": 0,
+      "frame_rate": 0.0,
+      "max_utilisation": 0.3628262468228997,
+      "utilisation": {
+        "E25_door_LH_FRT": 0.15197119102699813,
+        "E25_door_LH_RR": 0.11681817474153924,
+        "E25_door_RH": 0.2778681079069042,
+        "E30_E38_door_RH": 0.3628262468228997,
+        "E30_door_LH_FRT": 0.24392044744279595,
+        "E30_door_LH_RR": 0.18237637560623532,
+        "E38_door_LH_FRT": 0.2256636107432475,
+        "E38_door_LH_RR": 0.24887552640000143
+      }
+    }
+  },
+  "five_fold:depth": {
+    "train": {
+      "doors": 1083,
+      "failed": 85,
+      "rate": 0.07848568790397045,
+      "wilson": [
+        0.06391764308882793,
+        0.09603343110862249
+      ],
+      "frames_measured": 21255,
+      "frames_out_of_band": 2110,
+      "frame_rate": 0.09927075982121854,
+      "max_utilisation": 2.445976043026274,
+      "utilisation": {
+        "E25_door_LH_FRT": 1.1286431874712823,
+        "E25_door_LH_RR": 0.5587785201676346,
+        "E25_door_RH": 2.445976043026274,
+        "E30_E38_door_RH": 1.488529768181741,
+        "E30_door_LH_FRT": 1.700988259175603,
+        "E30_door_LH_RR": 0.5830686459821959,
+        "E38_door_LH_FRT": 0.7360207495300946,
+        "E38_door_LH_RR": 0.7000813855233757
+      }
+    },
+    "test": {
+      "doors": 361,
+      "failed": 29,
+      "rate": 0.08033240997229917,
+      "wilson": [
+        0.0565127421761594,
+        0.11298953703462206
+      ],
+      "frames_measured": 7086,
+      "frames_out_of_band": 719,
+      "frame_rate": 0.10146768275472763,
+      "max_utilisation": 2.433197163047247,
+      "utilisation": {
+        "E25_door_LH_FRT": 1.1144567644182921,
+        "E25_door_LH_RR": 0.530957306295312,
+        "E25_door_RH": 2.433197163047247,
+        "E30_E38_door_RH": 1.4694008010195028,
+        "E30_door_LH_FRT": 1.5999993625973192,
+        "E30_door_LH_RR": 0.5302997249231262,
+        "E38_door_LH_FRT": 0.7351554903637301,
+        "E38_door_LH_RR": 0.6193551234460603
+      }
+    }
+  },
+  "temporal:depth": {
+    "train": {
+      "doors": 193,
+      "failed": 8,
+      "rate": 0.04145077720207254,
+      "wilson": [
+        0.021150953290406463,
+        0.0796482327122131
+      ],
+      "frames_measured": 3786,
+      "frames_out_of_band": 217,
+      "frame_rate": 0.05731642894875858,
+      "max_utilisation": 1.9772268311497916,
+      "utilisation": {
+        "E25_door_LH_FRT": 1.0205214888314151,
+        "E25_door_LH_RR": 0.4537384208456584,
+        "E25_door_RH": 1.9772268311497916,
+        "E30_E38_door_RH": 0.7132397803661293,
+        "E30_door_LH_FRT": 1.1796477423743532,
+        "E30_door_LH_RR": 0.4645852820167128,
+        "E38_door_LH_FRT": 0.779740757501104,
+        "E38_door_LH_RR": 0.5269523156790926
+      }
+    },
+    "test": {
+      "doors": 133,
+      "failed": 25,
+      "rate": 0.18796992481203006,
+      "wilson": [
+        0.13068684795147056,
+        0.26277182520725084
+      ],
+      "frames_measured": 2616,
+      "frames_out_of_band": 549,
+      "frame_rate": 0.2098623853211009,
+      "max_utilisation": 2.4864894978554304,
+      "utilisation": {
+        "E25_door_LH_FRT": 1.160610579843587,
+        "E25_door_LH_RR": 0.4357344727109937,
+        "E25_door_RH": 2.4864894978554304,
+        "E30_E38_door_RH": 1.5894104560304607,
+        "E30_door_LH_FRT": 1.7443836667380341,
+        "E30_door_LH_RR": 0.42008806793774034,
+        "E38_door_LH_FRT": 0.3894182047893879,
+        "E38_door_LH_RR": 0.5630463980983192
+      }
+    }
+  }
+}

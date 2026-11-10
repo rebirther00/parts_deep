@@ -1,0 +1,42 @@
+{
+  "version": "extension-v6-20261110",
+  "registered_at": "2026-11-10, before any analysis or model below was computed or trained",
+  "requested_by": "Author (user), 2026-11-10, in response to v5 review R3/R4: compare unregistered-class rejection under EQUAL exposure of the two methods to the removed class, both when both methods saw it in training and when neither did",
+  "common": {
+    "snapshot": "v1",
+    "seed": 42,
+    "classes_and_cad": "snapshot protocol.json (8 classes); registered list in each run = 8 classes minus the removed class c",
+    "hole_decision": "unchanged v1 geometry gate, peak threshold 0.15, nearest registered CAD value, reject when the distance exceeds 30 mm; pixel width only",
+    "cnn_decision": "argmax over the registered outputs; accept when confidence >= threshold; threshold = confidence at index int(0.05 n) of the sorted VAL frame confidences of the same model under the same output set (the v1 rule)",
+    "session_rule": "majority of judged frames; tie or no judged frame = abstain",
+    "metrics": "same as extension_v5 loco_metrics: unregistered doors rejected (session abstained), unregistered frames rejected, registered-door decisions correct / abstained / wrong under the threshold, frame AUROC known vs unknown (CNN: confidence; hole: minus the distance to the nearest registered CAD value, gate-failed frames lowest), closed-set destination of unregistered doors; pooled over the 8 runs; Wilson 95% intervals are descriptive",
+    "primary_split": "fold 0 TEST (74 doors, 1,478 images)"
+  },
+  "seen_condition": {
+    "question": "Both methods were trained with the removed class c. The class is removed from the catalog without any retraining. Are its doors rejected?",
+    "hole": "detector holes_field8_f0_s42_v2 (fold 0) and holes_field8_f{k}_s42_v3 (folds 1-4), existing features; pixel scale S FIXED at the value fit on all 8 classes of the split's TRAIN sessions (as in the main evaluation); CAD list minus c. Nothing is refit.",
+    "cnn": "existing 8-class models rgb_f{k}_s42 and rgbe_f{k}_s42 with stored softmax probabilities; output c masked: p'_j = p_j / sum_{i != c} p_i for j != c; confidence = max_j p'_j; threshold recomputed by the v1 rule from the same model's masked VAL confidences of the frames whose class is not c",
+    "splits": "fold 0 primary; five-fold OOF (361 doors) secondary for both methods",
+    "no_training": true
+  },
+  "unseen_condition": {
+    "question": "Neither method saw the removed class c in any training or model-selection image. Are its doors rejected?",
+    "hole": {
+      "runs": "holes_strict_loco_{c}_f0_s42 for the 8 classes",
+      "training": "same recipe and seed as holes_field8_f0_s42_v2 (HoleNet, 80 epochs, AdamW 1e-4 cosine, batch 4, 1280x768, sigma 2, loss and augmentation unchanged); training images = the 94 LAB train and the 8 fold-0 field train images of holes_field8_f0_s42_v2 with every class-c image removed; checkpoint = minimum heatmap loss on the 8 fold-0 field VAL images minus class c; LAB VAL minus class c monitored only",
+      "evaluation": "features for fold-0 TRAIN and TEST frames; S fit on fold-0 TRAIN sessions without class c (same rule); CAD list minus c",
+      "localization": "PCK8 of the 8 fold-0 TEST-role field coordinates (one per class, including the class-c image) for each run, reported descriptively"
+    },
+    "cnn": "existing 7-class runs {rgb|rgbe}_loco_{c}_f0_s42 (extension_v5, trained and selected without class c); results reused, not recomputed",
+    "splits": "fold 0 only"
+  },
+  "reporting": {
+    "table": "per removed class and pooled: seen condition (hole fixed S vs CNN masked) and unseen condition (strict hole vs 7-class CNN); the v5 run (hole detector that saw c, S refit without c, vs 7-class CNN) is reported as the unequal-exposure condition",
+    "claims": "No claim of superiority beyond the measured conditions; single seed; fold-0 class counts 2-14 doors"
+  },
+  "rules": [
+    "No threshold, gate, CAD value, scale rule, training recipe or metric is changed after viewing any output of this protocol.",
+    "All runs and reports use new names; nothing existing is overwritten (outputs in reports/extension_v6, features/holes_strict_loco_*).",
+    "If a strict run fails for a technical reason it is re-run unchanged and the failure is reported."
+  ]
+}

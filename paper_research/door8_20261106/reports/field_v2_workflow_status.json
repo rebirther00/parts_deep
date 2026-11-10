@@ -1,0 +1,18 @@
+{
+  "started_at": "2026-11-09T09:32:26+09:00",
+  "status": "complete",
+  "scope": "fold0 seed42 TRAIN/VAL only",
+  "budgets": [
+    24,
+    8,
+    16
+  ],
+  "completed": [
+    24,
+    8,
+    16
+  ],
+  "current_budget": 16,
+  "current_stage": "complete",
+  "finished_at": "2026-11-09T10:06:34+09:00"
+}

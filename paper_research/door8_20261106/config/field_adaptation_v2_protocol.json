@@ -1,0 +1,28 @@
+{
+  "version": "field-v2-development-20261109",
+  "stage": "retrospective_train_validation_development_only",
+  "base_snapshot": "v1",
+  "labelset": "field40_20261109_v1",
+  "development_fold": "0",
+  "seeds": [42],
+  "field_train_budgets": [8, 16, 24],
+  "budget_selection_seed": 20261109,
+  "initialization": "fresh_ImageNet1K_V1_for_each_budget",
+  "lab_training_images": 94,
+  "lab_validation_images_monitor_only": 24,
+  "field_validation_images": 8,
+  "checkpoint_selection": "minimum_field_validation_heatmap_loss",
+  "training": {"epochs": 80, "batch_size": 4, "learning_rate": 0.0001, "width": 1280, "height": 768, "stride": 4, "sigma": 2.0, "peak_threshold": 0.15},
+  "sampling": "Uniform image sampling of LAB94 plus the selected field budget; same fourfold augmented dataset repetition as v1.",
+  "zero_field_control": "Existing holes_lab_s42; no field coordinates used for training or checkpoint selection.",
+  "development_evaluation": "Automatic features on fold TRAIN and VAL only; predicted-coordinate scales fit on all TRAIN sessions; evaluate all VAL frames and the 8 manually annotated VAL images.",
+  "rules": [
+    "No TEST images or TEST point coordinates enter development feature extraction, checkpoint selection, or calibration.",
+    "All 40 human annotations are frozen; each fold has its own train/val/test roles.",
+    "Field point budgets exclude the separately reported LAB images, field validation coordinates, and class labels used for calibration.",
+    "Use v1 geometry and peak thresholds unchanged in this first adaptation experiment.",
+    "Existing LAB-only failure is retained. No operational model weights, pseudo coordinates, radar labels, or VLM are used.",
+    "This development comparison is not a new independent test and does not claim method superiority.",
+    "GPU may be shared. Do not use these runtimes as paper latency measurements."
+  ]
+}

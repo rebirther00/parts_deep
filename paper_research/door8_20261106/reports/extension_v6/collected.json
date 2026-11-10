@@ -1,0 +1,1641 @@
+{
+  "created_at": "2026-11-10T12:26:26+09:00",
+  "protocol_sha256": "823c4a909938f63d46ce47043de3d27da8174838d6719b8f76af9a4add542292",
+  "missing_strict": [],
+  "seen": {
+    "per_class": {
+      "E25_door_LH_FRT": {
+        "hole": {
+          "unknown_doors": [
+            2,
+            2
+          ],
+          "accepted_as": {},
+          "known": {
+            "n": 72,
+            "correct": 72,
+            "abstained": 0,
+            "wrong": 0
+          },
+          "auroc": 1.0,
+          "unknown_min_distance_mm": 38.66332807135245
+        },
+        "rgb": {
+          "unknown_doors": [
+            2,
+            2
+          ],
+          "accepted_as": {},
+          "known": {
+            "n": 72,
+            "correct": 68,
+            "abstained": 4,
+            "wrong": 0
+          },
+          "auroc": 1.0,
+          "threshold": 0.9999998798348381
+        },
+        "rgbe": {
+          "unknown_doors": [
+            2,
+            2
+          ],
+          "accepted_as": {},
+          "known": {
+            "n": 72,
+            "correct": 70,
+            "abstained": 2,
+            "wrong": 0
+          },
+          "auroc": 0.997913769123783,
+          "threshold": 0.9999951337747823
+        }
+      },
+      "E25_door_LH_RR": {
+        "hole": {
+          "unknown_doors": [
+            14,
+            14
+          ],
+          "accepted_as": {},
+          "known": {
+            "n": 60,
+            "correct": 60,
+            "abstained": 0,
+            "wrong": 0
+          },
+          "auroc": 1.0,
+          "unknown_min_distance_mm": 48.246619977509226
+        },
+        "rgb": {
+          "unknown_doors": [
+            14,
+            14
+          ],
+          "accepted_as": {},
+          "known": {
+            "n": 60,
+            "correct": 58,
+            "abstained": 2,
+            "wrong": 0
+          },
+          "auroc": 1.0,
+          "threshold": 0.9999998266214699
+        },
+        "rgbe": {
+          "unknown_doors": [
+            14,
+            14
+          ],
+          "accepted_as": {},
+          "known": {
+            "n": 60,
+            "correct": 58,
+            "abstained": 2,
+            "wrong": 0
+          },
+          "auroc": 1.0,
+          "threshold": 0.9999932284216201
+        }
+      },
+      "E25_door_RH": {
+        "hole": {
+          "unknown_doors": [
+            14,
+            14
+          ],
+          "accepted_as": {},
+          "known": {
+            "n": 60,
+            "correct": 60,
+            "abstained": 0,
+            "wrong": 0
+          },
+          "auroc": 1.0,
+          "unknown_min_distance_mm": 66.65019688197651
+        },
+        "rgb": {
+          "unknown_doors": [
+            14,
+            14
+          ],
+          "accepted_as": {},
+          "known": {
+            "n": 60,
+            "correct": 58,
+            "abstained": 2,
+            "wrong": 0
+          },
+          "auroc": 1.0,
+          "threshold": 0.9999998280856219
+        },
+        "rgbe": {
+          "unknown_doors": [
+            14,
+            14
+          ],
+          "accepted_as": {},
+          "known": {
+            "n": 60,
+            "correct": 59,
+            "abstained": 1,
+            "wrong": 0
+          },
+          "auroc": 0.9996750536608633,
+          "threshold": 0.999992401702622
+        }
+      },
+      "E30_E38_door_RH": {
+        "hole": {
+          "unknown_doors": [
+            14,
+            14
+          ],
+          "accepted_as": {},
+          "known": {
+            "n": 60,
+            "correct": 60,
+            "abstained": 0,
+            "wrong": 0
+          },
+          "auroc": 1.0,
+          "unknown_min_distance_mm": 37.60400692754115
+        },
+        "rgb": {
+          "unknown_doors": [
+            14,
+            14
+          ],
+          "accepted_as": {},
+          "known": {
+            "n": 60,
+            "correct": 58,
+            "abstained": 2,
+            "wrong": 0
+          },
+          "auroc": 1.0,
+          "threshold": 0.9999998294281077
+        },
+        "rgbe": {
+          "unknown_doors": [
+            14,
+            14
+          ],
+          "accepted_as": {},
+          "known": {
+            "n": 60,
+            "correct": 59,
+            "abstained": 1,
+            "wrong": 0
+          },
+          "auroc": 0.9999195087049845,
+          "threshold": 0.9999925858636717
+        }
+      },
+      "E30_door_LH_FRT": {
+        "hole": {
+          "unknown_doors": [
+            9,
+            9
+          ],
+          "accepted_as": {},
+          "known": {
+            "n": 65,
+            "correct": 65,
+            "abstained": 0,
+            "wrong": 0
+          },
+          "auroc": 1.0,
+          "unknown_min_distance_mm": 38.408389721099866
+        },
+        "rgb": {
+          "unknown_doors": [
+            9,
+            9
+          ],
+          "accepted_as": {},
+          "known": {
+            "n": 65,
+            "correct": 62,
+            "abstained": 3,
+            "wrong": 0
+          },
+          "auroc": 1.0,
+          "threshold": 0.9999999471931426
+        },
+        "rgbe": {
+          "unknown_doors": [
+            9,
+            9
+          ],
+          "accepted_as": {},
+          "known": {
+            "n": 65,
+            "correct": 61,
+            "abstained": 4,
+            "wrong": 0
+          },
+          "auroc": 1.0,
+          "threshold": 0.9999947749110702
+        }
+      },
+      "E30_door_LH_RR": {
+        "hole": {
+          "unknown_doors": [
+            10,
+            10
+          ],
+          "accepted_as": {},
+          "known": {
+            "n": 64,
+            "correct": 64,
+            "abstained": 0,
+            "wrong": 0
+          },
+          "auroc": 1.0,
+          "unknown_min_distance_mm": 67.55050013107802
+        },
+        "rgb": {
+          "unknown_doors": [
+            10,
+            10
+          ],
+          "accepted_as": {},
+          "known": {
+            "n": 64,
+            "correct": 63,
+            "abstained": 1,
+            "wrong": 0
+          },
+          "auroc": 1.0,
+          "threshold": 0.9999998296795343
+        },
+        "rgbe": {
+          "unknown_doors": [
+            10,
+            10
+          ],
+          "accepted_as": {},
+          "known": {
+            "n": 64,
+            "correct": 60,
+            "abstained": 4,
+            "wrong": 0
+          },
+          "auroc": 1.0,
+          "threshold": 0.9999946682235616
+        }
+      },
+      "E38_door_LH_FRT": {
+        "hole": {
+          "unknown_doors": [
+            5,
+            5
+          ],
+          "accepted_as": {},
+          "known": {
+            "n": 69,
+            "correct": 69,
+            "abstained": 0,
+            "wrong": 0
+          },
+          "auroc": 1.0,
+          "unknown_min_distance_mm": 41.04249889958669
+        },
+        "rgb": {
+          "unknown_doors": [
+            5,
+            5
+          ],
+          "accepted_as": {},
+          "known": {
+            "n": 69,
+            "correct": 67,
+            "abstained": 2,
+            "wrong": 0
+          },
+          "auroc": 1.0,
+          "threshold": 0.9999999270064578
+        },
+        "rgbe": {
+          "unknown_doors": [
+            5,
+            5
+          ],
+          "accepted_as": {},
+          "known": {
+            "n": 69,
+            "correct": 65,
+            "abstained": 4,
+            "wrong": 0
+          },
+          "auroc": 0.9969158200290276,
+          "threshold": 0.9999941398960107
+        }
+      },
+      "E38_door_LH_RR": {
+        "hole": {
+          "unknown_doors": [
+            6,
+            6
+          ],
+          "accepted_as": {},
+          "known": {
+            "n": 68,
+            "correct": 68,
+            "abstained": 0,
+            "wrong": 0
+          },
+          "auroc": 1.0,
+          "unknown_min_distance_mm": 192.6232630518614
+        },
+        "rgb": {
+          "unknown_doors": [
+            6,
+            6
+          ],
+          "accepted_as": {},
+          "known": {
+            "n": 68,
+            "correct": 67,
+            "abstained": 1,
+            "wrong": 0
+          },
+          "auroc": 1.0,
+          "threshold": 0.9999998326263869
+        },
+        "rgbe": {
+          "unknown_doors": [
+            6,
+            6
+          ],
+          "accepted_as": {},
+          "known": {
+            "n": 68,
+            "correct": 65,
+            "abstained": 3,
+            "wrong": 0
+          },
+          "auroc": 1.0,
+          "threshold": 0.999992988413712
+        }
+      }
+    },
+    "pooled": {
+      "hole": {
+        "fold0": {
+          "unknown_doors": [
+            74,
+            74
+          ],
+          "unknown_doors_wilson": [
+            0.950650220603614,
+            1.0
+          ],
+          "unknown_frames": [
+            1478,
+            1478
+          ],
+          "known_door_decisions": {
+            "n": 518,
+            "correct": 518,
+            "abstained": 0,
+            "wrong": 0
+          },
+          "auroc_mean": 1.0,
+          "auroc_min": 1.0
+        },
+        "oof": {
+          "unknown_doors": [
+            361,
+            361
+          ],
+          "unknown_doors_wilson": [
+            0.9894708818643825,
+            1.0
+          ],
+          "unknown_frames": [
+            7104,
+            7104
+          ],
+          "known_door_decisions": {
+            "n": 2527,
+            "correct": 2527,
+            "abstained": 0,
+            "wrong": 0
+          },
+          "auroc_mean": 0.9976142742705214,
+          "auroc_min": 0.9880851063829788
+        }
+      },
+      "rgb": {
+        "fold0": {
+          "unknown_doors": [
+            74,
+            74
+          ],
+          "unknown_doors_wilson": [
+            0.950650220603614,
+            1.0
+          ],
+          "unknown_frames": [
+            1478,
+            1478
+          ],
+          "known_door_decisions": {
+            "n": 518,
+            "correct": 501,
+            "abstained": 17,
+            "wrong": 0
+          },
+          "auroc_mean": 1.0,
+          "auroc_min": 1.0
+        },
+        "oof": {
+          "unknown_doors": [
+            360,
+            361
+          ],
+          "unknown_doors_wilson": [
+            0.9844782038847874,
+            0.9995108448390723
+          ],
+          "unknown_frames": [
+            7084,
+            7104
+          ],
+          "known_door_decisions": {
+            "n": 2527,
+            "correct": 2442,
+            "abstained": 79,
+            "wrong": 6
+          },
+          "auroc_mean": 0.9954579937330716,
+          "auroc_min": 0.8227239353891336
+        }
+      },
+      "rgbe": {
+        "fold0": {
+          "unknown_doors": [
+            74,
+            74
+          ],
+          "unknown_doors_wilson": [
+            0.950650220603614,
+            1.0
+          ],
+          "unknown_frames": [
+            1478,
+            1478
+          ],
+          "known_door_decisions": {
+            "n": 518,
+            "correct": 497,
+            "abstained": 21,
+            "wrong": 0
+          },
+          "auroc_mean": 0.9993030189398322,
+          "auroc_min": 0.9969158200290276
+        },
+        "oof": {
+          "unknown_doors": [
+            360,
+            361
+          ],
+          "unknown_doors_wilson": [
+            0.9844782038847874,
+            0.9995108448390723
+          ],
+          "unknown_frames": [
+            7084,
+            7104
+          ],
+          "known_door_decisions": {
+            "n": 2527,
+            "correct": 2462,
+            "abstained": 59,
+            "wrong": 6
+          },
+          "auroc_mean": 0.9884597514220307,
+          "auroc_min": 0.5440161527165932
+        }
+      }
+    }
+  },
+  "unseen": {
+    "per_class": {
+      "E25_door_LH_FRT": {
+        "hole": {
+          "unknown_doors": [
+            2,
+            2
+          ],
+          "accepted_as": {},
+          "known": {
+            "n": 72,
+            "correct": 72,
+            "abstained": 0,
+            "wrong": 0
+          },
+          "auroc": 1.0,
+          "unknown_min_distance_mm": 38.66332807135245,
+          "best_epoch": 66
+        },
+        "rgb": {
+          "unknown_doors": [
+            0,
+            2
+          ],
+          "accepted_as": {
+            "E30_door_LH_FRT": 2
+          },
+          "known": {
+            "n": 72,
+            "correct": 68,
+            "abstained": 4,
+            "wrong": 0
+          },
+          "auroc": 0.8307197496522949
+        },
+        "rgbe": {
+          "unknown_doors": [
+            0,
+            2
+          ],
+          "accepted_as": {
+            "E30_door_LH_FRT": 2
+          },
+          "known": {
+            "n": 72,
+            "correct": 70,
+            "abstained": 2,
+            "wrong": 0
+          },
+          "auroc": 0.08344923504867872
+        }
+      },
+      "E25_door_LH_RR": {
+        "hole": {
+          "unknown_doors": [
+            14,
+            14
+          ],
+          "accepted_as": {},
+          "known": {
+            "n": 60,
+            "correct": 60,
+            "abstained": 0,
+            "wrong": 0
+          },
+          "auroc": 1.0,
+          "unknown_min_distance_mm": 47.93886608825164,
+          "best_epoch": 66
+        },
+        "rgb": {
+          "unknown_doors": [
+            14,
+            14
+          ],
+          "accepted_as": {},
+          "known": {
+            "n": 60,
+            "correct": 58,
+            "abstained": 2,
+            "wrong": 0
+          },
+          "auroc": 1.0
+        },
+        "rgbe": {
+          "unknown_doors": [
+            14,
+            14
+          ],
+          "accepted_as": {},
+          "known": {
+            "n": 60,
+            "correct": 59,
+            "abstained": 1,
+            "wrong": 0
+          },
+          "auroc": 0.9987200239808154
+        }
+      },
+      "E25_door_RH": {
+        "hole": {
+          "unknown_doors": [
+            14,
+            14
+          ],
+          "accepted_as": {},
+          "known": {
+            "n": 60,
+            "correct": 60,
+            "abstained": 0,
+            "wrong": 0
+          },
+          "auroc": 1.0,
+          "unknown_min_distance_mm": 65.4230534419371,
+          "best_epoch": 66
+        },
+        "rgb": {
+          "unknown_doors": [
+            14,
+            14
+          ],
+          "accepted_as": {},
+          "known": {
+            "n": 60,
+            "correct": 60,
+            "abstained": 0,
+            "wrong": 0
+          },
+          "auroc": 1.0
+        },
+        "rgbe": {
+          "unknown_doors": [
+            14,
+            14
+          ],
+          "accepted_as": {},
+          "known": {
+            "n": 60,
+            "correct": 60,
+            "abstained": 0,
+            "wrong": 0
+          },
+          "auroc": 1.0
+        }
+      },
+      "E30_E38_door_RH": {
+        "hole": {
+          "unknown_doors": [
+            14,
+            14
+          ],
+          "accepted_as": {},
+          "known": {
+            "n": 60,
+            "correct": 60,
+            "abstained": 0,
+            "wrong": 0
+          },
+          "auroc": 1.0,
+          "unknown_min_distance_mm": 37.58243147307758,
+          "best_epoch": 67
+        },
+        "rgb": {
+          "unknown_doors": [
+            0,
+            14
+          ],
+          "accepted_as": {
+            "E25_door_RH": 14
+          },
+          "known": {
+            "n": 60,
+            "correct": 57,
+            "abstained": 3,
+            "wrong": 0
+          },
+          "auroc": 0.4290484140233723
+        },
+        "rgbe": {
+          "unknown_doors": [
+            0,
+            14
+          ],
+          "accepted_as": {
+            "E25_door_RH": 14
+          },
+          "known": {
+            "n": 60,
+            "correct": 60,
+            "abstained": 0,
+            "wrong": 0
+          },
+          "auroc": 0.561106308132602
+        }
+      },
+      "E30_door_LH_FRT": {
+        "hole": {
+          "unknown_doors": [
+            9,
+            9
+          ],
+          "accepted_as": {},
+          "known": {
+            "n": 65,
+            "correct": 65,
+            "abstained": 0,
+            "wrong": 0
+          },
+          "auroc": 1.0,
+          "unknown_min_distance_mm": 38.408389721099866,
+          "best_epoch": 69
+        },
+        "rgb": {
+          "unknown_doors": [
+            9,
+            9
+          ],
+          "accepted_as": {},
+          "known": {
+            "n": 65,
+            "correct": 60,
+            "abstained": 5,
+            "wrong": 0
+          },
+          "auroc": 0.9999935798664612
+        },
+        "rgbe": {
+          "unknown_doors": [
+            9,
+            9
+          ],
+          "accepted_as": {},
+          "known": {
+            "n": 65,
+            "correct": 64,
+            "abstained": 1,
+            "wrong": 0
+          },
+          "auroc": 1.0
+        }
+      },
+      "E30_door_LH_RR": {
+        "hole": {
+          "unknown_doors": [
+            10,
+            10
+          ],
+          "accepted_as": {},
+          "known": {
+            "n": 64,
+            "correct": 64,
+            "abstained": 0,
+            "wrong": 0
+          },
+          "auroc": 1.0,
+          "unknown_min_distance_mm": 67.66682974036144,
+          "best_epoch": 66
+        },
+        "rgb": {
+          "unknown_doors": [
+            10,
+            10
+          ],
+          "accepted_as": {},
+          "known": {
+            "n": 64,
+            "correct": 64,
+            "abstained": 0,
+            "wrong": 0
+          },
+          "auroc": 0.9976232394366197
+        },
+        "rgbe": {
+          "unknown_doors": [
+            10,
+            10
+          ],
+          "accepted_as": {},
+          "known": {
+            "n": 64,
+            "correct": 63,
+            "abstained": 1,
+            "wrong": 0
+          },
+          "auroc": 1.0
+        }
+      },
+      "E38_door_LH_FRT": {
+        "hole": {
+          "unknown_doors": [
+            5,
+            5
+          ],
+          "accepted_as": {},
+          "known": {
+            "n": 69,
+            "correct": 69,
+            "abstained": 0,
+            "wrong": 0
+          },
+          "auroc": 1.0,
+          "unknown_min_distance_mm": 41.242795951228686,
+          "best_epoch": 69
+        },
+        "rgb": {
+          "unknown_doors": [
+            0,
+            5
+          ],
+          "accepted_as": {
+            "E30_door_LH_FRT": 5
+          },
+          "known": {
+            "n": 69,
+            "correct": 69,
+            "abstained": 0,
+            "wrong": 0
+          },
+          "auroc": 0.4869375907111756
+        },
+        "rgbe": {
+          "unknown_doors": [
+            0,
+            5
+          ],
+          "accepted_as": {
+            "E30_door_LH_FRT": 5
+          },
+          "known": {
+            "n": 69,
+            "correct": 66,
+            "abstained": 3,
+            "wrong": 0
+          },
+          "auroc": 0.4161502177068215
+        }
+      },
+      "E38_door_LH_RR": {
+        "hole": {
+          "unknown_doors": [
+            6,
+            6
+          ],
+          "accepted_as": {},
+          "known": {
+            "n": 68,
+            "correct": 68,
+            "abstained": 0,
+            "wrong": 0
+          },
+          "auroc": 1.0,
+          "unknown_min_distance_mm": 192.58072618152232,
+          "best_epoch": 69
+        },
+        "rgb": {
+          "unknown_doors": [
+            0,
+            6
+          ],
+          "accepted_as": {
+            "E30_door_LH_RR": 6
+          },
+          "known": {
+            "n": 68,
+            "correct": 66,
+            "abstained": 2,
+            "wrong": 0
+          },
+          "auroc": 0.631240795287187
+        },
+        "rgbe": {
+          "unknown_doors": [
+            6,
+            6
+          ],
+          "accepted_as": {},
+          "known": {
+            "n": 68,
+            "correct": 67,
+            "abstained": 1,
+            "wrong": 0
+          },
+          "auroc": 0.998005645557192
+        }
+      }
+    },
+    "pooled": {
+      "hole": {
+        "unknown_doors": [
+          74,
+          74
+        ],
+        "unknown_doors_wilson": [
+          0.950650220603614,
+          1.0
+        ],
+        "unknown_frames": [
+          1478,
+          1478
+        ],
+        "known_door_decisions": {
+          "n": 518,
+          "correct": 518,
+          "abstained": 0,
+          "wrong": 0
+        },
+        "auroc_mean": 1.0,
+        "auroc_min": 1.0
+      },
+      "rgb": {
+        "unknown_doors": [
+          47,
+          74
+        ],
+        "unknown_doors_wilson": [
+          0.5213181349836578,
+          0.7356143570713729
+        ],
+        "unknown_frames": [
+          948,
+          1478
+        ],
+        "known_door_decisions": {
+          "n": 518,
+          "correct": 502,
+          "abstained": 16,
+          "wrong": 0
+        },
+        "auroc_mean": 0.7969454211221387,
+        "auroc_min": 0.4290484140233723
+      },
+      "rgbe": {
+        "unknown_doors": [
+          53,
+          74
+        ],
+        "unknown_doors_wilson": [
+          0.6048274583682747,
+          0.8062645289197747
+        ],
+        "unknown_frames": [
+          1070,
+          1478
+        ],
+        "known_door_decisions": {
+          "n": 518,
+          "correct": 509,
+          "abstained": 9,
+          "wrong": 0
+        },
+        "auroc_mean": 0.7571789288032637,
+        "auroc_min": 0.08344923504867872
+      }
+    }
+  },
+  "unequal_v5": {
+    "hole": {
+      "unknown_doors": [
+        74,
+        74
+      ],
+      "unknown_doors_wilson": [
+        0.950650220603614,
+        1.0
+      ],
+      "unknown_frames": [
+        1478,
+        1478
+      ],
+      "known_door_decisions": {
+        "n": 518,
+        "correct": 518,
+        "abstained": 0,
+        "wrong": 0
+      },
+      "auroc_mean": 1.0,
+      "auroc_min": 1.0
+    },
+    "rgb": {
+      "unknown_doors": [
+        47,
+        74
+      ],
+      "unknown_doors_wilson": [
+        0.5213181349836578,
+        0.7356143570713729
+      ],
+      "unknown_frames": [
+        948,
+        1478
+      ],
+      "known_door_decisions": {
+        "n": 518,
+        "correct": 502,
+        "abstained": 16,
+        "wrong": 0
+      },
+      "auroc_mean": 0.7969454211221387,
+      "auroc_min": 0.4290484140233723
+    },
+    "rgbe": {
+      "unknown_doors": [
+        53,
+        74
+      ],
+      "unknown_doors_wilson": [
+        0.6048274583682747,
+        0.8062645289197747
+      ],
+      "unknown_frames": [
+        1070,
+        1478
+      ],
+      "known_door_decisions": {
+        "n": 518,
+        "correct": 509,
+        "abstained": 9,
+        "wrong": 0
+      },
+      "auroc_mean": 0.7571789288032637,
+      "auroc_min": 0.08344923504867872
+    }
+  },
+  "strict_localization": {
+    "E25_door_LH_FRT": {
+      "all": {
+        "visible_points": 48,
+        "matched": 48,
+        "pck8": 1.0,
+        "pck16": 1.0,
+        "median_error_px_when_matched": 2.5436029285434976,
+        "p95_error_px_when_matched": 4.252998955307226
+      },
+      "per_channel": {
+        "bolt": {
+          "visible_points": 32,
+          "matched": 32,
+          "pck8": 1.0,
+          "pck16": 1.0,
+          "median_error_px_when_matched": 2.52380588076299,
+          "p95_error_px_when_matched": 3.8860532934366745
+        },
+        "hinge": {
+          "visible_points": 8,
+          "matched": 8,
+          "pck8": 1.0,
+          "pck16": 1.0,
+          "median_error_px_when_matched": 3.2294868133355354,
+          "p95_error_px_when_matched": 4.61570499211195
+        },
+        "latch": {
+          "visible_points": 8,
+          "matched": 8,
+          "pck8": 1.0,
+          "pck16": 1.0,
+          "median_error_px_when_matched": 2.5067671441325716,
+          "p95_error_px_when_matched": 4.354349225930731
+        }
+      },
+      "excluded_class_points": [
+        {
+          "frame_id": "667:rgb_0027.png",
+          "key": "bolt_tl",
+          "channel": "bolt",
+          "error_px": 3.1080942714145956
+        },
+        {
+          "frame_id": "667:rgb_0027.png",
+          "key": "bolt_tr",
+          "channel": "bolt",
+          "error_px": 2.4256011625987153
+        },
+        {
+          "frame_id": "667:rgb_0027.png",
+          "key": "bolt_bl",
+          "channel": "bolt",
+          "error_px": 3.4122404663212604
+        },
+        {
+          "frame_id": "667:rgb_0027.png",
+          "key": "bolt_br",
+          "channel": "bolt",
+          "error_px": 3.6161540343298664
+        },
+        {
+          "frame_id": "667:rgb_0027.png",
+          "key": "corner_hinge",
+          "channel": "hinge",
+          "error_px": 3.4900259311357917
+        },
+        {
+          "frame_id": "667:rgb_0027.png",
+          "key": "corner_latch",
+          "channel": "latch",
+          "error_px": 1.750891201645592
+        }
+      ]
+    },
+    "E25_door_LH_RR": {
+      "all": {
+        "visible_points": 48,
+        "matched": 48,
+        "pck8": 1.0,
+        "pck16": 1.0,
+        "median_error_px_when_matched": 2.5257872918057007,
+        "p95_error_px_when_matched": 4.228543011226724
+      },
+      "per_channel": {
+        "bolt": {
+          "visible_points": 32,
+          "matched": 32,
+          "pck8": 1.0,
+          "pck16": 1.0,
+          "median_error_px_when_matched": 2.52380588076299,
+          "p95_error_px_when_matched": 3.8225654230936175
+        },
+        "hinge": {
+          "visible_points": 8,
+          "matched": 8,
+          "pck8": 1.0,
+          "pck16": 1.0,
+          "median_error_px_when_matched": 3.2294868133355354,
+          "p95_error_px_when_matched": 4.61570499211195
+        },
+        "latch": {
+          "visible_points": 8,
+          "matched": 8,
+          "pck8": 1.0,
+          "pck16": 1.0,
+          "median_error_px_when_matched": 2.3715662126896717,
+          "p95_error_px_when_matched": 2.871386556467277
+        }
+      },
+      "excluded_class_points": [
+        {
+          "frame_id": "80:rgb_0078.png",
+          "key": "bolt_tl",
+          "channel": "bolt",
+          "error_px": 5.152643787416312
+        },
+        {
+          "frame_id": "80:rgb_0078.png",
+          "key": "bolt_tr",
+          "channel": "bolt",
+          "error_px": 2.984054959279307
+        },
+        {
+          "frame_id": "80:rgb_0078.png",
+          "key": "bolt_bl",
+          "channel": "bolt",
+          "error_px": 3.6111833240642266
+        },
+        {
+          "frame_id": "80:rgb_0078.png",
+          "key": "bolt_br",
+          "channel": "bolt",
+          "error_px": 0.7675258953285878
+        },
+        {
+          "frame_id": "80:rgb_0078.png",
+          "key": "corner_hinge",
+          "channel": "hinge",
+          "error_px": 2.5190007939657817
+        },
+        {
+          "frame_id": "80:rgb_0078.png",
+          "key": "corner_latch",
+          "channel": "latch",
+          "error_px": 2.441621182739043
+        }
+      ]
+    },
+    "E25_door_RH": {
+      "all": {
+        "visible_points": 48,
+        "matched": 48,
+        "pck8": 1.0,
+        "pck16": 1.0,
+        "median_error_px_when_matched": 2.5257872918057007,
+        "p95_error_px_when_matched": 4.252998955307226
+      },
+      "per_channel": {
+        "bolt": {
+          "visible_points": 32,
+          "matched": 32,
+          "pck8": 1.0,
+          "pck16": 1.0,
+          "median_error_px_when_matched": 2.52380588076299,
+          "p95_error_px_when_matched": 4.106289366035357
+        },
+        "hinge": {
+          "visible_points": 8,
+          "matched": 8,
+          "pck8": 1.0,
+          "pck16": 1.0,
+          "median_error_px_when_matched": 3.2294868133355354,
+          "p95_error_px_when_matched": 4.61570499211195
+        },
+        "latch": {
+          "visible_points": 8,
+          "matched": 8,
+          "pck8": 1.0,
+          "pck16": 1.0,
+          "median_error_px_when_matched": 2.3715662126896717,
+          "p95_error_px_when_matched": 2.871386556467277
+        }
+      },
+      "excluded_class_points": [
+        {
+          "frame_id": "45:rgb_0072.png",
+          "key": "bolt_tl",
+          "channel": "bolt",
+          "error_px": 2.33519699383153
+        },
+        {
+          "frame_id": "45:rgb_0072.png",
+          "key": "bolt_tr",
+          "channel": "bolt",
+          "error_px": 0.604020695009741
+        },
+        {
+          "frame_id": "45:rgb_0072.png",
+          "key": "bolt_bl",
+          "channel": "bolt",
+          "error_px": 3.018156556575546
+        },
+        {
+          "frame_id": "45:rgb_0072.png",
+          "key": "bolt_br",
+          "channel": "bolt",
+          "error_px": 3.2451201826743
+        },
+        {
+          "frame_id": "45:rgb_0072.png",
+          "key": "corner_hinge",
+          "channel": "hinge",
+          "error_px": 2.2299562775981814
+        },
+        {
+          "frame_id": "45:rgb_0072.png",
+          "key": "corner_latch",
+          "channel": "latch",
+          "error_px": 2.928101432669312
+        }
+      ]
+    },
+    "E30_E38_door_RH": {
+      "all": {
+        "visible_points": 48,
+        "matched": 48,
+        "pck8": 1.0,
+        "pck16": 1.0,
+        "median_error_px_when_matched": 2.5436029285434976,
+        "p95_error_px_when_matched": 4.120264191224216
+      },
+      "per_channel": {
+        "bolt": {
+          "visible_points": 32,
+          "matched": 32,
+          "pck8": 1.0,
+          "pck16": 1.0,
+          "median_error_px_when_matched": 2.52380588076299,
+          "p95_error_px_when_matched": 3.8860532934366745
+        },
+        "hinge": {
+          "visible_points": 8,
+          "matched": 8,
+          "pck8": 1.0,
+          "pck16": 1.0,
+          "median_error_px_when_matched": 3.189943053370393,
+          "p95_error_px_when_matched": 4.328258040651475
+        },
+        "latch": {
+          "visible_points": 8,
+          "matched": 8,
+          "pck8": 1.0,
+          "pck16": 1.0,
+          "median_error_px_when_matched": 2.5067671441325716,
+          "p95_error_px_when_matched": 4.2066179680715186
+        }
+      },
+      "excluded_class_points": [
+        {
+          "frame_id": "371:rgb_0039.png",
+          "key": "bolt_tl",
+          "channel": "bolt",
+          "error_px": 2.53257378964562
+        },
+        {
+          "frame_id": "371:rgb_0039.png",
+          "key": "bolt_tr",
+          "channel": "bolt",
+          "error_px": 1.3251826289233204
+        },
+        {
+          "frame_id": "371:rgb_0039.png",
+          "key": "bolt_bl",
+          "channel": "bolt",
+          "error_px": 1.9691886654153168
+        },
+        {
+          "frame_id": "371:rgb_0039.png",
+          "key": "bolt_br",
+          "channel": "bolt",
+          "error_px": 2.788782709355484
+        },
+        {
+          "frame_id": "371:rgb_0039.png",
+          "key": "corner_hinge",
+          "channel": "hinge",
+          "error_px": 2.9979734822041446
+        },
+        {
+          "frame_id": "371:rgb_0039.png",
+          "key": "corner_latch",
+          "channel": "latch",
+          "error_px": 2.712023045624843
+        }
+      ]
+    },
+    "E30_door_LH_FRT": {
+      "all": {
+        "visible_points": 48,
+        "matched": 48,
+        "pck8": 1.0,
+        "pck16": 1.0,
+        "median_error_px_when_matched": 2.5257872918057007,
+        "p95_error_px_when_matched": 4.252998955307226
+      },
+      "per_channel": {
+        "bolt": {
+          "visible_points": 32,
+          "matched": 32,
+          "pck8": 1.0,
+          "pck16": 1.0,
+          "median_error_px_when_matched": 2.52380588076299,
+          "p95_error_px_when_matched": 4.106289366035357
+        },
+        "hinge": {
+          "visible_points": 8,
+          "matched": 8,
+          "pck8": 1.0,
+          "pck16": 1.0,
+          "median_error_px_when_matched": 3.2294868133355354,
+          "p95_error_px_when_matched": 4.61570499211195
+        },
+        "latch": {
+          "visible_points": 8,
+          "matched": 8,
+          "pck8": 1.0,
+          "pck16": 1.0,
+          "median_error_px_when_matched": 2.3715662126896717,
+          "p95_error_px_when_matched": 3.1457446067772414
+        }
+      },
+      "excluded_class_points": [
+        {
+          "frame_id": "614:rgb_0039.png",
+          "key": "bolt_tl",
+          "channel": "bolt",
+          "error_px": 2.8584656723493858
+        },
+        {
+          "frame_id": "614:rgb_0039.png",
+          "key": "bolt_tr",
+          "channel": "bolt",
+          "error_px": 1.0114529153648504
+        },
+        {
+          "frame_id": "614:rgb_0039.png",
+          "key": "bolt_bl",
+          "channel": "bolt",
+          "error_px": 4.074846009360425
+        },
+        {
+          "frame_id": "614:rgb_0039.png",
+          "key": "bolt_br",
+          "channel": "bolt",
+          "error_px": 2.484724532015592
+        },
+        {
+          "frame_id": "614:rgb_0039.png",
+          "key": "corner_hinge",
+          "channel": "hinge",
+          "error_px": 1.895034828175956
+        },
+        {
+          "frame_id": "614:rgb_0039.png",
+          "key": "corner_latch",
+          "channel": "latch",
+          "error_px": 2.2573156624628234
+        }
+      ]
+    },
+    "E30_door_LH_RR": {
+      "all": {
+        "visible_points": 48,
+        "matched": 48,
+        "pck8": 1.0,
+        "pck16": 1.0,
+        "median_error_px_when_matched": 2.5436029285434976,
+        "p95_error_px_when_matched": 4.615704992111949
+      },
+      "per_channel": {
+        "bolt": {
+          "visible_points": 32,
+          "matched": 32,
+          "pck8": 1.0,
+          "pck16": 1.0,
+          "median_error_px_when_matched": 2.52380588076299,
+          "p95_error_px_when_matched": 4.106289366035357
+        },
+        "hinge": {
+          "visible_points": 8,
+          "matched": 8,
+          "pck8": 1.0,
+          "pck16": 1.0,
+          "median_error_px_when_matched": 3.2294868133355354,
+          "p95_error_px_when_matched": 4.61570499211195
+        },
+        "latch": {
+          "visible_points": 8,
+          "matched": 8,
+          "pck8": 1.0,
+          "pck16": 1.0,
+          "median_error_px_when_matched": 2.5067671441325716,
+          "p95_error_px_when_matched": 4.2066179680715186
+        }
+      },
+      "excluded_class_points": [
+        {
+          "frame_id": "1712:rgb_0078.png",
+          "key": "bolt_tl",
+          "channel": "bolt",
+          "error_px": 3.5332683170119354
+        },
+        {
+          "frame_id": "1712:rgb_0078.png",
+          "key": "bolt_tr",
+          "channel": "bolt",
+          "error_px": 2.51503797188036
+        },
+        {
+          "frame_id": "1712:rgb_0078.png",
+          "key": "bolt_bl",
+          "channel": "bolt",
+          "error_px": 2.3182014580273007
+        },
+        {
+          "frame_id": "1712:rgb_0078.png",
+          "key": "bolt_br",
+          "channel": "bolt",
+          "error_px": 1.7192795002558983
+        },
+        {
+          "frame_id": "1712:rgb_0078.png",
+          "key": "corner_hinge",
+          "channel": "hinge",
+          "error_px": 4.779613791929151
+        },
+        {
+          "frame_id": "1712:rgb_0078.png",
+          "key": "corner_latch",
+          "channel": "latch",
+          "error_px": 2.3015112426403
+        }
+      ]
+    },
+    "E38_door_LH_FRT": {
+      "all": {
+        "visible_points": 48,
+        "matched": 48,
+        "pck8": 1.0,
+        "pck16": 1.0,
+        "median_error_px_when_matched": 2.5436029285434976,
+        "p95_error_px_when_matched": 4.615704992111949
+      },
+      "per_channel": {
+        "bolt": {
+          "visible_points": 32,
+          "matched": 32,
+          "pck8": 1.0,
+          "pck16": 1.0,
+          "median_error_px_when_matched": 2.52380588076299,
+          "p95_error_px_when_matched": 3.917496650111606
+        },
+        "hinge": {
+          "visible_points": 8,
+          "matched": 8,
+          "pck8": 1.0,
+          "pck16": 1.0,
+          "median_error_px_when_matched": 3.2294868133355354,
+          "p95_error_px_when_matched": 4.61570499211195
+        },
+        "latch": {
+          "visible_points": 8,
+          "matched": 8,
+          "pck8": 1.0,
+          "pck16": 1.0,
+          "median_error_px_when_matched": 2.5067671441325716,
+          "p95_error_px_when_matched": 4.354349225930731
+        }
+      },
+      "excluded_class_points": [
+        {
+          "frame_id": "624:rgb_0078.png",
+          "key": "bolt_tl",
+          "channel": "bolt",
+          "error_px": 1.5231496971735725
+        },
+        {
+          "frame_id": "624:rgb_0078.png",
+          "key": "bolt_tr",
+          "channel": "bolt",
+          "error_px": 2.554632067441375
+        },
+        {
+          "frame_id": "624:rgb_0078.png",
+          "key": "bolt_bl",
+          "channel": "bolt",
+          "error_px": 4.144720135304718
+        },
+        {
+          "frame_id": "624:rgb_0078.png",
+          "key": "bolt_br",
+          "channel": "bolt",
+          "error_px": 1.2528467583866507
+        },
+        {
+          "frame_id": "624:rgb_0078.png",
+          "key": "corner_hinge",
+          "channel": "hinge",
+          "error_px": 4.311302935308577
+        },
+        {
+          "frame_id": "624:rgb_0078.png",
+          "key": "corner_latch",
+          "channel": "latch",
+          "error_px": 2.7660589292349265
+        }
+      ]
+    },
+    "E38_door_LH_RR": {
+      "all": {
+        "visible_points": 48,
+        "matched": 48,
+        "pck8": 1.0,
+        "pck16": 1.0,
+        "median_error_px_when_matched": 2.5257872918057007,
+        "p95_error_px_when_matched": 4.252998955307226
+      },
+      "per_channel": {
+        "bolt": {
+          "visible_points": 32,
+          "matched": 32,
+          "pck8": 1.0,
+          "pck16": 1.0,
+          "median_error_px_when_matched": 2.52380588076299,
+          "p95_error_px_when_matched": 4.106289366035357
+        },
+        "hinge": {
+          "visible_points": 8,
+          "matched": 8,
+          "pck8": 1.0,
+          "pck16": 1.0,
+          "median_error_px_when_matched": 3.2294868133355354,
+          "p95_error_px_when_matched": 4.61570499211195
+        },
+        "latch": {
+          "visible_points": 8,
+          "matched": 8,
+          "pck8": 1.0,
+          "pck16": 1.0,
+          "median_error_px_when_matched": 2.3715662126896717,
+          "p95_error_px_when_matched": 2.871386556467277
+        }
+      },
+      "excluded_class_points": [
+        {
+          "frame_id": "911:rgb_0057.png",
+          "key": "bolt_tl",
+          "channel": "bolt",
+          "error_px": 2.1643514040007332
+        },
+        {
+          "frame_id": "911:rgb_0057.png",
+          "key": "bolt_tr",
+          "channel": "bolt",
+          "error_px": 2.030804766588896
+        },
+        {
+          "frame_id": "911:rgb_0057.png",
+          "key": "bolt_bl",
+          "channel": "bolt",
+          "error_px": 3.0697622057742784
+        },
+        {
+          "frame_id": "911:rgb_0057.png",
+          "key": "bolt_br",
+          "channel": "bolt",
+          "error_px": 0.4501110973970313
+        },
+        {
+          "frame_id": "911:rgb_0057.png",
+          "key": "corner_hinge",
+          "channel": "hinge",
+          "error_px": 3.4610001444669267
+        },
+        {
+          "frame_id": "911:rgb_0057.png",
+          "key": "corner_latch",
+          "channel": "latch",
+          "error_px": 1.5116127149504912
+        }
+      ]
+    }
+  }
+}

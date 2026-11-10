@@ -1,0 +1,708 @@
+{
+  "original_sha256": {
+    "manuscript/논문초안_v10.hwpx": "32b69147bc051944747031c1283dd0483266d95b3956810ef774b3143dbd391d",
+    "manuscript/논문초안_v10.pdf": "629eb17b344fad32422d6471fe4d89d59b108382980397d5d95bfe1d8d86d31f",
+    "manuscript/논문초안_v10.md": "e60404865d2f028bd1898efaa7a148c7d8015d72ee43f2a4ce48c240adb2cde3",
+    "manuscript/논문초안_v10.docx": "21bd634e273476578ca74edbe5651b81e4738b0f33a5f61e4d256167d30be4e5",
+    "manuscript/v10_작성확인사항.md": "ab3a927a96e4c53dff569e57173ff790775c2a82f2630bd0477fb06a45d1b4cb",
+    "figures/v10c_fig1_method.png": "824c30b3f87a7385948d0f063b1aff69fe52508dde27bd7b0ff0617c0dd3c8d9",
+    "figures/v10c_fig1_method.pdf": "98cd0fca5b5a49d6fa8a25c47afe989d9b028b48b75028af3e23c4eaeea96da4",
+    "scripts/build_manuscript_v10_hwpx.py": "1c9d82247c5de45c01178d71f8152013bbe26ae19e2aef67a26a28d3a32faa4d",
+    "scripts/build_manuscript_v10_docx.py": "450c7797a12aeee984cb049e1270711898a9e712d7992ab79179b8d9211ae85b",
+    "scripts/make_figure1_v10col.py": "97be5dac80b84976cde123268df2f4273e53f420e736c8cd212775717b0dcf10"
+  },
+  "md_changes": {
+    "only_expected_three_edits": true,
+    "abstract_unchanged": true,
+    "tables_unchanged": true,
+    "references_unchanged": true
+  },
+  "native_hwpx": {
+    "validation_issues": 0,
+    "paragraphs": 569,
+    "tables": 22,
+    "figures": 4,
+    "body_text_and_table_cells_match_md": true,
+    "body_tables": [
+      {
+        "caption": "Table 1 Door shape classes, CAD distance D, field data, and correct-decision band",
+        "pageBreak": "NONE",
+        "keepWithNext": "1"
+      },
+      {
+        "caption": "Table 2 Compared methods and the supervision each uses (per fold)",
+        "pageBreak": "NONE",
+        "keepWithNext": "1"
+      },
+      {
+        "caption": "Table 3 Effect of field point annotations (fold 0, pixel width). Annotation time is converted from the measured mean of 24.6 s per image (training + selection images); PCK8 H / L: hinge / latch corner holes; frozen ref.: 13 + 3 pre-period field images",
+        "pageBreak": "NONE",
+        "keepWithNext": "1"
+      },
+      {
+        "caption": "Table 4 Five-fold out-of-fold identification (361 doors, 7,104 images)",
+        "pageBreak": "NONE",
+        "keepWithNext": "1"
+      },
+      {
+        "caption": "Table 5 Pixel-width versus depth-plane distance with the same detections: test results and re-judgment of the training (calibration) sessions (five-fold OOF; temporal split in parentheses). Residual statistics use measurable images (pixel 7,087, depth 7,086; depth includes values beyond the 30 mm reject). Five-fold training decisions are 1,083 repeated judgments of the 361 doors; per-fold depth rates are given in the text",
+        "pageBreak": "NONE",
+        "keepWithNext": "1"
+      },
+      {
+        "caption": "Table 6 Temporal split: trained on sessions before October 3, tested on the 133 later doors (2,617 images)",
+        "pageBreak": "NONE",
+        "keepWithNext": "1"
+      },
+      {
+        "caption": "Table 7 Doors rejected when their class is unseen by both methods (fold 0, eight runs) and for the out-of-scope E23 class (eight-class models). Parentheses: smallest distance (mm) to a registered CAD value (hole) or accepting class (CNN)",
+        "pageBreak": "NONE",
+        "keepWithNext": "1"
+      },
+      {
+        "caption": "Table 8 Leave-one-class-out results under three exposure conditions (Section 4.4). Seen: no retraining, CNN output masked; unseen: class removed from all training; unequal: hole detector saw the class. Registered decisions are repeated (518 = 74 × 7; 2,527 = 361 × 7)",
+        "pageBreak": "NONE",
+        "keepWithNext": "1"
+      }
+    ],
+    "abstract_words": 150,
+    "placeholders": [],
+    "figure1_embedded_matches": {
+      "hwpx": [
+        "BinData/BIN0001.png"
+      ],
+      "docx": [
+        "word/media/image1.png"
+      ]
+    },
+    "only_figure1_changed": true
+  },
+  "manifest_and_splits": {
+    "frames": 7104,
+    "groups": 361,
+    "classes": 8,
+    "counts": {
+      "E25_door_LH_FRT": {
+        "doors": 9,
+        "images": 180
+      },
+      "E25_door_LH_RR": {
+        "doors": 70,
+        "images": 1388
+      },
+      "E25_door_RH": {
+        "doors": 68,
+        "images": 1343
+      },
+      "E30_E38_door_RH": {
+        "doors": 70,
+        "images": 1398
+      },
+      "E30_door_LH_FRT": {
+        "doors": 44,
+        "images": 867
+      },
+      "E30_door_LH_RR": {
+        "doors": 50,
+        "images": 984
+      },
+      "E38_door_LH_FRT": {
+        "doors": 21,
+        "images": 410
+      },
+      "E38_door_LH_RR": {
+        "doors": 29,
+        "images": 534
+      }
+    },
+    "within_split_overlap": 0,
+    "OOF_tests_per_group": 1,
+    "partitions": {
+      "0": {
+        "train": 214,
+        "val": 73,
+        "test": 74
+      },
+      "1": {
+        "train": 215,
+        "val": 73,
+        "test": 73
+      },
+      "2": {
+        "train": 216,
+        "val": 72,
+        "test": 73
+      },
+      "3": {
+        "train": 220,
+        "val": 69,
+        "test": 72
+      },
+      "4": {
+        "train": 218,
+        "val": 74,
+        "test": 69
+      },
+      "temporal": {
+        "train": 193,
+        "val": 35,
+        "test": 133
+      }
+    },
+    "identical_rgb_hashes_across_groups": 0
+  },
+  "current_aggregates": {
+    "cv5": {
+      "hole8": {
+        "session": [
+          361,
+          361
+        ],
+        "session_abstained": 0,
+        "wilson": [
+          0.9894708818643825,
+          1.0
+        ],
+        "frame": [
+          7087,
+          7104
+        ],
+        "frame_abstained": 17,
+        "macro_f1": 1.0,
+        "wrong_sessions": []
+      },
+      "hole8_depth": {
+        "session": [
+          332,
+          361
+        ],
+        "session_abstained": 13,
+        "wilson": [
+          0.887010462965378,
+          0.9434872578238406
+        ],
+        "frame": [
+          6367,
+          7104
+        ],
+        "frame_abstained": 406,
+        "macro_f1": 0.917678459050423,
+        "wrong_sessions": [
+          {
+            "s": "20260923/E25_door_LH_FRT/s_082712",
+            "true": "E25_door_LH_FRT",
+            "pred": "E30_door_LH_FRT"
+          },
+          {
+            "s": "20260923/E30_door_LH_FRT/s_075113",
+            "true": "E30_door_LH_FRT",
+            "pred": "E38_door_LH_FRT"
+          },
+          {
+            "s": "20260930/E25_door_RH/s_124659",
+            "true": "E25_door_RH",
+            "pred": null
+          },
+          {
+            "s": "20260930/E25_door_RH/s_131955",
+            "true": "E25_door_RH",
+            "pred": null
+          },
+          {
+            "s": "20260930/E25_door_RH/s_134449",
+            "true": "E25_door_RH",
+            "pred": null
+          },
+          {
+            "s": "20261001/E25_door_RH/s_123341",
+            "true": "E25_door_RH",
+            "pred": null
+          },
+          {
+            "s": "20261002/E25_door_RH/s_164340",
+            "true": "E25_door_RH",
+            "pred": null
+          },
+          {
+            "s": "20261007/E30_door_LH_FRT/s_123156",
+            "true": "E30_door_LH_FRT",
+            "pred": "E38_door_LH_FRT"
+          },
+          {
+            "s": "20261007/E30_door_LH_FRT/s_134255",
+            "true": "E30_door_LH_FRT",
+            "pred": "E38_door_LH_FRT"
+          },
+          {
+            "s": "20261008/E30_door_LH_FRT/s_095059",
+            "true": "E30_door_LH_FRT",
+            "pred": "E38_door_LH_FRT"
+          },
+          {
+            "s": "20261012/E25_door_RH/s_132314",
+            "true": "E25_door_RH",
+            "pred": null
+          },
+          {
+            "s": "20261012/E25_door_RH/s_145223",
+            "true": "E25_door_RH",
+            "pred": null
+          },
+          {
+            "s": "20261012/E25_door_RH/s_151706",
+            "true": "E25_door_RH",
+            "pred": null
+          },
+          {
+            "s": "20261012/E30_E38_door_RH/s_081727",
+            "true": "E30_E38_door_RH",
+            "pred": "E30_door_LH_RR"
+          },
+          {
+            "s": "20261013/E30_E38_door_RH/s_074704",
+            "true": "E30_E38_door_RH",
+            "pred": null
+          },
+          {
+            "s": "20261013/E30_door_LH_FRT/s_092635",
+            "true": "E30_door_LH_FRT",
+            "pred": "E38_door_LH_FRT"
+          },
+          {
+            "s": "20261019/E30_door_LH_FRT/s_122000",
+            "true": "E30_door_LH_FRT",
+            "pred": "E38_door_LH_FRT"
+          },
+          {
+            "s": "20261021/E30_E38_door_RH/s_104105",
+            "true": "E30_E38_door_RH",
+            "pred": "E30_door_LH_RR"
+          },
+          {
+            "s": "20261021/E30_door_LH_FRT/s_125151",
+            "true": "E30_door_LH_FRT",
+            "pred": "E38_door_LH_FRT"
+          },
+          {
+            "s": "20261021/E30_door_LH_FRT/s_131627",
+            "true": "E30_door_LH_FRT",
+            "pred": "E38_door_LH_FRT"
+          },
+          {
+            "s": "20261021/E30_door_LH_FRT/s_134819",
+            "true": "E30_door_LH_FRT",
+            "pred": "E38_door_LH_FRT"
+          },
+          {
+            "s": "20261022/E25_door_LH_FRT/s_123253",
+            "true": "E25_door_LH_FRT",
+            "pred": "E30_door_LH_FRT"
+          },
+          {
+            "s": "20261023/E25_door_RH/s_083521",
+            "true": "E25_door_RH",
+            "pred": null
+          },
+          {
+            "s": "20261023/E25_door_RH/s_093311",
+            "true": "E25_door_RH",
+            "pred": null
+          },
+          {
+            "s": "20261023/E25_door_RH/s_100812",
+            "true": "E25_door_RH",
+            "pred": null
+          },
+          {
+            "s": "20261026/E30_E38_door_RH/s_123507",
+            "true": "E30_E38_door_RH",
+            "pred": "E30_door_LH_RR"
+          },
+          {
+            "s": "20261027/E30_door_LH_FRT/s_074619",
+            "true": "E30_door_LH_FRT",
+            "pred": "E38_door_LH_FRT"
+          },
+          {
+            "s": "20261027/E30_door_LH_FRT/s_081034",
+            "true": "E30_door_LH_FRT",
+            "pred": "E38_door_LH_FRT"
+          },
+          {
+            "s": "20261028/E30_door_LH_FRT/s_100918",
+            "true": "E30_door_LH_FRT",
+            "pred": null
+          }
+        ]
+      },
+      "ops": {
+        "session": [
+          361,
+          361
+        ],
+        "session_abstained": 0,
+        "wilson": [
+          0.9894708818643825,
+          1.0
+        ],
+        "frame": [
+          7083,
+          7104
+        ],
+        "frame_abstained": 21,
+        "macro_f1": 1.0,
+        "wrong_sessions": []
+      },
+      "rgb": {
+        "session": [
+          360,
+          361
+        ],
+        "session_abstained": 0,
+        "wilson": [
+          0.9844782038847874,
+          0.9995108448390723
+        ],
+        "frame": [
+          7084,
+          7104
+        ],
+        "frame_abstained": 0,
+        "macro_f1": 0.9912425644415069,
+        "wrong_sessions": [
+          {
+            "s": "20261022/E25_door_LH_FRT/s_084658",
+            "true": "E25_door_LH_FRT",
+            "pred": "E30_door_LH_FRT"
+          }
+        ]
+      },
+      "rgbe": {
+        "session": [
+          359,
+          361
+        ],
+        "session_abstained": 0,
+        "wilson": [
+          0.9800278461001444,
+          0.9984793694831924
+        ],
+        "frame": [
+          7070,
+          7104
+        ],
+        "frame_abstained": 0,
+        "macro_f1": 0.9815972222222222,
+        "wrong_sessions": [
+          {
+            "s": "20261022/E25_door_LH_FRT/s_084658",
+            "true": "E25_door_LH_FRT",
+            "pred": "E30_door_LH_FRT"
+          },
+          {
+            "s": "20261022/E25_door_LH_FRT/s_123253",
+            "true": "E25_door_LH_FRT",
+            "pred": "E30_door_LH_FRT"
+          }
+        ]
+      },
+      "paired_vs_rgb": {
+        "hole8": {
+          "session_accuracy_difference": 0.002770083102493075,
+          "group_bootstrap95_difference": [
+            0.0,
+            0.008310249307479225
+          ],
+          "discordant_a_only_b_only": [
+            1,
+            0
+          ],
+          "exact_mcnemar_p_session": 1.0,
+          "groups": 361,
+          "note": "Bootstrap resamples groups. McNemar assumes independent sessions. No frame-wise significance claim."
+        },
+        "ops": {
+          "session_accuracy_difference": 0.002770083102493075,
+          "group_bootstrap95_difference": [
+            0.0,
+            0.008310249307479225
+          ],
+          "discordant_a_only_b_only": [
+            1,
+            0
+          ],
+          "exact_mcnemar_p_session": 1.0,
+          "groups": 361,
+          "note": "Bootstrap resamples groups. McNemar assumes independent sessions. No frame-wise significance claim."
+        },
+        "rgbe": {
+          "session_accuracy_difference": -0.002770083102493075,
+          "group_bootstrap95_difference": [
+            -0.008310249307479225,
+            0.0
+          ],
+          "discordant_a_only_b_only": [
+            0,
+            1
+          ],
+          "exact_mcnemar_p_session": 1.0,
+          "groups": 361,
+          "note": "Bootstrap resamples groups. McNemar assumes independent sessions. No frame-wise significance claim."
+        }
+      }
+    },
+    "temporal": {
+      "hole": {
+        "session": [
+          133,
+          133
+        ],
+        "session_abstained": 0,
+        "wilson": [
+          0.9719276683119282,
+          1.0
+        ],
+        "frame": [
+          2616,
+          2617
+        ],
+        "wrong_sessions": []
+      },
+      "hole_depth": {
+        "session": [
+          108,
+          133
+        ],
+        "session_abstained": 7,
+        "wilson": [
+          0.737228174792749,
+          0.8693131520485294
+        ],
+        "frame": [
+          2067,
+          2617
+        ],
+        "wrong_sessions": [
+          {
+            "s": "20261007/E30_door_LH_FRT/s_123156",
+            "true": "E30_door_LH_FRT",
+            "pred": "E38_door_LH_FRT"
+          },
+          {
+            "s": "20261007/E30_door_LH_FRT/s_131657",
+            "true": "E30_door_LH_FRT",
+            "pred": "E38_door_LH_FRT"
+          },
+          {
+            "s": "20261007/E30_door_LH_FRT/s_134255",
+            "true": "E30_door_LH_FRT",
+            "pred": "E38_door_LH_FRT"
+          },
+          {
+            "s": "20261008/E30_door_LH_FRT/s_095059",
+            "true": "E30_door_LH_FRT",
+            "pred": "E38_door_LH_FRT"
+          },
+          {
+            "s": "20261012/E25_door_RH/s_132314",
+            "true": "E25_door_RH",
+            "pred": null
+          },
+          {
+            "s": "20261012/E25_door_RH/s_145223",
+            "true": "E25_door_RH",
+            "pred": null
+          },
+          {
+            "s": "20261012/E25_door_RH/s_151706",
+            "true": "E25_door_RH",
+            "pred": null
+          },
+          {
+            "s": "20261012/E30_E38_door_RH/s_081727",
+            "true": "E30_E38_door_RH",
+            "pred": "E30_door_LH_RR"
+          },
+          {
+            "s": "20261013/E30_E38_door_RH/s_074704",
+            "true": "E30_E38_door_RH",
+            "pred": "E30_door_LH_RR"
+          },
+          {
+            "s": "20261013/E30_door_LH_FRT/s_084330",
+            "true": "E30_door_LH_FRT",
+            "pred": "E38_door_LH_FRT"
+          },
+          {
+            "s": "20261013/E30_door_LH_FRT/s_092635",
+            "true": "E30_door_LH_FRT",
+            "pred": "E38_door_LH_FRT"
+          },
+          {
+            "s": "20261019/E30_door_LH_FRT/s_122000",
+            "true": "E30_door_LH_FRT",
+            "pred": "E38_door_LH_FRT"
+          },
+          {
+            "s": "20261021/E30_E38_door_RH/s_104105",
+            "true": "E30_E38_door_RH",
+            "pred": "E30_door_LH_RR"
+          },
+          {
+            "s": "20261021/E30_door_LH_FRT/s_125151",
+            "true": "E30_door_LH_FRT",
+            "pred": "E38_door_LH_FRT"
+          },
+          {
+            "s": "20261021/E30_door_LH_FRT/s_131627",
+            "true": "E30_door_LH_FRT",
+            "pred": "E38_door_LH_FRT"
+          },
+          {
+            "s": "20261021/E30_door_LH_FRT/s_134819",
+            "true": "E30_door_LH_FRT",
+            "pred": "E38_door_LH_FRT"
+          },
+          {
+            "s": "20261022/E25_door_LH_FRT/s_123253",
+            "true": "E25_door_LH_FRT",
+            "pred": "E30_door_LH_FRT"
+          },
+          {
+            "s": "20261022/E25_door_RH/s_085619",
+            "true": "E25_door_RH",
+            "pred": null
+          },
+          {
+            "s": "20261023/E25_door_RH/s_083521",
+            "true": "E25_door_RH",
+            "pred": null
+          },
+          {
+            "s": "20261023/E25_door_RH/s_093311",
+            "true": "E25_door_RH",
+            "pred": null
+          },
+          {
+            "s": "20261023/E25_door_RH/s_100812",
+            "true": "E25_door_RH",
+            "pred": null
+          },
+          {
+            "s": "20261026/E30_E38_door_RH/s_123507",
+            "true": "E30_E38_door_RH",
+            "pred": "E30_door_LH_RR"
+          },
+          {
+            "s": "20261027/E30_door_LH_FRT/s_074619",
+            "true": "E30_door_LH_FRT",
+            "pred": "E38_door_LH_FRT"
+          },
+          {
+            "s": "20261027/E30_door_LH_FRT/s_081034",
+            "true": "E30_door_LH_FRT",
+            "pred": "E38_door_LH_FRT"
+          },
+          {
+            "s": "20261028/E30_door_LH_FRT/s_100918",
+            "true": "E30_door_LH_FRT",
+            "pred": "E38_door_LH_FRT"
+          }
+        ]
+      },
+      "ops": {
+        "session": [
+          133,
+          133
+        ],
+        "session_abstained": 0,
+        "wilson": [
+          0.9719276683119282,
+          1.0
+        ],
+        "frame": [
+          2614,
+          2617
+        ],
+        "wrong_sessions": []
+      },
+      "rgb": {
+        "session": [
+          132,
+          133
+        ],
+        "session_abstained": 0,
+        "wilson": [
+          0.9586407022607314,
+          0.9986715123923707
+        ],
+        "frame": [
+          2597,
+          2617
+        ],
+        "wrong_sessions": [
+          {
+            "s": "20261022/E25_door_LH_FRT/s_084658",
+            "true": "E25_door_LH_FRT",
+            "pred": "E30_door_LH_FRT"
+          }
+        ]
+      },
+      "rgbe": {
+        "session": [
+          132,
+          133
+        ],
+        "session_abstained": 0,
+        "wilson": [
+          0.9586407022607314,
+          0.9986715123923707
+        ],
+        "frame": [
+          2597,
+          2617
+        ],
+        "wrong_sessions": [
+          {
+            "s": "20261022/E25_door_LH_FRT/s_084658",
+            "true": "E25_door_LH_FRT",
+            "pred": "E30_door_LH_FRT"
+          }
+        ]
+      },
+      "test_sessions": 133
+    }
+  },
+  "extension_v6_unchanged_since_independent_audits": true,
+  "raw_predictions_reaggregated_this_turn": false,
+  "previous_audit": "reports/논문초안_v9_리뷰_20261110/근거대조.json",
+  "pdf": {
+    "pages": 14,
+    "draft_header_count": 0,
+    "placeholders": [],
+    "table_captions_by_page": {
+      "3": [
+        "1"
+      ],
+      "5": [
+        "2"
+      ],
+      "7": [
+        "3",
+        "4"
+      ],
+      "8": [
+        "5"
+      ],
+      "9": [
+        "6"
+      ],
+      "10": [
+        "7"
+      ],
+      "11": [
+        "8"
+      ]
+    }
+  }
+}

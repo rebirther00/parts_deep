@@ -1,0 +1,37 @@
+{
+  "review_date": "2026-11-10",
+  "completed_at": "2026-11-10T13:23:18+09:00",
+  "original_sha256": {
+    "manuscript/논문초안_v7.hwpx": "50681ff4188e9b36e5317b34ebedc7c28e3280a03f2ecbfdfbaafc9f9441da2e",
+    "manuscript/논문초안_v7.pdf": "ed1b93fc0b8c14213b3cf55d8944a62041d894a6ee497bda4c12e8c807e6b0c9",
+    "manuscript/논문초안_v7.md": "2128243aaf3e9e5e4abe7808195b97023abf8057353db177cb9dff2e6ddf2dfd",
+    "manuscript/논문초안_v7.docx": "975c2cc8113c21ba17cebb56cc308a8e4037df77003d1ace447810c37348706b",
+    "manuscript/v7_검토답변.md": "304182a18977b6489cead2f5e8c88c79aee66769b14b82d675b7aec4f3c5a30b",
+    "manuscript/v7_작성확인사항.md": "124a813794743198f4751c6274ae97c3fbcd64012d913013242262386948a1f8",
+    "manuscript/v7_차별성_검토.md": "7029294a69dcb0fb33208c2da189b522aec6b16fd91b57e3ac306596edaaa69d"
+  },
+  "original_unchanged": true,
+  "native_hwpx": true,
+  "memos_added": 3,
+  "annotated": "manuscript/논문초안_v7_검토메모_20261110.hwpx",
+  "annotated_sha256": "748685207c35c8d8487ad308de088437e8e7cde3109de1a32fc5600743e40d67",
+  "checks": {
+    "all_original_paragraphs_preserved": 568,
+    "tables": 22,
+    "figures": 4,
+    "image_bytes_unchanged": true,
+    "library_validation_issues": 0
+  },
+  "layout_scope": "Native Hancom rendering and memo UI not checked; companion PDF is a DOCX approximation.",
+  "review_pdf_pages": 4,
+  "supplied_pdf_pages_visually_inspected": [
+    5,
+    10,
+    12
+  ],
+  "supplemental_evidence": [
+    "근거대조.json",
+    "정본대조.json"
+  ],
+  "author_original_files_verified": 7
+}

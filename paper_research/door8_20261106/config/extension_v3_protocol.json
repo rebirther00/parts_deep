@@ -1,0 +1,46 @@
+{
+  "version": "extension-v3-20261109",
+  "registered_at": "2026-11-09, before any model below was trained or any listed input was evaluated",
+  "requested_by": "Author (user), 2026-11-09: fill the pending experiments of manuscript v3",
+  "common": {
+    "snapshot": "v1",
+    "labelset": "field40_20261109_v1",
+    "hole_training": "Same as holes_field8_f0_s42_v2: ImageNet init, 80 epochs, batch 4, AdamW 1e-4 cosine, sigma 2, peak 0.15; checkpoint = minimum field-VAL heatmap loss; LAB VAL 24 monitored only",
+    "cnn_training": "Same as rgb_f0_s42 / rgbe_f0_s42 (config/protocol.json cnn): 448, Adam 3e-4, max 40 epochs, patience 8, checkpoint by VAL session balanced accuracy",
+    "decision": "Unchanged v1 geometry gate, peak threshold 0.15, 30 mm CAD reject; pixel width is the primary distance; scale fit on the split's TRAIN sessions only",
+    "seed": 42,
+    "operational_reference": "2026-08-26 frozen detector (sha256 f38744da...a7), features already extracted for all 7,104 frames in features/operational_20260826_f0_test_v3; calibrated per split on that split's TRAIN sessions",
+    "metrics": "Frame and session accuracy over all inputs (abstentions in denominator), coverage, macro-F1, Wilson 95% CI for sessions, paired session comparison vs RGB with group bootstrap"
+  },
+  "experiments": {
+    "temporal": {
+      "split": "splits.json partitions['temporal']: TRAIN 193 / VAL 35 sessions before 2026-10-03, TEST 133 sessions from 2026-10-03",
+      "hole_main": "holes_field_temporal_s42: LAB 94 + all 24 field coordinates whose session lies in the temporal TRAIN period (7 classes; no E30 LH RR coordinate falls in that period); checkpoint by the 3 temporal-VAL field coordinates",
+      "cnn": "rgb_temporal_s42, rgbe_temporal_s42",
+      "primary_question": "Accuracy on the 133 later sessions of models fit only to the earlier period"
+    },
+    "cv5": {
+      "folds": ["1", "2", "3", "4"],
+      "hole_main": "holes_field8_f{k}_s42_v3: LAB 94 + 8 field coordinates (one per class) chosen from fold k TRAIN-role coordinates by the same nested rule and selection seed 20261109 as fold 0; checkpoint by fold k's 8 VAL-role coordinates",
+      "cnn": "rgb_f{k}_s42, rgbe_f{k}_s42",
+      "oof": "Fold 0 results (fold0_test_v3, rgb/rgbe_f0_s42_test) + folds 1-4 give one out-of-fold prediction per session for all 361 doors (seed 42 only)",
+      "not_in_this_run": "Seeds 123 and 456 (deferred; to be reported separately if run)"
+    },
+    "e23_open_set": {
+      "inputs": "All 120 local frames (20 per session) of the 6 sessions whose worker label E25_door_LH_FRT was human-confirmed as E23_door_LH_FRT and excluded from the snapshot: 20260903/E25_door_LH_FRT/s_124446, s_132914, s_141947; 20260905/E25_door_LH_FRT/s_150506; 20260912/E25_door_LH_FRT/s_094850, s_103329",
+      "excluded_inputs": "The 8 E23 sessions of 2026-11-02..06 are labeled only by the deployed system's own prediction (no human confirmation) and are not used",
+      "models": "Fold-0 models only: holes_field8_f0_s42_v2 (main), operational 2026-08-26 (reference), rgb_f0_s42, rgbe_f0_s42; scales from fold-0 TRAIN as in fold0_test_v3",
+      "conditions": {
+        "unregistered": "8 CAD classes; correct behaviour = abstain (no class)",
+        "registered": "CAD list + E23_door_LH_FRT 458 mm (STEP 110982-02444B corner holes 457.6 mm), no retraining; correct = E23",
+        "cnn_closed_set": "argmax over 8 classes (always a wrong class by construction)",
+        "cnn_threshold": "softmax threshold fixed in v1 evaluation to keep 95% of VAL frames (report.json val95coverage_threshold); abstain = correct rejection"
+      }
+    }
+  },
+  "rules": [
+    "No threshold, gate or CAD value is changed after viewing any TEST or E23 output.",
+    "Each split's TEST frames/coordinates are used only for evaluation.",
+    "All runs and reports use new names; nothing existing is overwritten."
+  ]
+}

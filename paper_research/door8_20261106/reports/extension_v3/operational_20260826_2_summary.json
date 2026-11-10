@@ -1,0 +1,52 @@
+{
+  "pixel": {
+    "scale": {
+      "54910212": 1476.7175801786461
+    },
+    "frame": [
+      1399,
+      1402
+    ],
+    "session": [
+      73,
+      73
+    ],
+    "session_abstained": 0,
+    "wilson": [
+      0.9500079920442688,
+      0.9999999999999998
+    ],
+    "reasons": {
+      "ok": 1399,
+      "latch_offset": 1,
+      "not_collinear": 1,
+      "same_side": 1
+    }
+  },
+  "depth": {
+    "scale": {
+      "54910212": 1.0075572848114815
+    },
+    "frame": [
+      1307,
+      1402
+    ],
+    "session": [
+      69,
+      73
+    ],
+    "session_abstained": 3,
+    "wilson": [
+      0.8674100245784024,
+      0.9784875025843027
+    ],
+    "reasons": {
+      "ok": 1322,
+      "latch_offset": 1,
+      "cad_distance_reject": 77,
+      "not_collinear": 1,
+      "same_side": 1
+    }
+  },
+  "fold": "2"
+}

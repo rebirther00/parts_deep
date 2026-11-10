@@ -1,0 +1,17 @@
+{
+  "method": "rgbe",
+  "run": "rgbe_f4_s42",
+  "fold": "4",
+  "seed": 42,
+  "subset": "test",
+  "pilot": false,
+  "snapshot_sha256": "086cc09bbcdcb4a0b30dca920db94db350b8f1a0ec8f67ca2960612cf87bc559",
+  "weights_sha256": "670c1fe8d05d1c074b2215a751fd499d0b18cfc0482e5ac39b29a2b46ee3ee9e",
+  "val95coverage_threshold": 0.9999991655349731,
+  "scope": "retrospective_development_not_pristine_blind_test",
+  "status": "complete",
+  "created_at": "2026-11-09T13:24:41+09:00",
+  "n": 1355,
+  "predictions_sha256": "cb348a398a34f5c8d837925ebf913bb932746f21cca03a9ef73f5a92169cc874",
+  "evaluation_code_sha256": "39767cbd808456f8f98a8ce1a551ea783240c202a42f43fda16b45c920401cb1"
+}

@@ -1,0 +1,50 @@
+{
+  "pixel": {
+    "scale": {
+      "54910212": 1476.66311660714
+    },
+    "frame": [
+      1412,
+      1414
+    ],
+    "session": [
+      72,
+      72
+    ],
+    "session_abstained": 0,
+    "wilson": [
+      0.9493488274035422,
+      1.0
+    ],
+    "reasons": {
+      "ok": 1412,
+      "missing_corner": 1,
+      "same_side": 1
+    }
+  },
+  "depth": {
+    "scale": {
+      "54910212": 1.0071302792103838
+    },
+    "frame": [
+      1312,
+      1414
+    ],
+    "session": [
+      67,
+      72
+    ],
+    "session_abstained": 1,
+    "wilson": [
+      0.8475202051632649,
+      0.9699746184342299
+    ],
+    "reasons": {
+      "ok": 1395,
+      "missing_corner": 1,
+      "cad_distance_reject": 17,
+      "same_side": 1
+    }
+  },
+  "fold": "3"
+}

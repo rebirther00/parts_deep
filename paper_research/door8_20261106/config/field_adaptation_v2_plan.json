@@ -1,5 +1,10 @@
 {
-  "status": "planned_human_annotations_required",
+  "status": "fold0_seed42_development_complete_formal_evaluation_pending",
+  "development_report": "reports/field_v2_development_comparison/comparison.json",
+  "sampling_confirmation": "reports/field_sampling_confirmation_20261109.json",
+  "human_annotations_completed": 40,
+  "labelset": "field40_20261109_v1",
+  "development_protocol": "config/field_adaptation_v2_protocol.json",
   "selection_seed": 20261106,
   "n_images": 40,
   "selection": "One randomly selected session per class and CV group; middle sampled frame. No model scores used.",
@@ -21,6 +26,7 @@
     "For each fold, field point training and checkpoint selection follow the frozen train/val groups.",
     "The 8 test images with point annotations are for localization evaluation only.",
     "The LAB-only v1 remains a recorded baseline. Do not overwrite its failed results.",
-    "This plan is not implemented training and is not a completed experiment."
+    "The 40 human annotations are frozen; fold0 seed42 development training and validation are complete. Full CV and prospective evaluation remain incomplete.",
+    "Each of the 361 field sessions depicts a distinct physical door, confirmed by the field collection operator on 2026-11-09."
   ]
 }

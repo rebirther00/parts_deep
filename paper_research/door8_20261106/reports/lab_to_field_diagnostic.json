@@ -1,0 +1,35 @@
+{
+  "scope": "First LAB-only transfer trial; no threshold retuning after test inspection",
+  "train_frames": 4171,
+  "train_gates": {
+    "missing_corner": 3756,
+    "latch_offset": 397,
+    "ok": 3,
+    "same_side": 1,
+    "invalid_bolt_rectangle": 14
+  },
+  "train_calibration_valid_sessions": 1,
+  "pixel_scale": {
+    "54910212": 1492.203063452505
+  },
+  "test_frames": 1478,
+  "test_gates": {
+    "missing_corner": 1315,
+    "latch_offset": 160,
+    "invalid_bolt_rectangle": 3
+  },
+  "lab_validation": {
+    "run": "holes_lab_s42",
+    "subset": "LAB checkpoint-selection validation",
+    "not_independent_test": true,
+    "images": 24,
+    "visible_gt_points": 138,
+    "matched_points": 137,
+    "median_error_original_px_when_matched": 2.308575696151781,
+    "pck8_original_px_all_visible": 0.9927536231884058,
+    "pck16_original_px_all_visible": 0.9927536231884058,
+    "note": "Missing detections count as failures in PCK. Unordered bolt detections are matched by minimum-cost assignment. Diagnostic only; not used to retune the frozen first-fold model."
+  },
+  "inference": "Missing/invalid field corner detections prevent classification. LAB validation is strong; domain transfer is a plausible explanation, not a proven exclusive cause.",
+  "next_step": "Human-only field point labels with strict per-fold train/val/test separation; evaluate label budgets in a new documented protocol."
+}

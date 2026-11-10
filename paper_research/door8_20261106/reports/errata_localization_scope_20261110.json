@@ -1,0 +1,147 @@
+{
+ "created_at": "2026-11-10T13:04:35+09:00",
+ "issue": "The localization summary (door8/field_experiments.py: localization) wrote a fixed scope string describing VAL images, also when it was called with the field TEST-role annotations. Only this metadata string is wrong; the evaluated images, point errors and PCK values are those of the TEST-role annotations.",
+ "found_by": "v6 review 2026-11-10 (C2), extended to v3 artifacts by the author check",
+ "wrong_string": "Eight field checkpoint-selection VAL images; missing detections fail PCK; not independent test.",
+ "correct_meaning": "Field TEST-role annotated images of the split (fold 0-4: 8 images, 48 points; temporal: 13 images, 78 points); missing detections fail PCK; never used for training or selection.",
+ "evidence": {
+  "scripts/run_fold0_test_v3.py": "localization(roles['test'], ...)",
+  "scripts/run_extension_v3.py": "localization(roles['test'], pool)",
+  "scripts/run_extension_v6.py": "localization(roles['test'], pool)"
+ },
+ "affected_artifacts": [
+  {
+   "file": "reports/fold0_test_v3/summary.json",
+   "sha256": "8e942f801a2f490b2e7c53116506d654042e10b2ac10dec7802ac1850045ffd5",
+   "json_paths": [
+    "/results/holes_field8_f0_s42_v2/localization_test_role_field8/scope",
+    "/results/holes_field24_f0_s42_v2/localization_test_role_field8/scope",
+    "/results/operational_20260826/localization_test_role_field8/scope"
+   ]
+  },
+  {
+   "file": "reports/extension_v3/holes_field8_f1_s42_v3_summary.json",
+   "sha256": "047485f26c36f918a559159cec2643ed182ea552f42e296335a0b5b5844e7ec6",
+   "json_paths": [
+    "/localization_test_role/scope"
+   ]
+  },
+  {
+   "file": "reports/extension_v3/holes_field8_f2_s42_v3_summary.json",
+   "sha256": "17cfa1baa7b77af52c826834bb0efa5013b57afb534fdbcb1f74db0b2f022d4b",
+   "json_paths": [
+    "/localization_test_role/scope"
+   ]
+  },
+  {
+   "file": "reports/extension_v3/holes_field8_f3_s42_v3_summary.json",
+   "sha256": "e161a47a458e3552b15bd221600d757ba2e1974ccd8271efb552442a348811a2",
+   "json_paths": [
+    "/localization_test_role/scope"
+   ]
+  },
+  {
+   "file": "reports/extension_v3/holes_field8_f4_s42_v3_summary.json",
+   "sha256": "0eb4467fd899a1dad7c2894fe908feef1864dde5c7d469d35880e2dcaf485890",
+   "json_paths": [
+    "/localization_test_role/scope"
+   ]
+  },
+  {
+   "file": "reports/extension_v3/holes_field_temporal_s42_summary.json",
+   "sha256": "5987c220d2d28a8607a5f1bfe7bbf8135dba28c53200bf5116590206ed8062ca",
+   "json_paths": [
+    "/localization_test_role/scope"
+   ]
+  },
+  {
+   "file": "reports/extension_v6/holes_strict_loco_E25_door_LH_FRT_f0_s42_metrics.json",
+   "sha256": "526eaf49b3e5979add0609d27098f20b187a6037bcaf2498a08b85d96c55d1ea",
+   "json_paths": [
+    "/test_role_localization/scope"
+   ]
+  },
+  {
+   "file": "reports/extension_v6/holes_strict_loco_E25_door_LH_RR_f0_s42_metrics.json",
+   "sha256": "c773644330509defef0d437b78ed56c4836a2ff5fa074edfe917125043f3b0f3",
+   "json_paths": [
+    "/test_role_localization/scope"
+   ]
+  },
+  {
+   "file": "reports/extension_v6/holes_strict_loco_E25_door_RH_f0_s42_metrics.json",
+   "sha256": "47d0ca82480c7f5f4411842e670e6c01cede7cca710202f1e979ed1695b0277c",
+   "json_paths": [
+    "/test_role_localization/scope"
+   ]
+  },
+  {
+   "file": "reports/extension_v6/holes_strict_loco_E30_E38_door_RH_f0_s42_metrics.json",
+   "sha256": "4f988db14e45541f08cfe9af0eb67e6b898cfc124fb525e2be131cbe7cc1b417",
+   "json_paths": [
+    "/test_role_localization/scope"
+   ]
+  },
+  {
+   "file": "reports/extension_v6/holes_strict_loco_E30_door_LH_FRT_f0_s42_metrics.json",
+   "sha256": "d99ca545c2feab94f7cd464584fc642de05861d690a839cfdc0f8b4fab0cd557",
+   "json_paths": [
+    "/test_role_localization/scope"
+   ]
+  },
+  {
+   "file": "reports/extension_v6/holes_strict_loco_E30_door_LH_RR_f0_s42_metrics.json",
+   "sha256": "3b441e24e87a4fe2039b9931ac57a9fc3c8ece58a915e77973e55fe923d5b78a",
+   "json_paths": [
+    "/test_role_localization/scope"
+   ]
+  },
+  {
+   "file": "reports/extension_v6/holes_strict_loco_E38_door_LH_FRT_f0_s42_metrics.json",
+   "sha256": "5874d3ba113202185a708b2bf2858e9aa40782075445c36f6b416e5be9a62c78",
+   "json_paths": [
+    "/test_role_localization/scope"
+   ]
+  },
+  {
+   "file": "reports/extension_v6/holes_strict_loco_E38_door_LH_RR_f0_s42_metrics.json",
+   "sha256": "e93d2a2392026f108bbbb30413042ce533faa7c8f64c45686714b94c4f159667",
+   "json_paths": [
+    "/test_role_localization/scope"
+   ]
+  }
+ ],
+ "affected_logs": [
+  {
+   "file": "reports/extension_v3/logs/holes_f1_eval.log",
+   "sha256": "ffc1ea13fa84ded90b13e55049cd065ded02764f6c7bde595af07bce4e114826"
+  },
+  {
+   "file": "reports/extension_v3/logs/holes_f2_eval.log",
+   "sha256": "a2b4f0e821352478d012b304bc63d225a80e2f962b9ec5607f7165660f15ea10"
+  },
+  {
+   "file": "reports/extension_v3/logs/holes_f3_eval.log",
+   "sha256": "db4984343d94bad07d3b30105d86d1d5b2179520049361a9985e9bc2a18e504e"
+  },
+  {
+   "file": "reports/extension_v3/logs/holes_f4_eval.log",
+   "sha256": "badbf40b47f0bfcc23a5e8295070c4814cebd42ad578bad168a1d2e6ff946a03"
+  },
+  {
+   "file": "reports/extension_v3/logs/holes_temporal_eval.log",
+   "sha256": "b128e1e42ab91ac2b66a3f363b4e470d5a99763e79cb7b72a929bcf2a766d1ae"
+  }
+ ],
+ "not_affected": "Development reports that call localization(roles['val'], ...) (reports/holes_*_validation/, reports/field_v2_development_*) describe VAL correctly.",
+ "handling": "Artifacts are kept unchanged (protocol rule: nothing existing is overwritten); this record is the correction. The sha256 values identify the uncorrected files.",
+ "code_change": "2026-11-10: localization(labels, features, role='val') takes the role and writes LOCALIZATION_SCOPE[role]; the three TEST-role callers pass role='test'. Numerical outputs are unchanged (metadata only).",
+ "manuscript_impact": "None. The manuscript (v3-v7) already describes these values as TEST-role field coordinates (Table 3 test PCK, Section 5.5 unseen-condition localization).",
+ "amendments": [
+  {
+   "date": "2026-11-10T14:01:37+09:00",
+   "reason": "v7 review 3.2: the first version listed the five logs by path only, while the v7 response said they were recorded with sha256.",
+   "change": "sha256 added for the five affected logs. Each value equals the hash the reviewer recorded at review time (reports/논문초안_v7_리뷰_20261110/근거대조.json, scope_errata.log_verification), so the logs were unchanged."
+  }
+ ]
+}

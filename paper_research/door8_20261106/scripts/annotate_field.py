@@ -7,25 +7,31 @@ import argparse,datetime,sys
 from pathlib import Path
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
 from door8.core import ROOT,dump,now,outpath,read_json,read_jsonl,sha256
-KEYS=['bolt_tl','bolt_tr','bolt_bl','bolt_br','corner_hinge','corner_latch']
-
-
-def validate_label(row,annotator):
-    if not annotator.strip():raise ValueError('작업자 이름 또는 식별자를 입력하세요.')
-    for k in KEYS:
-        if row['visible'][k] and row['points'][k] is None:raise ValueError(f'{k}: 점을 클릭하거나 가려짐(V)을 표시하세요.')
-    if sha256(row['rgb'])!=row['rgb_sha256']:raise ValueError('원본 영상이 고정 스냅샷 이후 변경됐습니다.')
+from door8.annotations import KEYS,validate_label
 
 
 def main():
-    parser=argparse.ArgumentParser(description=__doc__);parser.add_argument('--list',action='store_true');args=parser.parse_args()
+    parser=argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--list',action='store_true')
+    parser.add_argument('--web',action='store_true',help='DISPLAY 없이 로컬 브라우저에서 주석')
+    parser.add_argument('--port',type=int,default=8765,help='브라우저 주석 포트 (기본 8765)')
+    args=parser.parse_args()
     rows=read_jsonl(ROOT/'data/field40_v2_queue.jsonl');labeldir=outpath('data/annotations/field40_v2')
     if args.list:
         print(f'Human labels: {sum((labeldir/(r["annotation_id"]+".json")).exists() for r in rows)}/{len(rows)}');return
+    if args.web:
+        from annotate_field_web import serve
+        serve(args.port);return
     import tkinter as tk
     from tkinter import ttk,messagebox
     from PIL import Image,ImageTk
-    win=tk.Tk();win.title('Door8 — 수동 현장 홀 좌표 (원본 읽기 전용)');win.geometry('1400x980')
+    try:win=tk.Tk()
+    except tk.TclError as exc:
+        if 'display' not in str(exc).lower():raise
+        print('GUI 화면(DISPLAY)에 연결할 수 없어 브라우저 주석 모드로 전환합니다.',flush=True)
+        from annotate_field_web import serve
+        serve(args.port);return
+    win.title('Door8 — 수동 현장 홀 좌표 (원본 읽기 전용)');win.geometry('1400x980')
     state={'index':0,'scale':1.,'ox':0.,'oy':0.,'image':None,'photo':None,'row':None,'pan':None}
     author=tk.StringVar();selected=tk.StringVar(value=KEYS[0]);status=tk.StringVar();title=tk.StringVar()
     top=ttk.Frame(win);top.pack(fill='x',padx=8,pady=6)

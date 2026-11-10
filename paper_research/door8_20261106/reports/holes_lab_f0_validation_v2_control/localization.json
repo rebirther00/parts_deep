@@ -1,0 +1,37 @@
+{
+  "all": {
+    "visible_points": 48,
+    "matched": 34,
+    "pck8": 0.6875,
+    "pck16": 0.6875,
+    "median_error_px_when_matched": 2.9956316567658927,
+    "p95_error_px_when_matched": 5.619431442230661
+  },
+  "per_channel": {
+    "bolt": {
+      "visible_points": 32,
+      "matched": 32,
+      "pck8": 1.0,
+      "pck16": 1.0,
+      "median_error_px_when_matched": 2.9027769239703387,
+      "p95_error_px_when_matched": 4.876234620431588
+    },
+    "hinge": {
+      "visible_points": 8,
+      "matched": 2,
+      "pck8": 0.125,
+      "pck16": 0.125,
+      "median_error_px_when_matched": 349.73984607786167,
+      "p95_error_px_when_matched": 660.3470245196215
+    },
+    "latch": {
+      "visible_points": 8,
+      "matched": 0,
+      "pck8": 0.0,
+      "pck16": 0.0,
+      "median_error_px_when_matched": null,
+      "p95_error_px_when_matched": null
+    }
+  },
+  "scope": "Eight field checkpoint-selection VAL images; missing detections fail PCK; not independent test."
+}

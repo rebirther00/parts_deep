@@ -1,0 +1,17 @@
+{
+  "column_asset": "figures/v3c_fig1_method.png",
+  "column_sha256": "669885150b939ed6f94fd9b154b947a35c9042a810fab9a799faee324a63f10b",
+  "wide_asset": "figures/v3_fig1_method.png",
+  "wide_sha256": "c2114704f0ca8dbc16645b735cefb6e287e31ff736a5f487fc6497b9e5d06755",
+  "column_has_pipeline": false,
+  "wide_has_pipeline": true,
+  "caption_claims_pipeline": true,
+  "embedded_matches": {
+    "manuscript/논문초안_v9.hwpx": [
+      "BinData/BIN0001.png"
+    ],
+    "manuscript/논문초안_v9.docx": [
+      "word/media/image1.png"
+    ]
+  }
+}

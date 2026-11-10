@@ -1,0 +1,389 @@
+{
+  "review_date": "2026-11-10",
+  "original_sha256": {
+    "manuscript/논문초안_v6.hwpx": "3c52fb86b5f94bd21cf9af36b8bce93d4e14bfd5ad87b186371bf16c02b5b7f5",
+    "manuscript/논문초안_v6.pdf": "1169b9181730fab07a119ac25d409ede88abb4cd29593f06a26a795da15d84d6",
+    "manuscript/논문초안_v6.docx": "9a149b8f6d96770b6c17986edcaf2a258256e0edbb259b146c46967ba1d45e6f",
+    "manuscript/논문초안_v6.md": "bac18acf4eb92cec9a9da1e456f6c28370a8a7184ca4449e4c1064bf0f5e04fc",
+    "manuscript/v6_작성확인사항.md": "a644fea769d93209ffa2bf1d2d0676853f77d03b676af615c9f992f5449d2931",
+    "manuscript/v6_차별성_검토.md": "23e76e56f4ad727bbd923b3c14c2cef63b9f01365ed25e6095764d9cf14d87bc"
+  },
+  "native_hwpx": {
+    "top_paragraphs": 121,
+    "all_paragraphs": 568,
+    "tables": 22,
+    "figures": 4,
+    "abstract_words": 150
+  },
+  "seen_runs_checked": 120,
+  "seen_summary": {
+    "hole": {
+      "fold0": {
+        "unknown_doors": [
+          74,
+          74
+        ],
+        "known_door_decisions": {
+          "n": 518,
+          "correct": 518,
+          "abstained": 0,
+          "wrong": 0
+        },
+        "auroc_mean": 1.0,
+        "auroc_min": 1.0
+      },
+      "oof": {
+        "unknown_doors": [
+          361,
+          361
+        ],
+        "known_door_decisions": {
+          "n": 2527,
+          "correct": 2527,
+          "abstained": 0,
+          "wrong": 0
+        },
+        "auroc_mean": 0.9976142742705214,
+        "auroc_min": 0.9880851063829788
+      }
+    },
+    "rgb": {
+      "fold0": {
+        "unknown_doors": [
+          74,
+          74
+        ],
+        "known_door_decisions": {
+          "n": 518,
+          "correct": 501,
+          "abstained": 17,
+          "wrong": 0
+        },
+        "auroc_mean": 1.0,
+        "auroc_min": 1.0
+      },
+      "oof": {
+        "unknown_doors": [
+          360,
+          361
+        ],
+        "known_door_decisions": {
+          "n": 2527,
+          "correct": 2442,
+          "abstained": 79,
+          "wrong": 6
+        },
+        "auroc_mean": 0.9954579937330718,
+        "auroc_min": 0.8227239353891336
+      }
+    },
+    "rgbe": {
+      "fold0": {
+        "unknown_doors": [
+          74,
+          74
+        ],
+        "known_door_decisions": {
+          "n": 518,
+          "correct": 497,
+          "abstained": 21,
+          "wrong": 0
+        },
+        "auroc_mean": 0.9993030189398323,
+        "auroc_min": 0.9969158200290276
+      },
+      "oof": {
+        "unknown_doors": [
+          360,
+          361
+        ],
+        "known_door_decisions": {
+          "n": 2527,
+          "correct": 2462,
+          "abstained": 59,
+          "wrong": 6
+        },
+        "auroc_mean": 0.9884597514220308,
+        "auroc_min": 0.5440161527165932
+      }
+    }
+  },
+  "mask_numerical_check": {
+    "changed_frame_acceptances": 0,
+    "max_score_change": 0.00021711908636379285,
+    "max_auroc_change": 0.0
+  },
+  "strict_runs_checked": 8,
+  "distinct_weight_hashes": 8,
+  "strict_runs": {
+    "E25_door_LH_FRT": {
+      "unknown_doors": [
+        2,
+        2
+      ],
+      "unknown_frames": [
+        40,
+        40
+      ],
+      "known": {
+        "n": 72,
+        "correct": 72,
+        "abstained": 0,
+        "wrong": 0
+      },
+      "auc": 1.0,
+      "annotation_exclusion_checked": true,
+      "checkpoint_images_exclusion_checked": true,
+      "lab_train": 82,
+      "field_train": 7,
+      "field_val": 7,
+      "best_epoch": 66,
+      "min_distance_mm": 38.66332807135245,
+      "test_points": 48,
+      "localization_scope_string": "Eight field checkpoint-selection VAL images; missing detections fail PCK; not independent test."
+    },
+    "E25_door_LH_RR": {
+      "unknown_doors": [
+        14,
+        14
+      ],
+      "unknown_frames": [
+        278,
+        278
+      ],
+      "known": {
+        "n": 60,
+        "correct": 60,
+        "abstained": 0,
+        "wrong": 0
+      },
+      "auc": 1.0,
+      "annotation_exclusion_checked": true,
+      "checkpoint_images_exclusion_checked": true,
+      "lab_train": 82,
+      "field_train": 7,
+      "field_val": 7,
+      "best_epoch": 66,
+      "min_distance_mm": 47.93886608825164,
+      "test_points": 48,
+      "localization_scope_string": "Eight field checkpoint-selection VAL images; missing detections fail PCK; not independent test."
+    },
+    "E25_door_RH": {
+      "unknown_doors": [
+        14,
+        14
+      ],
+      "unknown_frames": [
+        280,
+        280
+      ],
+      "known": {
+        "n": 60,
+        "correct": 60,
+        "abstained": 0,
+        "wrong": 0
+      },
+      "auc": 1.0,
+      "annotation_exclusion_checked": true,
+      "checkpoint_images_exclusion_checked": true,
+      "lab_train": 82,
+      "field_train": 7,
+      "field_val": 7,
+      "best_epoch": 66,
+      "min_distance_mm": 65.4230534419371,
+      "test_points": 48,
+      "localization_scope_string": "Eight field checkpoint-selection VAL images; missing detections fail PCK; not independent test."
+    },
+    "E30_E38_door_RH": {
+      "unknown_doors": [
+        14,
+        14
+      ],
+      "unknown_frames": [
+        280,
+        280
+      ],
+      "known": {
+        "n": 60,
+        "correct": 60,
+        "abstained": 0,
+        "wrong": 0
+      },
+      "auc": 1.0,
+      "annotation_exclusion_checked": true,
+      "checkpoint_images_exclusion_checked": true,
+      "lab_train": 82,
+      "field_train": 7,
+      "field_val": 7,
+      "best_epoch": 67,
+      "min_distance_mm": 37.58243147307758,
+      "test_points": 48,
+      "localization_scope_string": "Eight field checkpoint-selection VAL images; missing detections fail PCK; not independent test."
+    },
+    "E30_door_LH_FRT": {
+      "unknown_doors": [
+        9,
+        9
+      ],
+      "unknown_frames": [
+        180,
+        180
+      ],
+      "known": {
+        "n": 65,
+        "correct": 65,
+        "abstained": 0,
+        "wrong": 0
+      },
+      "auc": 1.0,
+      "annotation_exclusion_checked": true,
+      "checkpoint_images_exclusion_checked": true,
+      "lab_train": 83,
+      "field_train": 7,
+      "field_val": 7,
+      "best_epoch": 69,
+      "min_distance_mm": 38.408389721099866,
+      "test_points": 48,
+      "localization_scope_string": "Eight field checkpoint-selection VAL images; missing detections fail PCK; not independent test."
+    },
+    "E30_door_LH_RR": {
+      "unknown_doors": [
+        10,
+        10
+      ],
+      "unknown_frames": [
+        200,
+        200
+      ],
+      "known": {
+        "n": 64,
+        "correct": 64,
+        "abstained": 0,
+        "wrong": 0
+      },
+      "auc": 1.0,
+      "annotation_exclusion_checked": true,
+      "checkpoint_images_exclusion_checked": true,
+      "lab_train": 82,
+      "field_train": 7,
+      "field_val": 7,
+      "best_epoch": 66,
+      "min_distance_mm": 67.66682974036144,
+      "test_points": 48,
+      "localization_scope_string": "Eight field checkpoint-selection VAL images; missing detections fail PCK; not independent test."
+    },
+    "E38_door_LH_FRT": {
+      "unknown_doors": [
+        5,
+        5
+      ],
+      "unknown_frames": [
+        100,
+        100
+      ],
+      "known": {
+        "n": 69,
+        "correct": 69,
+        "abstained": 0,
+        "wrong": 0
+      },
+      "auc": 1.0,
+      "annotation_exclusion_checked": true,
+      "checkpoint_images_exclusion_checked": true,
+      "lab_train": 82,
+      "field_train": 7,
+      "field_val": 7,
+      "best_epoch": 69,
+      "min_distance_mm": 41.242795951228686,
+      "test_points": 48,
+      "localization_scope_string": "Eight field checkpoint-selection VAL images; missing detections fail PCK; not independent test."
+    },
+    "E38_door_LH_RR": {
+      "unknown_doors": [
+        6,
+        6
+      ],
+      "unknown_frames": [
+        120,
+        120
+      ],
+      "known": {
+        "n": 68,
+        "correct": 68,
+        "abstained": 0,
+        "wrong": 0
+      },
+      "auc": 1.0,
+      "annotation_exclusion_checked": true,
+      "checkpoint_images_exclusion_checked": true,
+      "lab_train": 83,
+      "field_train": 7,
+      "field_val": 7,
+      "best_epoch": 69,
+      "min_distance_mm": 192.58072618152232,
+      "test_points": 48,
+      "localization_scope_string": "Eight field checkpoint-selection VAL images; missing detections fail PCK; not independent test."
+    }
+  },
+  "strict_summary": {
+    "unknown_doors": [
+      74,
+      74
+    ],
+    "known_door_decisions": {
+      "n": 518,
+      "correct": 518,
+      "abstained": 0,
+      "wrong": 0
+    },
+    "auroc_mean": 1.0,
+    "auroc_min": 1.0
+  },
+  "strict_excluded_point_summary": {
+    "n": 48,
+    "median": 2.5257872918057007,
+    "maximum": 5.152643787416312
+  },
+  "U_nonmajority_abstention_counterexamples": [
+    {
+      "split": "1:depth",
+      "group": "20261021/E30_E38_door_RH/s_122025",
+      "true": "E30_E38_door_RH",
+      "predicted": "E30_E38_door_RH",
+      "U": 1.1056504354325132,
+      "n_frames": 20,
+      "votes": {
+        "E30_door_LH_RR": 6,
+        "None": 5,
+        "E30_E38_door_RH": 9
+      }
+    },
+    {
+      "split": "temporal:depth",
+      "group": "20261012/E30_E38_door_RH/s_084115",
+      "true": "E30_E38_door_RH",
+      "predicted": "E30_E38_door_RH",
+      "U": 1.0117184046207457,
+      "n_frames": 20,
+      "votes": {
+        "E30_door_LH_RR": 6,
+        "None": 5,
+        "E30_E38_door_RH": 9
+      }
+    },
+    {
+      "split": "temporal:depth",
+      "group": "20261021/E30_E38_door_RH/s_122025",
+      "true": "E30_E38_door_RH",
+      "predicted": "E30_E38_door_RH",
+      "U": 1.1683975099663348,
+      "n_frames": 20,
+      "votes": {
+        "E30_door_LH_RR": 8,
+        "None": 3,
+        "E30_E38_door_RH": 9
+      }
+    }
+  ],
+  "scope": "Stored predictions, frozen annotations, training metadata, checkpoint/feature hashes; no training or original result changes."
+}

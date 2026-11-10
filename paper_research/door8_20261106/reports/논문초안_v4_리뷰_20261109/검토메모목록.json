@@ -1,0 +1,58 @@
+[
+  {
+    "number": 1,
+    "field_id": "540556201",
+    "paragraph_id": "0",
+    "heading": "필수 1 — 초록의 감독량 구분",
+    "text": "현재 문장은 교차검증과 시간 분할 모두 학습 8장·선택 8장을 쓴 것으로 읽힙니다. 실제 교차검증은 폴드마다 8/8장, 시간 분할은 이전 기간의 학습 24장·선택 3장입니다(본문 4.2절과 Table 6은 맞음). 두 조건을 별도 문장으로 나누세요. 예: “Eight training and eight validation images per fold yielded 361/361 correct identifications. A separate temporal model using 24 training and three validation images from the earlier period identified all 133 later doors.” 전체 초록 수정 예시는 별도 검토서에 있습니다.",
+    "anchor_excerpt": "Excavator side doors of different models look alike but differ in the CAD distance D between two corner holes. In a fixed jig, we detect six hole landmarks with a heatmap network, convert the corner-hole pixel distance to millimeters with a jig scale"
+  },
+  {
+    "number": 2,
+    "field_id": "1453116781",
+    "paragraph_id": "2000484027",
+    "heading": "필수 2 — OOF 합산 곡선과 운용점의 정책 차이",
+    "text": "수치는 저장 점수 재계산 결과와 일치합니다. 다만 OOF 곡선은 서로 다른 5개 모델의 원시 점수를 합쳐 하나의 공통 임계값을 바꾸고, 사전 운용점은 폴드마다 따로 정한 검증 임계값의 결과를 합칩니다. 그래서 사각형이 합산 곡선 위에 놓이지 않을 수 있습니다. RGB에서는 0.9999238253인 영상이 수락되는 반면 다른 폴드의 0.9999997616인 영상은 거절됩니다. 본문/캡션에 이 차이를 밝혀 주세요. 합산 곡선은 탐색적 기술 통계이며 단일 배포 모델의 검증된 보류 곡선은 아닙니다. 추가 학습 없이 설명을 보완할 수 있습니다.",
+    "anchor_excerpt": "임계값 운용점의 선택에 따른 차이를 보기 위해, 저장된 점수로 영상 단위 판정 비율–오류율 곡선을 사후에 계산하였다(Fig. 4). CNN은 소프트맥스 최대값이 큰 영상부터, 홀 방법은 최근접 CAD 값과의 거리가 작은 영상부터 판정하도록 하고, 홀 방법의 보류 거리는 0~30 mm 범위에서 바꾸었다. 기하 검사를 통과하지 못한 영상은 홀 방법에서 항상 보류된다."
+  },
+  {
+    "number": 3,
+    "field_id": "934084773",
+    "paragraph_id": "1852669496",
+    "heading": "권고 1 — 임계값 동점과 연결선",
+    "text": "RGB OOF의 처음 세 실현 가능한 판정 비율은 50.662%, 58.516%, 63.105%입니다. 같은 점수의 영상이 함께 들어오므로 사이의 모든 비율이 실제 임계값으로 실현되지는 않습니다. 관측점 마커 또는 “연결선은 시각적 안내이며 동점 사이 중간 비율은 실제 운용점을 뜻하지 않는다”는 설명을 권합니다. OOF의 공통 임계값 곡선과 폴드별 임계값 사각형의 차이도 캡션에 명시하세요.",
+    "anchor_excerpt": "Fig. 4 Exploratory risk-coverage analysis from stored scores (image level). (a) Five-fold OOF; (b) temporal split; (c) fold-0 known test images versus the six unregistered E23 doors. Lines: CNN softmax threshold or hole reject distance (0 to 30 mm) s"
+  },
+  {
+    "number": 4,
+    "field_id": "2129782036",
+    "paragraph_id": "32773095",
+    "heading": "필수 3 — 30 mm 선정 경위",
+    "text": "RGB도 사후 임계값으로 E23을 분리할 수 있음을 공개한 점은 적절합니다. 마지막의 “CAD 치수 간격에 따라 정한 고정값 30 mm”는 선정 근거를 점검해 주세요. 기존 docs/실험계획.md에는 과거 개발에서 정한 설정으로 기록되어 있고, 최소 CAD 간격 41 mm의 절반은 20.5 mm입니다. 별도 도출 근거가 없다면 “과거 개발에서 정하고 본 평가 전에 고정한 CAD 거리 허용값 30 mm”로 쓰는 것이 정확합니다. 정답 영역은 인접 CAD 중간값과 보류 경계 중 안쪽 범위입니다. 시험 결과를 보고 임계값을 다시 맞추라는 뜻은 아닙니다.",
+    "anchor_excerpt": "E23(Fig. 4(c))에서 홀 방법은 보류 거리 30 mm까지 E23 영상을 하나도 수락하지 않았다. 사후에 임계값을 고르면 RGB CNN도 폴드 0의 정상 시험 영상을 모두 판정하면서 E23을 모두 거절하는 구간이 있었다(정상 영상 신뢰도 최소 0.999998, E23 최대 0.99962). RGBE CNN은 정상 영상 판정 비율 98.4% 이상에서 E23 영상을 수락하기 시작하였다. 따라서 이 자료에서는 CNN도 적절한 임계값으로 E23"
+  },
+  {
+    "number": 5,
+    "field_id": "1928608438",
+    "paragraph_id": "1293158075",
+    "heading": "권고 2 — 결론에 새 E23 분석 반영",
+    "text": "5.6절에서는 RGB도 정상 시험 영상을 모두 수락하면서 E23을 전부 거절할 사후 임계값 구간이 있었음을 보고했습니다. 결론에도 거절 자체의 일반적 우월성을 확인한 것은 아니라는 점을 짧게 연결하면 균형이 좋아집니다. 홀 방식의 의미는 충분히 떨어진 치수와 같은 홀 배치라는 조건에서 CAD 등록만으로 식별 대상을 확장한 사례입니다. 현재 정확도나 6/6 결과가 틀렸다는 지적은 아닙니다.",
+    "anchor_excerpt": "무작위 분할에서 외관 CNN의 정확도는 홀 방법과 비슷하였고 우월성은 확인되지 않았다. 차이는 판정 근거와 일부 조건에서 나타났다. CNN은 세션이 적은 E25 LH FRT 도어 1개를 두 분할에서 높은 신뢰도로 인접 형상군에 분류하였고, 검증 기준 임계값 운용점에서는 시간 분할의 정상 도어 133개 중 20~25개를 보류하였다. 홀 방법은 같은 조건에서 보류 없이 모든 도어를 맞혔으며, 등록 치수와 266 mm 떨어진 미등록 형상군 E23의 "
+  },
+  {
+    "number": 6,
+    "field_id": "1002989430",
+    "paragraph_id": "681143168",
+    "heading": "권고 3 — 잔차 통계의 실제 표본 수",
+    "text": "전체 입력은 7,104장이지만 잔차를 계산할 수 있는 영상 수는 픽셀 7,087장, 깊이 7,086장입니다. 깊이의 계산 가능한 CAD 거리 보류값도 잔차 통계에 포함됩니다. 각주에 이 분모를 밝히면 좋겠습니다. 전체 정확도의 분모는 계속 7,104장으로 유지합니다.",
+    "anchor_excerpt": "Table 5 Pixel-width versus depth-plane distance with the same detections (five-fold OOF, 7,104 images)"
+  },
+  {
+    "number": 7,
+    "field_id": "1232567931",
+    "paragraph_id": "1897820113",
+    "heading": "투고 전 확인 — 후기 기관명과 지정 문구",
+    "text": "현재 공식 기관명은 “한국산업기술기획평가원(KEIT)”입니다. 원고의 “한국산업기술평가관리원”은 예전 명칭입니다. https://www.keit.re.kr/ . 부처명·사업명·과제번호 및 사사 문구는 실제 협약서의 요구 문구로 확인해 주세요. 본 검토에서 이 과제의 지원 관계까지 검증한 것은 아닙니다.",
+    "anchor_excerpt": "이 논문은 【부처명 확인】·한국산업기술평가관리원(KEIT)의 【사업명 확인】 지원을 받아 수행된 연구임(과제번호 25453759, 굴착기 혼류 생산을 위한 로봇용접 및 AI 기반 영상 PAUT 복합 검사 시스템 개발)."
+  }
+]

@@ -1,0 +1,1016 @@
+{
+  "frame": {
+    "n": 1455,
+    "judged": 0,
+    "correct": 0,
+    "abstained": 1455,
+    "coverage": 0.0,
+    "accuracy_all": 0.0,
+    "accuracy_judged": null,
+    "macro_f1": 0.0,
+    "balanced_accuracy": 0.0,
+    "per_class": {
+      "E25_door_LH_FRT": {
+        "n": 40,
+        "correct": 0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0
+      },
+      "E25_door_LH_RR": {
+        "n": 279,
+        "correct": 0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0
+      },
+      "E25_door_RH": {
+        "n": 280,
+        "correct": 0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0
+      },
+      "E30_E38_door_RH": {
+        "n": 279,
+        "correct": 0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0
+      },
+      "E30_door_LH_FRT": {
+        "n": 180,
+        "correct": 0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0
+      },
+      "E30_door_LH_RR": {
+        "n": 198,
+        "correct": 0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0
+      },
+      "E38_door_LH_FRT": {
+        "n": 79,
+        "correct": 0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0
+      },
+      "E38_door_LH_RR": {
+        "n": 120,
+        "correct": 0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0
+      }
+    },
+    "confusion": {
+      "E25_door_LH_FRT": {
+        "E25_door_LH_FRT": 0,
+        "E25_door_LH_RR": 0,
+        "E25_door_RH": 0,
+        "E30_E38_door_RH": 0,
+        "E30_door_LH_FRT": 0,
+        "E30_door_LH_RR": 0,
+        "E38_door_LH_FRT": 0,
+        "E38_door_LH_RR": 0,
+        "ABSTAIN": 40
+      },
+      "E25_door_LH_RR": {
+        "E25_door_LH_FRT": 0,
+        "E25_door_LH_RR": 0,
+        "E25_door_RH": 0,
+        "E30_E38_door_RH": 0,
+        "E30_door_LH_FRT": 0,
+        "E30_door_LH_RR": 0,
+        "E38_door_LH_FRT": 0,
+        "E38_door_LH_RR": 0,
+        "ABSTAIN": 279
+      },
+      "E25_door_RH": {
+        "E25_door_LH_FRT": 0,
+        "E25_door_LH_RR": 0,
+        "E25_door_RH": 0,
+        "E30_E38_door_RH": 0,
+        "E30_door_LH_FRT": 0,
+        "E30_door_LH_RR": 0,
+        "E38_door_LH_FRT": 0,
+        "E38_door_LH_RR": 0,
+        "ABSTAIN": 280
+      },
+      "E30_E38_door_RH": {
+        "E25_door_LH_FRT": 0,
+        "E25_door_LH_RR": 0,
+        "E25_door_RH": 0,
+        "E30_E38_door_RH": 0,
+        "E30_door_LH_FRT": 0,
+        "E30_door_LH_RR": 0,
+        "E38_door_LH_FRT": 0,
+        "E38_door_LH_RR": 0,
+        "ABSTAIN": 279
+      },
+      "E30_door_LH_FRT": {
+        "E25_door_LH_FRT": 0,
+        "E25_door_LH_RR": 0,
+        "E25_door_RH": 0,
+        "E30_E38_door_RH": 0,
+        "E30_door_LH_FRT": 0,
+        "E30_door_LH_RR": 0,
+        "E38_door_LH_FRT": 0,
+        "E38_door_LH_RR": 0,
+        "ABSTAIN": 180
+      },
+      "E30_door_LH_RR": {
+        "E25_door_LH_FRT": 0,
+        "E25_door_LH_RR": 0,
+        "E25_door_RH": 0,
+        "E30_E38_door_RH": 0,
+        "E30_door_LH_FRT": 0,
+        "E30_door_LH_RR": 0,
+        "E38_door_LH_FRT": 0,
+        "E38_door_LH_RR": 0,
+        "ABSTAIN": 198
+      },
+      "E38_door_LH_FRT": {
+        "E25_door_LH_FRT": 0,
+        "E25_door_LH_RR": 0,
+        "E25_door_RH": 0,
+        "E30_E38_door_RH": 0,
+        "E30_door_LH_FRT": 0,
+        "E30_door_LH_RR": 0,
+        "E38_door_LH_FRT": 0,
+        "E38_door_LH_RR": 0,
+        "ABSTAIN": 79
+      },
+      "E38_door_LH_RR": {
+        "E25_door_LH_FRT": 0,
+        "E25_door_LH_RR": 0,
+        "E25_door_RH": 0,
+        "E30_E38_door_RH": 0,
+        "E30_door_LH_FRT": 0,
+        "E30_door_LH_RR": 0,
+        "E38_door_LH_FRT": 0,
+        "E38_door_LH_RR": 0,
+        "ABSTAIN": 120
+      }
+    }
+  },
+  "session": {
+    "n": 73,
+    "judged": 0,
+    "correct": 0,
+    "abstained": 73,
+    "coverage": 0.0,
+    "accuracy_all": 0.0,
+    "accuracy_judged": null,
+    "macro_f1": 0.0,
+    "balanced_accuracy": 0.0,
+    "per_class": {
+      "E25_door_LH_FRT": {
+        "n": 2,
+        "correct": 0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "wilson95_recall": [
+          0.0,
+          0.6576197724933469
+        ]
+      },
+      "E25_door_LH_RR": {
+        "n": 14,
+        "correct": 0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "wilson95_recall": [
+          1.3877787807814457e-17,
+          0.2153108027376358
+        ]
+      },
+      "E25_door_RH": {
+        "n": 14,
+        "correct": 0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "wilson95_recall": [
+          1.3877787807814457e-17,
+          0.2153108027376358
+        ]
+      },
+      "E30_E38_door_RH": {
+        "n": 14,
+        "correct": 0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "wilson95_recall": [
+          1.3877787807814457e-17,
+          0.2153108027376358
+        ]
+      },
+      "E30_door_LH_FRT": {
+        "n": 9,
+        "correct": 0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "wilson95_recall": [
+          0.0,
+          0.2991450484195441
+        ]
+      },
+      "E30_door_LH_RR": {
+        "n": 10,
+        "correct": 0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "wilson95_recall": [
+          0.0,
+          0.2775327998628892
+        ]
+      },
+      "E38_door_LH_FRT": {
+        "n": 4,
+        "correct": 0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "wilson95_recall": [
+          0.0,
+          0.4898908364545973
+        ]
+      },
+      "E38_door_LH_RR": {
+        "n": 6,
+        "correct": 0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "wilson95_recall": [
+          2.7755575615628914e-17,
+          0.3903342879021653
+        ]
+      }
+    },
+    "confusion": {
+      "E25_door_LH_FRT": {
+        "E25_door_LH_FRT": 0,
+        "E25_door_LH_RR": 0,
+        "E25_door_RH": 0,
+        "E30_E38_door_RH": 0,
+        "E30_door_LH_FRT": 0,
+        "E30_door_LH_RR": 0,
+        "E38_door_LH_FRT": 0,
+        "E38_door_LH_RR": 0,
+        "ABSTAIN": 2
+      },
+      "E25_door_LH_RR": {
+        "E25_door_LH_FRT": 0,
+        "E25_door_LH_RR": 0,
+        "E25_door_RH": 0,
+        "E30_E38_door_RH": 0,
+        "E30_door_LH_FRT": 0,
+        "E30_door_LH_RR": 0,
+        "E38_door_LH_FRT": 0,
+        "E38_door_LH_RR": 0,
+        "ABSTAIN": 14
+      },
+      "E25_door_RH": {
+        "E25_door_LH_FRT": 0,
+        "E25_door_LH_RR": 0,
+        "E25_door_RH": 0,
+        "E30_E38_door_RH": 0,
+        "E30_door_LH_FRT": 0,
+        "E30_door_LH_RR": 0,
+        "E38_door_LH_FRT": 0,
+        "E38_door_LH_RR": 0,
+        "ABSTAIN": 14
+      },
+      "E30_E38_door_RH": {
+        "E25_door_LH_FRT": 0,
+        "E25_door_LH_RR": 0,
+        "E25_door_RH": 0,
+        "E30_E38_door_RH": 0,
+        "E30_door_LH_FRT": 0,
+        "E30_door_LH_RR": 0,
+        "E38_door_LH_FRT": 0,
+        "E38_door_LH_RR": 0,
+        "ABSTAIN": 14
+      },
+      "E30_door_LH_FRT": {
+        "E25_door_LH_FRT": 0,
+        "E25_door_LH_RR": 0,
+        "E25_door_RH": 0,
+        "E30_E38_door_RH": 0,
+        "E30_door_LH_FRT": 0,
+        "E30_door_LH_RR": 0,
+        "E38_door_LH_FRT": 0,
+        "E38_door_LH_RR": 0,
+        "ABSTAIN": 9
+      },
+      "E30_door_LH_RR": {
+        "E25_door_LH_FRT": 0,
+        "E25_door_LH_RR": 0,
+        "E25_door_RH": 0,
+        "E30_E38_door_RH": 0,
+        "E30_door_LH_FRT": 0,
+        "E30_door_LH_RR": 0,
+        "E38_door_LH_FRT": 0,
+        "E38_door_LH_RR": 0,
+        "ABSTAIN": 10
+      },
+      "E38_door_LH_FRT": {
+        "E25_door_LH_FRT": 0,
+        "E25_door_LH_RR": 0,
+        "E25_door_RH": 0,
+        "E30_E38_door_RH": 0,
+        "E30_door_LH_FRT": 0,
+        "E30_door_LH_RR": 0,
+        "E38_door_LH_FRT": 0,
+        "E38_door_LH_RR": 0,
+        "ABSTAIN": 4
+      },
+      "E38_door_LH_RR": {
+        "E25_door_LH_FRT": 0,
+        "E25_door_LH_RR": 0,
+        "E25_door_RH": 0,
+        "E30_E38_door_RH": 0,
+        "E30_door_LH_FRT": 0,
+        "E30_door_LH_RR": 0,
+        "E38_door_LH_FRT": 0,
+        "E38_door_LH_RR": 0,
+        "ABSTAIN": 6
+      }
+    },
+    "wilson95_accuracy_all": [
+      0.0,
+      0.0499920079557311
+    ],
+    "ci_assumption": "Approximate independent sessions; repeated physical parts/lots may violate this assumption."
+  },
+  "session_predictions": [
+    {
+      "session_dir": "20260827/E25_door_LH_RR/s_134623",
+      "group_id": "20260827/E25_door_LH_RR/s_134623",
+      "class_name": "E25_door_LH_RR",
+      "pred": null,
+      "n_frames": 20,
+      "n_judged": 0,
+      "votes": {}
+    },
+    {
+      "session_dir": "20260827/E30_door_LH_FRT/s_123607",
+      "group_id": "20260827/E30_door_LH_FRT/s_123607",
+      "class_name": "E30_door_LH_FRT",
+      "pred": null,
+      "n_frames": 20,
+      "n_judged": 0,
+      "votes": {}
+    },
+    {
+      "session_dir": "20260828/E30_door_LH_FRT/s_164849",
+      "group_id": "20260828/E30_door_LH_FRT/s_164849",
+      "class_name": "E30_door_LH_FRT",
+      "pred": null,
+      "n_frames": 20,
+      "n_judged": 0,
+      "votes": {}
+    },
+    {
+      "session_dir": "20260831/E25_door_RH/s_072809",
+      "group_id": "20260831/E25_door_RH/s_072809",
+      "class_name": "E25_door_RH",
+      "pred": null,
+      "n_frames": 20,
+      "n_judged": 0,
+      "votes": {}
+    },
+    {
+      "session_dir": "20260831/E25_door_RH/s_080246",
+      "group_id": "20260831/E25_door_RH/s_080246",
+      "class_name": "E25_door_RH",
+      "pred": null,
+      "n_frames": 20,
+      "n_judged": 0,
+      "votes": {}
+    },
+    {
+      "session_dir": "20260831/E30_E38_door_RH/s_153733",
+      "group_id": "20260831/E30_E38_door_RH/s_153733",
+      "class_name": "E30_E38_door_RH",
+      "pred": null,
+      "n_frames": 20,
+      "n_judged": 0,
+      "votes": {}
+    },
+    {
+      "session_dir": "20260831/E38_door_LH_FRT/s_183313",
+      "group_id": "20260831/E38_door_LH_FRT/s_183313",
+      "class_name": "E38_door_LH_FRT",
+      "pred": null,
+      "n_frames": 20,
+      "n_judged": 0,
+      "votes": {}
+    },
+    {
+      "session_dir": "20260831/E38_door_LH_RR/s_104040",
+      "group_id": "20260831/E38_door_LH_RR/s_104040",
+      "class_name": "E38_door_LH_RR",
+      "pred": null,
+      "n_frames": 20,
+      "n_judged": 0,
+      "votes": {}
+    },
+    {
+      "session_dir": "20260901/E30_E38_door_RH/s_154005",
+      "group_id": "20260901/E30_E38_door_RH/s_154005",
+      "class_name": "E30_E38_door_RH",
+      "pred": null,
+      "n_frames": 20,
+      "n_judged": 0,
+      "votes": {}
+    },
+    {
+      "session_dir": "20260901/E30_door_LH_RR/s_150706",
+      "group_id": "20260901/E30_door_LH_RR/s_150706",
+      "class_name": "E30_door_LH_RR",
+      "pred": null,
+      "n_frames": 20,
+      "n_judged": 0,
+      "votes": {}
+    },
+    {
+      "session_dir": "20260903/E25_door_RH/s_102021",
+      "group_id": "20260903/E25_door_RH/s_102021",
+      "class_name": "E25_door_RH",
+      "pred": null,
+      "n_frames": 20,
+      "n_judged": 0,
+      "votes": {}
+    },
+    {
+      "session_dir": "20260903/E25_door_RH/s_121413",
+      "group_id": "20260903/E25_door_RH/s_121413",
+      "class_name": "E25_door_RH",
+      "pred": null,
+      "n_frames": 20,
+      "n_judged": 0,
+      "votes": {}
+    },
+    {
+      "session_dir": "20260903/E30_E38_door_RH/s_193550",
+      "group_id": "20260903/E30_E38_door_RH/s_193550",
+      "class_name": "E30_E38_door_RH",
+      "pred": null,
+      "n_frames": 19,
+      "n_judged": 0,
+      "votes": {}
+    },
+    {
+      "session_dir": "20260904/E25_door_LH_RR/s_145031",
+      "group_id": "20260904/E25_door_LH_RR/s_145031",
+      "class_name": "E25_door_LH_RR",
+      "pred": null,
+      "n_frames": 20,
+      "n_judged": 0,
+      "votes": {}
+    },
+    {
+      "session_dir": "20260904/E30_door_LH_FRT/s_075009",
+      "group_id": "20260904/E30_door_LH_FRT/s_075009",
+      "class_name": "E30_door_LH_FRT",
+      "pred": null,
+      "n_frames": 20,
+      "n_judged": 0,
+      "votes": {}
+    },
+    {
+      "session_dir": "20260905/E25_door_LH_RR/s_072121",
+      "group_id": "20260905/E25_door_LH_RR/s_072121",
+      "class_name": "E25_door_LH_RR",
+      "pred": null,
+      "n_frames": 20,
+      "n_judged": 0,
+      "votes": {}
+    },
+    {
+      "session_dir": "20260907/E30_door_LH_RR/s_143122",
+      "group_id": "20260907/E30_door_LH_RR/s_143122",
+      "class_name": "E30_door_LH_RR",
+      "pred": null,
+      "n_frames": 20,
+      "n_judged": 0,
+      "votes": {}
+    },
+    {
+      "session_dir": "20260910/E25_door_RH/s_102431",
+      "group_id": "20260910/E25_door_RH/s_102431",
+      "class_name": "E25_door_RH",
+      "pred": null,
+      "n_frames": 20,
+      "n_judged": 0,
+      "votes": {}
+    },
+    {
+      "session_dir": "20260910/E30_E38_door_RH/s_085608",
+      "group_id": "20260910/E30_E38_door_RH/s_085608",
+      "class_name": "E30_E38_door_RH",
+      "pred": null,
+      "n_frames": 20,
+      "n_judged": 0,
+      "votes": {}
+    },
+    {
+      "session_dir": "20260910/E38_door_LH_FRT/s_190535",
+      "group_id": "20260910/E38_door_LH_FRT/s_190535",
+      "class_name": "E38_door_LH_FRT",
+      "pred": null,
+      "n_frames": 20,
+      "n_judged": 0,
+      "votes": {}
+    },
+    {
+      "session_dir": "20260910/E38_door_LH_RR/s_121448",
+      "group_id": "20260910/E38_door_LH_RR/s_121448",
+      "class_name": "E38_door_LH_RR",
+      "pred": null,
+      "n_frames": 20,
+      "n_judged": 0,
+      "votes": {}
+    },
+    {
+      "session_dir": "20260911/E30_E38_door_RH/s_152046",
+      "group_id": "20260911/E30_E38_door_RH/s_152046",
+      "class_name": "E30_E38_door_RH",
+      "pred": null,
+      "n_frames": 20,
+      "n_judged": 0,
+      "votes": {}
+    },
+    {
+      "session_dir": "20260911/E30_door_LH_FRT/s_171006",
+      "group_id": "20260911/E30_door_LH_FRT/s_171006",
+      "class_name": "E30_door_LH_FRT",
+      "pred": null,
+      "n_frames": 20,
+      "n_judged": 0,
+      "votes": {}
+    },
+    {
+      "session_dir": "20260911/E38_door_LH_FRT/s_145644",
+      "group_id": "20260911/E38_door_LH_FRT/s_145644",
+      "class_name": "E38_door_LH_FRT",
+      "pred": null,
+      "n_frames": 19,
+      "n_judged": 0,
+      "votes": {}
+    },
+    {
+      "session_dir": "20260911/E38_door_LH_RR/s_134448",
+      "group_id": "20260911/E38_door_LH_RR/s_134448",
+      "class_name": "E38_door_LH_RR",
+      "pred": null,
+      "n_frames": 20,
+      "n_judged": 0,
+      "votes": {}
+    },
+    {
+      "session_dir": "20260912/E25_door_LH_RR/s_080202",
+      "group_id": "20260912/E25_door_LH_RR/s_080202",
+      "class_name": "E25_door_LH_RR",
+      "pred": null,
+      "n_frames": 20,
+      "n_judged": 0,
+      "votes": {}
+    },
+    {
+      "session_dir": "20260912/E30_door_LH_RR/s_123706",
+      "group_id": "20260912/E30_door_LH_RR/s_123706",
+      "class_name": "E30_door_LH_RR",
+      "pred": null,
+      "n_frames": 20,
+      "n_judged": 0,
+      "votes": {}
+    },
+    {
+      "session_dir": "20260914/E25_door_LH_RR/s_181822",
+      "group_id": "20260914/E25_door_LH_RR/s_181822",
+      "class_name": "E25_door_LH_RR",
+      "pred": null,
+      "n_frames": 20,
+      "n_judged": 0,
+      "votes": {}
+    },
+    {
+      "session_dir": "20260914/E25_door_RH/s_124221",
+      "group_id": "20260914/E25_door_RH/s_124221",
+      "class_name": "E25_door_RH",
+      "pred": null,
+      "n_frames": 20,
+      "n_judged": 0,
+      "votes": {}
+    },
+    {
+      "session_dir": "20260914/E38_door_LH_RR/s_152858",
+      "group_id": "20260914/E38_door_LH_RR/s_152858",
+      "class_name": "E38_door_LH_RR",
+      "pred": null,
+      "n_frames": 20,
+      "n_judged": 0,
+      "votes": {}
+    },
+    {
+      "session_dir": "20260915/E38_door_LH_RR/s_193928",
+      "group_id": "20260915/E38_door_LH_RR/s_193928",
+      "class_name": "E38_door_LH_RR",
+      "pred": null,
+      "n_frames": 20,
+      "n_judged": 0,
+      "votes": {}
+    },
+    {
+      "session_dir": "20260916/E25_door_LH_RR/s_125051",
+      "group_id": "20260916/E25_door_LH_RR/s_125051",
+      "class_name": "E25_door_LH_RR",
+      "pred": null,
+      "n_frames": 20,
+      "n_judged": 0,
+      "votes": {}
+    },
+    {
+      "session_dir": "20260916/E30_door_LH_RR/s_075306",
+      "group_id": "20260916/E30_door_LH_RR/s_075306",
+      "class_name": "E30_door_LH_RR",
+      "pred": null,
+      "n_frames": 19,
+      "n_judged": 0,
+      "votes": {}
+    },
+    {
+      "session_dir": "20260917/E25_door_LH_RR/s_153907",
+      "group_id": "20260917/E25_door_LH_RR/s_153907",
+      "class_name": "E25_door_LH_RR",
+      "pred": null,
+      "n_frames": 20,
+      "n_judged": 0,
+      "votes": {}
+    },
+    {
+      "session_dir": "20260917/E38_door_LH_RR/s_170221",
+      "group_id": "20260917/E38_door_LH_RR/s_170221",
+      "class_name": "E38_door_LH_RR",
+      "pred": null,
+      "n_frames": 20,
+      "n_judged": 0,
+      "votes": {}
+    },
+    {
+      "session_dir": "20260922/E25_door_RH/s_151323",
+      "group_id": "20260922/E25_door_RH/s_151323",
+      "class_name": "E25_door_RH",
+      "pred": null,
+      "n_frames": 20,
+      "n_judged": 0,
+      "votes": {}
+    },
+    {
+      "session_dir": "20260923/E38_door_LH_FRT/s_143114",
+      "group_id": "20260923/E38_door_LH_FRT/s_143114",
+      "class_name": "E38_door_LH_FRT",
+      "pred": null,
+      "n_frames": 20,
+      "n_judged": 0,
+      "votes": {}
+    },
+    {
+      "session_dir": "20260929/E25_door_LH_FRT/s_103125",
+      "group_id": "20260929/E25_door_LH_FRT/s_103125",
+      "class_name": "E25_door_LH_FRT",
+      "pred": null,
+      "n_frames": 20,
+      "n_judged": 0,
+      "votes": {}
+    },
+    {
+      "session_dir": "20260929/E25_door_LH_RR/s_085250",
+      "group_id": "20260929/E25_door_LH_RR/s_085250",
+      "class_name": "E25_door_LH_RR",
+      "pred": null,
+      "n_frames": 20,
+      "n_judged": 0,
+      "votes": {}
+    },
+    {
+      "session_dir": "20260929/E25_door_RH/s_094141",
+      "group_id": "20260929/E25_door_RH/s_094141",
+      "class_name": "E25_door_RH",
+      "pred": null,
+      "n_frames": 20,
+      "n_judged": 0,
+      "votes": {}
+    },
+    {
+      "session_dir": "20260929/E25_door_RH/s_100746",
+      "group_id": "20260929/E25_door_RH/s_100746",
+      "class_name": "E25_door_RH",
+      "pred": null,
+      "n_frames": 20,
+      "n_judged": 0,
+      "votes": {}
+    },
+    {
+      "session_dir": "20260929/E30_E38_door_RH/s_074439",
+      "group_id": "20260929/E30_E38_door_RH/s_074439",
+      "class_name": "E30_E38_door_RH",
+      "pred": null,
+      "n_frames": 20,
+      "n_judged": 0,
+      "votes": {}
+    },
+    {
+      "session_dir": "20260930/E25_door_LH_RR/s_121848",
+      "group_id": "20260930/E25_door_LH_RR/s_121848",
+      "class_name": "E25_door_LH_RR",
+      "pred": null,
+      "n_frames": 20,
+      "n_judged": 0,
+      "votes": {}
+    },
+    {
+      "session_dir": "20260930/E25_door_RH/s_124659",
+      "group_id": "20260930/E25_door_RH/s_124659",
+      "class_name": "E25_door_RH",
+      "pred": null,
+      "n_frames": 20,
+      "n_judged": 0,
+      "votes": {}
+    },
+    {
+      "session_dir": "20260930/E30_door_LH_RR/s_174022",
+      "group_id": "20260930/E30_door_LH_RR/s_174022",
+      "class_name": "E30_door_LH_RR",
+      "pred": null,
+      "n_frames": 20,
+      "n_judged": 0,
+      "votes": {}
+    },
+    {
+      "session_dir": "20261001/E25_door_LH_RR/s_104820",
+      "group_id": "20261001/E25_door_LH_RR/s_104820",
+      "class_name": "E25_door_LH_RR",
+      "pred": null,
+      "n_frames": 20,
+      "n_judged": 0,
+      "votes": {}
+    },
+    {
+      "session_dir": "20261001/E30_door_LH_FRT/s_082926",
+      "group_id": "20261001/E30_door_LH_FRT/s_082926",
+      "class_name": "E30_door_LH_FRT",
+      "pred": null,
+      "n_frames": 20,
+      "n_judged": 0,
+      "votes": {}
+    },
+    {
+      "session_dir": "20261001/E30_door_LH_RR/s_163649",
+      "group_id": "20261001/E30_door_LH_RR/s_163649",
+      "class_name": "E30_door_LH_RR",
+      "pred": null,
+      "n_frames": 20,
+      "n_judged": 0,
+      "votes": {}
+    },
+    {
+      "session_dir": "20261001/E30_door_LH_RR/s_173207",
+      "group_id": "20261001/E30_door_LH_RR/s_173207",
+      "class_name": "E30_door_LH_RR",
+      "pred": null,
+      "n_frames": 20,
+      "n_judged": 0,
+      "votes": {}
+    },
+    {
+      "session_dir": "20261002/E30_E38_door_RH/s_125238",
+      "group_id": "20261002/E30_E38_door_RH/s_125238",
+      "class_name": "E30_E38_door_RH",
+      "pred": null,
+      "n_frames": 20,
+      "n_judged": 0,
+      "votes": {}
+    },
+    {
+      "session_dir": "20261002/E30_E38_door_RH/s_132105",
+      "group_id": "20261002/E30_E38_door_RH/s_132105",
+      "class_name": "E30_E38_door_RH",
+      "pred": null,
+      "n_frames": 20,
+      "n_judged": 0,
+      "votes": {}
+    },
+    {
+      "session_dir": "20261006/E25_door_RH/s_104537",
+      "group_id": "20261006/E25_door_RH/s_104537",
+      "class_name": "E25_door_RH",
+      "pred": null,
+      "n_frames": 20,
+      "n_judged": 0,
+      "votes": {}
+    },
+    {
+      "session_dir": "20261012/E25_door_LH_RR/s_093024",
+      "group_id": "20261012/E25_door_LH_RR/s_093024",
+      "class_name": "E25_door_LH_RR",
+      "pred": null,
+      "n_frames": 20,
+      "n_judged": 0,
+      "votes": {}
+    },
+    {
+      "session_dir": "20261012/E30_E38_door_RH/s_081727",
+      "group_id": "20261012/E30_E38_door_RH/s_081727",
+      "class_name": "E30_E38_door_RH",
+      "pred": null,
+      "n_frames": 20,
+      "n_judged": 0,
+      "votes": {}
+    },
+    {
+      "session_dir": "20261012/E30_E38_door_RH/s_084115",
+      "group_id": "20261012/E30_E38_door_RH/s_084115",
+      "class_name": "E30_E38_door_RH",
+      "pred": null,
+      "n_frames": 20,
+      "n_judged": 0,
+      "votes": {}
+    },
+    {
+      "session_dir": "20261013/E30_E38_door_RH/s_074704",
+      "group_id": "20261013/E30_E38_door_RH/s_074704",
+      "class_name": "E30_E38_door_RH",
+      "pred": null,
+      "n_frames": 20,
+      "n_judged": 0,
+      "votes": {}
+    },
+    {
+      "session_dir": "20261013/E30_door_LH_FRT/s_092635",
+      "group_id": "20261013/E30_door_LH_FRT/s_092635",
+      "class_name": "E30_door_LH_FRT",
+      "pred": null,
+      "n_frames": 20,
+      "n_judged": 0,
+      "votes": {}
+    },
+    {
+      "session_dir": "20261016/E30_door_LH_RR/s_151445",
+      "group_id": "20261016/E30_door_LH_RR/s_151445",
+      "class_name": "E30_door_LH_RR",
+      "pred": null,
+      "n_frames": 20,
+      "n_judged": 0,
+      "votes": {}
+    },
+    {
+      "session_dir": "20261019/E25_door_RH/s_085137",
+      "group_id": "20261019/E25_door_RH/s_085137",
+      "class_name": "E25_door_RH",
+      "pred": null,
+      "n_frames": 20,
+      "n_judged": 0,
+      "votes": {}
+    },
+    {
+      "session_dir": "20261019/E30_door_LH_FRT/s_104043",
+      "group_id": "20261019/E30_door_LH_FRT/s_104043",
+      "class_name": "E30_door_LH_FRT",
+      "pred": null,
+      "n_frames": 20,
+      "n_judged": 0,
+      "votes": {}
+    },
+    {
+      "session_dir": "20261020/E25_door_LH_RR/s_081951",
+      "group_id": "20261020/E25_door_LH_RR/s_081951",
+      "class_name": "E25_door_LH_RR",
+      "pred": null,
+      "n_frames": 19,
+      "n_judged": 0,
+      "votes": {}
+    },
+    {
+      "session_dir": "20261020/E30_E38_door_RH/s_103859",
+      "group_id": "20261020/E30_E38_door_RH/s_103859",
+      "class_name": "E30_E38_door_RH",
+      "pred": null,
+      "n_frames": 20,
+      "n_judged": 0,
+      "votes": {}
+    },
+    {
+      "session_dir": "20261021/E25_door_LH_RR/s_143912",
+      "group_id": "20261021/E25_door_LH_RR/s_143912",
+      "class_name": "E25_door_LH_RR",
+      "pred": null,
+      "n_frames": 20,
+      "n_judged": 0,
+      "votes": {}
+    },
+    {
+      "session_dir": "20261021/E30_E38_door_RH/s_104105",
+      "group_id": "20261021/E30_E38_door_RH/s_104105",
+      "class_name": "E30_E38_door_RH",
+      "pred": null,
+      "n_frames": 20,
+      "n_judged": 0,
+      "votes": {}
+    },
+    {
+      "session_dir": "20261021/E30_E38_door_RH/s_122025",
+      "group_id": "20261021/E30_E38_door_RH/s_122025",
+      "class_name": "E30_E38_door_RH",
+      "pred": null,
+      "n_frames": 20,
+      "n_judged": 0,
+      "votes": {}
+    },
+    {
+      "session_dir": "20261021/E30_door_LH_RR/s_082039",
+      "group_id": "20261021/E30_door_LH_RR/s_082039",
+      "class_name": "E30_door_LH_RR",
+      "pred": null,
+      "n_frames": 20,
+      "n_judged": 0,
+      "votes": {}
+    },
+    {
+      "session_dir": "20261021/E30_door_LH_RR/s_084950",
+      "group_id": "20261021/E30_door_LH_RR/s_084950",
+      "class_name": "E30_door_LH_RR",
+      "pred": null,
+      "n_frames": 19,
+      "n_judged": 0,
+      "votes": {}
+    },
+    {
+      "session_dir": "20261022/E25_door_LH_RR/s_100956",
+      "group_id": "20261022/E25_door_LH_RR/s_100956",
+      "class_name": "E25_door_LH_RR",
+      "pred": null,
+      "n_frames": 20,
+      "n_judged": 0,
+      "votes": {}
+    },
+    {
+      "session_dir": "20261022/E25_door_RH/s_104305",
+      "group_id": "20261022/E25_door_RH/s_104305",
+      "class_name": "E25_door_RH",
+      "pred": null,
+      "n_frames": 20,
+      "n_judged": 0,
+      "votes": {}
+    },
+    {
+      "session_dir": "20261023/E25_door_RH/s_100812",
+      "group_id": "20261023/E25_door_RH/s_100812",
+      "class_name": "E25_door_RH",
+      "pred": null,
+      "n_frames": 20,
+      "n_judged": 0,
+      "votes": {}
+    },
+    {
+      "session_dir": "20261026/E25_door_LH_FRT/s_100727",
+      "group_id": "20261026/E25_door_LH_FRT/s_100727",
+      "class_name": "E25_door_LH_FRT",
+      "pred": null,
+      "n_frames": 20,
+      "n_judged": 0,
+      "votes": {}
+    },
+    {
+      "session_dir": "20261027/E30_door_LH_FRT/s_081034",
+      "group_id": "20261027/E30_door_LH_FRT/s_081034",
+      "class_name": "E30_door_LH_FRT",
+      "pred": null,
+      "n_frames": 20,
+      "n_judged": 0,
+      "votes": {}
+    },
+    {
+      "session_dir": "20261028/E30_door_LH_FRT/s_103554",
+      "group_id": "20261028/E30_door_LH_FRT/s_103554",
+      "class_name": "E30_door_LH_FRT",
+      "pred": null,
+      "n_frames": 20,
+      "n_judged": 0,
+      "votes": {}
+    }
+  ]
+}

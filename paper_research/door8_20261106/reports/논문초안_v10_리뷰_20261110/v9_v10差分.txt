@@ -1,0 +1,29 @@
+--- v9
++++ v10
+@@ -6,7 +6,7 @@
+ 
+ Minsu Lee^*^, Jinho Lee, Heeyoung Shin, Youngil Shin
+ 
+-Korea Construction Equipment Technology Institute, 36 Sandan-ro, Gunsan-si, Jeonbuk State 【우편번호】, Republic of Korea
++Korea Construction Equipment Technology Institute, 36 Sandan-ro, Gunsan-si, Jeonbuk State 54004, Republic of Korea
+ ^*^ Corresponding author. E-mail address: minsu.lee@koceti.re.kr (Minsu Lee)
+ 
+ ## ABSTRACT
+@@ -17,7 +17,7 @@
+ 
+ ## 1. 서 론
+ 
+-다품종 혼류 생산에서는 작업 대상 부품의 품종을 먼저 식별해야 용접·조립 조건과 로봇 작업 경로를 선택할 수 있다. 굴착기 측면 도어는 기종(E25·E30·E38)과 위치(좌·우, 앞·뒤)에 따라 여러 형상군으로 나뉘지만, 같은 공정의 박판 프레스 부품이므로 외관과 표면 상태가 서로 비슷하다. 이러한 부품의 영상 식별에는 외관 기반 합성곱 신경망(CNN)[1]이 널리 쓰이며, 현장 영상으로 학습하면 높은 정확도를 얻을 수 있다[2]. 그러나 외관 분류기에서는 영상에서 배우는 특징과 품종을 구분하는 기준이 같은 가중치 안에 함께 들어 있다. 이미 학습한 품종은 출력 마스킹으로 판정에서 뺄 수 있지만, 고정 출력 분류기는 학습하지 않은 품종의 이름을 출력할 수 없고 그 입력을 기존 품종 중 하나로 출력할 수 있다[3,4]. 새 품종을 식별하려면 그 품종의 영상으로 분류기를 다시 학습하거나 확장해야 하며, 판정의 신뢰성을 물리량으로 설명하기도 어렵다.
++다품종 혼류 생산에서는 작업 대상 부품의 품종을 먼저 식별해야 용접·조립 조건과 로봇 작업 경로를 선택할 수 있다. 굴착기 측면 도어는 기종(E25·E30·E38)과 위치(좌·우, 앞·뒤)에 따라 여러 형상군으로 나뉘지만, 같은 공정의 박판 프레스 부품이므로 외관과 표면 상태가 서로 비슷하다. 이러한 부품의 영상 식별에는 외관 기반 합성곱 신경망(CNN)[1]이 널리 쓰이며, 외관이 유사한 산업 부품의 식별에는 2차원 영상과 3차원 점군을 이용한 방법이 비교 연구되었다[2]. 그러나 외관 분류기에서는 영상에서 배우는 특징과 품종을 구분하는 기준이 같은 가중치 안에 함께 들어 있다. 이미 학습한 품종은 출력 마스킹으로 판정에서 뺄 수 있지만, 고정 출력 분류기는 학습하지 않은 품종의 이름을 출력할 수 없고 그 입력을 기존 품종 중 하나로 출력할 수 있다[3,4]. 새 품종을 식별하려면 그 품종의 영상으로 분류기를 다시 학습하거나 확장해야 하며, 판정의 신뢰성을 물리량으로 설명하기도 어렵다.
+ 
+ 대상 도어의 형상군 차이는 설계 치수로 정의된다. 세로 프레임 상단의 두 모서리 홀 사이 거리 D가 형상군마다 다르고(Table 1), 모든 형상군이 같은 종류의 홀 배치를 공유한다. 본 연구는 이 구조를 이용하여 영상에서 학습하는 검출 가중치와 품종별 판정 목록을 분리한다. 검출기는 모든 형상군에 공통인 홀 6점만 출력하고, 품종의 판정은 CAD 치수 목록과의 대조로 한다. 형상군은 측정 거리를 CAD 값과 대조하여 정하며, 어느 등록값과도 맞지 않으면 보류한다. 이는 기하 모델을 영상 특징과 대조하는 모델 기반 인식[5]과, 클래스를 속성으로 기술하여 학습하지 않은 클래스를 인식하는 속성 기반 분류[6]의 생각을 생산 부품 식별에 적용한 것이다. 여기서는 CAD 치수가 클래스 속성의 역할을 한다. 판금 부품에서는 학습 기반 코너 검출로 위치를 추정한 연구[7]와 CAD 정보로 홀·슬롯 치수를 측정한 연구[8]가 있으나, 이들은 위치 추정과 치수 검사를 다룬다.
+ 
+@@ -43,7 +43,7 @@
+ 
+ 제안 방법은 영상에서 학습하는 검출 가중치와 품종별 판정 목록을 분리한다(Fig. 1). 학습하는 부분은 모든 형상군에 공통인 홀 6점의 검출기이며, 형상군 라벨을 출력하지 않는다. 판정 목록은 형상군별 CAD 거리 D이다. 형상군 정보는 학습 영상의 구성, 현장 좌표 표본의 선택, 축척 보정에도 쓰이므로, 여기서 분리는 검출 가중치와 판정 목록 사이의 운영상 분리를 뜻한다. 검출된 두 모서리 홀의 거리를 밀리미터로 바꾸고 가장 가까운 CAD 값을 선택하며, 그 차이가 30 mm를 넘으면 보류한다. 30 mm는 과거 개발에서 정하고 본 평가의 첫 프로토콜부터 고정한 값이다. 형상군의 추가와 제거는 판정 목록의 변경이며 검출기의 재학습을 요구하지 않는다. 다만 새 형상군은 같은 홀 배치와 기하 검사를 만족해야 하고, 그 CAD 값과 기존 값의 간격이 측정 잔차에 비해 충분해야 한다.
+ 
+-![Fig. 1 (a) Field image of an E38 LH FRT door with the six detected holes and the measured distance D; (b) decision pipeline. The detector is shared by all classes; the decision list holds the CAD values. The scale S is fit on training sessions only](../figures/v3_fig1_method.png)
++![Fig. 1 (a) Field image of an E38 LH FRT door with the six detected holes and the measured distance D; (b) decision pipeline. The detector is shared by all classes; the decision list holds the CAD values. The scale S is fit on training sessions only](../figures/v10c_fig1_method.png)
+ 
+ ### 3.2 대상 형상군, 판정 여유와 여유 사용률
+ 

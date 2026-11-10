@@ -1,0 +1,18 @@
+[
+  {
+    "number": 1,
+    "field_id": "1447352773",
+    "paragraph_id": "1977889055",
+    "heading": "제출 전 수정 1 — 캡션의 (b) 흐름도가 실제 그림에 없음",
+    "text": "HWPX와 DOCX에 삽입된 이미지의 해시를 확인했습니다. 두 파일은 사진만 있는 figures/v3c_fig1_method.png를 사용하지만, 캡션은 (a) 사진과 (b) 판정 흐름도를 설명합니다. 원래 figures/v3_fig1_method.png에는 두 패널이 있습니다. 핵심 기여인 분리 구조를 보여 주도록 흐름도를 복원하는 편을 권합니다. 사진만 유지한다면 캡션의 (a)/(b)와 decision pipeline을 없애고 3.1절의 그림 인용도 맞추세요. 이전 검토에서 놓친 편집 불일치이며, 새 실험은 필요하지 않습니다.",
+    "anchor_excerpt": "Fig. 1 (a) Field image of an E38 LH FRT door with the six detected holes and the measured distance D; (b) decision pipeline. The detector is shared by all classes; the decision list holds the CAD values. The scale S is fit on training sessions only"
+  },
+  {
+    "number": 2,
+    "field_id": "1986009150",
+    "paragraph_id": "0",
+    "heading": "제출 전 수정 2 — 우편번호 자리표시를 54004로",
+    "text": "소속 주소의 【우편번호】가 HWPX·PDF·MD·DOCX에 남아 있습니다. 기관 공식 영문 안내 https://www.koceti.re.kr/home/en 의 36 Sandan-ro 주소 우편번호는 54004입니다. 해당 표시를 54004로 바꾸고 생성 원천에도 반영하세요. 저자 영문명은 파일 간 일치만 확인했습니다.",
+    "anchor_excerpt": "Korea Construction Equipment Technology Institute, 36 Sandan-ro, Gunsan-si, Jeonbuk State 【우편번호】, Republic of Korea"
+  }
+]

@@ -1,0 +1,20 @@
+{
+  "run.py": "e2f27b6e62e8f02a37a71635afbeb465e9871760d02490d00a20114bc93172e3",
+  "door8/__init__.py": "05272ac1a83d724d6bd7ce0c157f70e86ab9ab7a245bf0c953bbc8661ab2da69",
+  "door8/core.py": "9eeb67fddd928ec1cedad6a9cc1abd103a9d70f54bc3cff5b8dd901593a6a8c3",
+  "door8/data.py": "33618dba7d05709a0e3bc54b04ae2da75ae618f1412c143f936c4b6b8e8a7402",
+  "door8/evaluate.py": "39767cbd808456f8f98a8ce1a551ea783240c202a42f43fda16b45c920401cb1",
+  "door8/features.py": "564c03cde12343cf91ae6f73ea9b1978a557a7724a5e25410bd397985c7d4af7",
+  "door8/geometry.py": "e6a95c4798d765ad5fbbdd91d9d72c61e9942814a9fef1465311d9db8eced4f3",
+  "door8/learning.py": "d1e807db1d1d3fb2969efca749079b7504d2de10cc1713f78fe25dba11136a84",
+  "door8/metrics.py": "35a6fd9c67b7e1a5b383f12ebcc023177bbe3235bc88c044f23aa8c277155fe9",
+  "door8/suite.py": "29c9377c0ea9664fb758556e9c9b1853202b3a968abe4bac1d3446fc8f63b408",
+  "scripts/annotate_field.py": "c3d0aa732fc1fd36830c968755efdb622bac8dff9d462fb1295fe3c0d9ca0d78",
+  "scripts/benchmark_first_fold.py": "dae351d04e1d3f423ff8db40ad86b14ab62e273d034e05a3b01ef5a7e541dd8e",
+  "scripts/build_documents.py": "1a962defe41f47b71220b755250503d5fd479a30ed3a144c19d707fef16ece4c",
+  "scripts/check_lab_localization.py": "064a0260e91860e9ea4ab99520e409ad70e69cbb57bff5f24acb2104caa701ec",
+  "scripts/finish_first_fold.py": "523081ba98a03a7ed5a5f809f6e892b1e43d6bbaea8c0517dfe097ba2474b6ea",
+  "scripts/measure_stl_thickness.py": "b6136a4e89663568c8aa7480ad8c31607c22b89360e266eeff1bbdef8acc1259",
+  "scripts/prepare_field40.py": "d3704db69a8289797555bd31f5b488c31389773d53e632af4604baf9fab5a008",
+  "scripts/summarize_first_fold.py": "173de2666ad438fe12ecbb1a2727be837856dace2b17fad112ec2847329f4391"
+}

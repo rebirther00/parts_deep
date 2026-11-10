@@ -1,0 +1,91 @@
+{
+  "pixel": {
+    "scale": {
+      "54910212": 1474.7142049471586
+    },
+    "frame": [
+      1441,
+      1455
+    ],
+    "session": [
+      73,
+      73
+    ],
+    "session_abstained": 0,
+    "wilson": [
+      0.9500079920442688,
+      0.9999999999999998
+    ],
+    "reasons": {
+      "ok": 1441,
+      "missing_corner": 12,
+      "invalid_bolt_rectangle": 1,
+      "not_collinear": 1
+    }
+  },
+  "depth": {
+    "scale": {
+      "54910212": 1.0084293161179443
+    },
+    "frame": [
+      1248,
+      1455
+    ],
+    "session": [
+      66,
+      73
+    ],
+    "session_abstained": 3,
+    "wilson": [
+      0.815043633098338,
+      0.9527710454031942
+    ],
+    "reasons": {
+      "ok": 1336,
+      "missing_corner": 12,
+      "invalid_bolt_rectangle": 1,
+      "distance_range": 1,
+      "not_collinear": 1,
+      "cad_distance_reject": 104
+    }
+  },
+  "localization_test_role": {
+    "all": {
+      "visible_points": 48,
+      "matched": 48,
+      "pck8": 1.0,
+      "pck16": 1.0,
+      "median_error_px_when_matched": 2.698197788049951,
+      "p95_error_px_when_matched": 3.9725930540156065
+    },
+    "per_channel": {
+      "bolt": {
+        "visible_points": 32,
+        "matched": 32,
+        "pck8": 1.0,
+        "pck16": 1.0,
+        "median_error_px_when_matched": 2.7461311366624996,
+        "p95_error_px_when_matched": 3.859027541132042
+      },
+      "hinge": {
+        "visible_points": 8,
+        "matched": 8,
+        "pck8": 1.0,
+        "pck16": 1.0,
+        "median_error_px_when_matched": 2.816029302809529,
+        "p95_error_px_when_matched": 4.0595573945384205
+      },
+      "latch": {
+        "visible_points": 8,
+        "matched": 8,
+        "pck8": 1.0,
+        "pck16": 1.0,
+        "median_error_px_when_matched": 1.530371219064985,
+        "p95_error_px_when_matched": 3.228614096351105
+      }
+    },
+    "scope": "Eight field checkpoint-selection VAL images; missing detections fail PCK; not independent test."
+  },
+  "fold": "1",
+  "weights_sha256": "7d921b53dcba3906ccfabb4c631e2b9c483a3556d704e26500f331ff9838708f"
+}

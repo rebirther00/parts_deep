@@ -1,0 +1,113 @@
+{
+  "run": "holes_lab_s42",
+  "field_train_budget": 0,
+  "fold": "0",
+  "subset": "validation",
+  "development_only": true,
+  "test_frames_evaluated": 0,
+  "created_at": "2026-11-09T09:30:56+09:00",
+  "feature_set": "holes_lab_s42_full",
+  "feature_rows_sha256": "f5aa5ba2f6fb81070d070100d85642b5efb51a45f8f3f23c31d3a2672fed8dcf",
+  "labelset_sha256": "2f6ada43455e01f453de96da00895545e230e1a3678ffdab0e45d3854a9afa78",
+  "checkpoint_field_validation": false,
+  "validation_frames": 1455,
+  "validation_sessions": 73,
+  "localization": {
+    "all": {
+      "visible_points": 48,
+      "matched": 34,
+      "pck8": 0.6875,
+      "pck16": 0.6875,
+      "median_error_px_when_matched": 2.9956316567658927,
+      "p95_error_px_when_matched": 5.619431442230661
+    },
+    "per_channel": {
+      "bolt": {
+        "visible_points": 32,
+        "matched": 32,
+        "pck8": 1.0,
+        "pck16": 1.0,
+        "median_error_px_when_matched": 2.9027769239703387,
+        "p95_error_px_when_matched": 4.876234620431588
+      },
+      "hinge": {
+        "visible_points": 8,
+        "matched": 2,
+        "pck8": 0.125,
+        "pck16": 0.125,
+        "median_error_px_when_matched": 349.73984607786167,
+        "p95_error_px_when_matched": 660.3470245196215
+      },
+      "latch": {
+        "visible_points": 8,
+        "matched": 0,
+        "pck8": 0.0,
+        "pck16": 0.0,
+        "median_error_px_when_matched": null,
+        "p95_error_px_when_matched": null
+      }
+    },
+    "scope": "Eight field checkpoint-selection VAL images; missing detections fail PCK; not independent test."
+  },
+  "gates": {
+    "train": {
+      "missing_corner": 3756,
+      "latch_offset": 397,
+      "ok": 3,
+      "same_side": 1,
+      "invalid_bolt_rectangle": 14
+    },
+    "val": {
+      "missing_corner": 1278,
+      "latch_offset": 177
+    }
+  },
+  "modes": {
+    "pixel": {
+      "frame": {
+        "n": 1455,
+        "correct": 0,
+        "abstained": 1455,
+        "coverage": 0.0,
+        "accuracy_all": 0.0,
+        "macro_f1": 0.0
+      },
+      "session": {
+        "n": 73,
+        "correct": 0,
+        "abstained": 73,
+        "coverage": 0.0,
+        "accuracy_all": 0.0,
+        "macro_f1": 0.0
+      },
+      "failures": {
+        "missing_corner": 1278,
+        "latch_offset": 177
+      },
+      "calibration_failure": null
+    },
+    "depth": {
+      "frame": {
+        "n": 1455,
+        "correct": 0,
+        "abstained": 1455,
+        "coverage": 0.0,
+        "accuracy_all": 0.0,
+        "macro_f1": 0.0
+      },
+      "session": {
+        "n": 73,
+        "correct": 0,
+        "abstained": 73,
+        "coverage": 0.0,
+        "accuracy_all": 0.0,
+        "macro_f1": 0.0
+      },
+      "failures": {
+        "missing_corner": 1278,
+        "latch_offset": 177
+      },
+      "calibration_failure": null
+    }
+  }
+}

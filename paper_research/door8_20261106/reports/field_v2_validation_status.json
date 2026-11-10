@@ -1,0 +1,52 @@
+{
+  "checked_at": "2026-11-09T10:15:05+09:00",
+  "status": "complete",
+  "scope": "Fold0 seed42 development validation only; final test not evaluated for new adaptation models",
+  "human_annotated_images": 40,
+  "human_visible_points": 240,
+  "distinct_physical_doors_confirmed_by_user": 361,
+  "train_sessions": 214,
+  "validation_sessions": 73,
+  "validation_frames": 1455,
+  "reserved_test_sessions": 74,
+  "new_test_frames_evaluated": 0,
+  "model_and_feature_checks": [
+    {
+      "budget": 8,
+      "epochs": 80,
+      "best_epoch": 74,
+      "optimizer_steps": 8160,
+      "feature_frames": 5626,
+      "test_frames": 0,
+      "weights_sha256": "21059b9d55bb0fa5d1a842f0c15779b25cdda6facc8583e3dd2236c35ff312e2"
+    },
+    {
+      "budget": 16,
+      "epochs": 80,
+      "best_epoch": 68,
+      "optimizer_steps": 8800,
+      "feature_frames": 5626,
+      "test_frames": 0,
+      "weights_sha256": "9dc6f4d00b842eeeb7135e0f941202ec4a4602973e7f43adf9cc590950cb427a"
+    },
+    {
+      "budget": 24,
+      "epochs": 80,
+      "best_epoch": 67,
+      "optimizer_steps": 9440,
+      "feature_frames": 5626,
+      "test_frames": 0,
+      "weights_sha256": "5b6fab37456332a421980c8db2f6868adb10d4f1ecfc82712050739c3c972aff"
+    }
+  ],
+  "frozen_input_integrity_report": "reports/field_v2_input_integrity_20261109.json",
+  "comparison": "reports/field_v2_development_comparison/comparison.json",
+  "manuscript": "manuscript/논문초안_v2_개발검증.docx",
+  "docx_tables_validated": 4,
+  "remaining": [
+    "Freeze the formal comparison protocol, then run fold-specific repeated evaluation.",
+    "Evaluate defined capture-condition changes fairly across methods.",
+    "Collect and independently verify prospective data after fixing the final models.",
+    "Measure annotation cost and end-to-end latency if those claims are retained."
+  ]
+}

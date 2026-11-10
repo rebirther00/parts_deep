@@ -1,0 +1,21 @@
+{
+  "completed_at": "2026-11-09T15:06:48+09:00",
+  "native_hwpx": true,
+  "memos_added": 7,
+  "original_sha256": {
+    "manuscript/논문초안_v4.hwpx": "2949de626c4c8fe2a8cee4c27ef6033f404a11f85ae02dfc2b14b26a4ed27423",
+    "manuscript/논문초안_v4.md": "3fe302341f3ac4b2fb310eb6faab881b62ea2daef9f521c3d3226680e5f46eac",
+    "manuscript/논문초안_v4.docx": "309da5dabb2719e58705d0eb704631ebfbf1a62a3a6f7ce92798bdb04b3d042b",
+    "manuscript/논문초안_v4.pdf": "11ef81f1cb3776ba6ffd56a76ce78ef32f539159dd1c0d1864ac84c35cfa31a2"
+  },
+  "original_unchanged": true,
+  "annotated_sha256": "41afcc15d46f75de2a7c01a1322a79305b77d3aef09312747d50fb1b9a929da4",
+  "annotated": "manuscript/논문초안_v4_검토메모.hwpx",
+  "checks": [
+    "Original HWPX/MD/DOCX/PDF hashes unchanged",
+    "All 432 original paragraph IDs/text preserved, excluding memo content",
+    "Embedded image bytes unchanged; 19 tables and 4 figures preserved",
+    "Native memo copy reopens and has no library validation issues"
+  ],
+  "layout_scope": "Native Hancom rendering and memo UI visibility not inspected; supplied PDF is a DOCX approximation."
+}

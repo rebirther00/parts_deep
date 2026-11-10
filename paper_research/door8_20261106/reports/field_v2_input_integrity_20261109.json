@@ -1,0 +1,36 @@
+{
+  "checked_at": "2026-11-09T10:06:04+09:00",
+  "frozen_snapshot_sha256": "086cc09bbcdcb4a0b30dca920db94db350b8f1a0ec8f67ca2960612cf87bc559",
+  "frozen_metadata_valid": true,
+  "field_rgb_depth_pairs_full_hash_verified": 7104,
+  "lab_image_hashes_verified": 118,
+  "human_field_labels_verified": 40,
+  "all_partitions_disjoint": true,
+  "current_operational_source_files": {
+    "/home/koceti/parts_deep/class_estimation/door_pipeline/hole_classifier.py": {
+      "frozen_sha256": "04771205271869f75b1b96441e11c7d30a405cb3a174be436aa7e84bb8352190",
+      "current_sha256": "04771205271869f75b1b96441e11c7d30a405cb3a174be436aa7e84bb8352190",
+      "matches_frozen": true,
+      "mtime_epoch": 1790943054.9197843
+    },
+    "/home/koceti/parts_deep/class_estimation/door_pipeline/16_train_hole_landmarks.py": {
+      "frozen_sha256": "09af1238535a16cb5fa07d79ff18d856236918718bb8b211b33e01147addf61b",
+      "current_sha256": "09af1238535a16cb5fa07d79ff18d856236918718bb8b211b33e01147addf61b",
+      "matches_frozen": true,
+      "mtime_epoch": 1788756032.861813
+    },
+    "/home/koceti/parts_deep/class_estimation/door_pipeline/db/decisions.csv": {
+      "frozen_sha256": "0a07c09cb01c7d0a582ac018978c10632d30ae5e2dd64630cbb0c6d0158ea743",
+      "current_sha256": "f1a6f0616a4fc42a147df2faab79cf329ce997da695fbb1bfdbb531ee63a127a",
+      "matches_frozen": false,
+      "mtime_epoch": 1794159601.470354
+    },
+    "/home/koceti/parts_deep/class_estimation/door_pipeline/02_train.py": {
+      "frozen_sha256": "8b22bce0935663eb85cacedf5127665a0986590cc170353c168c7e2a8bbbf661",
+      "current_sha256": "8b22bce0935663eb85cacedf5127665a0986590cc170353c168c7e2a8bbbf661",
+      "matches_frozen": true,
+      "mtime_epoch": 1790117608.8897958
+    }
+  },
+  "note": "The operational decisions.csv differs from its 2026-11-06 provenance hash; its mtime is 2026-11-09 02:40 KST, before this adaptation work. This live file was not written by the research workflow. Experiments use frozen snapshot labels and partitions; frozen inputs and image hashes are checked separately."
+}
