@@ -1,0 +1,165 @@
+{
+ "created_at": "2026-11-11T14:06:39+09:00",
+ "purpose": "Answer to review round 2 (2026-11-11): how many sessions had an operational hole-classifier decision that differed from the operator input. Read-only query of the frozen snapshot; no model was run.",
+ "source": "data/snapshots/v1/source.sqlite, table session_hole_metrics (operational evaluations stored before the snapshot of 2026-11-06)",
+ "rule": "per stored evaluation row: session decision = pred_major (mode of the pixel-width decisions); compared with the operator input (sessions.csv class_name for the 361 eligible sessions, excluded_sessions.csv original_label for the 11 input-error sessions)",
+ "evaluations": [
+  {
+   "date": "2026-09-23",
+   "model_id": 7,
+   "model": "hole_landmarks_resnet18",
+   "model_created_at": "2026-08-26 15:27:30",
+   "sessions": 185
+  },
+  {
+   "date": "2026-11-04",
+   "model_id": 12,
+   "model": "hole_landmarks_bracket_resnet18",
+   "model_created_at": "2026-09-23 15:05:03",
+   "sessions": 372
+  }
+ ],
+ "valid_sessions": 372,
+ "eligible_361": {
+  "agree_in_every_evaluation": 361
+ },
+ "input_error_11": {
+  "disagree_in_every_evaluation": 11
+ },
+ "input_error_sessions": [
+  {
+   "session_id": 77,
+   "session_dir": "20260903/E25_door_LH_FRT/s_124446",
+   "operator_input": "E25_door_LH_FRT",
+   "corrected": "E23_door_LH_FRT",
+   "operational_decisions": [
+    "E23_door_LH_FRT"
+   ]
+  },
+  {
+   "session_id": 78,
+   "session_dir": "20260903/E25_door_LH_FRT/s_132914",
+   "operator_input": "E25_door_LH_FRT",
+   "corrected": "E23_door_LH_FRT",
+   "operational_decisions": [
+    "E23_door_LH_FRT"
+   ]
+  },
+  {
+   "session_id": 79,
+   "session_dir": "20260903/E25_door_LH_FRT/s_141947",
+   "operator_input": "E25_door_LH_FRT",
+   "corrected": "E23_door_LH_FRT",
+   "operational_decisions": [
+    "E23_door_LH_FRT"
+   ]
+  },
+  {
+   "session_id": 81,
+   "session_dir": "20260903/E30_door_LH_RR/s_151736",
+   "operator_input": "E30_door_LH_RR",
+   "corrected": "E25_door_LH_RR",
+   "operational_decisions": [
+    "E25_door_LH_RR"
+   ]
+  },
+  {
+   "session_id": 84,
+   "session_dir": "20260903/E30_door_LH_RR/s_183159",
+   "operator_input": "E30_door_LH_RR",
+   "corrected": "E30_E38_door_RH",
+   "operational_decisions": [
+    "E30_E38_door_RH"
+   ]
+  },
+  {
+   "session_id": 100,
+   "session_dir": "20260905/E30_door_LH_RR/s_123451",
+   "operator_input": "E30_door_LH_RR",
+   "corrected": "E30_E38_door_RH",
+   "operational_decisions": [
+    "E30_E38_door_RH"
+   ]
+  },
+  {
+   "session_id": 103,
+   "session_dir": "20260905/E25_door_LH_FRT/s_150506",
+   "operator_input": "E25_door_LH_FRT",
+   "corrected": "E23_door_LH_FRT",
+   "operational_decisions": [
+    "E23_door_LH_FRT"
+   ]
+  },
+  {
+   "session_id": 409,
+   "session_dir": "20260912/E25_door_LH_FRT/s_094850",
+   "operator_input": "E25_door_LH_FRT",
+   "corrected": "E23_door_LH_FRT",
+   "operational_decisions": [
+    "E23_door_LH_FRT"
+   ]
+  },
+  {
+   "session_id": 410,
+   "session_dir": "20260912/E25_door_LH_FRT/s_103329",
+   "operator_input": "E25_door_LH_FRT",
+   "corrected": "E23_door_LH_FRT",
+   "operational_decisions": [
+    "E23_door_LH_FRT"
+   ]
+  },
+  {
+   "session_id": 427,
+   "session_dir": "20260914/E30_door_LH_RR/s_170035",
+   "operator_input": "E30_door_LH_RR",
+   "corrected": "E30_E38_door_RH",
+   "operational_decisions": [
+    "E30_E38_door_RH"
+   ]
+  },
+  {
+   "session_id": 1720,
+   "session_dir": "20261029/E30_door_LH_FRT/s_075858",
+   "operator_input": "E30_door_LH_FRT",
+   "corrected": "E38_door_LH_FRT",
+   "operational_decisions": [
+    "E38_door_LH_FRT"
+   ]
+  }
+ ],
+ "outside_period_or_invalid": [
+  {
+   "session_id": 1,
+   "session_dir": "20260729/Unknown/s_152242"
+  },
+  {
+   "session_id": 2,
+   "session_dir": "20260729/Unknown/s_163642"
+  },
+  {
+   "session_id": 3,
+   "session_dir": "20260804/Unknown/s_093254"
+  },
+  {
+   "session_id": 4,
+   "session_dir": "20260810/E25_door_RH/s_091317"
+  },
+  {
+   "session_id": 5,
+   "session_dir": "20260811/Unknown/s_124933"
+  },
+  {
+   "session_id": 9,
+   "session_dir": "20260827/E30_door_LH_RR/s_111705"
+  },
+  {
+   "session_id": 10,
+   "session_dir": "20260827/E30_door_LH_RR/s_122816"
+  }
+ ],
+ "limits": [
+  "Stored evaluations are of 2026-09-23 and 2026-11-04; the decisions the operator-facing system showed on each production day are not logged separately.",
+  "pred_major is the pixel-width decision. The older depth-based columns (n_wrong) contain image-level errors and are not used here.",
+  "Agreement of the operator input and this classifier does not prove the label; both can be wrong together."
+ ]
+}

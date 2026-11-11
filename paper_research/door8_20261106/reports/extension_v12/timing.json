@@ -1,0 +1,26 @@
+{
+  "created_at": "2026-11-10T17:50:18+09:00",
+  "protocol_sha256": "9f265bdb5854d7d6a1c82ab15111029eebb848e4dd137502364f1d2bf60cc463",
+  "gpu": "NVIDIA GeForce RTX 5090",
+  "torch": "2.9.1+cu130",
+  "image": "1920x1200 PNG",
+  "decode": {
+    "n": 200,
+    "mean_ms": 30.57043173466809,
+    "median_ms": 30.459728091955185,
+    "p95_ms": 31.43328110454604
+  },
+  "hole_pipeline": {
+    "n": 200,
+    "mean_ms": 14.870577577967197,
+    "median_ms": 14.08612250816077,
+    "p95_ms": 20.93662387924269
+  },
+  "cnn_forward": {
+    "n": 200,
+    "mean_ms": 8.640367884654552,
+    "median_ms": 9.598938398994505,
+    "p95_ms": 12.672023451887071
+  },
+  "note": "batch 1, mixed precision as in the stored evaluations; decode = cv2.imread of the RGB PNG; edge device not measured"
+}

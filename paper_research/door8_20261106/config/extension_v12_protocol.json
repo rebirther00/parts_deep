@@ -1,0 +1,79 @@
+{
+  "version": "extension-v12-20261110",
+  "registered_at": "2026-11-10, before any score, decision or model output below was computed",
+  "requested_by": "Author (user), 2026-11-10, in response to an external mock review (major revision): (1) the CNN rejection baseline is numerically degenerate in float32, (3) registration by CAD is supported by six E23 doors only, (4) the detection stage lacks ablations, (5) production information is missing",
+  "seen_before_registration": "Only descriptive statistics of the STORED float32 max-softmax confidences (share exactly 1.0 per run, thresholds on the float32 grid), the label/session provenance records and the capture code. No logit-based, feature-based, gate-off, sub-pixel, re-registration, frame-count or timing result was computed or viewed before this registration.",
+  "common": {
+    "snapshot": "v1",
+    "seed": 42,
+    "no_training": "No model is trained or fine-tuned. Existing weights only.",
+    "session_rule": "majority of judged frames; tie or no judged frame = abstain",
+    "intervals": "Wilson 95% intervals are descriptive",
+    "outputs": "reports/extension_v12, cache/extension_v12; nothing existing is overwritten"
+  },
+  "A_cnn_scores": {
+    "question": "Do the CNN rejection results change when the score is computed without float32 softmax saturation, and with stronger scores?",
+    "models": {
+      "unseen": "{rgb|rgbe}_loco_{c}_f0_s42 for the 8 classes (7 outputs, trained and selected without c)",
+      "seen": "{rgb|rgbe}_f{k}_s42, k = 0..4 (8 outputs)",
+      "temporal": "{rgb|rgbe}_temporal_s42"
+    },
+    "forward": "eval mode, the stored evaluation preprocessing (letterbox 448, RGBE edge channel), batch 32, automatic mixed precision DISABLED (float32 forward); logits and the 512-d global-average-pooled backbone feature are taken and all scores are computed in float64",
+    "consistency_check": "argmax of the new logits is compared with the stored closed-set prediction of every frame; mismatches are counted and reported. All four scores and their decisions use the new logits (prediction = argmax over the registered outputs).",
+    "scores_higher_is_more_registered": {
+      "msp": "log-odds of the maximum softmax probability over the registered outputs, z_max - logsumexp_{j != max} z_j; a monotone transform of the maximum softmax probability that does not saturate",
+      "maxlogit": "z_max",
+      "energy": "logsumexp_j z_j (temperature 1)",
+      "maha": "minus the smallest Mahalanobis distance (f - mu_c)^T Sigma^+ (f - mu_c) over the registered classes; mu_c and the pooled within-class covariance Sigma are estimated from the 512-d features of the model's own TRAIN frames (deterministic evaluation transform); Sigma^+ is the Moore-Penrose pseudo-inverse"
+    },
+    "threshold": "the v1 rule, per model and per score: threshold = value at index int(0.05 n) of the sorted VAL scores of the same model; accept when score >= threshold",
+    "seen_masking": "outputs j != c only (the logit of c is dropped) for msp/maxlogit/energy; maha uses the class means of j != c with Sigma unchanged; VAL = validation frames whose class is not c",
+    "evaluations": {
+      "unseen": "fold-0 TEST, 8 runs x 2 input kinds: extension_v5 loco_metrics per score and pooled (unregistered doors rejected, registered decisions correct/abstained/wrong, frame AUROC)",
+      "seen": "fold 0 and five-fold, same metrics",
+      "registered_operating_point": "8-class five-fold OOF and temporal split: image accuracy and coverage, doors correct/abstained/wrong at the validation threshold of each score",
+      "e23": "six E23 doors (120 images) on the 8-class fold-0 models: doors rejected at the validation threshold and frame AUROC against fold-0 TEST"
+    },
+    "claim_rule": "All four scores are reported for every condition together with the previously reported float32 result. No score is chosen after the fact as the baseline. A statement that the hole method rejects more unseen-class doors than the CNN baseline is made only for the scores for which it holds, and is worded per score."
+  },
+  "B_registration_of_unseen_class": {
+    "question": "Is a class that the detector never saw identified after only its CAD value is registered?",
+    "detectors": "holes_strict_loco_{c}_f0_s42 (class c removed from all detector training and selection), existing features features/{run}_trainTest",
+    "scale": "S fit on fold-0 TRAIN sessions WITHOUT class c (no calibration data of the new class)",
+    "catalog": "all 8 CAD values (the value of c registered again)",
+    "decision": "unchanged: pixel width, geometry gate, nearest CAD, 30 mm reject, session vote",
+    "report": "class-c TEST doors identified (correct/abstained/wrong, pooled over the 8 runs = 74 doors, Wilson interval), their images, the other-class decisions (518 repeated decisions), and the relative residual / margin utilisation of the class-c doors"
+  },
+  "C_geometry_gate_ablation": {
+    "question": "What does the bolt-rectangle geometry gate contribute?",
+    "detectors": "main detectors (fold 0: holes_field8_f0_s42_v2; folds 1-4: holes_field8_f{k}_s42_v3; temporal: holes_field_temporal_s42), stored features, pixel width",
+    "scale": "S unchanged (fit with the gate, as in the main evaluation)",
+    "conditions": "gate on (as reported) versus gate off (classify_measurement(gates=False): every frame with both corner peaks gets a measurement; the valid-distance range and the 30 mm rule stay)",
+    "report": "five-fold OOF and temporal TEST: images correct/wrong/abstained and doors correct/abstained/wrong; the six E23 doors with the 8-class catalog (rejection) under both conditions"
+  },
+  "D_subpixel_peaks": {
+    "question": "Does sub-pixel peak refinement reduce the pixel-width residual, which is at the level of the 6.25-pixel heatmap grid?",
+    "detectors": "main detectors of the five folds",
+    "forward": "identical to the stored extraction (letterbox 1280x768, same mixed-precision setting); the integer peaks are checked against the stored points of every frame and mismatches are reported",
+    "refinement": "for each selected peak (same selection and suppression), a 3-point quadratic fit along x and along y on the original heatmap: delta = 0.5 (v_minus - v_plus) / (v_minus - 2 v_0 + v_plus) when both neighbours exist and the denominator is negative, otherwise 0; clipped to [-0.5, 0.5] cells; point = inverse letterbox of ((x + delta_x) stride, (y + delta_y) stride)",
+    "evaluation": "gate recomputed with the refined points; S refit on the fold's TRAIN sessions with the refined features (same rule); decisions on TEST (five-fold OOF, 361 doors). No depth path.",
+    "report": "decisions (images, doors), relative residual percentiles and range, maximum margin utilisation, within-session and between-door standard deviation, and localisation error on the TEST-role field coordinates (median, p95, PCK8), integer versus refined",
+    "status": "ablation only; the main results stay the integer-peak ones whatever the outcome"
+  },
+  "E_frames_per_decision": {
+    "question": "How many images does a door decision need?",
+    "data": "stored five-fold OOF TEST predictions: hole (pixel width) and RGB / RGBE closed-set",
+    "rule": "door decision from the first n frames of the sampled sequence (n = 1, 3, 5, 10, 20; frames ordered by file index), same vote rule",
+    "report": "doors correct/abstained/wrong per n"
+  },
+  "F_timing": {
+    "what": "per-image processing time on the training PC (GPU model recorded): hole pipeline (letterbox, forward, peaks, gate, pixel-width decision; image decoding reported separately) and CNN forward, 200 fold-0 TEST frames after 20 warm-up frames; mean, median, p95",
+    "limits": "the edge device (Jetson Orin NX) is not measured here and no edge timing will be claimed from this measurement"
+  },
+  "reporting": "Every result is reported whatever its direction, including results unfavourable to the proposed method; manuscript claims are adjusted to the results.",
+  "rules": [
+    "No threshold, gate, CAD value, scale rule, score definition or metric is changed after viewing any output of this protocol.",
+    "All runs and reports use new names; nothing existing is overwritten.",
+    "If a step fails for a technical reason it is re-run unchanged and the failure is reported."
+  ]
+}

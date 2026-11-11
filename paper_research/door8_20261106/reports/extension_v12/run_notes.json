@@ -1,0 +1,19 @@
+{
+ "created_at": "2026-11-10T18:04:17+09:00",
+ "protocol_sha256": "9f265bdb5854d7d6a1c82ab15111029eebb848e4dd137502364f1d2bf60cc463",
+ "attempts": [
+  {
+   "attempt": 1,
+   "started": "2026-11-10 17:30",
+   "outcome": "hole-register, hole-gate, frames, subpixel-extract (5 folds), subpixel-eval and timing completed. All 28 cnn-infer jobs FAILED after their forward passes with TypeError (duplicate keyword \"run\" when building the run metadata dict); the consistency check and metadata were not written and cnn-analyze stopped at its first line (missing metadata). No CNN score, threshold or decision was computed or viewed.",
+   "logs": "reports/extension_v12/logs/failed_attempt1/"
+  },
+  {
+   "attempt": 2,
+   "started": "2026-11-10 17:50",
+   "change": "one bookkeeping line in cnn_infer (dict(run=run, **spec, ...) -> dict(**spec, ...)); forward, score, threshold and metric code unchanged; the cache written by attempt 1 was deleted and all 28 forward passes were repeated",
+   "outcome": "28/28 cnn-infer OK, cnn-analyze OK, collect OK"
+  }
+ ],
+ "consistency": "float32 forward versus stored mixed-precision predictions: argmax differs for 3 of 43,090 TEST frames and 0 of 35,948 VAL frames; integer peaks of the sub-pixel extraction equal the stored points for 28,416/28,416 frames"
+}

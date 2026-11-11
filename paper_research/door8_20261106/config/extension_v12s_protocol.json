@@ -1,0 +1,36 @@
+{
+  "version": "extension-v12s-20261111",
+  "registered_at": "2026-11-11 09:20 KST, before any model below was trained or evaluated",
+  "requested_by": "Author (user), 2026-11-11, in response to an external mock review (single training seed): repeat the unseen-class condition with two more seeds",
+  "seen_before_registration": "All seed-42 results of extension_v5, extension_v6 and extension_v12 (unseen condition, fold 0: hole method 74/74 unregistered doors rejected and 74/74 identified after CAD registration; CNN softmax/logit scores 47/74 (RGB) and 53/74 (RGBE); CNN Mahalanobis score 74/74). No model with seed 123 or 456 exists for this condition and none was trained or evaluated before this registration.",
+  "seeds": {
+    "new": [123, 456],
+    "existing": 42,
+    "choice": "the two remaining seeds of the seed list [42, 123, 456] fixed in the v1 snapshot protocol (data/snapshots/v1/protocol.json) before any experiment; no other seed is tried"
+  },
+  "scope": "unseen-class condition only (fold 0, each of the 8 classes removed in turn from all training and model selection of both methods): 16 hole detectors and 32 CNNs. The seen condition, the five-fold and temporal evaluations, the sub-pixel ablation and all other analyses stay single-seed (42) and are reported as such.",
+  "what_the_seed_changes": "random initialisation of the layers that are not ImageNet-pretrained, mini-batch order and training augmentation. Unchanged: snapshot v1, fold-0 split, annotated images, hyperparameters, checkpoint selection rules, decision rules and thresholds.",
+  "hole": {
+    "runs": "holes_strict_loco_{c}_f0_s{seed}",
+    "training": "run_extension_v6.train_strict with the new seed: the recipe and the training/validation images of extension_v6 unseen_condition (class c removed from LAB and field images; checkpoint = minimum heatmap loss on the fold-0 field VAL images minus class c)",
+    "evaluation_rejection": "run_extension_v6.eval_strict: fold-0 TRAIN+TEST features, S fit on fold-0 TRAIN sessions without class c, CAD list minus c, pixel width, geometry gate, 30 mm reject, session vote; extension_v5 loco_metrics; TEST-role localisation",
+    "evaluation_registration": "run_extension_v12.hole_register: same features and S (no calibration data of class c), all 8 CAD values registered; class-c doors identified, other-class decisions, relative residual and margin utilisation"
+  },
+  "cnn": {
+    "runs": "{rgb|rgbe}_loco_{c}_f0_s{seed}",
+    "training": "run_extension_v5.train_cnn_loco with the new seed (7 outputs, v1 CNN recipe, trained and selected without class c)",
+    "evaluation_legacy": "run_extension_v5.eval_cnn_loco (stored mixed-precision float32 softmax and the v1 threshold), kept for the consistency check and for comparison with the previously reported seed-42 numbers",
+    "evaluation_scores": "run_extension_v12 A: float32 forward without mixed precision, scores msp (log-odds), maxlogit, energy and maha (class means and pooled within-class covariance from the model's own TRAIN frames) computed in float64; threshold per model and per score = value at index int(0.05 n) of the sorted VAL scores; extension_v5 loco_metrics"
+  },
+  "reporting": {
+    "per_seed": "for every method and score: unregistered doors rejected out of 74, registered-door decisions correct/abstained/wrong out of 518, frame AUROC mean and minimum over the 8 runs; for the hole method also the class-c doors identified after CAD registration out of 74; per-class numbers of every seed are stored",
+    "across_seeds": "the three per-seed values are listed and summarised as minimum-maximum. The same 74 doors are judged by every seed, so the seeds are repetitions of training, not independent doors; no interval is computed over the 222 repeated decisions. Wilson 95% intervals are given per seed only and are descriptive.",
+    "claim_rule": "All seeds and all four CNN scores are reported whatever the direction. A statement about a method or score (for example that it rejects every unseen-class door) is made without qualification only when it holds for all three seeds; otherwise the per-seed values are given. Seed 42 stays the seed of the per-class table because it is the first seed of the registered list and its results were reported before the repetition; no seed is selected after the fact."
+  },
+  "outputs": "runs/*_s123, runs/*_s456, features/holes_strict_loco_*_s{seed}_trainTest, reports/extension_v12s/s{seed}, cache/extension_v12s/s{seed}, reports/extension_v12s/collected.json; nothing existing is overwritten",
+  "rules": [
+    "No threshold, gate, CAD value, scale rule, score definition, training recipe or metric is changed after viewing any output of this protocol.",
+    "All runs and reports use new names; nothing existing is overwritten.",
+    "If a step fails for a technical reason it is re-run unchanged and the failure is reported."
+  ]
+}

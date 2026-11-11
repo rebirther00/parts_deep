@@ -1,0 +1,235 @@
+{
+ "created_at": "2026-11-11T16:41:39+09:00",
+ "split_date": "20260921",
+ "author_statement": "2026-11-11: an operator bumped the camera by mistake and it was re-adjusted; date and time are not recorded. The author agrees with the reading of the records: bumped by 2026-09-21, re-adjusted on 2026-09-22.",
+ "timeline": "last normal session 2026-09-18 13:26; changed view in the sessions of 2026-09-21 15:57 and 2026-09-22 08:05 (5 and 1 images); re-adjusted view from the session of 2026-09-22 08:10",
+ "images": "reports/camera_readjustment_202609/ (scripts/make_camera_change_sheet_v14.py)",
+ "camera": {
+  "source": "session_hole_metrics, operational evaluation of 2026-11-04 (model 12), 361 eligible sessions",
+  "tilt_med": {
+   "normal": {
+    "sessions": 160,
+    "median": 5.313764644359464,
+    "p05": 4.55118082855992,
+    "p95": 6.956846805459094
+   },
+   "bumped": {
+    "sessions": 2,
+    "median": 4.696908918296225,
+    "p05": 4.410015350791896,
+    "p95": 4.983802485800554
+   },
+   "readjusted": {
+    "sessions": 199,
+    "median": 9.14947869401967,
+    "p05": 6.563473019673076,
+    "p95": 12.32452046994485
+   }
+  },
+  "s_session": {
+   "normal": {
+    "sessions": 160,
+    "median": 1478.5908657646469,
+    "p05": 1475.317505502609,
+    "p95": 1481.6433243909437
+   },
+   "bumped": {
+    "sessions": 2,
+    "median": 1487.3561850619694,
+    "p05": 1485.832651329776,
+    "p95": 1488.8797187941632
+   },
+   "readjusted": {
+    "sessions": 199,
+    "median": 1473.5287443746477,
+    "p05": 1469.7870251026063,
+    "p95": 1477.6391616381413
+   }
+  },
+  "z_med": {
+   "normal": {
+    "sessions": 160,
+    "median": 1451.3519184129934,
+    "p05": 1441.0922690354178,
+    "p95": 1466.60676355619
+   },
+   "bumped": {
+    "sessions": 2,
+    "median": 1446.62139114401,
+    "p05": 1439.7302068937556,
+    "p95": 1453.5125753942643
+   },
+   "readjusted": {
+    "sessions": 199,
+    "median": 1441.3831748094713,
+    "p05": 1421.2803341911233,
+    "p95": 1475.139465869354
+   }
+  }
+ },
+ "distance": {
+  "source": "five-fold out-of-fold TEST predictions of the field-adapted hole detectors (extension_v3, fold0_test_v3)",
+  "pixel": {
+   "before": {
+    "doors": 160,
+    "wrong": 0,
+    "rejected": 0,
+    "image_residual_median_pct": -0.34170337865339073,
+    "image_residual_min_pct": -1.1403857472363277,
+    "image_residual_max_pct": 0.3691354470293229,
+    "failed_by_class": {},
+    "doors_by_class": {
+     "E25_door_LH_RR": 33,
+     "E30_door_LH_FRT": 15,
+     "E25_door_RH": 30,
+     "E30_E38_door_RH": 34,
+     "E38_door_LH_FRT": 12,
+     "E38_door_LH_RR": 16,
+     "E30_door_LH_RR": 18,
+     "E25_door_LH_FRT": 2
+    }
+   },
+   "after": {
+    "doors": 201,
+    "wrong": 0,
+    "rejected": 0,
+    "image_residual_median_pct": 0.18170151221810205,
+    "image_residual_min_pct": -1.0803234860597422,
+    "image_residual_max_pct": 1.1099914025291202,
+    "failed_by_class": {},
+    "doors_by_class": {
+     "E25_door_RH": 38,
+     "E38_door_LH_FRT": 9,
+     "E25_door_LH_FRT": 7,
+     "E25_door_LH_RR": 37,
+     "E30_E38_door_RH": 36,
+     "E30_door_LH_RR": 32,
+     "E30_door_LH_FRT": 29,
+     "E38_door_LH_RR": 13
+    }
+   },
+   "failed_dates": {}
+  },
+  "depth": {
+   "before": {
+    "doors": 160,
+    "wrong": 0,
+    "rejected": 0,
+    "image_residual_median_pct": -0.303996105996468,
+    "image_residual_min_pct": -2.1871477374630133,
+    "image_residual_max_pct": 3.3907811164492596,
+    "failed_by_class": {},
+    "doors_by_class": {
+     "E25_door_LH_RR": 33,
+     "E30_door_LH_FRT": 15,
+     "E25_door_RH": 30,
+     "E30_E38_door_RH": 34,
+     "E38_door_LH_FRT": 12,
+     "E38_door_LH_RR": 16,
+     "E30_door_LH_RR": 18,
+     "E25_door_LH_FRT": 2
+    }
+   },
+   "after": {
+    "doors": 201,
+    "wrong": 16,
+    "rejected": 13,
+    "image_residual_median_pct": 0.29445651873983847,
+    "image_residual_min_pct": -2.2907033004793576,
+    "image_residual_max_pct": 10.08269733224254,
+    "failed_by_class": {
+     "E25_door_RH": 11,
+     "E30_E38_door_RH": 4,
+     "E30_door_LH_FRT": 12,
+     "E25_door_LH_FRT": 2
+    },
+    "doors_by_class": {
+     "E25_door_RH": 38,
+     "E38_door_LH_FRT": 9,
+     "E25_door_LH_FRT": 7,
+     "E25_door_LH_RR": 37,
+     "E30_E38_door_RH": 36,
+     "E30_door_LH_RR": 32,
+     "E30_door_LH_FRT": 29,
+     "E38_door_LH_RR": 13
+    }
+   },
+   "failed_dates": {
+    "20260923": 2,
+    "20260930": 3,
+    "20261001": 1,
+    "20261002": 1,
+    "20261007": 2,
+    "20261008": 1,
+    "20261012": 4,
+    "20261013": 2,
+    "20261019": 1,
+    "20261021": 4,
+    "20261022": 1,
+    "20261023": 3,
+    "20261026": 1,
+    "20261027": 2,
+    "20261028": 1
+   }
+  }
+ },
+ "operational": {
+  "source": "session_hole_metrics, operational evaluation of 2026-09-23 (model 7, depth path); pred_major is the pixel-width decision recomputed for the whole period",
+  "sessions": 175,
+  "depth_path_majority_wrong": 0,
+  "depth_path_some_image_wrong": 1,
+  "switch_record": "git commit d9ee5ee (2026-09-23), hole_classifier.SCALE_DEFAULT comment: 185 sessions, 3,762 images, 0 decisions changed by the switch from the depth path to pixel width"
+ },
+ "cnn_rule": {
+  "door_rule": "run_extension_v5.vote: mode of the accepted images; a door is rejected only when all its images are rejected or the vote is tied",
+  "mahalanobis_registered": {
+   "rgb:s42": {
+    "images": 10346,
+    "images_rejected_pct": 12.787550744248986,
+    "doors": 518,
+    "doors_all_images_rejected": 39
+   },
+   "rgbe:s42": {
+    "images": 10346,
+    "images_rejected_pct": 11.076744635607964,
+    "doors": 518,
+    "doors_all_images_rejected": 36
+   },
+   "rgb:s123": {
+    "images": 10346,
+    "images_rejected_pct": 11.250724917842645,
+    "doors": 518,
+    "doors_all_images_rejected": 38
+   },
+   "rgbe:s123": {
+    "images": 10346,
+    "images_rejected_pct": 11.183065919195824,
+    "doors": 518,
+    "doors_all_images_rejected": 33
+   },
+   "rgb:s456": {
+    "images": 10346,
+    "images_rejected_pct": 13.222501449835685,
+    "doors": 518,
+    "doors_all_images_rejected": 44
+   },
+   "rgbe:s456": {
+    "images": 10346,
+    "images_rejected_pct": 14.527353566595785,
+    "doors": 518,
+    "doors_all_images_rejected": 45
+   }
+  },
+  "output_scores_accepted_unregistered": {
+   "doors": 432,
+   "some_images_accepted": 59,
+   "all_images_accepted": 373
+  }
+ },
+ "e23": {
+  "images": 120,
+  "measured_D_median_mm": 453.86167248968485,
+  "nearest_registered_distance_min_mm": 266.53587379174724,
+  "nearest_registered_distance_median_mm": 270.13832751031515
+ }
+}

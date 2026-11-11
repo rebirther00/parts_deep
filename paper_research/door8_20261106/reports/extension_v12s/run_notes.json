@@ -1,0 +1,20 @@
+{
+ "created_at": "2026-11-11T13:30:03+09:00",
+ "protocol_sha256": "82c6d618c53c313b219b2fcb90b8b6709c52526a2e83fb402f56d77fdeb3cd15",
+ "registration_time": "The protocol text gives registered_at as 09:20 KST. That is a rounded time written into the file in advance; the file itself was last written at 09:15:54 (mtime) and the queue started at 09:16:41 (first line of logs/queue.log). The file was therefore fixed before any model of this extension was trained or evaluated. It is left unedited because its sha256 is stored in every analysis output.",
+ "before_the_queue": "The rebinding of run names and output folders (run_extension_v12s.bind) was tested once on a stored seed-42 run (rgb_loco_E25_door_LH_FRT_f0) with the output redirected to cache/_v12s_dryrun_s42; it reproduced the stored result (unregistered doors rejected 0/2, registered 68/4/0, argmax mismatch 0) and the folder was deleted. No seed-123 or seed-456 model existed at that time.",
+ "attempts": [
+  {
+   "attempt": 1,
+   "started": "2026-11-11 09:16:41",
+   "finished": "2026-11-11 13:27:47",
+   "outcome": "96/96 train and evaluation steps OK (16 strict hole detectors, 32 CNNs), analyze seed 123 OK, analyze seed 456 OK, collect OK. No FAIL line in logs/queue.log, no traceback in any step log. Nothing was re-run and no code or protocol file was changed after the start."
+  }
+ ],
+ "consistency": "float32 forward versus stored mixed-precision predictions: argmax differs for 1 of 23,648 TEST frames (seed 123) and 0 of 23,648 (seed 456); 0 of 20,370 VAL frames in both seeds",
+ "observations": [
+  "Seed 456, detector trained without E25_door_RH: one registered-class TEST image gave no measurement (known_frames_judged 0.99917), which lowers that run's image-level AUROC to 0.9992; the door of that image was still identified by its other images. All other hole runs have AUROC 1.0.",
+  "Several strict detectors report identical scale values or identical localisation errors to many digits. Integer heatmap peaks on the stride-4 grid make pixel widths discrete, so medians coincide; the weights differ (weights_sha256 differs in every run).",
+  "The legacy single-precision softmax evaluation (V5.eval_cnn_loco) and the float64 softmax score differ by one door in one case (RGBE, seed 456: 48 versus 49 of 74); both are reported in collected.json."
+ ]
+}

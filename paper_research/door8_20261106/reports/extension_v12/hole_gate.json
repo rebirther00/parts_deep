@@ -1,0 +1,142 @@
+{
+  "created_at": "2026-11-10T17:30:12+09:00",
+  "protocol_sha256": "9f265bdb5854d7d6a1c82ab15111029eebb848e4dd137502364f1d2bf60cc463",
+  "oof": {
+    "on": {
+      "frames": {
+        "n": 7104,
+        "correct": 7087,
+        "abstained": 17,
+        "wrong": 0
+      },
+      "doors": {
+        "n": 361,
+        "correct": 361,
+        "abstained": 0,
+        "wrong": 0
+      },
+      "reasons": {
+        "ok": 7087,
+        "missing_corner": 14,
+        "invalid_bolt_rectangle": 1,
+        "not_collinear": 2
+      },
+      "frames_failing_gate": {
+        "n": 17,
+        "correct": 0,
+        "abstained": 17,
+        "wrong": 0,
+        "by_gate": {
+          "missing_corner": 14,
+          "invalid_bolt_rectangle": 1,
+          "not_collinear": 2
+        }
+      }
+    },
+    "off": {
+      "frames": {
+        "n": 7104,
+        "correct": 7089,
+        "abstained": 14,
+        "wrong": 1
+      },
+      "doors": {
+        "n": 361,
+        "correct": 361,
+        "abstained": 0,
+        "wrong": 0
+      },
+      "reasons": {
+        "ok": 7090,
+        "missing_measurement": 14
+      },
+      "frames_failing_gate": {
+        "n": 17,
+        "correct": 2,
+        "abstained": 14,
+        "wrong": 1,
+        "by_gate": {
+          "missing_corner": 14,
+          "invalid_bolt_rectangle": 1,
+          "not_collinear": 2
+        }
+      }
+    }
+  },
+  "temporal": {
+    "on": {
+      "frames": {
+        "n": 2617,
+        "correct": 2616,
+        "abstained": 1,
+        "wrong": 0
+      },
+      "doors": {
+        "n": 133,
+        "correct": 133,
+        "abstained": 0,
+        "wrong": 0
+      },
+      "reasons": {
+        "ok": 2616,
+        "missing_corner": 1
+      },
+      "frames_failing_gate": {
+        "n": 1,
+        "correct": 0,
+        "abstained": 1,
+        "wrong": 0,
+        "by_gate": {
+          "missing_corner": 1
+        }
+      }
+    },
+    "off": {
+      "frames": {
+        "n": 2617,
+        "correct": 2616,
+        "abstained": 1,
+        "wrong": 0
+      },
+      "doors": {
+        "n": 133,
+        "correct": 133,
+        "abstained": 0,
+        "wrong": 0
+      },
+      "reasons": {
+        "ok": 2616,
+        "missing_measurement": 1
+      },
+      "frames_failing_gate": {
+        "n": 1,
+        "correct": 0,
+        "abstained": 1,
+        "wrong": 0,
+        "by_gate": {
+          "missing_corner": 1
+        }
+      }
+    }
+  },
+  "e23": {
+    "on": {
+      "doors": 6,
+      "doors_rejected": 6,
+      "frames": 120,
+      "frames_rejected": 120,
+      "reasons": {
+        "cad_distance_reject": 120
+      }
+    },
+    "off": {
+      "doors": 6,
+      "doors_rejected": 6,
+      "frames": 120,
+      "frames_rejected": 120,
+      "reasons": {
+        "cad_distance_reject": 120
+      }
+    }
+  }
+}
