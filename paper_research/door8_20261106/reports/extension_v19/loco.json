@@ -1,0 +1,280 @@
+{
+  "created_at": "2026-11-13T15:38:36+09:00",
+  "protocol_sha256": "a02b13852031fa6385c7978f81859fbedef12890a9f5613b67c654f5701e182f",
+  "runs": 40,
+  "unknown": {
+    "n": 361,
+    "rejected": 323,
+    "wilson": [
+      0.8588168528149992,
+      0.9223443697095134
+    ]
+  },
+  "new": {
+    "n": 361,
+    "correct": 326,
+    "rejected": 3,
+    "wrong": 32,
+    "wilson": [
+      0.8681461339052234,
+      0.9294605880408577
+    ]
+  },
+  "known": {
+    "n": 2527,
+    "correct": 2482,
+    "rejected": 8,
+    "wrong": 37
+  },
+  "other": {
+    "n": 2527,
+    "correct": 2479,
+    "rejected": 8,
+    "wrong": 40
+  },
+  "accepted_as": {
+    "E30_E38_door_RH->E25_door_RH": 2,
+    "E38_door_LH_RR->E30_E38_door_RH": 3,
+    "E38_door_LH_RR->E25_door_RH": 6,
+    "E38_door_LH_FRT->E25_door_LH_RR": 1,
+    "E38_door_LH_RR->E30_door_LH_RR": 3,
+    "E38_door_LH_RR->E25_door_LH_FRT": 8,
+    "E38_door_LH_RR->E30_door_LH_FRT": 3,
+    "E25_door_RH->E25_door_LH_RR": 1,
+    "E30_door_LH_FRT->E38_door_LH_FRT": 1,
+    "E30_door_LH_RR->E25_door_LH_RR": 2,
+    "E38_door_LH_RR->E38_door_LH_FRT": 1,
+    "E25_door_LH_RR->E30_door_LH_RR": 1,
+    "E25_door_LH_RR->E25_door_RH": 1,
+    "E30_door_LH_RR->E25_door_RH": 1,
+    "E25_door_RH->E30_door_LH_FRT": 1,
+    "E38_door_LH_FRT->E30_E38_door_RH": 1,
+    "E38_door_LH_RR->E25_door_LH_RR": 2
+  },
+  "new_wrong_as": {
+    "E38_door_LH_RR->E30_E38_door_RH": 3,
+    "E38_door_LH_RR->E25_door_RH": 6,
+    "E38_door_LH_RR->E30_door_LH_RR": 3,
+    "E38_door_LH_RR->E25_door_LH_FRT": 8,
+    "E38_door_LH_RR->E30_door_LH_FRT": 3,
+    "E25_door_RH->E25_door_LH_RR": 1,
+    "E30_door_LH_FRT->E38_door_LH_FRT": 1,
+    "E30_door_LH_RR->E25_door_LH_RR": 2,
+    "E38_door_LH_RR->E38_door_LH_FRT": 1,
+    "E25_door_LH_RR->E30_door_LH_RR": 1,
+    "E38_door_LH_FRT->E30_E38_door_RH": 1,
+    "E38_door_LH_RR->E25_door_LH_RR": 2
+  },
+  "unknown_images": {
+    "n": 7104,
+    "accepted": 484,
+    "unmeasured": 0
+  },
+  "min_distance_to_registered_mm": 0.36131047044182196,
+  "per_class": {
+    "E25_door_LH_FRT": {
+      "doors": 9,
+      "unknown_rejected": 9,
+      "new_correct": 9,
+      "new_rejected": 0,
+      "new_wrong": 0,
+      "holes_inside_search_box": [
+        "10/10",
+        "10/10",
+        "10/10",
+        "10/10",
+        "10/10"
+      ],
+      "min_distance_to_registered_mm": 37.073056144529346
+    },
+    "E25_door_LH_RR": {
+      "doors": 70,
+      "unknown_rejected": 68,
+      "new_correct": 69,
+      "new_rejected": 0,
+      "new_wrong": 1,
+      "holes_inside_search_box": [
+        "10/10",
+        "10/10",
+        "10/10",
+        "10/10",
+        "10/10"
+      ],
+      "min_distance_to_registered_mm": 4.38229842918156
+    },
+    "E25_door_RH": {
+      "doors": 68,
+      "unknown_rejected": 66,
+      "new_correct": 67,
+      "new_rejected": 0,
+      "new_wrong": 1,
+      "holes_inside_search_box": [
+        "10/10",
+        "10/10",
+        "10/10",
+        "10/10",
+        "10/10"
+      ],
+      "min_distance_to_registered_mm": 1.3454809696077064
+    },
+    "E30_E38_door_RH": {
+      "doors": 70,
+      "unknown_rejected": 68,
+      "new_correct": 70,
+      "new_rejected": 0,
+      "new_wrong": 0,
+      "holes_inside_search_box": [
+        "10/10",
+        "10/10",
+        "10/10",
+        "10/10",
+        "10/10"
+      ],
+      "min_distance_to_registered_mm": 2.635086911513895
+    },
+    "E30_door_LH_FRT": {
+      "doors": 44,
+      "unknown_rejected": 43,
+      "new_correct": 43,
+      "new_rejected": 0,
+      "new_wrong": 1,
+      "holes_inside_search_box": [
+        "10/10",
+        "10/10",
+        "10/10",
+        "10/10",
+        "10/10"
+      ],
+      "min_distance_to_registered_mm": 11.217625091218679
+    },
+    "E30_door_LH_RR": {
+      "doors": 50,
+      "unknown_rejected": 47,
+      "new_correct": 48,
+      "new_rejected": 0,
+      "new_wrong": 2,
+      "holes_inside_search_box": [
+        "10/10",
+        "10/10",
+        "10/10",
+        "10/10",
+        "10/10"
+      ],
+      "min_distance_to_registered_mm": 13.80000919727388
+    },
+    "E38_door_LH_FRT": {
+      "doors": 21,
+      "unknown_rejected": 19,
+      "new_correct": 20,
+      "new_rejected": 0,
+      "new_wrong": 1,
+      "holes_inside_search_box": [
+        "10/10",
+        "10/10",
+        "10/10",
+        "10/10",
+        "10/10"
+      ],
+      "min_distance_to_registered_mm": 7.5914637855220235
+    },
+    "E38_door_LH_RR": {
+      "doors": 29,
+      "unknown_rejected": 3,
+      "new_correct": 0,
+      "new_rejected": 3,
+      "new_wrong": 26,
+      "holes_inside_search_box": [
+        "2/10",
+        "2/10",
+        "2/10",
+        "2/10",
+        "2/10"
+      ],
+      "min_distance_to_registered_mm": 0.36131047044182196
+    }
+  },
+  "selected": {
+    "0_E25_door_LH_FRT": "ncc r=24 m=40",
+    "0_E25_door_LH_RR": "ncc r=24 m=40",
+    "0_E25_door_RH": "ncc r=24 m=40",
+    "0_E30_E38_door_RH": "ncc r=24 m=40",
+    "0_E30_door_LH_FRT": "ncc r=16 m=40",
+    "0_E30_door_LH_RR": "ncc r=24 m=40",
+    "0_E38_door_LH_FRT": "ncc r=16 m=40",
+    "0_E38_door_LH_RR": "ncc r=16 m=40",
+    "1_E25_door_LH_FRT": "ncc r=24 m=80",
+    "1_E25_door_LH_RR": "ncc r=24 m=80",
+    "1_E25_door_RH": "ncc r=24 m=80",
+    "1_E30_E38_door_RH": "ncc r=32 m=80",
+    "1_E30_door_LH_FRT": "ncc r=24 m=80",
+    "1_E30_door_LH_RR": "ncc r=24 m=80",
+    "1_E38_door_LH_FRT": "ncc r=32 m=80",
+    "1_E38_door_LH_RR": "ncc r=24 m=40",
+    "2_E25_door_LH_FRT": "ncc r=16 m=40",
+    "2_E25_door_LH_RR": "ncc r=32 m=40",
+    "2_E25_door_RH": "ncc r=32 m=40",
+    "2_E30_E38_door_RH": "ncc r=32 m=40",
+    "2_E30_door_LH_FRT": "ncc r=32 m=40",
+    "2_E30_door_LH_RR": "ncc r=32 m=40",
+    "2_E38_door_LH_FRT": "ncc r=32 m=40",
+    "2_E38_door_LH_RR": "ncc r=32 m=40",
+    "3_E25_door_LH_FRT": "ncc r=16 m=40",
+    "3_E25_door_LH_RR": "ncc r=16 m=40",
+    "3_E25_door_RH": "ncc r=16 m=40",
+    "3_E30_E38_door_RH": "ncc r=16 m=40",
+    "3_E30_door_LH_FRT": "ncc r=24 m=40",
+    "3_E30_door_LH_RR": "ncc r=16 m=40",
+    "3_E38_door_LH_FRT": "ncc r=16 m=40",
+    "3_E38_door_LH_RR": "ncc r=16 m=40",
+    "4_E25_door_LH_FRT": "ncc r=32 m=40",
+    "4_E25_door_LH_RR": "ncc r=32 m=40",
+    "4_E25_door_RH": "ncc r=32 m=40",
+    "4_E30_E38_door_RH": "ncc r=32 m=40",
+    "4_E30_door_LH_FRT": "ncc r=32 m=40",
+    "4_E30_door_LH_RR": "ncc r=32 m=40",
+    "4_E38_door_LH_FRT": "ncc r=32 m=40",
+    "4_E38_door_LH_RR": "ncc r=32 m=40"
+  },
+  "scale": {
+    "0_E25_door_LH_FRT": 1476.3,
+    "0_E25_door_LH_RR": 1476.3,
+    "0_E25_door_RH": 1476.1,
+    "0_E30_E38_door_RH": 1477.1,
+    "0_E30_door_LH_FRT": 1476.4,
+    "0_E30_door_LH_RR": 1477.6,
+    "0_E38_door_LH_FRT": 1476.2,
+    "0_E38_door_LH_RR": 1476.2,
+    "1_E25_door_LH_FRT": 1474.3,
+    "1_E25_door_LH_RR": 1476.0,
+    "1_E25_door_RH": 1474.5,
+    "1_E30_E38_door_RH": 1474.5,
+    "1_E30_door_LH_FRT": 1474.5,
+    "1_E30_door_LH_RR": 1476.0,
+    "1_E38_door_LH_FRT": 1474.5,
+    "1_E38_door_LH_RR": 1474.5,
+    "2_E25_door_LH_FRT": 1474.6,
+    "2_E25_door_LH_RR": 1474.9,
+    "2_E25_door_RH": 1474.6,
+    "2_E30_E38_door_RH": 1474.9,
+    "2_E30_door_LH_FRT": 1474.8,
+    "2_E30_door_LH_RR": 1476.0,
+    "2_E38_door_LH_FRT": 1474.6,
+    "2_E38_door_LH_RR": 1475.0,
+    "3_E25_door_LH_FRT": 1476.0,
+    "3_E25_door_LH_RR": 1476.1,
+    "3_E25_door_RH": 1476.2,
+    "3_E30_E38_door_RH": 1476.1,
+    "3_E30_door_LH_FRT": 1476.3,
+    "3_E30_door_LH_RR": 1476.2,
+    "3_E38_door_LH_FRT": 1476.1,
+    "3_E38_door_LH_RR": 1476.2,
+    "4_E25_door_LH_FRT": 1476.1,
+    "4_E25_door_LH_RR": 1476.2,
+    "4_E25_door_RH": 1476.0,
+    "4_E30_E38_door_RH": 1476.1,
+    "4_E30_door_LH_FRT": 1476.0,
+    "4_E30_door_LH_RR": 1476.1,
+    "4_E38_door_LH_FRT": 1476.1,
+    "4_E38_door_LH_RR": 1476.1
+  }
+}

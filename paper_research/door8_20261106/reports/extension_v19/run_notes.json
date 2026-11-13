@@ -1,0 +1,311 @@
+{
+ "created_at": "2026-11-13 KST, after the queue had finished",
+ "protocol": {
+  "config/extension_v19_protocol.json": "a02b13852031fa6385c7978f81859fbedef12890a9f5613b67c654f5701e182f"
+ },
+ "queue": {
+  "start": "2026-11-13 15:23:39",
+  "end": "2026-11-13 16:16:49",
+  "steps_ok": 79,
+  "steps_failed": 0
+ },
+ "attempts": [
+  "Before the queue: scripts/run_extension_v19.py was compiled and its --help was printed; no image, detection or label was read.",
+  "Queue (scripts/queue_extension_v19.sh): every step OK at the first attempt; nothing re-run."
+ ],
+ "looks_before_registration": "As listed in the protocol file. While the queue ran, finished lines of E1, E2 and E3 were read as they appeared; the queue ran unchanged to its end.",
+ "results": {
+  "E1_E23": {
+   "candidate": "ncc r=24 m=40",
+   "doors_rejected_eight_values": 5,
+   "doors_accepted_as": {
+    "E25_door_LH_FRT": 1
+   },
+   "images_rejected": 119,
+   "doors_identified_after_458": 0,
+   "images_identified_after_458": 0,
+   "measured_mm": {
+    "n": 120,
+    "median": 615.098946702751,
+    "min": 609.9363252112222,
+    "max": 700.3286096839096
+   },
+   "detection_gap_px": {
+    "n": 120,
+    "median": 528.9688081541293,
+    "min": 524.5493303779922,
+    "max": 602.2640616872303
+   }
+  },
+  "E2_unseen_class": {
+   "unregistered_rejected": "323/361",
+   "identified_after_registration": "326/361",
+   "new": {
+    "n": 361,
+    "correct": 326,
+    "rejected": 3,
+    "wrong": 32,
+    "wilson": [
+     0.8681461339052234,
+     0.9294605880408577
+    ]
+   },
+   "registered_decisions_seven_list": {
+    "n": 2527,
+    "correct": 2482,
+    "rejected": 8,
+    "wrong": 37
+   },
+   "registered_decisions_eight_list": {
+    "n": 2527,
+    "correct": 2479,
+    "rejected": 8,
+    "wrong": 40
+   },
+   "unknown_images": {
+    "n": 7104,
+    "accepted": 484,
+    "unmeasured": 0
+   },
+   "min_distance_to_registered_mm": 0.36131047044182196,
+   "per_class": {
+    "E25_door_LH_FRT": {
+     "doors": 9,
+     "unknown_rejected": 9,
+     "new_correct": 9,
+     "new_rejected": 0,
+     "new_wrong": 0,
+     "holes_inside_search_box": [
+      "10/10",
+      "10/10",
+      "10/10",
+      "10/10",
+      "10/10"
+     ],
+     "min_distance_to_registered_mm": 37.073056144529346
+    },
+    "E25_door_LH_RR": {
+     "doors": 70,
+     "unknown_rejected": 68,
+     "new_correct": 69,
+     "new_rejected": 0,
+     "new_wrong": 1,
+     "holes_inside_search_box": [
+      "10/10",
+      "10/10",
+      "10/10",
+      "10/10",
+      "10/10"
+     ],
+     "min_distance_to_registered_mm": 4.38229842918156
+    },
+    "E25_door_RH": {
+     "doors": 68,
+     "unknown_rejected": 66,
+     "new_correct": 67,
+     "new_rejected": 0,
+     "new_wrong": 1,
+     "holes_inside_search_box": [
+      "10/10",
+      "10/10",
+      "10/10",
+      "10/10",
+      "10/10"
+     ],
+     "min_distance_to_registered_mm": 1.3454809696077064
+    },
+    "E30_E38_door_RH": {
+     "doors": 70,
+     "unknown_rejected": 68,
+     "new_correct": 70,
+     "new_rejected": 0,
+     "new_wrong": 0,
+     "holes_inside_search_box": [
+      "10/10",
+      "10/10",
+      "10/10",
+      "10/10",
+      "10/10"
+     ],
+     "min_distance_to_registered_mm": 2.635086911513895
+    },
+    "E30_door_LH_FRT": {
+     "doors": 44,
+     "unknown_rejected": 43,
+     "new_correct": 43,
+     "new_rejected": 0,
+     "new_wrong": 1,
+     "holes_inside_search_box": [
+      "10/10",
+      "10/10",
+      "10/10",
+      "10/10",
+      "10/10"
+     ],
+     "min_distance_to_registered_mm": 11.217625091218679
+    },
+    "E30_door_LH_RR": {
+     "doors": 50,
+     "unknown_rejected": 47,
+     "new_correct": 48,
+     "new_rejected": 0,
+     "new_wrong": 2,
+     "holes_inside_search_box": [
+      "10/10",
+      "10/10",
+      "10/10",
+      "10/10",
+      "10/10"
+     ],
+     "min_distance_to_registered_mm": 13.80000919727388
+    },
+    "E38_door_LH_FRT": {
+     "doors": 21,
+     "unknown_rejected": 19,
+     "new_correct": 20,
+     "new_rejected": 0,
+     "new_wrong": 1,
+     "holes_inside_search_box": [
+      "10/10",
+      "10/10",
+      "10/10",
+      "10/10",
+      "10/10"
+     ],
+     "min_distance_to_registered_mm": 7.5914637855220235
+    },
+    "E38_door_LH_RR": {
+     "doors": 29,
+     "unknown_rejected": 3,
+     "new_correct": 0,
+     "new_rejected": 3,
+     "new_wrong": 26,
+     "holes_inside_search_box": [
+      "2/10",
+      "2/10",
+      "2/10",
+      "2/10",
+      "2/10"
+     ],
+     "min_distance_to_registered_mm": 0.36131047044182196
+    }
+   },
+   "seven_classes_without_E38_LH_RR": {
+    "doors": 332,
+    "rejected": 320,
+    "identified": 326
+   }
+  },
+  "E3_fixed_settings": {
+   "five_fold_range": [
+    352,
+    358
+   ],
+   "temporal_range": [
+    124,
+    133
+   ],
+   "per_setting": {
+    "ncc r=16 m=40": {
+     "five_fold": {
+      "n": 361,
+      "correct": 356,
+      "abstained": 1,
+      "wrong": 4
+     },
+     "temporal": {
+      "n": 133,
+      "correct": 133,
+      "abstained": 0,
+      "wrong": 0
+     }
+    },
+    "ncc r=16 m=80": {
+     "five_fold": {
+      "n": 361,
+      "correct": 358,
+      "abstained": 0,
+      "wrong": 3
+     },
+     "temporal": {
+      "n": 133,
+      "correct": 131,
+      "abstained": 0,
+      "wrong": 2
+     }
+    },
+    "ncc r=24 m=40": {
+     "five_fold": {
+      "n": 361,
+      "correct": 355,
+      "abstained": 1,
+      "wrong": 5
+     },
+     "temporal": {
+      "n": 133,
+      "correct": 124,
+      "abstained": 2,
+      "wrong": 7
+     }
+    },
+    "ncc r=24 m=80": {
+     "five_fold": {
+      "n": 361,
+      "correct": 354,
+      "abstained": 1,
+      "wrong": 6
+     },
+     "temporal": {
+      "n": 133,
+      "correct": 124,
+      "abstained": 2,
+      "wrong": 7
+     }
+    },
+    "ncc r=32 m=40": {
+     "five_fold": {
+      "n": 361,
+      "correct": 352,
+      "abstained": 2,
+      "wrong": 7
+     },
+     "temporal": {
+      "n": 133,
+      "correct": 129,
+      "abstained": 1,
+      "wrong": 3
+     }
+    },
+    "ncc r=32 m=80": {
+     "five_fold": {
+      "n": 361,
+      "correct": 352,
+      "abstained": 1,
+      "wrong": 8
+     },
+     "temporal": {
+      "n": 133,
+      "correct": 129,
+      "abstained": 0,
+      "wrong": 4
+     }
+    }
+   }
+  }
+ },
+ "claim_rule": {
+  "E1": "I = 0 <= 1 -> case (a): the 500 px condition (about 581 mm) presupposes the dimension range of the registered classes; R = 5, I = 0; the learned detector has no such premise (6 and 6).",
+  "E2": "U = 323, N = 326 -> case (c): both counts with the per-class breakdown; neither the statement that the properties belong to the separation structure nor the statement that the learned detector did better in this condition is made. The manuscript gives the counts, the E38 LH RR breakdown with the search-box coverage (2 of 10 annotated holes), and the counts of the other seven classes (320 and 326 of 332).",
+  "E3": "Five-fold range 352-358 (smallest >= 343): no statement that the result depends on the setting; the statement that a learned detector was not shown to be necessary for registered classes is kept. Temporal range 124-133 is given as it is."
+ },
+ "observations_not_in_the_claim_rule": [
+  "With E38 LH RR removed the search box of the selected candidate spans x 508-516 to 1,593-1,595 px; the corner holes of that class are annotated at x 427-513 and 1,591-1,667 px. 26 of its 29 doors were accepted as another class while unregistered and 26 were wrong after registration.",
+  "Of the 7,104 unregistered images of E2, 484 were accepted (learned detectors: 0); the smallest distance of an unregistered image to a registered value was 0.36 mm.",
+  "E2 selected NCC candidates in all 40 runs (r=32 m=40 15, r=16 m=40 11, r=24 m=40 7, r=24 m=80 5, r=32 m=80 2); S 1,474.3-1,477.6 mm.",
+  "E3: the setting T1b selected per split is not the best fixed setting everywhere (temporal: r=16 m=40 gives 133, the selected r=32 m=40 gives 129; r=24 gives 124).",
+  "Not registered, computed after the queue for review-round-8 supplement 1 from stored detections only: the detections of the five doors T1b failed in the five folds were compared with the points of the learned detector of the same fold; in every image not judged correctly at least one detection is 37.7 px or more from the learned detector's point (in two doors the other point is within 4.1 px, in three doors both points are off in some images). The measured D of these doors (median) is 34.5-632.8 mm from the CAD value.",
+  "The optional sentence of the external review (item 4.3: registration by the CAD list and traceability are properties of the identification structure; the learned detector is the adopted detection means) was not added, because E2 fell into case (c)."
+ ],
+ "scope_limit": "All results here are post hoc diagnostics of a baseline whose separation rule and validation score were changed after TEST results had been seen (extension_v18, v18b).",
+ "manuscript_use": "v19: section 4.2 (fixed-setting range, temporal selection, failed doors), new paragraph of section 4.4, sections 3.4 and 4.5, conclusion."
+}

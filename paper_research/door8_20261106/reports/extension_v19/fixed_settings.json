@@ -1,0 +1,248 @@
+{
+  "created_at": "2026-11-13T16:16:49+09:00",
+  "protocol_sha256": "a02b13852031fa6385c7978f81859fbedef12890a9f5613b67c654f5701e182f",
+  "settings": {
+    "ncc r=16 m=40": {
+      "five_fold": {
+        "n": 361,
+        "correct": 356,
+        "abstained": 1,
+        "wrong": 4
+      },
+      "five_fold_wilson": [
+        0.9679919095714392,
+        0.9940698065903287
+      ],
+      "frames": {
+        "n": 7104,
+        "correct": 6973,
+        "abstained": 44,
+        "wrong": 87
+      },
+      "temporal": {
+        "n": 133,
+        "correct": 133,
+        "abstained": 0,
+        "wrong": 0
+      },
+      "per_fold": {
+        "0": 73,
+        "1": 73,
+        "2": 71,
+        "3": 71,
+        "4": 68
+      },
+      "scale": {
+        "0": 1476.2,
+        "1": 1474.4,
+        "2": 1474.7,
+        "3": 1476.2,
+        "4": 1474.5,
+        "temporal": 1477.7
+      }
+    },
+    "ncc r=16 m=80": {
+      "five_fold": {
+        "n": 361,
+        "correct": 358,
+        "abstained": 0,
+        "wrong": 3
+      },
+      "five_fold_wilson": [
+        0.9758555622459513,
+        0.9971698201968624
+      ],
+      "frames": {
+        "n": 7104,
+        "correct": 6990,
+        "abstained": 56,
+        "wrong": 58
+      },
+      "temporal": {
+        "n": 133,
+        "correct": 131,
+        "abstained": 0,
+        "wrong": 2
+      },
+      "per_fold": {
+        "0": 73,
+        "1": 73,
+        "2": 73,
+        "3": 70,
+        "4": 69
+      },
+      "scale": {
+        "0": 1476.2,
+        "1": 1474.5,
+        "2": 1474.9,
+        "3": 1476.2,
+        "4": 1474.5,
+        "temporal": 1477.7
+      }
+    },
+    "ncc r=24 m=40": {
+      "five_fold": {
+        "n": 361,
+        "correct": 355,
+        "abstained": 1,
+        "wrong": 5
+      },
+      "five_fold_wilson": [
+        0.9642188989318473,
+        0.992360984089398
+      ],
+      "frames": {
+        "n": 7104,
+        "correct": 6945,
+        "abstained": 36,
+        "wrong": 123
+      },
+      "temporal": {
+        "n": 133,
+        "correct": 124,
+        "abstained": 2,
+        "wrong": 7
+      },
+      "per_fold": {
+        "0": 74,
+        "1": 73,
+        "2": 71,
+        "3": 69,
+        "4": 68
+      },
+      "scale": {
+        "0": 1476.6,
+        "1": 1474.5,
+        "2": 1474.8,
+        "3": 1476.2,
+        "4": 1476.1,
+        "temporal": 1477.9
+      }
+    },
+    "ncc r=24 m=80": {
+      "five_fold": {
+        "n": 361,
+        "correct": 354,
+        "abstained": 1,
+        "wrong": 6
+      },
+      "five_fold_wilson": [
+        0.9605219023211607,
+        0.9905761475595615
+      ],
+      "frames": {
+        "n": 7104,
+        "correct": 6927,
+        "abstained": 56,
+        "wrong": 121
+      },
+      "temporal": {
+        "n": 133,
+        "correct": 124,
+        "abstained": 2,
+        "wrong": 7
+      },
+      "per_fold": {
+        "0": 74,
+        "1": 73,
+        "2": 72,
+        "3": 67,
+        "4": 68
+      },
+      "scale": {
+        "0": 1476.3,
+        "1": 1474.5,
+        "2": 1474.7,
+        "3": 1476.2,
+        "4": 1476.1,
+        "temporal": 1477.9
+      }
+    },
+    "ncc r=32 m=40": {
+      "five_fold": {
+        "n": 361,
+        "correct": 352,
+        "abstained": 2,
+        "wrong": 7
+      },
+      "five_fold_wilson": [
+        0.9533048797295692,
+        0.9868295038701073
+      ],
+      "frames": {
+        "n": 7104,
+        "correct": 6882,
+        "abstained": 89,
+        "wrong": 133
+      },
+      "temporal": {
+        "n": 133,
+        "correct": 129,
+        "abstained": 1,
+        "wrong": 3
+      },
+      "per_fold": {
+        "0": 72,
+        "1": 72,
+        "2": 70,
+        "3": 70,
+        "4": 68
+      },
+      "scale": {
+        "0": 1477.2,
+        "1": 1474.7,
+        "2": 1474.7,
+        "3": 1476.3,
+        "4": 1476.1,
+        "temporal": 1477.9
+      }
+    },
+    "ncc r=32 m=80": {
+      "five_fold": {
+        "n": 361,
+        "correct": 352,
+        "abstained": 1,
+        "wrong": 8
+      },
+      "five_fold_wilson": [
+        0.9533048797295692,
+        0.9868295038701073
+      ],
+      "frames": {
+        "n": 7104,
+        "correct": 6894,
+        "abstained": 101,
+        "wrong": 109
+      },
+      "temporal": {
+        "n": 133,
+        "correct": 129,
+        "abstained": 0,
+        "wrong": 4
+      },
+      "per_fold": {
+        "0": 72,
+        "1": 72,
+        "2": 71,
+        "3": 70,
+        "4": 67
+      },
+      "scale": {
+        "0": 1477.1,
+        "1": 1474.7,
+        "2": 1474.6,
+        "3": 1476.2,
+        "4": 1476.1,
+        "temporal": 1477.9
+      }
+    }
+  },
+  "five_fold_range": [
+    352,
+    358
+  ],
+  "temporal_range": [
+    124,
+    133
+  ]
+}

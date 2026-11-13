@@ -1,0 +1,194 @@
+{
+  "created_at": "2026-11-13T15:36:45+09:00",
+  "protocol_sha256": "a02b13852031fa6385c7978f81859fbedef12890a9f5613b67c654f5701e182f",
+  "split": "4",
+  "removed": "E38_door_LH_RR",
+  "train_images": 7,
+  "val_images": 7,
+  "validation": [
+    {
+      "candidate": "ncc r=16 m=40",
+      "region": [
+        508,
+        940,
+        1595,
+        1068
+      ],
+      "points": 14,
+      "pck8": 0.9285714285714286,
+      "median_px": 0.7433327228357193,
+      "max_px": 63.06393956929745
+    },
+    {
+      "candidate": "ncc r=16 m=80",
+      "region": [
+        468,
+        900,
+        1635,
+        1108
+      ],
+      "points": 14,
+      "pck8": 0.8571428571428571,
+      "median_px": 0.8255897484097853,
+      "max_px": 66.31169641925929
+    },
+    {
+      "candidate": "ncc r=24 m=40",
+      "region": [
+        508,
+        940,
+        1595,
+        1068
+      ],
+      "points": 14,
+      "pck8": 1.0,
+      "median_px": 0.9285069252972089,
+      "max_px": 1.9322986311644308
+    },
+    {
+      "candidate": "ncc r=24 m=80",
+      "region": [
+        468,
+        900,
+        1635,
+        1108
+      ],
+      "points": 14,
+      "pck8": 1.0,
+      "median_px": 0.9285069252972089,
+      "max_px": 1.9322986311644308
+    },
+    {
+      "candidate": "ncc r=32 m=40",
+      "region": [
+        508,
+        940,
+        1595,
+        1068
+      ],
+      "points": 14,
+      "pck8": 1.0,
+      "median_px": 0.7820212594786069,
+      "max_px": 1.6422910826038002
+    },
+    {
+      "candidate": "ncc r=32 m=80",
+      "region": [
+        468,
+        900,
+        1635,
+        1108
+      ],
+      "points": 14,
+      "pck8": 1.0,
+      "median_px": 0.7820212594786069,
+      "max_px": 1.6422910826038002
+    },
+    {
+      "candidate": "log sigma=1.5 m=40",
+      "region": [
+        508,
+        940,
+        1595,
+        1068
+      ],
+      "points": 14,
+      "pck8": 0.42857142857142855,
+      "median_px": 47.91402712858215,
+      "max_px": 461.6977196878928
+    },
+    {
+      "candidate": "log sigma=1.5 m=80",
+      "region": [
+        468,
+        900,
+        1635,
+        1108
+      ],
+      "points": 14,
+      "pck8": 0.21428571428571427,
+      "median_px": 130.12579343090897,
+      "max_px": 478.3648924879417
+    },
+    {
+      "candidate": "log sigma=2.5 m=40",
+      "region": [
+        508,
+        940,
+        1595,
+        1068
+      ],
+      "points": 14,
+      "pck8": 0.42857142857142855,
+      "median_px": 63.88021057496799,
+      "max_px": 394.3026304312463
+    },
+    {
+      "candidate": "log sigma=2.5 m=80",
+      "region": [
+        468,
+        900,
+        1635,
+        1108
+      ],
+      "points": 14,
+      "pck8": 0.14285714285714285,
+      "median_px": 129.97944208870334,
+      "max_px": 325.14925859518735
+    }
+  ],
+  "selected": "ncc r=32 m=40",
+  "region": [
+    508,
+    940,
+    1595,
+    1068
+  ],
+  "scale": {
+    "54910212": 1476.0769236917831
+  },
+  "train_sessions": 200,
+  "unknown": {
+    "n": 5,
+    "rejected": 0,
+    "accepted_as": {
+      "E25_door_LH_RR": 2,
+      "E25_door_LH_FRT": 2,
+      "E30_door_LH_FRT": 1
+    }
+  },
+  "known": {
+    "n": 64,
+    "correct": 64,
+    "rejected": 0,
+    "wrong": 0
+  },
+  "new": {
+    "n": 5,
+    "correct": 0,
+    "rejected": 0,
+    "wrong": 5
+  },
+  "other": {
+    "n": 64,
+    "correct": 64,
+    "rejected": 0,
+    "wrong": 0
+  },
+  "new_wrong_as": {
+    "E25_door_LH_RR": 2,
+    "E25_door_LH_FRT": 2,
+    "E30_door_LH_FRT": 1
+  },
+  "unknown_images": {
+    "n": 81,
+    "accepted": 69,
+    "unmeasured": 0,
+    "min_distance_to_registered_mm": 1.0795183695161086
+  },
+  "removed_class_holes": {
+    "points": 10,
+    "inside_search_box": 2
+  },
+  "seconds_per_image_single_thread": 0.030201240709482928
+}

@@ -1,0 +1,22 @@
+{
+  "created_at": "2026-11-13T15:46:42+09:00",
+  "protocol_sha256": "a02b13852031fa6385c7978f81859fbedef12890a9f5613b67c654f5701e182f",
+  "split": "4",
+  "candidate": "ncc r=24 m=40",
+  "index": 2,
+  "scale": {
+    "54910212": 1476.0735214579659
+  },
+  "doors": {
+    "n": 69,
+    "correct": 68,
+    "abstained": 1,
+    "wrong": 0
+  },
+  "frames": {
+    "n": 1355,
+    "correct": 1352,
+    "abstained": 2,
+    "wrong": 1
+  }
+}

@@ -1,0 +1,186 @@
+{
+  "created_at": "2026-11-13T15:26:13+09:00",
+  "protocol_sha256": "a02b13852031fa6385c7978f81859fbedef12890a9f5613b67c654f5701e182f",
+  "split": "0",
+  "removed": "E25_door_LH_RR",
+  "train_images": 7,
+  "val_images": 7,
+  "validation": [
+    {
+      "candidate": "ncc r=16 m=40",
+      "region": [
+        421,
+        937,
+        1671,
+        1068
+      ],
+      "points": 14,
+      "pck8": 0.9285714285714286,
+      "median_px": 1.0465271854843996,
+      "max_px": 64.93817529004025
+    },
+    {
+      "candidate": "ncc r=16 m=80",
+      "region": [
+        381,
+        897,
+        1711,
+        1108
+      ],
+      "points": 14,
+      "pck8": 0.9285714285714286,
+      "median_px": 1.0465271854843996,
+      "max_px": 64.93817529004025
+    },
+    {
+      "candidate": "ncc r=24 m=40",
+      "region": [
+        421,
+        937,
+        1671,
+        1068
+      ],
+      "points": 14,
+      "pck8": 1.0,
+      "median_px": 1.0106270301182954,
+      "max_px": 2.3519596084967134
+    },
+    {
+      "candidate": "ncc r=24 m=80",
+      "region": [
+        381,
+        897,
+        1711,
+        1108
+      ],
+      "points": 14,
+      "pck8": 1.0,
+      "median_px": 1.0106270301182954,
+      "max_px": 2.3519596084967134
+    },
+    {
+      "candidate": "ncc r=32 m=40",
+      "region": [
+        421,
+        937,
+        1671,
+        1068
+      ],
+      "points": 14,
+      "pck8": 1.0,
+      "median_px": 1.0888348685060203,
+      "max_px": 2.3519596084967134
+    },
+    {
+      "candidate": "ncc r=32 m=80",
+      "region": [
+        381,
+        897,
+        1711,
+        1108
+      ],
+      "points": 14,
+      "pck8": 1.0,
+      "median_px": 1.0888348685060203,
+      "max_px": 2.3519596084967134
+    },
+    {
+      "candidate": "log sigma=1.5 m=40",
+      "region": [
+        421,
+        937,
+        1671,
+        1068
+      ],
+      "points": 14,
+      "pck8": 0.2857142857142857,
+      "median_px": 64.29418418111565,
+      "max_px": 190.5171657200474
+    },
+    {
+      "candidate": "log sigma=1.5 m=80",
+      "region": [
+        381,
+        897,
+        1711,
+        1108
+      ],
+      "points": 14,
+      "pck8": 0.0,
+      "median_px": 130.59659372536402,
+      "max_px": 573.8685860098983
+    },
+    {
+      "candidate": "log sigma=2.5 m=40",
+      "region": [
+        421,
+        937,
+        1671,
+        1068
+      ],
+      "points": 14,
+      "pck8": 0.14285714285714285,
+      "median_px": 72.60185986731491,
+      "max_px": 185.07345418508828
+    },
+    {
+      "candidate": "log sigma=2.5 m=80",
+      "region": [
+        381,
+        897,
+        1711,
+        1108
+      ],
+      "points": 14,
+      "pck8": 0.0,
+      "median_px": 158.0787596037117,
+      "max_px": 472.82194958461906
+    }
+  ],
+  "selected": "ncc r=24 m=40",
+  "region": [
+    421,
+    937,
+    1671,
+    1068
+  ],
+  "scale": {
+    "54910212": 1476.3294712028228
+  },
+  "train_sessions": 172,
+  "unknown": {
+    "n": 14,
+    "rejected": 14,
+    "accepted_as": {}
+  },
+  "known": {
+    "n": 60,
+    "correct": 60,
+    "rejected": 0,
+    "wrong": 0
+  },
+  "new": {
+    "n": 14,
+    "correct": 14,
+    "rejected": 0,
+    "wrong": 0
+  },
+  "other": {
+    "n": 60,
+    "correct": 60,
+    "rejected": 0,
+    "wrong": 0
+  },
+  "new_wrong_as": {},
+  "unknown_images": {
+    "n": 278,
+    "accepted": 0,
+    "unmeasured": 0,
+    "min_distance_to_registered_mm": 43.833296799455184
+  },
+  "removed_class_holes": {
+    "points": 10,
+    "inside_search_box": 10
+  },
+  "seconds_per_image_single_thread": 0.03293915888763912
+}

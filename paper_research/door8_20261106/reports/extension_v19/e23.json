@@ -1,0 +1,63 @@
+{
+  "created_at": "2026-11-13T15:23:42+09:00",
+  "protocol_sha256": "a02b13852031fa6385c7978f81859fbedef12890a9f5613b67c654f5701e182f",
+  "candidate": "ncc r=24 m=40",
+  "region": [
+    421,
+    937,
+    1671,
+    1068
+  ],
+  "scale": {
+    "54910212": 1476.6233681883268
+  },
+  "doors": 6,
+  "images": 120,
+  "unregistered": {
+    "doors_rejected": 5,
+    "doors_accepted_as": {
+      "E25_door_LH_FRT": 1
+    },
+    "images_rejected": 119,
+    "images_accepted_as": {
+      "E25_door_LH_FRT": 1
+    },
+    "reasons": {
+      "cad_distance_reject": 119,
+      "ok": 1
+    }
+  },
+  "registered_458": {
+    "doors_identified": 0,
+    "doors_rejected": 5,
+    "doors_other": {
+      "E25_door_LH_FRT": 1
+    },
+    "images_identified": 0,
+    "reasons": {
+      "cad_distance_reject": 119,
+      "ok": 1
+    }
+  },
+  "measured_mm": {
+    "n": 120,
+    "median": 615.098946702751,
+    "min": 609.9363252112222,
+    "max": 700.3286096839096
+  },
+  "measured_mm_door_medians": {
+    "20260903/E25_door_LH_FRT/s_124446": 615.8519146989229,
+    "20260903/E25_door_LH_FRT/s_132914": 615.4379381162867,
+    "20260903/E25_door_LH_FRT/s_141947": 615.098946702751,
+    "20260905/E25_door_LH_FRT/s_150506": 617.1545814202847,
+    "20260912/E25_door_LH_FRT/s_094850": 613.0393572767757,
+    "20260912/E25_door_LH_FRT/s_103329": 613.650224664385
+  },
+  "detection_gap_px": {
+    "n": 120,
+    "median": 528.9688081541293,
+    "min": 524.5493303779922,
+    "max": 602.2640616872303
+  },
+  "no_detection": 0
+}
