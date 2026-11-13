@@ -1,0 +1,159 @@
+{
+  "created_at": "2026-11-13T14:20:15+09:00",
+  "protocol_sha256": "dea8e309c85a7806ce28def5c4c1494d97b6415a4600d4cff1ed01040beb6bb5",
+  "variant": "perkey",
+  "split": "0",
+  "selected": "ncc r=32 m=40",
+  "scale": {
+    "54910212": 1480.736703355032
+  },
+  "scale_learned": {
+    "54910212": 1475.3372010525288
+  },
+  "seconds_per_image_single_thread": 0.034331878126852955,
+  "doors": {
+    "n": 74,
+    "correct": 64,
+    "abstained": 9,
+    "wrong": 1
+  },
+  "frames": {
+    "n": 1478,
+    "correct": 917,
+    "abstained": 553,
+    "wrong": 8
+  },
+  "frame_reasons": {
+    "ok": 925,
+    "distance_range": 551,
+    "cad_distance_reject": 2
+  },
+  "localisation_test_role": {
+    "points": 16,
+    "pck8": 0.6875,
+    "median_px": 1.718574368563458,
+    "max_px": 995.9051530913977
+  },
+  "residual": {
+    "frames_measured": 927,
+    "percentiles_5_50_95": [
+      -0.0014221174450017582,
+      0.003964470034144574,
+      0.009326268138017735
+    ],
+    "range": [
+      -0.31217818870297775,
+      0.010188335229099232
+    ],
+    "rms": 0.025400585812748365,
+    "mean_abs": 0.0065309712846573645,
+    "max_abs_mm": 339.3376911201368,
+    "frames_out_of_band": 10,
+    "max_utilisation": 11.822174693438292,
+    "within_door_sd_median": 2.709743984177469e-05,
+    "between_door_sd": 0.04315426541179944
+  },
+  "failed_doors": [
+    {
+      "door": "20260907/E30_door_LH_RR/s_145148",
+      "true": "E30_door_LH_RR",
+      "pred": null,
+      "state": "before"
+    },
+    {
+      "door": "20260914/E30_door_LH_RR/s_080437",
+      "true": "E30_door_LH_RR",
+      "pred": null,
+      "state": "before"
+    },
+    {
+      "door": "20260914/E30_door_LH_RR/s_084733",
+      "true": "E30_door_LH_RR",
+      "pred": null,
+      "state": "before"
+    },
+    {
+      "door": "20260918/E30_E38_door_RH/s_095707",
+      "true": "E30_E38_door_RH",
+      "pred": null,
+      "state": "before"
+    },
+    {
+      "door": "20261002/E25_door_RH/s_164340",
+      "true": "E25_door_RH",
+      "pred": null,
+      "state": "after"
+    },
+    {
+      "door": "20261006/E30_E38_door_RH/s_170710",
+      "true": "E30_E38_door_RH",
+      "pred": "E38_door_LH_FRT",
+      "state": "after"
+    },
+    {
+      "door": "20261007/E30_door_LH_RR/s_164351",
+      "true": "E30_door_LH_RR",
+      "pred": null,
+      "state": "after"
+    },
+    {
+      "door": "20261007/E30_door_LH_RR/s_171409",
+      "true": "E30_door_LH_RR",
+      "pred": null,
+      "state": "after"
+    },
+    {
+      "door": "20261013/E25_door_RH/s_071934",
+      "true": "E25_door_RH",
+      "pred": null,
+      "state": "after"
+    },
+    {
+      "door": "20261028/E30_E38_door_RH/s_150546",
+      "true": "E30_E38_door_RH",
+      "pred": null,
+      "state": "after"
+    }
+  ],
+  "by_state": {
+    "before": {
+      "n": 30,
+      "correct": 26,
+      "abstained": 4,
+      "wrong": 0
+    },
+    "after": {
+      "n": 44,
+      "correct": 38,
+      "abstained": 5,
+      "wrong": 1
+    }
+  },
+  "differs_from_learned": 10,
+  "learned_doors": {
+    "n": 74,
+    "correct": 74,
+    "abstained": 0,
+    "wrong": 0
+  },
+  "same_hole": {
+    "train": 1693,
+    "train_images": 4171,
+    "test": 526,
+    "test_images": 1478
+  },
+  "learned_scale": {
+    "doors": {
+      "n": 74,
+      "correct": 64,
+      "abstained": 9,
+      "wrong": 1
+    },
+    "frames": {
+      "n": 1478,
+      "correct": 917,
+      "abstained": 553,
+      "wrong": 8
+    }
+  }
+}

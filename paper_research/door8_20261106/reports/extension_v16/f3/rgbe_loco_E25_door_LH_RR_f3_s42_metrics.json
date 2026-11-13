@@ -1,0 +1,32 @@
+{
+  "unknown_doors": {
+    "n": 14,
+    "rejected": 14,
+    "accepted_as": {}
+  },
+  "unknown_frames": {
+    "n": 279,
+    "rejected": 279
+  },
+  "unknown_closed_set_destination": {
+    "E30_door_LH_RR": 14
+  },
+  "known_doors_threshold": {
+    "n": 58,
+    "correct": 56,
+    "abstained": 2,
+    "wrong": 0
+  },
+  "known_doors_closed": {
+    "n": 58,
+    "correct": 58
+  },
+  "known_frames_judged": 0.9180616740088106,
+  "auroc_frame": 0.9825809609524261,
+  "run": "rgbe_loco_E25_door_LH_RR_f3_s42",
+  "kind": "rgbe",
+  "excluded_class": "E25_door_LH_RR",
+  "threshold": 0.9999908208847046,
+  "val_acceptance": 0.950834879406308,
+  "best_epoch": 18
+}

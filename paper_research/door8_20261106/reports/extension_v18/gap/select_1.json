@@ -1,0 +1,153 @@
+{
+  "created_at": "2026-11-13T14:20:24+09:00",
+  "protocol_sha256": "dea8e309c85a7806ce28def5c4c1494d97b6415a4600d4cff1ed01040beb6bb5",
+  "variant": "gap",
+  "split": "1",
+  "base_run": "holes_field8_f1_s42_v3",
+  "train_images": 8,
+  "val_images": 8,
+  "candidates": [
+    {
+      "candidate": "ncc r=16 m=40",
+      "region": [
+        423,
+        936,
+        1670,
+        1068
+      ],
+      "regions_per_key": null,
+      "points": 16,
+      "pck8": 0.1875,
+      "median_px": 775.2982872089049,
+      "max_px": 1135.3147605668657
+    },
+    {
+      "candidate": "ncc r=16 m=80",
+      "region": [
+        383,
+        896,
+        1710,
+        1108
+      ],
+      "regions_per_key": null,
+      "points": 16,
+      "pck8": 0.25,
+      "median_px": 362.0935358779093,
+      "max_px": 1157.2884910004075
+    },
+    {
+      "candidate": "ncc r=24 m=40",
+      "region": [
+        423,
+        936,
+        1670,
+        1068
+      ],
+      "regions_per_key": null,
+      "points": 16,
+      "pck8": 0.625,
+      "median_px": 1.4844585959411063,
+      "max_px": 1000.4168219147458
+    },
+    {
+      "candidate": "ncc r=24 m=80",
+      "region": [
+        383,
+        896,
+        1710,
+        1108
+      ],
+      "regions_per_key": null,
+      "points": 16,
+      "pck8": 0.625,
+      "median_px": 1.4844585959411063,
+      "max_px": 1156.1695798636117
+    },
+    {
+      "candidate": "ncc r=32 m=40",
+      "region": [
+        423,
+        936,
+        1670,
+        1068
+      ],
+      "regions_per_key": null,
+      "points": 16,
+      "pck8": 0.5,
+      "median_px": 261.37644307833284,
+      "max_px": 1185.6514047396056
+    },
+    {
+      "candidate": "ncc r=32 m=80",
+      "region": [
+        383,
+        896,
+        1710,
+        1108
+      ],
+      "regions_per_key": null,
+      "points": 16,
+      "pck8": 0.5625,
+      "median_px": 4.2329733331144075,
+      "max_px": 1001.0568638938549
+    },
+    {
+      "candidate": "log sigma=1.5 m=40",
+      "region": [
+        423,
+        936,
+        1670,
+        1068
+      ],
+      "regions_per_key": null,
+      "points": 16,
+      "pck8": 0.125,
+      "median_px": 120.89207207956652,
+      "max_px": 462.03266270037665
+    },
+    {
+      "candidate": "log sigma=1.5 m=80",
+      "region": [
+        383,
+        896,
+        1710,
+        1108
+      ],
+      "regions_per_key": null,
+      "points": 16,
+      "pck8": 0.0,
+      "median_px": 144.53820549231355,
+      "max_px": 720.0595194572459
+    },
+    {
+      "candidate": "log sigma=2.5 m=40",
+      "region": [
+        423,
+        936,
+        1670,
+        1068
+      ],
+      "regions_per_key": null,
+      "points": 16,
+      "pck8": 0.125,
+      "median_px": 119.97857920944736,
+      "max_px": 485.7000632097962
+    },
+    {
+      "candidate": "log sigma=2.5 m=80",
+      "region": [
+        383,
+        896,
+        1710,
+        1108
+      ],
+      "regions_per_key": null,
+      "points": 16,
+      "pck8": 0.125,
+      "median_px": 175.8490620709715,
+      "max_px": 443.90940449826024
+    }
+  ],
+  "selected": "ncc r=24 m=40",
+  "selected_index": 2
+}

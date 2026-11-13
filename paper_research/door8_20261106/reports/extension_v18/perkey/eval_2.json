@@ -1,0 +1,183 @@
+{
+  "created_at": "2026-11-13T14:22:10+09:00",
+  "protocol_sha256": "dea8e309c85a7806ce28def5c4c1494d97b6415a4600d4cff1ed01040beb6bb5",
+  "variant": "perkey",
+  "split": "2",
+  "selected": "ncc r=32 m=40",
+  "scale": {
+    "54910212": 1477.8852575869184
+  },
+  "scale_learned": {
+    "54910212": 1475.3139687312205
+  },
+  "seconds_per_image_single_thread": 0.03432737525944518,
+  "doors": {
+    "n": 73,
+    "correct": 59,
+    "abstained": 14,
+    "wrong": 0
+  },
+  "frames": {
+    "n": 1402,
+    "correct": 787,
+    "abstained": 614,
+    "wrong": 1
+  },
+  "frame_reasons": {
+    "distance_range": 594,
+    "ok": 788,
+    "cad_distance_reject": 20
+  },
+  "localisation_test_role": {
+    "points": 16,
+    "pck8": 0.5625,
+    "median_px": 1.0223500262956107,
+    "max_px": 954.4730994433525
+  },
+  "residual": {
+    "frames_measured": 808,
+    "percentiles_5_50_95": [
+      -0.0018521775627906578,
+      0.0034315401389855005,
+      0.005679767886674458
+    ],
+    "range": [
+      -0.1612291384950325,
+      0.037096320625303436
+    ],
+    "rms": 0.01615047251420111,
+    "mean_abs": 0.00514558764193526,
+    "max_abs_mm": 186.70334237724762,
+    "frames_out_of_band": 21,
+    "max_utilisation": 1.5807623838154896,
+    "within_door_sd_median": 0.00023906955056570128,
+    "between_door_sd": 0.008618322635096869
+  },
+  "failed_doors": [
+    {
+      "door": "20260901/E30_door_LH_FRT/s_173308",
+      "true": "E30_door_LH_FRT",
+      "pred": null,
+      "state": "before"
+    },
+    {
+      "door": "20260904/E25_door_RH/s_164143",
+      "true": "E25_door_RH",
+      "pred": null,
+      "state": "before"
+    },
+    {
+      "door": "20260904/E25_door_RH/s_171428",
+      "true": "E25_door_RH",
+      "pred": null,
+      "state": "before"
+    },
+    {
+      "door": "20260907/E30_E38_door_RH/s_152807",
+      "true": "E30_E38_door_RH",
+      "pred": null,
+      "state": "before"
+    },
+    {
+      "door": "20260907/E30_door_LH_FRT/s_155421",
+      "true": "E30_door_LH_FRT",
+      "pred": null,
+      "state": "before"
+    },
+    {
+      "door": "20260915/E30_door_LH_RR/s_101116",
+      "true": "E30_door_LH_RR",
+      "pred": null,
+      "state": "before"
+    },
+    {
+      "door": "20260918/E30_E38_door_RH/s_101954",
+      "true": "E30_E38_door_RH",
+      "pred": null,
+      "state": "before"
+    },
+    {
+      "door": "20260918/E30_door_LH_RR/s_122814",
+      "true": "E30_door_LH_RR",
+      "pred": null,
+      "state": "before"
+    },
+    {
+      "door": "20260921/E38_door_LH_RR/s_155719",
+      "true": "E38_door_LH_RR",
+      "pred": null,
+      "state": "after"
+    },
+    {
+      "door": "20260930/E30_door_LH_RR/s_170603",
+      "true": "E30_door_LH_RR",
+      "pred": null,
+      "state": "after"
+    },
+    {
+      "door": "20261007/E30_E38_door_RH/s_084742",
+      "true": "E30_E38_door_RH",
+      "pred": null,
+      "state": "after"
+    },
+    {
+      "door": "20261023/E25_door_RH/s_083521",
+      "true": "E25_door_RH",
+      "pred": null,
+      "state": "after"
+    },
+    {
+      "door": "20261023/E25_door_RH/s_105348",
+      "true": "E25_door_RH",
+      "pred": null,
+      "state": "after"
+    },
+    {
+      "door": "20261029/E38_door_LH_FRT/s_095115",
+      "true": "E38_door_LH_FRT",
+      "pred": null,
+      "state": "after"
+    }
+  ],
+  "by_state": {
+    "before": {
+      "n": 28,
+      "correct": 20,
+      "abstained": 8,
+      "wrong": 0
+    },
+    "after": {
+      "n": 45,
+      "correct": 39,
+      "abstained": 6,
+      "wrong": 0
+    }
+  },
+  "differs_from_learned": 14,
+  "learned_doors": {
+    "n": 73,
+    "correct": 73,
+    "abstained": 0,
+    "wrong": 0
+  },
+  "same_hole": {
+    "train": 1736,
+    "train_images": 4288,
+    "test": 575,
+    "test_images": 1402
+  },
+  "learned_scale": {
+    "doors": {
+      "n": 73,
+      "correct": 59,
+      "abstained": 14,
+      "wrong": 0
+    },
+    "frames": {
+      "n": 1402,
+      "correct": 787,
+      "abstained": 614,
+      "wrong": 1
+    }
+  }
+}

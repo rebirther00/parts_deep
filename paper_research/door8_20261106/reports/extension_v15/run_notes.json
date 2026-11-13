@@ -1,0 +1,16 @@
+{
+ "created_at": "2026-11-11T17:06:00+09:00",
+ "protocol_sha256": "5982292eb068cb2129d577feeeea9448a282cf68d15efbf6eb781559b58b51ca",
+ "registration_time": "The protocol text says \"17:02 KST (file time)\". The file was written at 17:01:21 (mtime); A was computed at 17:02:55, B at 17:03:22 and C at 17:03:30 (created_at of the outputs). The file was therefore fixed before any of the three was computed and is left unedited because its sha256 is stored in the outputs.",
+ "attempts": [
+  {
+   "attempt": 1,
+   "outcome": "scale, errors, retab and collect each ran once without error; nothing was re-run and no code or protocol file was changed after the first output."
+  }
+ ],
+ "observations": [
+  "A: the reference decisions recomputed with the scale of all TRAIN sessions equal the stored predictions for every TEST frame of every fold and both modes (checked in the script).",
+  "C3: the operational evaluation of 2026-09-23 has 186 rows for model 7; 175 belong to the 361 sessions, 10 are input-error sessions and 1 is neither (an invalid session). The switch record of the operational code speaks of 185 sessions.",
+  "C1: the two depth-plane failures dated 2026-09-23 are the sessions of 07:51 and 08:27; the last session covered by the operational evaluation of that day started at 07:23."
+ ]
+}

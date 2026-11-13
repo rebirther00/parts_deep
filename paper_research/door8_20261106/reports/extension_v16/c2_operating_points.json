@@ -1,0 +1,4306 @@
+{
+  "created_at": "2026-11-12T18:38:46+09:00",
+  "protocol_sha256": "5fb94f5cb1f00890639a55c1ad1ed497763c037eb17ea3eebe2f5726f0364e15",
+  "scopes": {
+    "fold0_s42": {
+      "runs": 8,
+      "hole": {
+        "door_auroc_mean": 1.0,
+        "door_auroc_min": 1.0,
+        "manuscript": {
+          "unknown_rejected": [
+            74,
+            74
+          ],
+          "known": [
+            518,
+            0,
+            0
+          ],
+          "known_n": 518,
+          "known_rejection_rate": 0.0,
+          "known_rejection_rate_ci95": [
+            0.0,
+            0.0
+          ],
+          "distinct_known_doors": 74,
+          "distinct_known_doors_rejected_at_least_once": 0,
+          "thresholds": [
+            -30.0,
+            -30.0,
+            -30.0,
+            -30.0,
+            -30.0,
+            -30.0,
+            -30.0,
+            -30.0
+          ]
+        },
+        "validation_door": {
+          "unknown_rejected": [
+            74,
+            74
+          ],
+          "known": [
+            506,
+            12,
+            0
+          ],
+          "known_n": 518,
+          "known_rejection_rate": 0.023166023166023165,
+          "known_rejection_rate_ci95": [
+            0.003861003861003861,
+            0.0444015444015444
+          ],
+          "distinct_known_doors": 74,
+          "distinct_known_doors_rejected_at_least_once": 5,
+          "thresholds": [
+            -7.449266143760951,
+            -7.442233444155363,
+            -7.3638187760907385,
+            -7.303994483028646,
+            -7.321930230990347,
+            -7.394269997585752,
+            -7.5439157330411035,
+            -7.3292899446062165
+          ]
+        },
+        "posthoc": {
+          "unknown_rejected": [
+            74,
+            74
+          ],
+          "known": [
+            518,
+            0,
+            0
+          ],
+          "known_n": 518,
+          "known_rejection_rate": 0.0,
+          "known_rejection_rate_ci95": [
+            0.0,
+            0.0
+          ],
+          "distinct_known_doors": 74,
+          "distinct_known_doors_rejected_at_least_once": 0,
+          "thresholds": [
+            -12.39599307245885,
+            -7.215118498935453,
+            -7.349619763508144,
+            -7.431327839201458,
+            -9.097101326856091,
+            -9.801219073429593,
+            -12.128959988515817,
+            -12.429836922597588
+          ]
+        },
+        "validation_tau_mm": [
+          7.449266143760951,
+          7.442233444155363,
+          7.3638187760907385,
+          7.303994483028646,
+          7.321930230990347,
+          7.394269997585752,
+          7.5439157330411035,
+          7.3292899446062165
+        ],
+        "posthoc_tau_mm": [
+          12.39599307245885,
+          7.215118498935453,
+          7.349619763508144,
+          7.431327839201458,
+          9.097101326856091,
+          9.801219073429593,
+          12.128959988515817,
+          12.429836922597588
+        ]
+      },
+      "hole_validation_predictions_missing": 0,
+      "rgb:msp": {
+        "door_auroc_mean": 0.8168177597125807,
+        "door_auroc_min": 0.5130434782608696,
+        "manuscript": {
+          "unknown_rejected": [
+            47,
+            74
+          ],
+          "known": [
+            498,
+            20,
+            0
+          ],
+          "known_n": 518,
+          "known_rejection_rate": 0.03861003861003861,
+          "known_rejection_rate_ci95": [
+            0.017374517374517374,
+            0.06563706563706563
+          ],
+          "distinct_known_doors": 74,
+          "distinct_known_doors_rejected_at_least_once": 11,
+          "thresholds": [
+            14.957469971190962,
+            13.504781555239282,
+            15.036736635370072,
+            15.796215988569983,
+            15.00617143656665,
+            13.595370973760076,
+            16.88647665934081,
+            9.316247865536585
+          ]
+        },
+        "validation_door": {
+          "unknown_rejected": [
+            47,
+            74
+          ],
+          "known": [
+            498,
+            20,
+            0
+          ],
+          "known_n": 518,
+          "known_rejection_rate": 0.03861003861003861,
+          "known_rejection_rate_ci95": [
+            0.019305019305019305,
+            0.0637065637065637
+          ],
+          "distinct_known_doors": 74,
+          "distinct_known_doors_rejected_at_least_once": 13,
+          "thresholds": [
+            15.300880895216974,
+            13.214799375573403,
+            14.75329098405383,
+            14.745907699256122,
+            15.168193910044637,
+            12.992599352931546,
+            16.468643986981807,
+            9.262416192450951
+          ]
+        },
+        "posthoc": {
+          "unknown_rejected": [
+            47,
+            74
+          ],
+          "known": [
+            518,
+            0,
+            0
+          ],
+          "known_n": 518,
+          "known_rejection_rate": 0.0,
+          "known_rejection_rate_ci95": [
+            0.0,
+            0.0
+          ],
+          "distinct_known_doors": 74,
+          "distinct_known_doors_rejected_at_least_once": 0,
+          "thresholds": [
+            13.853853001855136,
+            12.63173104560367,
+            14.989946978336926,
+            12.685162657713128,
+            13.78764337437229,
+            14.003703207961868,
+            16.74325690235617,
+            3.5555903341415394
+          ]
+        }
+      },
+      "rgb:maxlogit": {
+        "door_auroc_mean": 0.8529710525514553,
+        "door_auroc_min": 0.5357142857142857,
+        "manuscript": {
+          "unknown_rejected": [
+            47,
+            74
+          ],
+          "known": [
+            499,
+            19,
+            0
+          ],
+          "known_n": 518,
+          "known_rejection_rate": 0.03667953667953668,
+          "known_rejection_rate_ci95": [
+            0.017374517374517374,
+            0.0637065637065637
+          ],
+          "distinct_known_doors": 74,
+          "distinct_known_doors_rejected_at_least_once": 12,
+          "thresholds": [
+            12.92696475982666,
+            12.222391128540039,
+            13.505759239196777,
+            14.688944816589355,
+            13.7322359085083,
+            13.385489463806152,
+            14.033533096313477,
+            9.662603378295898
+          ]
+        },
+        "validation_door": {
+          "unknown_rejected": [
+            47,
+            74
+          ],
+          "known": [
+            507,
+            11,
+            0
+          ],
+          "known_n": 518,
+          "known_rejection_rate": 0.021235521235521235,
+          "known_rejection_rate_ci95": [
+            0.007722007722007722,
+            0.03861003861003861
+          ],
+          "distinct_known_doors": 74,
+          "distinct_known_doors_rejected_at_least_once": 8,
+          "thresholds": [
+            12.99427318572998,
+            11.84692096710205,
+            13.138569831848145,
+            13.49623966217041,
+            13.66637897491455,
+            11.81480884552002,
+            13.696057319641113,
+            9.694403648376465
+          ]
+        },
+        "posthoc": {
+          "unknown_rejected": [
+            47,
+            74
+          ],
+          "known": [
+            518,
+            0,
+            0
+          ],
+          "known_n": 518,
+          "known_rejection_rate": 0.0,
+          "known_rejection_rate_ci95": [
+            0.0,
+            0.0
+          ],
+          "distinct_known_doors": 74,
+          "distinct_known_doors_rejected_at_least_once": 0,
+          "thresholds": [
+            12.15772819519043,
+            11.796808242797852,
+            13.656999588012695,
+            12.939181327819824,
+            13.31276798248291,
+            13.156166076660156,
+            13.825225830078125,
+            6.541058540344238
+          ]
+        }
+      },
+      "rgb:energy": {
+        "door_auroc_mean": 0.8529710525514553,
+        "door_auroc_min": 0.5357142857142857,
+        "manuscript": {
+          "unknown_rejected": [
+            47,
+            74
+          ],
+          "known": [
+            499,
+            19,
+            0
+          ],
+          "known_n": 518,
+          "known_rejection_rate": 0.03667953667953668,
+          "known_rejection_rate_ci95": [
+            0.017374517374517374,
+            0.0637065637065637
+          ],
+          "distinct_known_doors": 74,
+          "distinct_known_doors_rejected_at_least_once": 12,
+          "thresholds": [
+            12.926965002488362,
+            12.222391948964981,
+            13.505759497726261,
+            14.688944903503078,
+            13.732236254008985,
+            13.385489802575174,
+            14.033533141663652,
+            9.662638664592011
+          ]
+        },
+        "validation_door": {
+          "unknown_rejected": [
+            47,
+            74
+          ],
+          "known": [
+            507,
+            11,
+            0
+          ],
+          "known_n": 518,
+          "known_rejection_rate": 0.021235521235521235,
+          "known_rejection_rate_ci95": [
+            0.007722007722007722,
+            0.03861003861003861
+          ],
+          "distinct_known_doors": 74,
+          "distinct_known_doors_rejected_at_least_once": 8,
+          "thresholds": [
+            12.994273398525543,
+            11.846922171169155,
+            13.138570223343894,
+            13.49624005656738,
+            13.66637923731867,
+            11.814811122636785,
+            13.696057390071289,
+            9.694440625396089
+          ]
+        },
+        "posthoc": {
+          "unknown_rejected": [
+            47,
+            74
+          ],
+          "known": [
+            518,
+            0,
+            0
+          ],
+          "known_n": 518,
+          "known_rejection_rate": 0.0,
+          "known_rejection_rate_ci95": [
+            0.0,
+            0.0
+          ],
+          "distinct_known_doors": 74,
+          "distinct_known_doors_rejected_at_least_once": 0,
+          "thresholds": [
+            12.15772915757329,
+            11.79681150948994,
+            13.65699989700572,
+            12.939184424548696,
+            13.312768798538018,
+            13.156166404393792,
+            13.825225883595635,
+            6.569222688307559
+          ]
+        }
+      },
+      "rgb:maha": {
+        "door_auroc_mean": 0.9779429525433361,
+        "door_auroc_min": 0.9101449275362319,
+        "manuscript": {
+          "unknown_rejected": [
+            74,
+            74
+          ],
+          "known": [
+            479,
+            39,
+            0
+          ],
+          "known_n": 518,
+          "known_rejection_rate": 0.07528957528957529,
+          "known_rejection_rate_ci95": [
+            0.03088803088803089,
+            0.13132239382239355
+          ],
+          "distinct_known_doors": 74,
+          "distinct_known_doors_rejected_at_least_once": 11,
+          "thresholds": [
+            -2613.122056029895,
+            -4120.928206895485,
+            -4214.749100119295,
+            -4000.172467852438,
+            -3771.5342057504304,
+            -5465.329122451785,
+            -4361.31584650952,
+            -3096.7077246428944
+          ]
+        },
+        "validation_door": {
+          "unknown_rejected": [
+            69,
+            74
+          ],
+          "known": [
+            479,
+            39,
+            0
+          ],
+          "known_n": 518,
+          "known_rejection_rate": 0.07528957528957529,
+          "known_rejection_rate_ci95": [
+            0.03088803088803089,
+            0.13320463320463322
+          ],
+          "distinct_known_doors": 74,
+          "distinct_known_doors_rejected_at_least_once": 11,
+          "thresholds": [
+            -2896.3697087841656,
+            -4218.3533540306835,
+            -4893.577771726677,
+            -3957.541460752553,
+            -3345.0235581262023,
+            -8301.58798012105,
+            -6394.126235504644,
+            -3486.2110916696615
+          ]
+        },
+        "posthoc": {
+          "unknown_rejected": [
+            61,
+            74
+          ],
+          "known": [
+            518,
+            0,
+            0
+          ],
+          "known_n": 518,
+          "known_rejection_rate": 0.0,
+          "known_rejection_rate_ci95": [
+            0.0,
+            0.0
+          ],
+          "distinct_known_doors": 74,
+          "distinct_known_doors_rejected_at_least_once": 0,
+          "thresholds": [
+            -11642.535434902049,
+            -17849.952476839393,
+            -8870.889876297275,
+            -9693.701613089965,
+            -12940.859736999875,
+            -12190.358639921778,
+            -9778.67715781027,
+            -11667.531042149205
+          ]
+        }
+      },
+      "rgbe:msp": {
+        "door_auroc_mean": 0.7611995341614908,
+        "door_auroc_min": 0.0,
+        "manuscript": {
+          "unknown_rejected": [
+            53,
+            74
+          ],
+          "known": [
+            508,
+            10,
+            0
+          ],
+          "known_n": 518,
+          "known_rejection_rate": 0.019305019305019305,
+          "known_rejection_rate_ci95": [
+            0.003861003861003861,
+            0.04054054054054054
+          ],
+          "distinct_known_doors": 74,
+          "distinct_known_doors_rejected_at_least_once": 6,
+          "thresholds": [
+            12.278688539514915,
+            8.919976983919149,
+            13.12658988335195,
+            15.89172121948133,
+            13.711712491240586,
+            15.30710854445261,
+            15.04889976553448,
+            14.294175740447976
+          ]
+        },
+        "validation_door": {
+          "unknown_rejected": [
+            53,
+            74
+          ],
+          "known": [
+            510,
+            8,
+            0
+          ],
+          "known_n": 518,
+          "known_rejection_rate": 0.015444015444015444,
+          "known_rejection_rate_ci95": [
+            0.0019305019305019305,
+            0.03474903474903475
+          ],
+          "distinct_known_doors": 74,
+          "distinct_known_doors_rejected_at_least_once": 5,
+          "thresholds": [
+            11.83545255871608,
+            8.23708712294438,
+            12.731180929635638,
+            15.78420909613553,
+            14.224912078102003,
+            15.138430275033382,
+            14.3123012998566,
+            13.674022307125059
+          ]
+        },
+        "posthoc": {
+          "unknown_rejected": [
+            53,
+            74
+          ],
+          "known": [
+            518,
+            0,
+            0
+          ],
+          "known_n": 518,
+          "known_rejection_rate": 0.0,
+          "known_rejection_rate_ci95": [
+            0.0,
+            0.0
+          ],
+          "distinct_known_doors": 74,
+          "distinct_known_doors_rejected_at_least_once": 0,
+          "thresholds": [
+            11.225931867148962,
+            7.864139741773428,
+            14.176326804578656,
+            15.917704717369842,
+            13.27211909473472,
+            14.00409601608758,
+            10.712282693131304,
+            12.113893599128314
+          ]
+        }
+      },
+      "rgbe:maxlogit": {
+        "door_auroc_mean": 0.7289855072463768,
+        "door_auroc_min": 0.0,
+        "manuscript": {
+          "unknown_rejected": [
+            53,
+            74
+          ],
+          "known": [
+            511,
+            7,
+            0
+          ],
+          "known_n": 518,
+          "known_rejection_rate": 0.013513513513513514,
+          "known_rejection_rate_ci95": [
+            0.0019305019305019305,
+            0.02895752895752896
+          ],
+          "distinct_known_doors": 74,
+          "distinct_known_doors_rejected_at_least_once": 5,
+          "thresholds": [
+            11.591299057006836,
+            9.796833038330078,
+            12.860346794128418,
+            14.573792457580566,
+            12.746504783630371,
+            14.039383888244629,
+            13.165101051330566,
+            12.944164276123047
+          ]
+        },
+        "validation_door": {
+          "unknown_rejected": [
+            53,
+            74
+          ],
+          "known": [
+            513,
+            5,
+            0
+          ],
+          "known_n": 518,
+          "known_rejection_rate": 0.009652509652509652,
+          "known_rejection_rate_ci95": [
+            0.0019305019305019305,
+            0.017374517374517374
+          ],
+          "distinct_known_doors": 74,
+          "distinct_known_doors_rejected_at_least_once": 5,
+          "thresholds": [
+            11.290205001831055,
+            9.369697570800781,
+            12.40750789642334,
+            14.349230766296387,
+            13.045083999633789,
+            13.723873138427734,
+            12.607300758361816,
+            12.253850936889648
+          ]
+        },
+        "posthoc": {
+          "unknown_rejected": [
+            53,
+            74
+          ],
+          "known": [
+            518,
+            0,
+            0
+          ],
+          "known_n": 518,
+          "known_rejection_rate": 0.0,
+          "known_rejection_rate_ci95": [
+            0.0,
+            0.0
+          ],
+          "distinct_known_doors": 74,
+          "distinct_known_doors_rejected_at_least_once": 0,
+          "thresholds": [
+            10.782673835754395,
+            9.588833808898926,
+            12.805316925048828,
+            14.411300659179688,
+            12.153292655944824,
+            14.080193519592285,
+            9.993334770202637,
+            12.981833457946777
+          ]
+        }
+      },
+      "rgbe:energy": {
+        "door_auroc_mean": 0.7289855072463768,
+        "door_auroc_min": 0.0,
+        "manuscript": {
+          "unknown_rejected": [
+            53,
+            74
+          ],
+          "known": [
+            511,
+            7,
+            0
+          ],
+          "known_n": 518,
+          "known_rejection_rate": 0.013513513513513514,
+          "known_rejection_rate_ci95": [
+            0.0019305019305019305,
+            0.02895752895752896
+          ],
+          "distinct_known_doors": 74,
+          "distinct_known_doors_rejected_at_least_once": 5,
+          "thresholds": [
+            11.591303744322698,
+            9.796922562600322,
+            12.860349407016201,
+            14.57379254219563,
+            12.74650539585454,
+            14.039384223260786,
+            13.165101406557914,
+            12.94416479658125
+          ]
+        },
+        "validation_door": {
+          "unknown_rejected": [
+            53,
+            74
+          ],
+          "known": [
+            513,
+            5,
+            0
+          ],
+          "known_n": 518,
+          "known_rejection_rate": 0.009652509652509652,
+          "known_rejection_rate_ci95": [
+            0.0019305019305019305,
+            0.017374517374517374
+          ],
+          "distinct_known_doors": 74,
+          "distinct_known_doors_rejected_at_least_once": 5,
+          "thresholds": [
+            11.290212244967893,
+            9.370082466672246,
+            12.407512233433003,
+            14.34923090593485,
+            13.04508444765432,
+            13.723873404784179,
+            12.60730136684193,
+            12.253852088875954
+          ]
+        },
+        "posthoc": {
+          "unknown_rejected": [
+            53,
+            74
+          ],
+          "known": [
+            518,
+            0,
+            0
+          ],
+          "known_n": 518,
+          "known_rejection_rate": 0.0,
+          "known_rejection_rate_ci95": [
+            0.0,
+            0.0
+          ],
+          "distinct_known_doors": 74,
+          "distinct_known_doors_rejected_at_least_once": 0,
+          "thresholds": [
+            10.78268715982246,
+            9.589331463539077,
+            12.805317358434257,
+            14.411300781367714,
+            12.153294377779858,
+            14.080193692092676,
+            9.993357039673704,
+            12.981833898510173
+          ]
+        }
+      },
+      "rgbe:maha": {
+        "door_auroc_mean": 0.9872613573021182,
+        "door_auroc_min": 0.936231884057971,
+        "manuscript": {
+          "unknown_rejected": [
+            74,
+            74
+          ],
+          "known": [
+            482,
+            36,
+            0
+          ],
+          "known_n": 518,
+          "known_rejection_rate": 0.0694980694980695,
+          "known_rejection_rate_ci95": [
+            0.02702702702702703,
+            0.12355212355212356
+          ],
+          "distinct_known_doors": 74,
+          "distinct_known_doors_rejected_at_least_once": 11,
+          "thresholds": [
+            -1986.9646383847444,
+            -3993.5000408922056,
+            -5874.601309593599,
+            -5064.939086519731,
+            -2851.121479828871,
+            -3401.555417307971,
+            -3447.735214525638,
+            -3145.735061028792
+          ]
+        },
+        "validation_door": {
+          "unknown_rejected": [
+            71,
+            74
+          ],
+          "known": [
+            485,
+            33,
+            0
+          ],
+          "known_n": 518,
+          "known_rejection_rate": 0.0637065637065637,
+          "known_rejection_rate_ci95": [
+            0.023166023166023165,
+            0.11583011583011583
+          ],
+          "distinct_known_doors": 74,
+          "distinct_known_doors_rejected_at_least_once": 10,
+          "thresholds": [
+            -1917.3712391474376,
+            -3329.955919247131,
+            -9363.827781511178,
+            -4736.651871651977,
+            -2949.201078232897,
+            -3936.1651706938774,
+            -5244.567881350611,
+            -2105.793691342967
+          ]
+        },
+        "posthoc": {
+          "unknown_rejected": [
+            65,
+            74
+          ],
+          "known": [
+            518,
+            0,
+            0
+          ],
+          "known_n": 518,
+          "known_rejection_rate": 0.0,
+          "known_rejection_rate_ci95": [
+            0.0,
+            0.0
+          ],
+          "distinct_known_doors": 74,
+          "distinct_known_doors_rejected_at_least_once": 0,
+          "thresholds": [
+            -5532.558515714056,
+            -7502.893202850146,
+            -9648.501956975804,
+            -9985.1534989588,
+            -12057.077921908418,
+            -9298.692046608152,
+            -9163.552954881763,
+            -5718.7346301805255
+          ]
+        }
+      }
+    },
+    "fold0_s123": {
+      "runs": 8,
+      "hole": {
+        "door_auroc_mean": 1.0,
+        "door_auroc_min": 1.0,
+        "manuscript": {
+          "unknown_rejected": [
+            74,
+            74
+          ],
+          "known": [
+            518,
+            0,
+            0
+          ],
+          "known_n": 518,
+          "known_rejection_rate": 0.0,
+          "known_rejection_rate_ci95": [
+            0.0,
+            0.0
+          ],
+          "distinct_known_doors": 74,
+          "distinct_known_doors_rejected_at_least_once": 0,
+          "thresholds": [
+            -30.0,
+            -30.0,
+            -30.0,
+            -30.0,
+            -30.0,
+            -30.0,
+            -30.0,
+            -30.0
+          ]
+        },
+        "validation_door": {
+          "unknown_rejected": [
+            74,
+            74
+          ],
+          "known": [
+            503,
+            15,
+            0
+          ],
+          "known_n": 518,
+          "known_rejection_rate": 0.02895752895752896,
+          "known_rejection_rate_ci95": [
+            0.003861003861003861,
+            0.059845559845559844
+          ],
+          "distinct_known_doors": 74,
+          "distinct_known_doors_rejected_at_least_once": 5,
+          "thresholds": [
+            -7.187459782379051,
+            -7.36196371865924,
+            -7.514144908657954,
+            -7.4197207009571,
+            -6.0365192009213615,
+            -7.354288175932197,
+            -7.101876162920462,
+            -7.2923889990535145
+          ]
+        },
+        "posthoc": {
+          "unknown_rejected": [
+            74,
+            74
+          ],
+          "known": [
+            518,
+            0,
+            0
+          ],
+          "known_n": 518,
+          "known_rejection_rate": 0.0,
+          "known_rejection_rate_ci95": [
+            0.0,
+            0.0
+          ],
+          "distinct_known_doors": 74,
+          "distinct_known_doors_rejected_at_least_once": 0,
+          "thresholds": [
+            -9.547322553412414,
+            -9.76155733918722,
+            -8.000437112681084,
+            -7.4197207009571,
+            -9.665348136795501,
+            -9.304984146656352,
+            -9.285986537440522,
+            -9.229022820869886
+          ]
+        },
+        "validation_tau_mm": [
+          7.187459782379051,
+          7.36196371865924,
+          7.514144908657954,
+          7.4197207009571,
+          6.0365192009213615,
+          7.354288175932197,
+          7.101876162920462,
+          7.2923889990535145
+        ],
+        "posthoc_tau_mm": [
+          9.547322553412414,
+          9.76155733918722,
+          8.000437112681084,
+          7.4197207009571,
+          9.665348136795501,
+          9.304984146656352,
+          9.285986537440522,
+          9.229022820869886
+        ]
+      },
+      "hole_validation_predictions_missing": 0,
+      "rgb:msp": {
+        "door_auroc_mean": 0.7714580669224211,
+        "door_auroc_min": 0.14583333333333334,
+        "manuscript": {
+          "unknown_rejected": [
+            53,
+            74
+          ],
+          "known": [
+            500,
+            18,
+            0
+          ],
+          "known_n": 518,
+          "known_rejection_rate": 0.03474903474903475,
+          "known_rejection_rate_ci95": [
+            0.011583011583011582,
+            0.06756756756756757
+          ],
+          "distinct_known_doors": 74,
+          "distinct_known_doors_rejected_at_least_once": 9,
+          "thresholds": [
+            16.207447966726846,
+            9.617226780165922,
+            12.572441323737962,
+            12.813237661968564,
+            15.622375859551433,
+            14.84705861823274,
+            13.898314453404215,
+            13.177103421670417
+          ]
+        },
+        "validation_door": {
+          "unknown_rejected": [
+            51,
+            74
+          ],
+          "known": [
+            504,
+            14,
+            0
+          ],
+          "known_n": 518,
+          "known_rejection_rate": 0.02702702702702703,
+          "known_rejection_rate_ci95": [
+            0.009652509652509652,
+            0.04826254826254826
+          ],
+          "distinct_known_doors": 74,
+          "distinct_known_doors_rejected_at_least_once": 9,
+          "thresholds": [
+            16.369230293178347,
+            8.986844568394616,
+            11.972022383095828,
+            12.686902403886048,
+            14.762981223721724,
+            13.609746548154035,
+            14.172951217582337,
+            12.039372777712352
+          ]
+        },
+        "posthoc": {
+          "unknown_rejected": [
+            49,
+            74
+          ],
+          "known": [
+            518,
+            0,
+            0
+          ],
+          "known_n": 518,
+          "known_rejection_rate": 0.0,
+          "known_rejection_rate_ci95": [
+            0.0,
+            0.0
+          ],
+          "distinct_known_doors": 74,
+          "distinct_known_doors_rejected_at_least_once": 0,
+          "thresholds": [
+            13.001630115662152,
+            7.891734893341136,
+            11.290098977373162,
+            11.81616495457805,
+            14.525599783513714,
+            12.794095901183985,
+            12.61618871785707,
+            12.58534739095122
+          ]
+        }
+      },
+      "rgb:maxlogit": {
+        "door_auroc_mean": 0.790464772865668,
+        "door_auroc_min": 0.23478260869565218,
+        "manuscript": {
+          "unknown_rejected": [
+            55,
+            74
+          ],
+          "known": [
+            501,
+            17,
+            0
+          ],
+          "known_n": 518,
+          "known_rejection_rate": 0.032818532818532815,
+          "known_rejection_rate_ci95": [
+            0.011583011583011582,
+            0.059845559845559844
+          ],
+          "distinct_known_doors": 74,
+          "distinct_known_doors_rejected_at_least_once": 9,
+          "thresholds": [
+            15.230376243591309,
+            10.440311431884766,
+            12.714035034179688,
+            12.586036682128906,
+            14.780752182006836,
+            14.20807933807373,
+            13.41290283203125,
+            13.13752269744873
+          ]
+        },
+        "validation_door": {
+          "unknown_rejected": [
+            53,
+            74
+          ],
+          "known": [
+            502,
+            16,
+            0
+          ],
+          "known_n": 518,
+          "known_rejection_rate": 0.03088803088803089,
+          "known_rejection_rate_ci95": [
+            0.013513513513513514,
+            0.052123552123552123
+          ],
+          "distinct_known_doors": 74,
+          "distinct_known_doors_rejected_at_least_once": 11,
+          "thresholds": [
+            15.368446350097656,
+            10.295044898986816,
+            12.295212745666504,
+            12.450331687927246,
+            14.785579681396484,
+            13.593113899230957,
+            13.772821426391602,
+            13.094674110412598
+          ]
+        },
+        "posthoc": {
+          "unknown_rejected": [
+            55,
+            74
+          ],
+          "known": [
+            518,
+            0,
+            0
+          ],
+          "known_n": 518,
+          "known_rejection_rate": 0.0,
+          "known_rejection_rate_ci95": [
+            0.0,
+            0.0
+          ],
+          "distinct_known_doors": 74,
+          "distinct_known_doors_rejected_at_least_once": 0,
+          "thresholds": [
+            12.46293830871582,
+            10.327777862548828,
+            11.479822158813477,
+            13.163994789123535,
+            14.702601432800293,
+            11.947386741638184,
+            12.148154258728027,
+            12.835599899291992
+          ]
+        }
+      },
+      "rgb:energy": {
+        "door_auroc_mean": 0.790464772865668,
+        "door_auroc_min": 0.23478260869565218,
+        "manuscript": {
+          "unknown_rejected": [
+            55,
+            74
+          ],
+          "known": [
+            501,
+            17,
+            0
+          ],
+          "known_n": 518,
+          "known_rejection_rate": 0.032818532818532815,
+          "known_rejection_rate_ci95": [
+            0.011583011583011582,
+            0.059845559845559844
+          ],
+          "distinct_known_doors": 74,
+          "distinct_known_doors_rejected_at_least_once": 9,
+          "thresholds": [
+            15.230376326872662,
+            10.440338879232547,
+            12.714039227881667,
+            12.586046082055011,
+            14.780753047921278,
+            14.208079637200044,
+            13.412903712394122,
+            13.137524793740301
+          ]
+        },
+        "validation_door": {
+          "unknown_rejected": [
+            53,
+            74
+          ],
+          "known": [
+            502,
+            16,
+            0
+          ],
+          "known_n": 518,
+          "known_rejection_rate": 0.03088803088803089,
+          "known_rejection_rate_ci95": [
+            0.013513513513513514,
+            0.052123552123552123
+          ],
+          "distinct_known_doors": 74,
+          "distinct_known_doors_rejected_at_least_once": 11,
+          "thresholds": [
+            15.368446427889415,
+            10.29520790328594,
+            12.29521906418658,
+            12.450334099153055,
+            14.785579791003752,
+            13.593115247827615,
+            13.772821993671585,
+            13.094680037702716
+          ]
+        },
+        "posthoc": {
+          "unknown_rejected": [
+            55,
+            74
+          ],
+          "known": [
+            518,
+            0,
+            0
+          ],
+          "known_n": 518,
+          "known_rejection_rate": 0.0,
+          "known_rejection_rate_ci95": [
+            0.0,
+            0.0
+          ],
+          "distinct_known_doors": 74,
+          "distinct_known_doors_rejected_at_least_once": 0,
+          "thresholds": [
+            12.462940565361084,
+            10.327800112258892,
+            11.479834654772734,
+            13.164002173318579,
+            14.7026015701369,
+            11.947389506400047,
+            12.14815757658864,
+            12.835603321073952
+          ]
+        }
+      },
+      "rgb:maha": {
+        "door_auroc_mean": 0.9810505089717046,
+        "door_auroc_min": 0.9188405797101449,
+        "manuscript": {
+          "unknown_rejected": [
+            74,
+            74
+          ],
+          "known": [
+            480,
+            38,
+            0
+          ],
+          "known_n": 518,
+          "known_rejection_rate": 0.07335907335907337,
+          "known_rejection_rate_ci95": [
+            0.02702702702702703,
+            0.13127413127413126
+          ],
+          "distinct_known_doors": 74,
+          "distinct_known_doors_rejected_at_least_once": 9,
+          "thresholds": [
+            -2894.677584397685,
+            -3847.9543735683283,
+            -4525.551994445741,
+            -5058.991397666183,
+            -4618.271444539108,
+            -5592.644973877254,
+            -3370.369629857885,
+            -5035.983571864982
+          ]
+        },
+        "validation_door": {
+          "unknown_rejected": [
+            71,
+            74
+          ],
+          "known": [
+            482,
+            36,
+            0
+          ],
+          "known_n": 518,
+          "known_rejection_rate": 0.0694980694980695,
+          "known_rejection_rate_ci95": [
+            0.023166023166023165,
+            0.1274131274131274
+          ],
+          "distinct_known_doors": 74,
+          "distinct_known_doors_rejected_at_least_once": 9,
+          "thresholds": [
+            -2644.228186843427,
+            -4559.675569433579,
+            -3984.883929636848,
+            -5325.234677702145,
+            -4212.9579596090525,
+            -4841.710503115362,
+            -4701.7791327756595,
+            -5355.6247958749755
+          ]
+        },
+        "posthoc": {
+          "unknown_rejected": [
+            53,
+            74
+          ],
+          "known": [
+            518,
+            0,
+            0
+          ],
+          "known_n": 518,
+          "known_rejection_rate": 0.0,
+          "known_rejection_rate_ci95": [
+            0.0,
+            0.0
+          ],
+          "distinct_known_doors": 74,
+          "distinct_known_doors_rejected_at_least_once": 0,
+          "thresholds": [
+            -12350.463667648066,
+            -9985.398308840817,
+            -7188.210058353446,
+            -15243.608170629073,
+            -18197.935944975135,
+            -12307.965788572554,
+            -8787.769623911092,
+            -8531.320282704513
+          ]
+        }
+      },
+      "rgbe:msp": {
+        "door_auroc_mean": 0.7314585458277514,
+        "door_auroc_min": 0.04861111111111111,
+        "manuscript": {
+          "unknown_rejected": [
+            49,
+            74
+          ],
+          "known": [
+            499,
+            19,
+            0
+          ],
+          "known_n": 518,
+          "known_rejection_rate": 0.03667953667953668,
+          "known_rejection_rate_ci95": [
+            0.013513513513513514,
+            0.06563706563706563
+          ],
+          "distinct_known_doors": 74,
+          "distinct_known_doors_rejected_at_least_once": 10,
+          "thresholds": [
+            12.828564910077667,
+            15.507361168140953,
+            12.397841958484658,
+            15.390432708317146,
+            15.938699670674726,
+            12.176739712796822,
+            12.661668994850405,
+            12.00536784655942
+          ]
+        },
+        "validation_door": {
+          "unknown_rejected": [
+            44,
+            74
+          ],
+          "known": [
+            504,
+            14,
+            0
+          ],
+          "known_n": 518,
+          "known_rejection_rate": 0.02702702702702703,
+          "known_rejection_rate_ci95": [
+            0.013513513513513514,
+            0.0444015444015444
+          ],
+          "distinct_known_doors": 74,
+          "distinct_known_doors_rejected_at_least_once": 11,
+          "thresholds": [
+            13.14771976345545,
+            16.285745605824527,
+            12.710617055144068,
+            15.086635392230288,
+            15.348905012941133,
+            10.627253112363528,
+            10.840851882560509,
+            11.12052136205257
+          ]
+        },
+        "posthoc": {
+          "unknown_rejected": [
+            44,
+            74
+          ],
+          "known": [
+            518,
+            0,
+            0
+          ],
+          "known_n": 518,
+          "known_rejection_rate": 0.0,
+          "known_rejection_rate_ci95": [
+            0.0,
+            0.0
+          ],
+          "distinct_known_doors": 74,
+          "distinct_known_doors_rejected_at_least_once": 0,
+          "thresholds": [
+            12.092505430373512,
+            16.659318872234213,
+            12.7399549906388,
+            12.242572725331623,
+            12.821687492621297,
+            11.366196505679321,
+            10.17288896189702,
+            10.98737274219014
+          ]
+        }
+      },
+      "rgbe:maxlogit": {
+        "door_auroc_mean": 0.7141180815623351,
+        "door_auroc_min": 0.034722222222222224,
+        "manuscript": {
+          "unknown_rejected": [
+            49,
+            74
+          ],
+          "known": [
+            497,
+            21,
+            0
+          ],
+          "known_n": 518,
+          "known_rejection_rate": 0.04054054054054054,
+          "known_rejection_rate_ci95": [
+            0.013513513513513514,
+            0.07335907335907337
+          ],
+          "distinct_known_doors": 74,
+          "distinct_known_doors_rejected_at_least_once": 10,
+          "thresholds": [
+            11.994306564331055,
+            14.42435359954834,
+            12.27688217163086,
+            14.912833213806152,
+            14.210580825805664,
+            12.644410133361816,
+            12.10454273223877,
+            12.092559814453125
+          ]
+        },
+        "validation_door": {
+          "unknown_rejected": [
+            46,
+            74
+          ],
+          "known": [
+            500,
+            18,
+            0
+          ],
+          "known_n": 518,
+          "known_rejection_rate": 0.03474903474903475,
+          "known_rejection_rate_ci95": [
+            0.013513513513513514,
+            0.06177606177606178
+          ],
+          "distinct_known_doors": 74,
+          "distinct_known_doors_rejected_at_least_once": 11,
+          "thresholds": [
+            12.239646911621094,
+            14.817214012145996,
+            12.520180702209473,
+            15.303669929504395,
+            13.590935707092285,
+            11.54648494720459,
+            11.22298526763916,
+            12.01802921295166
+          ]
+        },
+        "posthoc": {
+          "unknown_rejected": [
+            42,
+            74
+          ],
+          "known": [
+            518,
+            0,
+            0
+          ],
+          "known_n": 518,
+          "known_rejection_rate": 0.0,
+          "known_rejection_rate_ci95": [
+            0.0,
+            0.0
+          ],
+          "distinct_known_doors": 74,
+          "distinct_known_doors_rejected_at_least_once": 0,
+          "thresholds": [
+            11.723247528076172,
+            15.245882034301758,
+            11.925209999084473,
+            11.051785469055176,
+            11.974913597106934,
+            10.251628875732422,
+            10.353510856628418,
+            11.729290962219238
+          ]
+        }
+      },
+      "rgbe:energy": {
+        "door_auroc_mean": 0.7141180815623351,
+        "door_auroc_min": 0.034722222222222224,
+        "manuscript": {
+          "unknown_rejected": [
+            49,
+            74
+          ],
+          "known": [
+            497,
+            21,
+            0
+          ],
+          "known_n": 518,
+          "known_rejection_rate": 0.04054054054054054,
+          "known_rejection_rate_ci95": [
+            0.013513513513513514,
+            0.07335907335907337
+          ],
+          "distinct_known_doors": 74,
+          "distinct_known_doors_rejected_at_least_once": 10,
+          "thresholds": [
+            11.99430953672122,
+            14.424353850512274,
+            12.276884419372655,
+            14.912833309953443,
+            14.210580927236238,
+            12.644413139656635,
+            12.104546879406817,
+            12.092566113989404
+          ]
+        },
+        "validation_door": {
+          "unknown_rejected": [
+            46,
+            74
+          ],
+          "known": [
+            500,
+            18,
+            0
+          ],
+          "known_n": 518,
+          "known_rejection_rate": 0.03474903474903475,
+          "known_rejection_rate_ci95": [
+            0.013513513513513514,
+            0.06177606177606178
+          ],
+          "distinct_known_doors": 74,
+          "distinct_known_doors_rejected_at_least_once": 11,
+          "thresholds": [
+            12.239648353262066,
+            14.817214096710972,
+            12.520184788730038,
+            15.303669951273822,
+            13.590935922894156,
+            11.546513240525586,
+            11.223004850385387,
+            12.01804511841308
+          ]
+        },
+        "posthoc": {
+          "unknown_rejected": [
+            42,
+            74
+          ],
+          "known": [
+            518,
+            0,
+            0
+          ],
+          "known_n": 518,
+          "known_rejection_rate": 0.0,
+          "known_rejection_rate_ci95": [
+            0.0,
+            0.0
+          ],
+          "distinct_known_doors": 74,
+          "distinct_known_doors_rejected_at_least_once": 0,
+          "thresholds": [
+            11.723253129396412,
+            15.245882082748908,
+            11.925213321369942,
+            11.05179028983364,
+            11.974916298646214,
+            10.251640456065815,
+            10.353549047728276,
+            11.729307876010816
+          ]
+        }
+      },
+      "rgbe:maha": {
+        "door_auroc_mean": 0.9680264406487233,
+        "door_auroc_min": 0.808695652173913,
+        "manuscript": {
+          "unknown_rejected": [
+            69,
+            74
+          ],
+          "known": [
+            485,
+            33,
+            0
+          ],
+          "known_n": 518,
+          "known_rejection_rate": 0.0637065637065637,
+          "known_rejection_rate_ci95": [
+            0.017374517374517374,
+            0.11969111969111969
+          ],
+          "distinct_known_doors": 74,
+          "distinct_known_doors_rejected_at_least_once": 7,
+          "thresholds": [
+            -2316.2785093100856,
+            -3720.606082526596,
+            -4079.240909496884,
+            -4044.763296205023,
+            -3236.7709051608763,
+            -3644.3254959626456,
+            -2804.5470765248883,
+            -2761.295439382985
+          ]
+        },
+        "validation_door": {
+          "unknown_rejected": [
+            69,
+            74
+          ],
+          "known": [
+            481,
+            37,
+            0
+          ],
+          "known_n": 518,
+          "known_rejection_rate": 0.07142857142857142,
+          "known_rejection_rate_ci95": [
+            0.023166023166023165,
+            0.13127413127413126
+          ],
+          "distinct_known_doors": 74,
+          "distinct_known_doors_rejected_at_least_once": 9,
+          "thresholds": [
+            -2317.526096757965,
+            -4145.213321699619,
+            -3177.4425463543816,
+            -3620.666870637977,
+            -3396.004595780454,
+            -2565.9554910671395,
+            -2725.2585406927255,
+            -4405.967014717789
+          ]
+        },
+        "posthoc": {
+          "unknown_rejected": [
+            53,
+            74
+          ],
+          "known": [
+            518,
+            0,
+            0
+          ],
+          "known_n": 518,
+          "known_rejection_rate": 0.0,
+          "known_rejection_rate_ci95": [
+            0.0,
+            0.0
+          ],
+          "distinct_known_doors": 74,
+          "distinct_known_doors_rejected_at_least_once": 0,
+          "thresholds": [
+            -8020.690352905186,
+            -8483.867013232184,
+            -8476.799967263867,
+            -15094.759507225019,
+            -7485.508756063755,
+            -10762.429872466144,
+            -9399.583156034309,
+            -7628.746729148448
+          ]
+        }
+      }
+    },
+    "fold0_s456": {
+      "runs": 8,
+      "hole": {
+        "door_auroc_mean": 1.0,
+        "door_auroc_min": 1.0,
+        "manuscript": {
+          "unknown_rejected": [
+            74,
+            74
+          ],
+          "known": [
+            518,
+            0,
+            0
+          ],
+          "known_n": 518,
+          "known_rejection_rate": 0.0,
+          "known_rejection_rate_ci95": [
+            0.0,
+            0.0
+          ],
+          "distinct_known_doors": 74,
+          "distinct_known_doors_rejected_at_least_once": 0,
+          "thresholds": [
+            -30.0,
+            -30.0,
+            -30.0,
+            -30.0,
+            -30.0,
+            -30.0,
+            -30.0,
+            -30.0
+          ]
+        },
+        "validation_door": {
+          "unknown_rejected": [
+            74,
+            74
+          ],
+          "known": [
+            502,
+            16,
+            0
+          ],
+          "known_n": 518,
+          "known_rejection_rate": 0.03088803088803089,
+          "known_rejection_rate_ci95": [
+            0.003861003861003861,
+            0.06756756756756757
+          ],
+          "distinct_known_doors": 74,
+          "distinct_known_doors_rejected_at_least_once": 5,
+          "thresholds": [
+            -6.001933082920914,
+            -7.656647607138893,
+            -7.493474902768412,
+            -6.838956204716055,
+            -7.034946691064761,
+            -7.123035973691913,
+            -7.123035973691913,
+            -7.538915788671488
+          ]
+        },
+        "posthoc": {
+          "unknown_rejected": [
+            74,
+            74
+          ],
+          "known": [
+            518,
+            0,
+            0
+          ],
+          "known_n": 518,
+          "known_rejection_rate": 0.0,
+          "known_rejection_rate_ci95": [
+            0.0,
+            0.0
+          ],
+          "distinct_known_doors": 74,
+          "distinct_known_doors_rejected_at_least_once": 0,
+          "thresholds": [
+            -7.333448079705136,
+            -9.023993027090341,
+            -8.022422519641623,
+            -7.933660033605747,
+            -8.510130621468306,
+            -8.416435499282215,
+            -8.416435499282215,
+            -9.378791350150777
+          ]
+        },
+        "validation_tau_mm": [
+          6.001933082920914,
+          7.656647607138893,
+          7.493474902768412,
+          6.838956204716055,
+          7.034946691064761,
+          7.123035973691913,
+          7.123035973691913,
+          7.538915788671488
+        ],
+        "posthoc_tau_mm": [
+          7.333448079705136,
+          9.023993027090341,
+          8.022422519641623,
+          7.933660033605747,
+          8.510130621468306,
+          8.416435499282215,
+          8.416435499282215,
+          9.378791350150777
+        ]
+      },
+      "hole_validation_predictions_missing": 0,
+      "rgb:msp": {
+        "door_auroc_mean": 0.7938049948240166,
+        "door_auroc_min": 0.0625,
+        "manuscript": {
+          "unknown_rejected": [
+            53,
+            74
+          ],
+          "known": [
+            499,
+            19,
+            0
+          ],
+          "known_n": 518,
+          "known_rejection_rate": 0.03667953667953668,
+          "known_rejection_rate_ci95": [
+            0.017374517374517374,
+            0.059845559845559844
+          ],
+          "distinct_known_doors": 74,
+          "distinct_known_doors_rejected_at_least_once": 13,
+          "thresholds": [
+            16.16502487540094,
+            13.234270155916365,
+            10.693761081038627,
+            10.564042595592587,
+            17.366043133072996,
+            13.484508288002058,
+            16.8212080300513,
+            13.60635761802588
+          ]
+        },
+        "validation_door": {
+          "unknown_rejected": [
+            53,
+            74
+          ],
+          "known": [
+            505,
+            13,
+            0
+          ],
+          "known_n": 518,
+          "known_rejection_rate": 0.025096525096525095,
+          "known_rejection_rate_ci95": [
+            0.009652509652509652,
+            0.04826254826254826
+          ],
+          "distinct_known_doors": 74,
+          "distinct_known_doors_rejected_at_least_once": 9,
+          "thresholds": [
+            15.184825465590222,
+            13.839968818566245,
+            10.972535173156185,
+            9.131797730436055,
+            17.43682066188027,
+            13.171045166460631,
+            16.674721598168734,
+            13.732284366430493
+          ]
+        },
+        "posthoc": {
+          "unknown_rejected": [
+            53,
+            74
+          ],
+          "known": [
+            518,
+            0,
+            0
+          ],
+          "known_n": 518,
+          "known_rejection_rate": 0.0,
+          "known_rejection_rate_ci95": [
+            0.0,
+            0.0
+          ],
+          "distinct_known_doors": 74,
+          "distinct_known_doors_rejected_at_least_once": 0,
+          "thresholds": [
+            13.705229681062661,
+            11.61991899370672,
+            11.071105351399257,
+            7.2421659348715695,
+            15.444193633818326,
+            12.548559794669835,
+            15.699524880956586,
+            11.98659039948889
+          ]
+        }
+      },
+      "rgb:maxlogit": {
+        "door_auroc_mean": 0.7919960012990703,
+        "door_auroc_min": 0.2777777777777778,
+        "manuscript": {
+          "unknown_rejected": [
+            52,
+            74
+          ],
+          "known": [
+            502,
+            16,
+            0
+          ],
+          "known_n": 518,
+          "known_rejection_rate": 0.03088803088803089,
+          "known_rejection_rate_ci95": [
+            0.015444015444015444,
+            0.05019305019305019
+          ],
+          "distinct_known_doors": 74,
+          "distinct_known_doors_rejected_at_least_once": 12,
+          "thresholds": [
+            14.34610652923584,
+            12.657416343688965,
+            10.669183731079102,
+            10.398077011108398,
+            16.001920700073242,
+            12.953710556030273,
+            15.626473426818848,
+            12.997915267944336
+          ]
+        },
+        "validation_door": {
+          "unknown_rejected": [
+            52,
+            74
+          ],
+          "known": [
+            511,
+            7,
+            0
+          ],
+          "known_n": 518,
+          "known_rejection_rate": 0.013513513513513514,
+          "known_rejection_rate_ci95": [
+            0.0019305019305019305,
+            0.02895752895752896
+          ],
+          "distinct_known_doors": 74,
+          "distinct_known_doors_rejected_at_least_once": 4,
+          "thresholds": [
+            13.441823959350586,
+            13.008213996887207,
+            10.621012687683105,
+            9.52310848236084,
+            15.367769241333008,
+            12.636674880981445,
+            15.649913787841797,
+            13.290587425231934
+          ]
+        },
+        "posthoc": {
+          "unknown_rejected": [
+            50,
+            74
+          ],
+          "known": [
+            518,
+            0,
+            0
+          ],
+          "known_n": 518,
+          "known_rejection_rate": 0.0,
+          "known_rejection_rate_ci95": [
+            0.0,
+            0.0
+          ],
+          "distinct_known_doors": 74,
+          "distinct_known_doors_rejected_at_least_once": 0,
+          "thresholds": [
+            13.180837631225586,
+            12.499176979064941,
+            10.7902193069458,
+            8.464980125427246,
+            15.513141632080078,
+            12.072518348693848,
+            15.757855415344238,
+            12.29917049407959
+          ]
+        }
+      },
+      "rgb:energy": {
+        "door_auroc_mean": 0.7919960012990703,
+        "door_auroc_min": 0.2777777777777778,
+        "manuscript": {
+          "unknown_rejected": [
+            52,
+            74
+          ],
+          "known": [
+            502,
+            16,
+            0
+          ],
+          "known_n": 518,
+          "known_rejection_rate": 0.03088803088803089,
+          "known_rejection_rate_ci95": [
+            0.015444015444015444,
+            0.05019305019305019
+          ],
+          "distinct_known_doors": 74,
+          "distinct_known_doors_rejected_at_least_once": 12,
+          "thresholds": [
+            14.346106651622861,
+            12.657419499325105,
+            10.66924863871679,
+            10.398097109919034,
+            16.001920709141228,
+            12.953711609817134,
+            15.626473483597728,
+            12.997916310535555
+          ]
+        },
+        "validation_door": {
+          "unknown_rejected": [
+            52,
+            74
+          ],
+          "known": [
+            511,
+            7,
+            0
+          ],
+          "known_n": 518,
+          "known_rejection_rate": 0.013513513513513514,
+          "known_rejection_rate_ci95": [
+            0.0019305019305019305,
+            0.02895752895752896
+          ],
+          "distinct_known_doors": 74,
+          "distinct_known_doors_rejected_at_least_once": 4,
+          "thresholds": [
+            13.441824213631659,
+            13.008214861601731,
+            10.62102985430312,
+            9.523216647458778,
+            15.367769261964112,
+            12.636676785947975,
+            15.649913819727878,
+            13.290588375877523
+          ]
+        },
+        "posthoc": {
+          "unknown_rejected": [
+            50,
+            74
+          ],
+          "known": [
+            518,
+            0,
+            0
+          ],
+          "known_n": 518,
+          "known_rejection_rate": 0.0,
+          "known_rejection_rate_ci95": [
+            0.0,
+            0.0
+          ],
+          "distinct_known_doors": 74,
+          "distinct_known_doors_rejected_at_least_once": 0,
+          "thresholds": [
+            13.180838747816614,
+            12.49918596433945,
+            10.79023399811994,
+            8.465695629184266,
+            15.513141828267827,
+            12.072521898698763,
+            15.75785544799932,
+            12.299173529297853
+          ]
+        }
+      },
+      "rgb:maha": {
+        "door_auroc_mean": 0.9822981366459628,
+        "door_auroc_min": 0.9464285714285714,
+        "manuscript": {
+          "unknown_rejected": [
+            74,
+            74
+          ],
+          "known": [
+            474,
+            44,
+            0
+          ],
+          "known_n": 518,
+          "known_rejection_rate": 0.08494208494208494,
+          "known_rejection_rate_ci95": [
+            0.03474903474903475,
+            0.14864864864864866
+          ],
+          "distinct_known_doors": 74,
+          "distinct_known_doors_rejected_at_least_once": 11,
+          "thresholds": [
+            -2547.7812858707402,
+            -4951.232753548131,
+            -3942.440629863094,
+            -4604.583730212315,
+            -4377.453432240123,
+            -4917.161983648815,
+            -4084.008914236976,
+            -3524.2476364840895
+          ]
+        },
+        "validation_door": {
+          "unknown_rejected": [
+            69,
+            74
+          ],
+          "known": [
+            479,
+            39,
+            0
+          ],
+          "known_n": 518,
+          "known_rejection_rate": 0.07528957528957529,
+          "known_rejection_rate_ci95": [
+            0.02895752895752896,
+            0.12934362934362933
+          ],
+          "distinct_known_doors": 74,
+          "distinct_known_doors_rejected_at_least_once": 13,
+          "thresholds": [
+            -2086.7078827887326,
+            -7723.196163147055,
+            -6801.887437403029,
+            -7503.351803327789,
+            -4522.409033594876,
+            -7858.507586638836,
+            -4909.467463430993,
+            -4343.6422994821805
+          ]
+        },
+        "posthoc": {
+          "unknown_rejected": [
+            53,
+            74
+          ],
+          "known": [
+            518,
+            0,
+            0
+          ],
+          "known_n": 518,
+          "known_rejection_rate": 0.0,
+          "known_rejection_rate_ci95": [
+            0.0,
+            0.0
+          ],
+          "distinct_known_doors": 74,
+          "distinct_known_doors_rejected_at_least_once": 0,
+          "thresholds": [
+            -13514.74981033189,
+            -15131.385705068365,
+            -11449.77266014407,
+            -14026.60850766263,
+            -15170.720488752326,
+            -17522.14104180337,
+            -19222.731312343647,
+            -12102.002318964016
+          ]
+        }
+      },
+      "rgbe:msp": {
+        "door_auroc_mean": 0.727289826186885,
+        "door_auroc_min": 0.041666666666666664,
+        "manuscript": {
+          "unknown_rejected": [
+            49,
+            74
+          ],
+          "known": [
+            494,
+            24,
+            0
+          ],
+          "known_n": 518,
+          "known_rejection_rate": 0.04633204633204633,
+          "known_rejection_rate_ci95": [
+            0.019305019305019305,
+            0.08112934362934338
+          ],
+          "distinct_known_doors": 74,
+          "distinct_known_doors_rejected_at_least_once": 12,
+          "thresholds": [
+            16.004934539043447,
+            10.514150576482995,
+            10.632153780730365,
+            9.809607618860685,
+            16.15182625849479,
+            8.295386049520912,
+            17.2673127343362,
+            13.31239365271884
+          ]
+        },
+        "validation_door": {
+          "unknown_rejected": [
+            49,
+            74
+          ],
+          "known": [
+            491,
+            27,
+            0
+          ],
+          "known_n": 518,
+          "known_rejection_rate": 0.052123552123552123,
+          "known_rejection_rate_ci95": [
+            0.02702702702702703,
+            0.0830598455598453
+          ],
+          "distinct_known_doors": 74,
+          "distinct_known_doors_rejected_at_least_once": 16,
+          "thresholds": [
+            16.081537263518797,
+            10.344252559868139,
+            11.305202526144864,
+            9.065847115944127,
+            16.32949969384828,
+            8.313687121065607,
+            17.537198338728643,
+            12.808846158952187
+          ]
+        },
+        "posthoc": {
+          "unknown_rejected": [
+            46,
+            74
+          ],
+          "known": [
+            518,
+            0,
+            0
+          ],
+          "known_n": 518,
+          "known_rejection_rate": 0.0,
+          "known_rejection_rate_ci95": [
+            0.0,
+            0.0
+          ],
+          "distinct_known_doors": 74,
+          "distinct_known_doors_rejected_at_least_once": 0,
+          "thresholds": [
+            13.830790486584219,
+            8.10621106033579,
+            9.764657875538528,
+            7.804936007390791,
+            15.336242316506343,
+            5.2005137348537325,
+            15.561297995754384,
+            9.24625766341795
+          ]
+        }
+      },
+      "rgbe:maxlogit": {
+        "door_auroc_mean": 0.6901165942965816,
+        "door_auroc_min": 0.18055555555555555,
+        "manuscript": {
+          "unknown_rejected": [
+            42,
+            74
+          ],
+          "known": [
+            504,
+            14,
+            0
+          ],
+          "known_n": 518,
+          "known_rejection_rate": 0.02702702702702703,
+          "known_rejection_rate_ci95": [
+            0.009652509652509652,
+            0.05019305019305019
+          ],
+          "distinct_known_doors": 74,
+          "distinct_known_doors_rejected_at_least_once": 8,
+          "thresholds": [
+            14.573027610778809,
+            10.062551498413086,
+            10.654428482055664,
+            9.383522033691406,
+            15.441505432128906,
+            9.13858413696289,
+            15.816019058227539,
+            12.784404754638672
+          ]
+        },
+        "validation_door": {
+          "unknown_rejected": [
+            40,
+            74
+          ],
+          "known": [
+            498,
+            20,
+            0
+          ],
+          "known_n": 518,
+          "known_rejection_rate": 0.03861003861003861,
+          "known_rejection_rate_ci95": [
+            0.017374517374517374,
+            0.06563706563706563
+          ],
+          "distinct_known_doors": 74,
+          "distinct_known_doors_rejected_at_least_once": 12,
+          "thresholds": [
+            14.64654541015625,
+            10.087003707885742,
+            11.136576652526855,
+            9.126489639282227,
+            15.542777061462402,
+            9.44543170928955,
+            15.818196296691895,
+            12.132719039916992
+          ]
+        },
+        "posthoc": {
+          "unknown_rejected": [
+            39,
+            74
+          ],
+          "known": [
+            518,
+            0,
+            0
+          ],
+          "known_n": 518,
+          "known_rejection_rate": 0.0,
+          "known_rejection_rate_ci95": [
+            0.0,
+            0.0
+          ],
+          "distinct_known_doors": 74,
+          "distinct_known_doors_rejected_at_least_once": 0,
+          "thresholds": [
+            12.796812057495117,
+            7.876284122467041,
+            10.577489852905273,
+            8.241133689880371,
+            15.457832336425781,
+            8.751961708068848,
+            14.611180305480957,
+            11.181349754333496
+          ]
+        }
+      },
+      "rgbe:energy": {
+        "door_auroc_mean": 0.6901165942965816,
+        "door_auroc_min": 0.18055555555555555,
+        "manuscript": {
+          "unknown_rejected": [
+            42,
+            74
+          ],
+          "known": [
+            504,
+            14,
+            0
+          ],
+          "known_n": 518,
+          "known_rejection_rate": 0.02702702702702703,
+          "known_rejection_rate_ci95": [
+            0.009652509652509652,
+            0.05019305019305019
+          ],
+          "distinct_known_doors": 74,
+          "distinct_known_doors_rejected_at_least_once": 8,
+          "thresholds": [
+            14.573027702410098,
+            10.0625776902831,
+            10.654447678353316,
+            9.383558696830026,
+            15.441505585717612,
+            9.138722794156237,
+            15.816019093113209,
+            12.784406470102642
+          ]
+        },
+        "validation_door": {
+          "unknown_rejected": [
+            40,
+            74
+          ],
+          "known": [
+            498,
+            20,
+            0
+          ],
+          "known_n": 518,
+          "known_rejection_rate": 0.03861003861003861,
+          "known_rejection_rate_ci95": [
+            0.017374517374517374,
+            0.06563706563706563
+          ],
+          "distinct_known_doors": 74,
+          "distinct_known_doors_rejected_at_least_once": 12,
+          "thresholds": [
+            14.64654544499443,
+            10.087035884563912,
+            11.136588633687667,
+            9.126605177997632,
+            15.542777098187338,
+            9.445492190791404,
+            15.818196319906132,
+            12.132721776371291
+          ]
+        },
+        "posthoc": {
+          "unknown_rejected": [
+            39,
+            74
+          ],
+          "known": [
+            518,
+            0,
+            0
+          ],
+          "known_n": 518,
+          "known_rejection_rate": 0.0,
+          "known_rejection_rate_ci95": [
+            0.0,
+            0.0
+          ],
+          "distinct_known_doors": 74,
+          "distinct_known_doors_rejected_at_least_once": 0,
+          "thresholds": [
+            12.79681304233085,
+            7.876585736657838,
+            10.577561228955918,
+            8.241541324293493,
+            15.457832376660813,
+            8.75746029419543,
+            14.611180691979301,
+            11.18144622168845
+          ]
+        }
+      },
+      "rgbe:maha": {
+        "door_auroc_mean": 0.9869601714710411,
+        "door_auroc_min": 0.9444444444444444,
+        "manuscript": {
+          "unknown_rejected": [
+            74,
+            74
+          ],
+          "known": [
+            473,
+            45,
+            0
+          ],
+          "known_n": 518,
+          "known_rejection_rate": 0.08687258687258688,
+          "known_rejection_rate_ci95": [
+            0.03667953667953668,
+            0.14869691119691095
+          ],
+          "distinct_known_doors": 74,
+          "distinct_known_doors_rejected_at_least_once": 11,
+          "thresholds": [
+            -2102.2077864543126,
+            -2872.265061448466,
+            -3309.6877200429017,
+            -4278.622197158555,
+            -2987.1396325552537,
+            -2386.9444508580314,
+            -3013.20285525249,
+            -3371.1121493695086
+          ]
+        },
+        "validation_door": {
+          "unknown_rejected": [
+            74,
+            74
+          ],
+          "known": [
+            480,
+            38,
+            0
+          ],
+          "known_n": 518,
+          "known_rejection_rate": 0.07335907335907337,
+          "known_rejection_rate_ci95": [
+            0.02895752895752896,
+            0.12934362934362933
+          ],
+          "distinct_known_doors": 74,
+          "distinct_known_doors_rejected_at_least_once": 11,
+          "thresholds": [
+            -1802.0126378151167,
+            -5408.924619432092,
+            -5330.726514341339,
+            -4909.464996882202,
+            -3374.7717868175,
+            -3470.148711630688,
+            -3454.69762285977,
+            -2761.5460409656343
+          ]
+        },
+        "posthoc": {
+          "unknown_rejected": [
+            58,
+            74
+          ],
+          "known": [
+            518,
+            0,
+            0
+          ],
+          "known_n": 518,
+          "known_rejection_rate": 0.0,
+          "known_rejection_rate_ci95": [
+            0.0,
+            0.0
+          ],
+          "distinct_known_doors": 74,
+          "distinct_known_doors_rejected_at_least_once": 0,
+          "thresholds": [
+            -9359.372886653153,
+            -14183.776635273663,
+            -9113.007666460497,
+            -8063.964829167175,
+            -17236.263862641896,
+            -6519.156238710895,
+            -10739.079864171747,
+            -6669.423954715573
+          ]
+        }
+      }
+    },
+    "allfolds_s42": {
+      "runs": 40,
+      "hole": {
+        "door_auroc_mean": 1.0,
+        "door_auroc_min": 1.0,
+        "manuscript": {
+          "unknown_rejected": [
+            361,
+            361
+          ],
+          "known": [
+            2527,
+            0,
+            0
+          ],
+          "known_n": 2527,
+          "known_rejection_rate": 0.0,
+          "known_rejection_rate_ci95": [
+            0.0,
+            0.0
+          ],
+          "distinct_known_doors": 361,
+          "distinct_known_doors_rejected_at_least_once": 0,
+          "thresholds": [
+            -30.0,
+            -30.0,
+            -30.0,
+            -30.0,
+            -30.0,
+            -30.0,
+            -30.0,
+            -30.0,
+            -30.0,
+            -30.0,
+            -30.0,
+            -30.0,
+            -30.0,
+            -30.0,
+            -30.0,
+            -30.0,
+            -30.0,
+            -30.0,
+            -30.0,
+            -30.0,
+            -30.0,
+            -30.0,
+            -30.0,
+            -30.0,
+            -30.0,
+            -30.0,
+            -30.0,
+            -30.0,
+            -30.0,
+            -30.0,
+            -30.0,
+            -30.0,
+            -30.0,
+            -30.0,
+            -30.0,
+            -30.0,
+            -30.0,
+            -30.0,
+            -30.0,
+            -30.0
+          ]
+        },
+        "validation_door": {
+          "unknown_rejected": [
+            361,
+            361
+          ],
+          "known": [
+            2490,
+            37,
+            0
+          ],
+          "known_n": 2527,
+          "known_rejection_rate": 0.014641867827463396,
+          "known_rejection_rate_ci95": [
+            0.007518796992481203,
+            0.023357736446379052
+          ],
+          "distinct_known_doors": 361,
+          "distinct_known_doors_rejected_at_least_once": 18,
+          "thresholds": [
+            -7.449266143760951,
+            -7.442233444155363,
+            -7.3638187760907385,
+            -7.303994483028646,
+            -7.321930230990347,
+            -7.394269997585752,
+            -7.5439157330411035,
+            -7.3292899446062165,
+            -8.656612473139376,
+            -7.365161468960309,
+            -8.532897325145996,
+            -7.350177640714833,
+            -7.417606036569282,
+            -8.536406159108537,
+            -7.38949462192295,
+            -7.509835664292041,
+            -8.256879129745926,
+            -6.287617398494376,
+            -7.396651178990396,
+            -7.397101107895651,
+            -7.383156474757925,
+            -7.461441628178136,
+            -7.375777914298965,
+            -8.665173802156687,
+            -13.603695987459787,
+            -13.603695987459787,
+            -15.581074773151386,
+            -13.603695987459787,
+            -13.603695987459787,
+            -13.580511735509617,
+            -13.522366978041873,
+            -8.747117826571753,
+            -7.395366297316855,
+            -12.340419002111503,
+            -7.341760005783499,
+            -7.351089583047155,
+            -7.362504673444846,
+            -9.851317412926164,
+            -7.294071360763155,
+            -7.416531663864021
+          ]
+        },
+        "posthoc": {
+          "unknown_rejected": [
+            361,
+            361
+          ],
+          "known": [
+            2527,
+            0,
+            0
+          ],
+          "known_n": 2527,
+          "known_rejection_rate": 0.0,
+          "known_rejection_rate_ci95": [
+            0.0,
+            0.0
+          ],
+          "distinct_known_doors": 361,
+          "distinct_known_doors_rejected_at_least_once": 0,
+          "thresholds": [
+            -12.39599307245885,
+            -7.215118498935453,
+            -7.349619763508144,
+            -7.431327839201458,
+            -9.097101326856091,
+            -9.801219073429593,
+            -12.128959988515817,
+            -12.429836922597588,
+            -7.293092361718664,
+            -7.2472719492402575,
+            -7.493474902768412,
+            -7.361905534414063,
+            -7.314193241673479,
+            -7.190401412604842,
+            -7.321930230990347,
+            -7.453501368954903,
+            -7.8195821557148975,
+            -6.459477371653065,
+            -7.676067029157139,
+            -8.656612473139376,
+            -8.728380735340352,
+            -8.635205869270976,
+            -8.737162686355532,
+            -8.639611097406487,
+            -7.444147643772453,
+            -7.444147643772453,
+            -7.462013275844129,
+            -7.444147643772453,
+            -7.444147643772453,
+            -7.382573394517635,
+            -7.390761305976866,
+            -8.727084648170944,
+            -13.653752895078696,
+            -13.490216537995138,
+            -15.44340838903372,
+            -13.586307798497273,
+            -13.603695987459787,
+            -13.389909792837443,
+            -13.499454029597018,
+            -7.518230855593288
+          ]
+        },
+        "validation_tau_mm": [
+          7.449266143760951,
+          7.442233444155363,
+          7.3638187760907385,
+          7.303994483028646,
+          7.321930230990347,
+          7.394269997585752,
+          7.5439157330411035,
+          7.3292899446062165,
+          8.656612473139376,
+          7.365161468960309,
+          8.532897325145996,
+          7.350177640714833,
+          7.417606036569282,
+          8.536406159108537,
+          7.38949462192295,
+          7.509835664292041,
+          8.256879129745926,
+          6.287617398494376,
+          7.396651178990396,
+          7.397101107895651,
+          7.383156474757925,
+          7.461441628178136,
+          7.375777914298965,
+          8.665173802156687,
+          13.603695987459787,
+          13.603695987459787,
+          15.581074773151386,
+          13.603695987459787,
+          13.603695987459787,
+          13.580511735509617,
+          13.522366978041873,
+          8.747117826571753,
+          7.395366297316855,
+          12.340419002111503,
+          7.341760005783499,
+          7.351089583047155,
+          7.362504673444846,
+          9.851317412926164,
+          7.294071360763155,
+          7.416531663864021
+        ],
+        "posthoc_tau_mm": [
+          12.39599307245885,
+          7.215118498935453,
+          7.349619763508144,
+          7.431327839201458,
+          9.097101326856091,
+          9.801219073429593,
+          12.128959988515817,
+          12.429836922597588,
+          7.293092361718664,
+          7.2472719492402575,
+          7.493474902768412,
+          7.361905534414063,
+          7.314193241673479,
+          7.190401412604842,
+          7.321930230990347,
+          7.453501368954903,
+          7.8195821557148975,
+          6.459477371653065,
+          7.676067029157139,
+          8.656612473139376,
+          8.728380735340352,
+          8.635205869270976,
+          8.737162686355532,
+          8.639611097406487,
+          7.444147643772453,
+          7.444147643772453,
+          7.462013275844129,
+          7.444147643772453,
+          7.444147643772453,
+          7.382573394517635,
+          7.390761305976866,
+          8.727084648170944,
+          13.653752895078696,
+          13.490216537995138,
+          15.44340838903372,
+          13.586307798497273,
+          13.603695987459787,
+          13.389909792837443,
+          13.499454029597018,
+          7.518230855593288
+        ]
+      },
+      "hole_validation_predictions_missing": 0,
+      "rgb:msp": {
+        "door_auroc_mean": 0.7403595680021782,
+        "door_auroc_min": 0.0,
+        "manuscript": {
+          "unknown_rejected": [
+            222,
+            361
+          ],
+          "known": [
+            2451,
+            74,
+            2
+          ],
+          "known_n": 2527,
+          "known_rejection_rate": 0.02928373565492679,
+          "known_rejection_rate_ci95": [
+            0.018599129402453504,
+            0.041946972694895134
+          ],
+          "distinct_known_doors": 361,
+          "distinct_known_doors_rejected_at_least_once": 36,
+          "thresholds": [
+            14.957469971190962,
+            13.504781555239282,
+            15.036736635370072,
+            15.796215988569983,
+            15.00617143656665,
+            13.595370973760076,
+            16.88647665934081,
+            9.316247865536585,
+            16.76022951316382,
+            7.4192965752239335,
+            1.5074797009645184,
+            8.290660154050514,
+            6.62530619462907,
+            6.858542795732101,
+            5.051474529081268,
+            6.249934204843819,
+            13.147418984785084,
+            10.660636430079112,
+            14.246642287764931,
+            15.255355995459702,
+            6.988899395075627,
+            14.541591608587563,
+            13.431185455897495,
+            11.412013806237347,
+            13.546073439641416,
+            16.280624060615654,
+            11.800516716673496,
+            14.417943996117987,
+            12.731967817204719,
+            14.731997790036324,
+            15.944501648588183,
+            14.634697290211442,
+            13.022850124326046,
+            14.457857100080217,
+            14.248414905225399,
+            7.474852684609357,
+            12.978913643773604,
+            14.8578530619867,
+            13.700638936925149,
+            11.07605096771298
+          ]
+        },
+        "validation_door": {
+          "unknown_rejected": [
+            213,
+            361
+          ],
+          "known": [
+            2473,
+            49,
+            5
+          ],
+          "known_n": 2527,
+          "known_rejection_rate": 0.019390581717451522,
+          "known_rejection_rate_ci95": [
+            0.01187178472497032,
+            0.02809655718242976
+          ],
+          "distinct_known_doors": 361,
+          "distinct_known_doors_rejected_at_least_once": 29,
+          "thresholds": [
+            15.300880895216974,
+            13.214799375573403,
+            14.75329098405383,
+            14.745907699256122,
+            15.168193910044637,
+            12.992599352931546,
+            16.468643986981807,
+            9.262416192450951,
+            15.894029296944645,
+            6.610659068326312,
+            1.410879140881578,
+            7.456128226865494,
+            2.487597395566552,
+            6.058679612690493,
+            3.612345485464871,
+            5.255654520541483,
+            11.40362453055754,
+            9.277386380843042,
+            14.105315676034543,
+            15.576835818209297,
+            1.0661799569951875,
+            13.159630857859687,
+            11.265314920113006,
+            8.998019263204538,
+            12.151788787133153,
+            13.768081862385621,
+            10.250735972816086,
+            14.167816581091927,
+            12.567502854659564,
+            12.264735925364064,
+            15.910700700968807,
+            13.838529272552417,
+            13.203309640496084,
+            15.170546281659586,
+            14.199093863026272,
+            7.806870031129916,
+            13.2289686479681,
+            15.19946752752157,
+            13.641225095336175,
+            11.046078900990285
+          ]
+        },
+        "posthoc": {
+          "unknown_rejected": [
+            205,
+            361
+          ],
+          "known": [
+            2520,
+            0,
+            7
+          ],
+          "known_n": 2527,
+          "known_rejection_rate": 0.0,
+          "known_rejection_rate_ci95": [
+            0.0,
+            0.0
+          ],
+          "distinct_known_doors": 361,
+          "distinct_known_doors_rejected_at_least_once": 0,
+          "thresholds": [
+            13.853853001855136,
+            12.63173104560367,
+            14.989946978336926,
+            12.685162657713128,
+            13.78764337437229,
+            14.003703207961868,
+            16.74325690235617,
+            3.5555903341415394,
+            17.855697637004802,
+            8.12790867181084,
+            1.0088795580378576,
+            9.579679565427917,
+            7.303693243115185,
+            5.88355575365525,
+            4.537191078022641,
+            6.190497437173475,
+            7.487491402502838,
+            8.310563845412103,
+            12.095309551299662,
+            12.617001326616657,
+            1.1102114967390078,
+            11.991628896986624,
+            11.598017456748469,
+            10.560898820483082,
+            9.42291232253027,
+            14.347252482373008,
+            11.680219041562648,
+            14.21209579664245,
+            11.231617403045895,
+            13.474056060131568,
+            14.33946275538039,
+            9.423295205771204,
+            12.302328044944845,
+            10.0363324899728,
+            10.851102525447901,
+            6.593176705186383,
+            13.701538957417117,
+            16.3503933439351,
+            11.846143480225576,
+            10.045698949052621
+          ]
+        }
+      },
+      "rgb:maxlogit": {
+        "door_auroc_mean": 0.7555573006831293,
+        "door_auroc_min": 0.014705882352941176,
+        "manuscript": {
+          "unknown_rejected": [
+            203,
+            361
+          ],
+          "known": [
+            2448,
+            75,
+            4
+          ],
+          "known_n": 2527,
+          "known_rejection_rate": 0.0296794618124258,
+          "known_rejection_rate_ci95": [
+            0.019390581717451522,
+            0.04115552037989711
+          ],
+          "distinct_known_doors": 361,
+          "distinct_known_doors_rejected_at_least_once": 38,
+          "thresholds": [
+            12.92696475982666,
+            12.222391128540039,
+            13.505759239196777,
+            14.688944816589355,
+            13.7322359085083,
+            13.385489463806152,
+            14.033533096313477,
+            9.662603378295898,
+            14.590414047241211,
+            8.336311340332031,
+            4.299734115600586,
+            9.013916969299316,
+            7.58080530166626,
+            7.956932544708252,
+            5.665460586547852,
+            7.423727989196777,
+            12.000874519348145,
+            11.004788398742676,
+            12.52680492401123,
+            13.378501892089844,
+            7.350764751434326,
+            13.15967845916748,
+            12.227334022521973,
+            11.251954078674316,
+            12.38150405883789,
+            14.80250072479248,
+            11.551491737365723,
+            13.373897552490234,
+            12.119404792785645,
+            13.723977088928223,
+            14.157794952392578,
+            13.263818740844727,
+            11.839550971984863,
+            13.119546890258789,
+            12.945541381835938,
+            8.186230659484863,
+            12.338386535644531,
+            13.969209671020508,
+            12.480226516723633,
+            11.655101776123047
+          ]
+        },
+        "validation_door": {
+          "unknown_rejected": [
+            202,
+            361
+          ],
+          "known": [
+            2478,
+            44,
+            5
+          ],
+          "known_n": 2527,
+          "known_rejection_rate": 0.01741195092995647,
+          "known_rejection_rate_ci95": [
+            0.010288880094974277,
+            0.024940641076375097
+          ],
+          "distinct_known_doors": 361,
+          "distinct_known_doors_rejected_at_least_once": 27,
+          "thresholds": [
+            12.99427318572998,
+            11.84692096710205,
+            13.138569831848145,
+            13.49623966217041,
+            13.66637897491455,
+            11.81480884552002,
+            13.696057319641113,
+            9.694403648376465,
+            14.260717391967773,
+            7.517928123474121,
+            4.391162872314453,
+            8.049369812011719,
+            6.9209160804748535,
+            7.2046799659729,
+            4.394583225250244,
+            7.509886264801025,
+            10.39913558959961,
+            9.283242225646973,
+            12.576420783996582,
+            13.651602745056152,
+            4.531764030456543,
+            12.866877555847168,
+            11.159882545471191,
+            9.650103569030762,
+            11.093130111694336,
+            12.943370819091797,
+            9.814416885375977,
+            12.802630424499512,
+            12.133594512939453,
+            11.09961223602295,
+            14.422154426574707,
+            13.161355018615723,
+            11.746307373046875,
+            13.54415225982666,
+            12.376081466674805,
+            8.135553359985352,
+            12.041136741638184,
+            13.296441078186035,
+            12.270909309387207,
+            11.968925476074219
+          ]
+        },
+        "posthoc": {
+          "unknown_rejected": [
+            190,
+            361
+          ],
+          "known": [
+            2521,
+            0,
+            6
+          ],
+          "known_n": 2527,
+          "known_rejection_rate": 0.0,
+          "known_rejection_rate_ci95": [
+            0.0,
+            0.0
+          ],
+          "distinct_known_doors": 361,
+          "distinct_known_doors_rejected_at_least_once": 0,
+          "thresholds": [
+            12.15772819519043,
+            11.796808242797852,
+            13.656999588012695,
+            12.939181327819824,
+            13.31276798248291,
+            13.156166076660156,
+            13.825225830078125,
+            6.541058540344238,
+            15.344283103942871,
+            8.411171913146973,
+            3.6718413829803467,
+            9.543023109436035,
+            7.823299407958984,
+            7.3861775398254395,
+            5.166019439697266,
+            7.391487121582031,
+            8.252577781677246,
+            9.698677062988281,
+            11.203709602355957,
+            11.351263999938965,
+            5.837372303009033,
+            11.635723114013672,
+            10.846465110778809,
+            11.991877555847168,
+            9.7902250289917,
+            13.330924034118652,
+            10.653895378112793,
+            12.972197532653809,
+            11.023920059204102,
+            13.619521141052246,
+            12.98257827758789,
+            9.987384796142578,
+            11.395035743713379,
+            10.433287620544434,
+            10.932220458984375,
+            6.996156215667725,
+            12.394537925720215,
+            13.901551246643066,
+            11.893891334533691,
+            9.834357261657715
+          ]
+        }
+      },
+      "rgb:energy": {
+        "door_auroc_mean": 0.7554362353078267,
+        "door_auroc_min": 0.014705882352941176,
+        "manuscript": {
+          "unknown_rejected": [
+            202,
+            361
+          ],
+          "known": [
+            2448,
+            75,
+            4
+          ],
+          "known_n": 2527,
+          "known_rejection_rate": 0.0296794618124258,
+          "known_rejection_rate_ci95": [
+            0.019390581717451522,
+            0.04115552037989711
+          ],
+          "distinct_known_doors": 361,
+          "distinct_known_doors_rejected_at_least_once": 38,
+          "thresholds": [
+            12.926965002488362,
+            12.222391948964981,
+            13.505759497726261,
+            14.688944903503078,
+            13.732236254008985,
+            13.385489802575174,
+            14.033533141663652,
+            9.662638664592011,
+            14.59041410989609,
+            8.336657943287051,
+            4.499512613562162,
+            9.014056814428672,
+            7.582119567928026,
+            7.9575739248623245,
+            5.68128953353626,
+            7.426095759267656,
+            12.000875767427964,
+            11.004867938936,
+            12.526805377268913,
+            13.378502135835044,
+            7.351522328501075,
+            13.15967877802151,
+            12.227335906416572,
+            11.252129381460795,
+            12.381505371046316,
+            14.802500776538311,
+            11.551498363742976,
+            13.37389800266052,
+            12.119408376589375,
+            13.723977477597254,
+            14.15779507060381,
+            13.263819140118633,
+            11.839552763977265,
+            13.119547314135751,
+            12.945541693257377,
+            8.18661324191285,
+            12.338388844139445,
+            13.969210681159428,
+            12.480227453363407,
+            11.655106162006225
+          ]
+        },
+        "validation_door": {
+          "unknown_rejected": [
+            201,
+            361
+          ],
+          "known": [
+            2478,
+            44,
+            5
+          ],
+          "known_n": 2527,
+          "known_rejection_rate": 0.01741195092995647,
+          "known_rejection_rate_ci95": [
+            0.010288880094974277,
+            0.024940641076375097
+          ],
+          "distinct_known_doors": 361,
+          "distinct_known_doors_rejected_at_least_once": 27,
+          "thresholds": [
+            12.994273398525543,
+            11.846922171169155,
+            13.138570223343894,
+            13.49624005656738,
+            13.66637923731867,
+            11.814811122636785,
+            13.696057390071289,
+            9.694440625396089,
+            14.260717517083169,
+            7.519273163289822,
+            4.609437582942855,
+            8.049665443828358,
+            7.006905075059967,
+            7.207014723540704,
+            4.421213930724484,
+            7.515090628507655,
+            10.399146744517308,
+            9.283335736492203,
+            12.576421563442205,
+            13.651602916873149,
+            4.883169360961077,
+            12.866879482682123,
+            11.159897605974631,
+            9.65015054527414,
+            11.093138276989578,
+            12.943371455626693,
+            9.814452216240099,
+            12.802631127564199,
+            12.133597996329467,
+            11.099617529192216,
+            14.422154514212759,
+            13.16135599585944,
+            11.746309217531671,
+            13.544152517764706,
+            12.376081971807235,
+            8.135960206945915,
+            12.041138539397403,
+            13.296441328771035,
+            12.270910499781829,
+            11.968934643634581
+          ]
+        },
+        "posthoc": {
+          "unknown_rejected": [
+            190,
+            361
+          ],
+          "known": [
+            2521,
+            0,
+            6
+          ],
+          "known_n": 2527,
+          "known_rejection_rate": 0.0,
+          "known_rejection_rate_ci95": [
+            0.0,
+            0.0
+          ],
+          "distinct_known_doors": 361,
+          "distinct_known_doors_rejected_at_least_once": 0,
+          "thresholds": [
+            12.15772915757329,
+            11.79681150948994,
+            13.65699989700572,
+            12.939184424548696,
+            13.312768798538018,
+            13.156166404393792,
+            13.825225883595635,
+            6.569222688307559,
+            15.344283121537051,
+            8.411467054472693,
+            3.8914934428534296,
+            9.543092226139747,
+            7.823961701273427,
+            7.3889585346261635,
+            5.176665992949219,
+            7.393533832985377,
+            8.25313767104001,
+            9.698922938110178,
+            11.203715187991461,
+            11.351267315104554,
+            5.86828361706756,
+            11.635729309856547,
+            10.846474295014561,
+            11.991903465064393,
+            9.790305875937701,
+            13.330924621699037,
+            10.653903837589246,
+            12.972198205266524,
+            11.023933720103761,
+            13.61952140571104,
+            12.982578869763238,
+            9.987516251263413,
+            11.39504028486319,
+            10.433338560829977,
+            10.932239842022128,
+            6.997524960478456,
+            12.394539046439883,
+            13.901551325914074,
+            11.893898886984207,
+            9.834443685627093
+          ]
+        }
+      },
+      "rgb:maha": {
+        "door_auroc_mean": 0.9833815317242081,
+        "door_auroc_min": 0.8970588235294118,
+        "manuscript": {
+          "unknown_rejected": [
+            312,
+            361
+          ],
+          "known": [
+            2434,
+            87,
+            6
+          ],
+          "known_n": 2527,
+          "known_rejection_rate": 0.03442817570241393,
+          "known_rejection_rate_ci95": [
+            0.019390581717451522,
+            0.051444400474871387
+          ],
+          "distinct_known_doors": 361,
+          "distinct_known_doors_rejected_at_least_once": 24,
+          "thresholds": [
+            -2613.122056029895,
+            -4120.928206895485,
+            -4214.749100119295,
+            -4000.172467852438,
+            -3771.5342057504304,
+            -5465.329122451785,
+            -4361.31584650952,
+            -3096.7077246428944,
+            -4332.976999437818,
+            -4611.884520600741,
+            -5073.112539801574,
+            -6080.0104729988,
+            -6809.44972882549,
+            -5684.428584597355,
+            -3167.7849810653247,
+            -4385.33899058746,
+            -6200.230674427501,
+            -7446.825961598465,
+            -10714.828548969133,
+            -13103.404044258474,
+            -8831.354596874926,
+            -8251.452422045724,
+            -8455.947685076902,
+            -7708.0306314865165,
+            -3024.265456948213,
+            -6338.090558581356,
+            -3203.226215131329,
+            -4523.068658263282,
+            -4535.238484116191,
+            -6283.582348308187,
+            -6626.768923242536,
+            -4307.012899434794,
+            -7702.903053128273,
+            -12714.42292641114,
+            -9126.926059278248,
+            -7403.258351059245,
+            -9089.265908664744,
+            -9125.3957716851,
+            -14266.396805285282,
+            -7821.397481935324
+          ]
+        },
+        "validation_door": {
+          "unknown_rejected": [
+            266,
+            361
+          ],
+          "known": [
+            2465,
+            55,
+            7
+          ],
+          "known_n": 2527,
+          "known_rejection_rate": 0.02176493866244559,
+          "known_rejection_rate_ci95": [
+            0.010684606252473288,
+            0.03482390185991294
+          ],
+          "distinct_known_doors": 361,
+          "distinct_known_doors_rejected_at_least_once": 20,
+          "thresholds": [
+            -2896.3697087841656,
+            -4218.3533540306835,
+            -4893.577771726677,
+            -3957.541460752553,
+            -3345.0235581262023,
+            -8301.58798012105,
+            -6394.126235504644,
+            -3486.2110916696615,
+            -8428.32904539771,
+            -4898.570928721531,
+            -6588.793541286057,
+            -7343.500553522195,
+            -58560.509405878634,
+            -8994.252615972024,
+            -6305.938022796434,
+            -5338.392450454261,
+            -6413.329229499298,
+            -15682.17392101598,
+            -13787.269460448368,
+            -39995.16423278325,
+            -48677.77007276174,
+            -11104.15855047213,
+            -27507.248024086763,
+            -21123.26612752622,
+            -6654.478692882167,
+            -11315.78580866024,
+            -7346.105394862134,
+            -5032.895155506136,
+            -6685.239642467053,
+            -7861.299783683839,
+            -10672.146105164706,
+            -7056.054114463534,
+            -12146.94415422943,
+            -16007.2439658596,
+            -13159.186297530963,
+            -10614.003292211564,
+            -10343.838542485244,
+            -11227.397015307753,
+            -14735.79334663981,
+            -9890.135614841327
+          ]
+        },
+        "posthoc": {
+          "unknown_rejected": [
+            297,
+            361
+          ],
+          "known": [
+            2520,
+            0,
+            7
+          ],
+          "known_n": 2527,
+          "known_rejection_rate": 0.0,
+          "known_rejection_rate_ci95": [
+            0.0,
+            0.0
+          ],
+          "distinct_known_doors": 361,
+          "distinct_known_doors_rejected_at_least_once": 0,
+          "thresholds": [
+            -11642.535434902049,
+            -17849.952476839393,
+            -8870.889876297275,
+            -9693.701613089965,
+            -12940.859736999875,
+            -12190.358639921778,
+            -9778.67715781027,
+            -11667.531042149205,
+            -2574.474895775923,
+            -3907.5128810226897,
+            -2386.1344076350006,
+            -5223.474106407886,
+            -5520.4830266779645,
+            -2873.137005506461,
+            -2155.5209249612963,
+            -2974.423498688354,
+            -8996.21782199237,
+            -14901.16893665832,
+            -15084.2731533011,
+            -29385.000166792714,
+            -45111.246011032774,
+            -15563.269729397247,
+            -22909.46826040794,
+            -16556.945470790626,
+            -7547.929919078463,
+            -10850.232149203654,
+            -6416.3402578784035,
+            -11154.168506285963,
+            -7657.4788364491,
+            -7525.256661829815,
+            -11288.680688992681,
+            -14389.714356993056,
+            -7920.72272677187,
+            -19289.263909179033,
+            -6903.2793324740305,
+            -3787.691951106962,
+            -7269.981970991324,
+            -9323.2227008518,
+            -14030.227456487191,
+            -14971.300666514931
+          ]
+        }
+      },
+      "rgbe:msp": {
+        "door_auroc_mean": 0.775839864158149,
+        "door_auroc_min": 0.0,
+        "manuscript": {
+          "unknown_rejected": [
+            210,
+            361
+          ],
+          "known": [
+            2461,
+            61,
+            5
+          ],
+          "known_n": 2527,
+          "known_rejection_rate": 0.024139295607439652,
+          "known_rejection_rate_ci95": [
+            0.014246141669964385,
+            0.03561535417491096
+          ],
+          "distinct_known_doors": 361,
+          "distinct_known_doors_rejected_at_least_once": 32,
+          "thresholds": [
+            12.278688539514915,
+            8.919976983919149,
+            13.12658988335195,
+            15.89172121948133,
+            13.711712491240586,
+            15.30710854445261,
+            15.04889976553448,
+            14.294175740447976,
+            17.145533999037674,
+            2.005886790132485,
+            7.9502526602594035,
+            8.5374316320892,
+            10.207535319244187,
+            8.399579734402504,
+            8.895503773416424,
+            3.377371701337216,
+            12.94864389765787,
+            12.569156058975114,
+            13.662755670178168,
+            13.904582966394091,
+            4.943600397225799,
+            13.233222084200742,
+            13.962905023102158,
+            12.292729069203958,
+            16.323125546229612,
+            11.591174172021374,
+            11.42639368955017,
+            12.05982871678733,
+            15.70115053957854,
+            12.450415439020354,
+            13.626034581093183,
+            15.756396295722396,
+            13.16168165387953,
+            12.673903932926653,
+            16.148015242781376,
+            14.248538962052654,
+            13.962475326634014,
+            13.379758348944199,
+            15.747900524481963,
+            13.20702012514455
+          ]
+        },
+        "validation_door": {
+          "unknown_rejected": [
+            185,
+            361
+          ],
+          "known": [
+            2472,
+            50,
+            5
+          ],
+          "known_n": 2527,
+          "known_rejection_rate": 0.019786307874950535,
+          "known_rejection_rate_ci95": [
+            0.0110803324099723,
+            0.0296794618124258
+          ],
+          "distinct_known_doors": 361,
+          "distinct_known_doors_rejected_at_least_once": 25,
+          "thresholds": [
+            11.83545255871608,
+            8.23708712294438,
+            12.731180929635638,
+            15.78420909613553,
+            14.224912078102003,
+            15.138430275033382,
+            14.3123012998566,
+            13.674022307125059,
+            15.74205480823815,
+            2.563528682957502,
+            2.302769423462723,
+            4.14539828464352,
+            5.150976768558948,
+            6.688970668524096,
+            8.496384767562974,
+            2.5667841241160776,
+            12.22486893069986,
+            11.235006878366406,
+            13.638853488796737,
+            13.929247394210812,
+            1.7902951692871856,
+            11.512308908717948,
+            13.630881960719268,
+            12.038838303076885,
+            14.8421180750046,
+            11.795548789516427,
+            9.299790057963113,
+            12.95363741902831,
+            14.546985129266481,
+            12.495489439322991,
+            12.19404760538585,
+            16.284201528130218,
+            13.02398649835273,
+            12.817519934201467,
+            16.785083572103375,
+            14.321102397166783,
+            13.283231595087646,
+            13.642406055277823,
+            15.915649530044856,
+            12.789344519737233
+          ]
+        },
+        "posthoc": {
+          "unknown_rejected": [
+            184,
+            361
+          ],
+          "known": [
+            2518,
+            0,
+            9
+          ],
+          "known_n": 2527,
+          "known_rejection_rate": 0.0,
+          "known_rejection_rate_ci95": [
+            0.0,
+            0.0
+          ],
+          "distinct_known_doors": 361,
+          "distinct_known_doors_rejected_at_least_once": 0,
+          "thresholds": [
+            11.225931867148962,
+            7.864139741773428,
+            14.176326804578656,
+            15.917704717369842,
+            13.27211909473472,
+            14.00409601608758,
+            10.712282693131304,
+            12.113893599128314,
+            18.223970826656352,
+            1.6490645776249844,
+            8.272411506501719,
+            9.747706935408178,
+            10.659151411535577,
+            9.176202362671406,
+            9.645436490640638,
+            2.403993655836003,
+            5.543139625115625,
+            10.280737527220476,
+            13.086493836094638,
+            9.975676915774322,
+            6.314046462677515,
+            12.205702547802726,
+            12.912140946872979,
+            8.83609087625259,
+            14.81154401276956,
+            3.9119179031328377,
+            9.116201025710813,
+            11.115836410805704,
+            12.82537782074966,
+            10.116799649950083,
+            12.134979448815459,
+            13.648642869993205,
+            9.6801561722309,
+            9.635783376811716,
+            10.942534042157865,
+            11.625541864130984,
+            14.021934047224303,
+            10.792608564969276,
+            15.060919808659262,
+            11.76794583977699
+          ]
+        }
+      },
+      "rgbe:maxlogit": {
+        "door_auroc_mean": 0.7604375658642686,
+        "door_auroc_min": 0.0,
+        "manuscript": {
+          "unknown_rejected": [
+            198,
+            361
+          ],
+          "known": [
+            2466,
+            55,
+            6
+          ],
+          "known_n": 2527,
+          "known_rejection_rate": 0.02176493866244559,
+          "known_rejection_rate_ci95": [
+            0.013454689354966362,
+            0.031658092599920855
+          ],
+          "distinct_known_doors": 361,
+          "distinct_known_doors_rejected_at_least_once": 32,
+          "thresholds": [
+            11.591299057006836,
+            9.796833038330078,
+            12.860346794128418,
+            14.573792457580566,
+            12.746504783630371,
+            14.039383888244629,
+            13.165101051330566,
+            12.944164276123047,
+            14.932056427001953,
+            5.970222473144531,
+            8.820314407348633,
+            9.209680557250977,
+            10.13329029083252,
+            9.131434440612793,
+            9.066357612609863,
+            6.245536804199219,
+            12.18246078491211,
+            11.757655143737793,
+            13.103653907775879,
+            12.595221519470215,
+            6.416288375854492,
+            12.146671295166016,
+            12.851212501525879,
+            11.477435111999512,
+            14.345849990844727,
+            12.246726036071777,
+            11.236043930053711,
+            11.49531364440918,
+            14.832036018371582,
+            11.923556327819824,
+            12.739867210388184,
+            14.822684288024902,
+            12.012813568115234,
+            12.209756851196289,
+            15.1599760055542,
+            12.705982208251953,
+            13.240618705749512,
+            12.894449234008789,
+            14.384268760681152,
+            12.460248947143555
+          ]
+        },
+        "validation_door": {
+          "unknown_rejected": [
+            179,
+            361
+          ],
+          "known": [
+            2477,
+            41,
+            9
+          ],
+          "known_n": 2527,
+          "known_rejection_rate": 0.016224772457459437,
+          "known_rejection_rate_ci95": [
+            0.009101701622477245,
+            0.024930747922437674
+          ],
+          "distinct_known_doors": 361,
+          "distinct_known_doors_rejected_at_least_once": 25,
+          "thresholds": [
+            11.290205001831055,
+            9.369697570800781,
+            12.40750789642334,
+            14.349230766296387,
+            13.045083999633789,
+            13.723873138427734,
+            12.607300758361816,
+            12.253850936889648,
+            14.202165603637695,
+            4.114944934844971,
+            7.546475887298584,
+            6.841214179992676,
+            9.058927536010742,
+            8.394487380981445,
+            8.370687484741211,
+            4.804559230804443,
+            11.430245399475098,
+            10.542549133300781,
+            13.552906036376953,
+            12.572033882141113,
+            4.965244293212891,
+            11.941492080688477,
+            12.6502046585083,
+            11.36089038848877,
+            13.317659378051758,
+            10.85282039642334,
+            9.397493362426758,
+            11.681174278259277,
+            13.869263648986816,
+            12.003837585449219,
+            11.529881477355957,
+            14.997674942016602,
+            11.718226432800293,
+            12.513360023498535,
+            15.635538101196289,
+            12.668119430541992,
+            11.58903694152832,
+            12.88680648803711,
+            14.262466430664062,
+            12.759793281555176
+          ]
+        },
+        "posthoc": {
+          "unknown_rejected": [
+            180,
+            361
+          ],
+          "known": [
+            2519,
+            0,
+            8
+          ],
+          "known_n": 2527,
+          "known_rejection_rate": 0.0,
+          "known_rejection_rate_ci95": [
+            0.0,
+            0.0
+          ],
+          "distinct_known_doors": 361,
+          "distinct_known_doors_rejected_at_least_once": 0,
+          "thresholds": [
+            10.782673835754395,
+            9.588833808898926,
+            12.805316925048828,
+            14.411300659179688,
+            12.153292655944824,
+            14.080193519592285,
+            9.993334770202637,
+            12.981833457946777,
+            16.156742095947266,
+            6.8113555908203125,
+            9.284199714660645,
+            10.087616920471191,
+            11.010578155517578,
+            9.619584083557129,
+            9.432717323303223,
+            5.039512634277344,
+            7.662665367126465,
+            10.02258014678955,
+            12.725375175476074,
+            11.044994354248047,
+            6.884746074676514,
+            11.525379180908203,
+            12.396766662597656,
+            10.245346069335938,
+            14.026568412780762,
+            7.442086219787598,
+            9.73642635345459,
+            11.158665657043457,
+            12.545196533203125,
+            10.005720138549805,
+            11.224568367004395,
+            13.840367317199707,
+            9.325176239013672,
+            9.625826835632324,
+            10.38389778137207,
+            11.721951484680176,
+            13.343242645263672,
+            11.57606029510498,
+            14.061690330505371,
+            11.76175308227539
+          ]
+        }
+      },
+      "rgbe:energy": {
+        "door_auroc_mean": 0.7604678322080943,
+        "door_auroc_min": 0.0,
+        "manuscript": {
+          "unknown_rejected": [
+            198,
+            361
+          ],
+          "known": [
+            2465,
+            55,
+            7
+          ],
+          "known_n": 2527,
+          "known_rejection_rate": 0.02176493866244559,
+          "known_rejection_rate_ci95": [
+            0.013454689354966362,
+            0.031658092599920855
+          ],
+          "distinct_known_doors": 361,
+          "distinct_known_doors_rejected_at_least_once": 32,
+          "thresholds": [
+            11.591303744322698,
+            9.796922562600322,
+            12.860349407016201,
+            14.57379254219563,
+            12.74650539585454,
+            14.039384223260786,
+            13.165101406557914,
+            12.94416479658125,
+            14.93205646153699,
+            6.038030982551454,
+            8.820439852409942,
+            9.209904595572088,
+            10.133315588848722,
+            9.131590591486916,
+            9.066494606768426,
+            6.287940113195045,
+            12.18246235753643,
+            11.75765962763483,
+            13.103654862536027,
+            12.595222220278304,
+            6.45299630772234,
+            12.146672917485688,
+            12.851213364479012,
+            11.477439135406204,
+            14.345850058477627,
+            12.246727357430048,
+            11.236056370544373,
+            11.495318770633526,
+            14.832036062365232,
+            11.923560237005624,
+            12.739867664794907,
+            14.822684363445452,
+            12.012815064904265,
+            12.209761237265496,
+            15.159976100182014,
+            12.70598296333977,
+            13.240619934779907,
+            12.894449930957968,
+            14.384268904936432,
+            12.460250640140092
+          ]
+        },
+        "validation_door": {
+          "unknown_rejected": [
+            179,
+            361
+          ],
+          "known": [
+            2478,
+            41,
+            8
+          ],
+          "known_n": 2527,
+          "known_rejection_rate": 0.016224772457459437,
+          "known_rejection_rate_ci95": [
+            0.009101701622477245,
+            0.024930747922437674
+          ],
+          "distinct_known_doors": 361,
+          "distinct_known_doors_rejected_at_least_once": 25,
+          "thresholds": [
+            11.290212244967893,
+            9.370082466672246,
+            12.407512233433003,
+            14.34923090593485,
+            13.04508444765432,
+            13.723873404784179,
+            12.60730136684193,
+            12.253852088875954,
+            14.202165749288346,
+            4.189154450710107,
+            7.641769311191542,
+            6.856927208237765,
+            9.06836170977382,
+            8.394971933668495,
+            8.370891669179867,
+            4.907510452591923,
+            11.430250306359376,
+            10.542562337000575,
+            13.552907229598071,
+            12.572034774633511,
+            5.065456754104685,
+            11.941502484766625,
+            12.65020543811298,
+            11.360895128360584,
+            13.317659736271851,
+            10.852826866869707,
+            9.397584801673345,
+            11.681176645847845,
+            13.86926378778036,
+            12.003841328942645,
+            11.529886537831311,
+            14.997674998612583,
+            11.718228639554953,
+            12.513362736320117,
+            15.635538152521509,
+            12.66812003858876,
+            11.589038644335398,
+            12.886806801486323,
+            14.262466553103467,
+            12.7597960718985
+          ]
+        },
+        "posthoc": {
+          "unknown_rejected": [
+            180,
+            361
+          ],
+          "known": [
+            2519,
+            0,
+            8
+          ],
+          "known_n": 2527,
+          "known_rejection_rate": 0.0,
+          "known_rejection_rate_ci95": [
+            0.0,
+            0.0
+          ],
+          "distinct_known_doors": 361,
+          "distinct_known_doors_rejected_at_least_once": 0,
+          "thresholds": [
+            10.78268715982246,
+            9.589331463539077,
+            12.805317358434257,
+            14.411300781367714,
+            12.153294377779858,
+            14.080193692092676,
+            9.993357039673704,
+            12.981833898510173,
+            16.156742102208696,
+            6.915442658024548,
+            9.284455150518056,
+            10.087682142813001,
+            11.010587259574384,
+            9.619687550944082,
+            9.432777101656983,
+            5.124623841942363,
+            7.666571944853536,
+            10.022614433433441,
+            12.725377248515155,
+            11.045040870901339,
+            6.88655512885044,
+            11.525381179574822,
+            12.396768424103186,
+            10.245491448752539,
+            14.026568550812684,
+            7.732999580565881,
+            9.736511086285617,
+            11.158688191070251,
+            12.545199692048854,
+            10.005760532931598,
+            11.224573735396408,
+            13.840367991317333,
+            9.32523874880031,
+            9.625892181519845,
+            10.383915470808882,
+            11.721960419573652,
+            13.343242839263668,
+            11.576080962062923,
+            14.061690618328422,
+            11.761760831252461
+          ]
+        }
+      },
+      "rgbe:maha": {
+        "door_auroc_mean": 0.9866484416698361,
+        "door_auroc_min": 0.8928571428571429,
+        "manuscript": {
+          "unknown_rejected": [
+            326,
+            361
+          ],
+          "known": [
+            2429,
+            91,
+            7
+          ],
+          "known_n": 2527,
+          "known_rejection_rate": 0.036011080332409975,
+          "known_rejection_rate_ci95": [
+            0.020973486347447567,
+            0.053423031262366444
+          ],
+          "distinct_known_doors": 361,
+          "distinct_known_doors_rejected_at_least_once": 26,
+          "thresholds": [
+            -1986.9646383847444,
+            -3993.5000408922056,
+            -5874.601309593599,
+            -5064.939086519731,
+            -2851.121479828871,
+            -3401.555417307971,
+            -3447.735214525638,
+            -3145.735061028792,
+            -3490.2759455513133,
+            -3130.7377916275627,
+            -3881.35721308124,
+            -5133.973323396209,
+            -5364.613482429714,
+            -5431.427423804984,
+            -2903.8371457923213,
+            -3701.7583783008413,
+            -4184.336113753835,
+            -5902.123937437644,
+            -8162.190789768794,
+            -5553.869559838421,
+            -7297.201335612706,
+            -5761.856852153151,
+            -6576.331716099199,
+            -4320.187070942472,
+            -2882.4449406208796,
+            -4010.963955516257,
+            -2690.155224239963,
+            -2856.8873808888156,
+            -4314.043172465905,
+            -3723.325879288318,
+            -3390.5263663151927,
+            -3138.8680425113052,
+            -5460.230229248782,
+            -9009.718138882577,
+            -8177.614052360369,
+            -6081.197620992377,
+            -9471.894995466686,
+            -8358.688147635636,
+            -11309.480573854778,
+            -5348.708123355119
+          ]
+        },
+        "validation_door": {
+          "unknown_rejected": [
+            285,
+            361
+          ],
+          "known": [
+            2465,
+            53,
+            9
+          ],
+          "known_n": 2527,
+          "known_rejection_rate": 0.020973486347447567,
+          "known_rejection_rate_ci95": [
+            0.009893153937475268,
+            0.03403244954491492
+          ],
+          "distinct_known_doors": 361,
+          "distinct_known_doors_rejected_at_least_once": 16,
+          "thresholds": [
+            -1917.3712391474376,
+            -3329.955919247131,
+            -9363.827781511178,
+            -4736.651871651977,
+            -2949.201078232897,
+            -3936.1651706938774,
+            -5244.567881350611,
+            -2105.793691342967,
+            -5904.858194847637,
+            -4031.799670711397,
+            -4827.490986892841,
+            -8016.922991178028,
+            -33492.33801842636,
+            -7716.239427468052,
+            -6267.788149558072,
+            -3816.8465146101876,
+            -6680.949409843521,
+            -15590.50849207378,
+            -10180.289843695624,
+            -8284.23409745799,
+            -16829.913966882556,
+            -7223.820758945301,
+            -13700.033761061255,
+            -6867.153143327652,
+            -4582.100974225794,
+            -5652.574493656499,
+            -5513.183961073116,
+            -4390.989274058158,
+            -5332.548300122107,
+            -5928.496480136888,
+            -4749.958617992296,
+            -5686.84438711768,
+            -8348.13273288346,
+            -10101.393139874559,
+            -9572.0583617439,
+            -6942.463675521145,
+            -11670.918700392978,
+            -9163.195791614562,
+            -17987.81755162059,
+            -6517.782045345029
+          ]
+        },
+        "posthoc": {
+          "unknown_rejected": [
+            308,
+            361
+          ],
+          "known": [
+            2519,
+            0,
+            8
+          ],
+          "known_n": 2527,
+          "known_rejection_rate": 0.0,
+          "known_rejection_rate_ci95": [
+            0.0,
+            0.0
+          ],
+          "distinct_known_doors": 361,
+          "distinct_known_doors_rejected_at_least_once": 0,
+          "thresholds": [
+            -5532.558515714056,
+            -7502.893202850146,
+            -9648.501956975804,
+            -9985.1534989588,
+            -12057.077921908418,
+            -9298.692046608152,
+            -9163.552954881763,
+            -5718.7346301805255,
+            -1771.274257376747,
+            -3434.9501641160105,
+            -4798.724078117213,
+            -2635.394067880661,
+            -4980.426495551261,
+            -4101.926281799736,
+            -2398.1614594598636,
+            -2901.960179485026,
+            -8176.098884362012,
+            -15345.481992943452,
+            -11495.462178193033,
+            -11902.144840922287,
+            -11694.561565016811,
+            -9299.142239240777,
+            -13622.779084628719,
+            -8383.60349374091,
+            -4488.971410228491,
+            -11057.458265545667,
+            -9001.42228900138,
+            -8756.92106998487,
+            -6330.523243523127,
+            -6040.329793679191,
+            -9434.666691646598,
+            -6529.883883811147,
+            -15314.830111844465,
+            -14899.627696511185,
+            -10935.085669130702,
+            -6434.737853428649,
+            -6102.46920968958,
+            -8709.575861297573,
+            -12151.898861019345,
+            -9641.919943009807
+          ]
+        }
+      }
+    }
+  }
+}

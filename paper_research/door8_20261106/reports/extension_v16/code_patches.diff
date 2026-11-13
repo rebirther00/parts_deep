@@ -1,0 +1,88 @@
+--- run_extension_v6.strict_inputs
++++ run_extension_v6.strict_inputs (v16)
+@@ -11,10 +11,10 @@
+         raise ValueError('Annotation id collision')
+     get = lambda i: field[i] if i in field else lab[i]
+     tr = [get(i) for i in base['train_annotation_ids']]; va = [field[i] for i in base['val_annotation_ids']]
+-    lv = [lab[i] for i in base['lab_monitor_annotation_ids']]
++    lv = [lab[i] for i in (base.get('lab_monitor_annotation_ids') or _LAB_VAL)]
+     if len(tr) != 102 or len(va) != 8 or len(lv) != 24:
+         raise ValueError('Base run inputs not as expected')
+-    roles = field_partitions(labels, frames, splits, '0')
++    roles = field_partitions(labels, frames, splits, _FOLD)
+     if {r['annotation_id'] for r in tr if r['annotation_id'] in field} - {r['annotation_id'] for r in roles['train']} \
+             or {r['annotation_id'] for r in va} != {r['annotation_id'] for r in roles['val']}:
+         raise ValueError('Field supervision crossed fold roles')
+--- run_extension_v6.train_strict
++++ run_extension_v6.train_strict (v16)
+@@ -7,7 +7,7 @@
+     nf = sum(r['annotation_id'].startswith('field_') for r in tr)
+     meta = dict(model_kind='holes', training_regime='human_manual_lab_plus_field_strict_loco', snapshot='v1',
+                 snapshot_sha256=sha256(sp / 'COMPLETE.json'), labelset=base['labelset'], labelset_sha256=sha256(lp / 'COMPLETE.json'),
+-                extension_protocol_sha256=sha256(PROTOCOL), base_run=BASE_RUN, excluded_class=c, fold='0', seed=seed,
++                extension_protocol_sha256=sha256(PROTOCOL), base_run=BASE_RUN, excluded_class=c, fold=_FOLD, seed=seed,
+                 field_train_images=nf, lab_train_images=len(tr) - nf, field_val_images=len(va), lab_monitor_images=len(lv),
+                 train_annotation_ids=[r['annotation_id'] for r in tr], val_annotation_ids=[r['annotation_id'] for r in va],
+                 lab_monitor_annotation_ids=[r['annotation_id'] for r in lv],
+--- run_extension_v6.eval_strict
++++ run_extension_v6.eval_strict (v16)
+@@ -1,5 +1,5 @@
+ def eval_strict(c, memory_fraction=.12):
+-    sp, _, frames, splits = snapshot(); cfg = read_json(sp / 'protocol.json'); parts = partition(frames, splits, '0')
++    sp, _, frames, splits = snapshot(); cfg = read_json(sp / 'protocol.json'); parts = partition(frames, splits, _FOLD)
+     run = strict_run(c); rp, rm = load_run(run, sp)
+     if rm['extension_protocol_sha256'] != sha256(PROTOCOL) or rm['excluded_class'] != c:
+         raise ValueError('Run/protocol mismatch')
+@@ -11,13 +11,13 @@
+     fdir = require_fresh_dir(f'features/{run}_trainTest')
+     pool = V3.extract(net, parts['train'] + parts['test'], dev)
+     jsonl(fdir / 'rows.jsonl', list(pool.values()))
+-    dump(fdir / 'features.json', dict(status='complete', run=run, fold='0', subset='train_test', n=len(pool),
++    dump(fdir / 'features.json', dict(status='complete', run=run, fold=_FOLD, subset='train_test', n=len(pool),
+                                       rows_sha256=sha256(fdir / 'rows.jsonl'), weights_sha256=rm['weights_sha256'], created_at=now()))
+     g = V5.cfg_without(cfg, c); cad7 = dict(zip(g['classes'], g['cad_hole_distance_mm']))
+     cal = fit_scale([r for r in parts['train'] if r['class_name'] != c], pool, cad7, 'pixel')
+-    preds = hole_preds(parts, pool, cal, g, c, '0')
++    preds = hole_preds(parts, pool, cal, g, c, _FOLD)
+     m = V5.loco_metrics(preds, preds, c, score=lambda r: r['score'])
+-    _, _, labels = load_field_labels(rm['labelset'], sp); roles = field_partitions(labels, frames, splits, '0')
++    _, _, labels = load_field_labels(rm['labelset'], sp); roles = field_partitions(labels, frames, splits, _FOLD)
+     loc, points = localization(roles['test'], pool, role='test')
+     cid = {r['frame_id'] for r in roles['test'] if r['class_name'] == c}
+     m.update(run=run, excluded_class=c, scale=cal['camera_scales'], best_epoch=rm.get('best_epoch'), weights_sha256=rm['weights_sha256'],
+--- run_extension_v5.train_cnn_loco
++++ run_extension_v5.train_cnn_loco (v16)
+@@ -1,5 +1,5 @@
+ def train_cnn_loco(kind, exclude, run, seed=42, workers=4):
+-    sp, summary, rows, splits = snapshot(); cfg = read_json(sp / 'protocol.json'); parts = partition(rows, splits, '0')
++    sp, summary, rows, splits = snapshot(); cfg = read_json(sp / 'protocol.json'); parts = partition(rows, splits, _FOLD)
+     if exclude not in cfg['classes']:
+         raise ValueError(exclude)
+     classes = [c for c in cfg['classes'] if c != exclude]; idx = {c: i for i, c in enumerate(classes)}
+@@ -16,7 +16,7 @@
+     scaler = torch.amp.GradScaler('cuda', enabled=dev.type == 'cuda')
+     scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(opt, mode='min', factor=.5, patience=3)
+     meta = dict(model_kind=kind, snapshot='v1', snapshot_sha256=sha256(sp / 'COMPLETE.json'), protocol_sha256=summary['protocol_sha256'],
+-                extension_protocol_sha256=sha256(PROTOCOL), fold='0', seed=seed, classes=classes, excluded_class=exclude,
++                extension_protocol_sha256=sha256(PROTOCOL), fold=_FOLD, seed=seed, classes=classes, excluded_class=exclude,
+                 image_size=hp['image_size'], training_regime='field_class_labels_leave_one_class_out',
+                 initialization='ImageNet1K_V1', initialization_sha256=sha256(pretrained_resnet()),
+                 train_frame_ids=[r['frame_id'] for r in tr], val_frame_ids=[r['frame_id'] for r in va],
+--- run_extension_v5.eval_cnn_loco
++++ run_extension_v5.eval_cnn_loco (v16)
+@@ -1,5 +1,5 @@
+ def eval_cnn_loco(run, workers=4):
+-    sp, _, rows, splits = snapshot(); cfg = read_json(sp / 'protocol.json'); parts = partition(rows, splits, '0')
++    sp, _, rows, splits = snapshot(); cfg = read_json(sp / 'protocol.json'); parts = partition(rows, splits, _FOLD)
+     rp = ROOT / 'runs' / run; rm = read_json(rp / 'run.json')
+     if rm['status'] != 'complete' or rm['extension_protocol_sha256'] != sha256(PROTOCOL):
+         raise ValueError('Run incomplete or protocol changed')
+--- run_extension_v12.hole_register
++++ run_extension_v12.hole_register (v16)
+@@ -1,5 +1,5 @@
+ def hole_register():
+-    sp, frames, splits, cfg = ctx(); parts = partition(frames, splits, '0')
++    sp, frames, splits, cfg = ctx(); parts = partition(frames, splits, _FOLD)
+     cad = dict(zip(cfg['classes'], cfg['cad_hole_distance_mm'])); band = V5.bands(cad); res = {}; rows_out = []
+     for c in cfg['classes']:
+         run = V6.strict_run(c); fdir = ROOT / f'features/{run}_trainTest'; fm = read_json(fdir / 'features.json')

@@ -1,0 +1,108 @@
+{
+ "created_at": "2026-11-13T12:17:53+09:00",
+ "protocol": "config/extension_v17_protocol.json",
+ "protocol_sha256": "94694df59e9e7fa66d99e06836995adc42f7ed5bf6912ef8fae9e7138da82395",
+ "queue": {
+  "log": "reports/extension_v17/logs/queue.log",
+  "started": "2026-11-13 09:49:41",
+  "finished": "2026-11-13 12:15:04",
+  "steps_ok": 50,
+  "steps_failed": 0,
+  "note": "prepare, 16 x (train, eval last, eval rule), analyze = 50 steps. No step failed and nothing was re-run.",
+  "durations_minutes": {
+   "analyze": {
+    "n": 1,
+    "median_min": 0.0,
+    "min_min": 0.0,
+    "max_min": 0.0
+   },
+   "prepare": {
+    "n": 1,
+    "median_min": 0.0,
+    "min_min": 0.0,
+    "max_min": 0.0
+   },
+   "rgb_eval_last": {
+    "n": 8,
+    "median_min": 1.4,
+    "min_min": 1.3,
+    "max_min": 1.4
+   },
+   "rgb_eval_rule": {
+    "n": 8,
+    "median_min": 1.3,
+    "min_min": 1.3,
+    "max_min": 1.4
+   },
+   "rgb_train": {
+    "n": 8,
+    "median_min": 32.8,
+    "min_min": 30.0,
+    "max_min": 36.4
+   },
+   "rgbe_eval_last": {
+    "n": 8,
+    "median_min": 1.4,
+    "min_min": 1.3,
+    "max_min": 1.5
+   },
+   "rgbe_eval_rule": {
+    "n": 8,
+    "median_min": 1.4,
+    "min_min": 1.3,
+    "max_min": 1.5
+   },
+   "rgbe_train": {
+    "n": 8,
+    "median_min": 34.0,
+    "min_min": 31.7,
+    "max_min": 38.5
+   }
+  }
+ },
+ "attempts": [
+  {
+   "step": "smoke test before registration of the queue",
+   "attempt": 1,
+   "outcome": "The patched training function was run for 2 epochs on two throwaway run names with the training and validation sessions only (no test data read). Its epoch-1 and epoch-2 losses equalled the stored fold-1 runs to all printed digits. The two throwaway run folders were removed before the queue started; no test output existed at that point."
+  },
+  {
+   "step": "queue (16 trainings of 40 epochs, 32 evaluations, analyze)",
+   "attempt": 1,
+   "outcome": "all OK"
+  }
+ ],
+ "looks_before_registration": "The per-run tabulation of the stored v16 runs (selected epoch against Mahalanobis rejections, folds 0-4) was seen before the protocol was registered and is recorded in the protocol (seen_before_registration). No v17 output existed before registration.",
+ "replication_of_stored_runs": {
+  "history": "For all 16 runs the rerun history (train loss, validation loss, validation session-balanced accuracy) equals the stored history at every epoch the stored run reached.",
+  "weights": "For all 16 runs every tensor of the RULE checkpoint (model_rule.pth) is bit-identical to the stored model.pth (torch.equal on every state-dict entry); the file hashes differ only by serialisation.",
+  "counts": "STORED and RULE give identical counts for every score (Mahalanobis: 52/73 and 66/73). RULE is therefore not an independent replication: training on this machine is deterministic.",
+  "stored_prediction_check": "argmax of the stored TEST predictions equals the re-inferred logits in all 48 run entries; one VAL image of rgbe_loco_E30_E38_door_RH_f1_s42 (stored run and its RULE copy) differs between the two inference passes (near-tie), as already present in the stored run."
+ },
+ "result": {
+  "mahalanobis_unregistered_doors_rejected": {
+   "stored": {
+    "rgb": 52,
+    "rgbe": 66
+   },
+   "rule": {
+    "rgb": 52,
+    "rgbe": 66
+   },
+   "last": {
+    "rgb": 52,
+    "rgbe": 70
+   }
+  },
+  "doors": 73,
+  "case": "a"
+ },
+ "observations_not_in_the_claim_rule": [
+  "LAST changed which doors were rejected although the totals were close. RGB: E30 LH FRT 8/9 -> 3/9, E38 LH FRT 0/4 -> 4/4, E30/E38 RH 0/14 -> 1/14, E25 LH FRT 0/2 -> 0/2. RGBE: E30 LH FRT 8/9 -> 9/9, E38 LH FRT 0/4 -> 3/4, E25 LH FRT 0/2 -> 0/2.",
+  "In 12 of the 16 runs the validation session-balanced accuracy at the rule epoch equals that at epoch 40 (0.929 in 10 runs, 1.0 in the two E25 LH FRT runs); the early rule epochs were decided by the tie-break (lowest validation loss), not by a higher accuracy. In the other 4 runs the rule epoch had a higher validation accuracy than epoch 40.",
+  "Output-based scores with LAST rejected 38/73 (RGB, all three scores) and 27-38/73 (RGBE), against 24-32/73 and 25-32/73 with the rule checkpoints. Closed-set accuracy of the registered doors: 511/511 with LAST, 510/511 and 509/511 with the rule checkpoints.",
+  "Validation-door threshold (Mahalanobis): RULE 44/73 and 46/73, LAST 44/73 and 58/73."
+ ],
+ "manuscript_use": "Case (a) of the registered claim rule: section 4.4 states the last-epoch counts (52 and 70 of 73) next to the rule counts (52 and 66) and that the composition of the rejected doors changed for the RGB CNN; the conclusion keeps its statement. Tables 5 and 6 (formerly 6 and 7) keep the stored results.",
+ "scope_limit": "Fold 1 only, seed 42. The other folds were not retrained to 40 epochs."
+}

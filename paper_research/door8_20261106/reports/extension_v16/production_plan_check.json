@@ -1,0 +1,146 @@
+{
+ "created_at": "2026-11-12T09:52:41+09:00",
+ "protocol_sha256": "5fb94f5cb1f00890639a55c1ad1ed497763c037eb17ea3eebe2f5726f0364e15",
+ "plan": "9-10월_통합모델_일별생산계획.xlsx",
+ "plan_sha256": "38ba40a0a4c1a438f33c771f11630418ebcaf328c3269a0a73b20ea25c5b6f0c",
+ "plan_span_wa_dates": [
+  "20260825",
+  "20261023"
+ ],
+ "units_by_group": {
+  "E23": 73,
+  "E25": 10,
+  "E30": 79,
+  "E35/38": 48
+ },
+ "e25_unit_wa_dates": [
+  "20260825",
+  "20260902",
+  "20260903",
+  "20260907",
+  "20260916",
+  "20260924",
+  "20260929",
+  "20261001",
+  "20261008",
+  "20261022"
+ ],
+ "e25_lh_frt_sessions": [
+  {
+   "session": "20260904/E25_door_LH_FRT/s_132137",
+   "in_plan_span": true,
+   "days_to_nearest_E25_unit": 1
+  },
+  {
+   "session": "20260916/E25_door_LH_FRT/s_135409",
+   "in_plan_span": true,
+   "days_to_nearest_E25_unit": 0
+  },
+  {
+   "session": "20260923/E25_door_LH_FRT/s_082712",
+   "in_plan_span": true,
+   "days_to_nearest_E25_unit": 1
+  },
+  {
+   "session": "20260929/E25_door_LH_FRT/s_103125",
+   "in_plan_span": true,
+   "days_to_nearest_E25_unit": 0
+  },
+  {
+   "session": "20261001/E25_door_LH_FRT/s_142956",
+   "in_plan_span": true,
+   "days_to_nearest_E25_unit": 0
+  },
+  {
+   "session": "20261022/E25_door_LH_FRT/s_084658",
+   "in_plan_span": true,
+   "days_to_nearest_E25_unit": 0
+  },
+  {
+   "session": "20261022/E25_door_LH_FRT/s_123253",
+   "in_plan_span": true,
+   "days_to_nearest_E25_unit": 0
+  },
+  {
+   "session": "20261026/E25_door_LH_FRT/s_100727",
+   "in_plan_span": false,
+   "days_to_nearest_E25_unit": 4
+  },
+  {
+   "session": "20261029/E25_door_LH_FRT/s_123610",
+   "in_plan_span": false,
+   "days_to_nearest_E25_unit": 7
+  }
+ ],
+ "e25_lh_frt_summary": {
+  "sessions": 9,
+  "in_plan_span": 7,
+  "within_one_day": 7
+ },
+ "target_dates": {
+  "20260903/E30_door_LH_RR/s_151736": {
+   "in_plan_span": true,
+   "units_on_date": {
+    "E23": 2,
+    "E25": 1,
+    "E30": 3,
+    "E35/38": 0
+   }
+  },
+  "20260903/E30_door_LH_RR/s_183159": {
+   "in_plan_span": true,
+   "units_on_date": {
+    "E23": 2,
+    "E25": 1,
+    "E30": 3,
+    "E35/38": 0
+   }
+  },
+  "20260905/E30_door_LH_RR/s_123451": {
+   "in_plan_span": true,
+   "units_on_date": {
+    "E23": 0,
+    "E25": 0,
+    "E30": 0,
+    "E35/38": 0
+   }
+  },
+  "20260914/E30_door_LH_RR/s_170035": {
+   "in_plan_span": true,
+   "units_on_date": {
+    "E23": 3,
+    "E25": 0,
+    "E30": 3,
+    "E35/38": 2
+   }
+  },
+  "20261029/E30_door_LH_FRT/s_075858": {
+   "in_plan_span": false,
+   "units_on_date": {
+    "E23": 0,
+    "E25": 0,
+    "E30": 0,
+    "E35/38": 0
+   }
+  },
+  "20261022/E25_door_LH_FRT/s_084658": {
+   "in_plan_span": true,
+   "units_on_date": {
+    "E23": 1,
+    "E25": 1,
+    "E30": 2,
+    "E35/38": 2
+   }
+  },
+  "20261022/E25_door_LH_FRT/s_123253": {
+   "in_plan_span": true,
+   "units_on_date": {
+    "E23": 1,
+    "E25": 1,
+    "E30": 2,
+    "E35/38": 2
+   }
+  }
+ },
+ "limits": "Machine-level plan with planned dates; one unit needs one door of each position and E23 units use E25 rear and RH doors. A count on a date cannot tell which class a given session shows."
+}

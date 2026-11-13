@@ -1,0 +1,57 @@
+{
+  "version": "extension-v16-20261112",
+  "registered_at": "2026-11-12 09:48:28 KST (written by the script that created this file; nothing below had been trained or computed)",
+  "requested_by": "Author (user), 2026-11-12: go-ahead for the revision plan of review round 5 (manuscript/review_round5_revision_plan_door_shape_identification.md), bundles B, C and D. Bundle E (classical baseline) gets its own protocol before any TEST evaluation.",
+  "seen_before_registration": "Everything reported up to manuscript v15 and reports/extension_v15. In particular the fold-0 unseen-class results of three seeds (hole method 74/74 rejected and identified; smallest distance 36.9 mm) and the image-level CNN scores. Not seen: any unseen-class result of folds 1-4; any door-level score, validation-door threshold or door-level AUROC; any tabulation of the largest registered residual under the unseen condition; any second reading of images.",
+  "D_unseen_all_folds": {
+    "scope": "folds 1, 2, 3, 4; each of the 8 classes removed in turn; seed 42 (first seed of the registered list). 32 hole detectors and 64 CNNs (RGB, RGBE). Fold 0 keeps its existing runs (seed 42 in the pooled five-fold numbers; seeds 123 and 456 stay a fold-0 repetition).",
+    "code": "The fold-0 functions are reused by replacing the literal fold '0' in their source with the fold variable (run_extension_v6.strict_inputs / train_strict / eval_strict, run_extension_v5.train_cnn_loco / eval_cnn_loco, run_extension_v12.hole_register) and one line that reads the LAB monitor ids (the base runs of folds 1-4 do not store them; the LAB split 'val' ids are used, which equal the stored ids of fold 0). The source differences are written to reports/extension_v16/code_patches.diff. Before the queue starts, the patched input builder must reproduce the stored training inputs of the eight fold-0 strict runs and the patched decision path must reproduce their stored TEST predictions.",
+    "hole": {
+      "runs": "holes_strict_loco_{c}_f{k}_s42",
+      "training": "base run = the fold's field-adapted detector (holes_field8_f{k}_s42_v3): its 94 LAB and 8 field training annotations and 8 field validation annotations, minus every image of class c; same hyperparameters; checkpoint = minimum heatmap loss on the remaining field validation images",
+      "rejection": "features of the fold's TRAIN and TEST frames; S fit on the fold's TRAIN sessions without class c; CAD list minus c; pixel width; geometry gate; 30 mm reject; session vote",
+      "registration": "same features and S; all 8 CAD values registered; class-c doors identified, other-class decisions, relative residual, margin utilisation",
+      "localisation": "TEST-role field annotations of the fold, and the points on images of the removed class"
+    },
+    "cnn": {
+      "runs": "{rgb|rgbe}_loco_{c}_f{k}_s42",
+      "training": "7 outputs, v1 CNN recipe, trained and selected on the fold's TRAIN / VAL sessions without class c",
+      "scores": "legacy single-precision softmax evaluation (for the consistency check) and the four scores of extension_v12 (msp log-odds, maxlogit, energy, maha) in float64; image threshold per model and score = value at index int(0.05 n) of the sorted VAL scores"
+    },
+    "reporting": "Per fold and pooled over the five folds (fold 0 = seed 42): unregistered doors rejected out of 361 and per class, registered-door decisions correct / rejected / wrong out of 2,527, image AUROC mean and minimum over the 40 runs, smallest distance of an unregistered image to a registered CAD value; for the hole method the doors identified after CAD registration out of 361 (Wilson 95%), other-class decisions and the largest margin utilisation. Every failure is listed with class, fold, door and distance.",
+    "claim_rule": "All folds, both CNNs and all four scores are reported whatever the direction. 'All rejected' or 'all identified' is stated only if it holds in every fold; otherwise the counts are given and the failures are described next to the rejection margin (C1). The CNN scores and thresholds are not changed."
+  },
+  "C1_rejection_margin": {
+    "definition": "For an unseen-class run (class c removed): a = largest |D - CAD of the true class| over the measured TEST images of the registered classes (S and CAD list without c); b = smallest distance of a measured TEST image of class c to the nearest registered CAD value. Any reject distance tau with a <= tau < b rejects no registered image by distance and rejects every measured unregistered image.",
+    "report": "a, b and the number of unmeasured images per run; over runs: largest a and smallest b, for the three fold-0 seeds and for the five folds (seed 42). Per class: nominal rejection margin = (distance from the CAD value of c to the nearest other CAD value) - 30 mm, observed rejection margin = b - 30 mm. tau stays 30 mm; this is a sensitivity description, not a new operating point."
+  },
+  "C2_door_level_operating_points": {
+    "door_score": "CNN: largest image score of the door (for each of the four scores). Hole: minus the smallest image distance to a registered CAD value (images without a measurement do not count). With the session vote of the manuscript a door is rejected exactly when all its images are rejected, so thresholding the image scores at t accepts a door exactly when its door score is >= t.",
+    "validation_door_threshold": "per run and score: t_val = smallest door score over the validation doors of the run's registered classes (the strictest threshold that still accepts every validation door). Hole: tau_val = largest over validation doors of the smallest image distance. The TEST images are thresholded at t_val and the doors are judged by the usual vote. Hole validation features are extracted for this (inference only), for the 24 fold-0 runs and the 32 new runs.",
+    "posthoc_operating_point": "t_test = smallest door score over the registered TEST doors of the run (no registered door rejected); unregistered doors rejected at t_test. This is fitted on the TEST data and is reported as a reference, not as a selection procedure.",
+    "door_auroc": "per run: P(score of a registered door > score of an unregistered door) + 0.5 P(tie), over TEST doors; mean and minimum over runs",
+    "uncertainty": "the registered-door decisions repeat each door in seven runs; the number of distinct doors rejected at least once as a registered door is reported, and a 95% percentile interval of the pooled registered-decision rejection rate from 2,000 bootstrap resamples of the distinct TEST doors (numpy default_rng(20261112))",
+    "report": "for the hole method and for every CNN score: unregistered doors rejected and registered decisions rejected / wrong at (i) the manuscript's operating point (hole 30 mm, CNN image threshold), (ii) the validation-door threshold, (iii) the post-hoc point; door AUROC; distinct doors; for fold 0 (three seeds) and for the five folds (seed 42)."
+  },
+  "B_label_checks": {
+    "B1_production_plan": "cad/9-10월_통합모델_일별생산계획.xlsx is a machine-level plan (model group per unit with the welding-assembly date). Descriptive tabulation only: machines per group and date against the sessions per class and date, in particular for the dates of the seven target sessions. The author states that no session-level production record exists.",
+    "B2_blind_second_reading": {
+      "targets": [
+        "20260903/E30_door_LH_RR/s_151736",
+        "20260903/E30_door_LH_RR/s_183159",
+        "20260905/E30_door_LH_RR/s_123451",
+        "20260914/E30_door_LH_RR/s_170035",
+        "20261029/E30_door_LH_FRT/s_075858",
+        "20261022/E25_door_LH_FRT/s_084658",
+        "20261022/E25_door_LH_FRT/s_123253"
+      ],
+      "decoys": "two eligible sessions per class (16), drawn with random.Random(20261112) from the 361 sessions after removing the targets and the reference sessions",
+      "references": "for each camera state (before the bump / after the re-adjustment) one labelled image per class: the first eligible session of that class and state in sorted order, middle frame",
+      "shown": "one image per item (middle frame, same crop for all), under a neutral item number in shuffled order; the reference images of the item's camera state. Not shown: operator input, corrected label, measured D, any model output, session name or date.",
+      "reader": "a co-author who took no part in the label confirmation; one of the eight classes or 'cannot tell' per item",
+      "scoring": "agreement with the label used in the manuscript (corrected label for the five input-error sessions, operator input for the others); every item is reported, including the decoys. The answer key is stored outside the reading kit.",
+      "E23": "not included: the six E23 sessions are the only images of that class, so no independent reference image exists."
+    }
+  },
+  "rules": "Nothing existing is overwritten; outputs go to runs/*_f{1..4}_s42, features/, reports/extension_v16/, cache/extension_v16/. No threshold, rule or metric is changed after seeing outputs. A technical failure is fixed without changing the analysis, re-run, and noted in reports/extension_v16/run_notes.json."
+}

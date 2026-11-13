@@ -1,0 +1,414 @@
+{
+ "created_at": "2026-11-13 KST, after both queues had finished",
+ "protocols": {
+  "config/extension_v18_protocol.json": "dea8e309c85a7806ce28def5c4c1494d97b6415a4600d4cff1ed01040beb6bb5",
+  "config/extension_v18b_protocol.json (addendum)": "c475ef4d228cc53d254fe61f543d1b773ba7cef6df1620819839848fa8844e15"
+ },
+ "queue": {
+  "registered": {
+   "start": "2026-11-13 14:19:19",
+   "end": "2026-11-13 14:28:16",
+   "steps_ok": 41,
+   "steps_failed": 0
+  },
+  "addendum": {
+   "start": "2026-11-13 14:28:44",
+   "end": "2026-11-13 14:34:46",
+   "steps_ok": 21,
+   "steps_failed": 0
+  }
+ },
+ "attempts": [
+  "Before the registered queue: run_extension_v18.best_pair was compared with a brute-force search on 300 random synthetic arrays (0 mismatches). No image, detection or label was read.",
+  "Registered queue (scripts/queue_extension_v18.sh): every step OK at the first attempt; nothing re-run.",
+  "Addendum queue (scripts/queue_extension_v18b.sh): every step OK at the first attempt; nothing re-run."
+ ],
+ "code": "scripts/run_extension_v18.py was extended for the addendum after the registered queue had finished (variant 'gapfree', command 'loc-free', protocol hash per variant). The difference to the file that ran in the registered queue is reports/extension_v18/code_patch_addendum.diff; the detection and decision code of 'gap' and 'perkey' is unchanged.",
+ "looks_before_registration": "As listed in the two protocol files. In addition, between the start of the registered queue and its end, the finished per-split lines of T0, W0, W1, T1 and T2 were read as they appeared (the queue ran unchanged to its end).",
+ "results": {
+  "T0_same_hole": {
+   "five_fold": {
+    "images": 7104,
+    "same_hole": 3586,
+    "share": 0.504786036036036,
+    "doors": 361,
+    "doors_majority_same_hole": 179
+   },
+   "temporal": {
+    "images": 2617,
+    "same_hole": 1511,
+    "share": 0.5773786778754298,
+    "doors": 133,
+    "doors_majority_same_hole": 70
+   }
+  },
+  "T0_train_sessions_with_majority_same_hole": {
+   "0": "78/214",
+   "1": "79/215",
+   "2": "96/216",
+   "3": "129/220",
+   "4": "115/218",
+   "temporal": "106/193"
+  },
+  "T1_gap_registered": {
+   "five_fold": {
+    "n": 361,
+    "correct": 298,
+    "abstained": 10,
+    "wrong": 53
+   },
+   "temporal": {
+    "n": 133,
+    "correct": 133,
+    "abstained": 0,
+    "wrong": 0
+   },
+   "per_split": {
+    "0": {
+     "n": 74,
+     "correct": 73,
+     "abstained": 0,
+     "wrong": 1
+    },
+    "1": {
+     "n": 73,
+     "correct": 73,
+     "abstained": 0,
+     "wrong": 0
+    },
+    "2": {
+     "n": 73,
+     "correct": 70,
+     "abstained": 1,
+     "wrong": 2
+    },
+    "3": {
+     "n": 72,
+     "correct": 71,
+     "abstained": 0,
+     "wrong": 1
+    },
+    "4": {
+     "n": 69,
+     "correct": 11,
+     "abstained": 9,
+     "wrong": 49
+    },
+    "temporal": {
+     "n": 133,
+     "correct": 133,
+     "abstained": 0,
+     "wrong": 0
+    }
+   },
+   "selected": {
+    "0": "ncc r=16 m=40",
+    "1": "ncc r=24 m=40",
+    "2": "ncc r=32 m=40",
+    "3": "ncc r=16 m=40",
+    "4": "log sigma=1.5 m=40",
+    "temporal": "ncc r=16 m=40"
+   },
+   "own_scale_mm": {
+    "0": 1476.2,
+    "1": 1474.5,
+    "2": 1474.7,
+    "3": 1476.2,
+    "4": 1624.5,
+    "temporal": 1477.7
+   },
+   "learned_scale_supplement": {
+    "five_fold": {
+     "n": 361,
+     "correct": 309,
+     "abstained": 17,
+     "wrong": 35
+    },
+    "temporal": {
+     "n": 133,
+     "correct": 133,
+     "abstained": 0,
+     "wrong": 0
+    }
+   }
+  },
+  "T2_perkey": {
+   "five_fold": {
+    "n": 361,
+    "correct": 249,
+    "abstained": 99,
+    "wrong": 13
+   },
+   "temporal": {
+    "n": 133,
+    "correct": 117,
+    "abstained": 16,
+    "wrong": 0
+   },
+   "per_split": {
+    "0": {
+     "n": 74,
+     "correct": 64,
+     "abstained": 9,
+     "wrong": 1
+    },
+    "1": {
+     "n": 73,
+     "correct": 59,
+     "abstained": 14,
+     "wrong": 0
+    },
+    "2": {
+     "n": 73,
+     "correct": 59,
+     "abstained": 14,
+     "wrong": 0
+    },
+    "3": {
+     "n": 72,
+     "correct": 5,
+     "abstained": 55,
+     "wrong": 12
+    },
+    "4": {
+     "n": 69,
+     "correct": 62,
+     "abstained": 7,
+     "wrong": 0
+    },
+    "temporal": {
+     "n": 133,
+     "correct": 117,
+     "abstained": 16,
+     "wrong": 0
+    }
+   },
+   "same_hole_test_images": [
+    3204,
+    1162
+   ],
+   "own_scale_mm": {
+    "0": 1480.7,
+    "1": 1478.9,
+    "2": 1477.9,
+    "3": 485777.3,
+    "4": 1478.8,
+    "temporal": 1483.0
+   }
+  },
+  "T1b_gapfree_addendum": {
+   "five_fold": {
+    "n": 361,
+    "correct": 356,
+    "abstained": 1,
+    "wrong": 4
+   },
+   "five_fold_wilson": [
+    0.9679919095714392,
+    0.9940698065903287
+   ],
+   "temporal": {
+    "n": 133,
+    "correct": 129,
+    "abstained": 1,
+    "wrong": 3
+   },
+   "temporal_wilson": [
+    0.9252223795903031,
+    0.9882434740863212
+   ],
+   "image_accuracy": 0.9770551801801802,
+   "image_coverage": 0.9884572072072072,
+   "per_split": {
+    "0": {
+     "n": 74,
+     "correct": 74,
+     "abstained": 0,
+     "wrong": 0
+    },
+    "1": {
+     "n": 73,
+     "correct": 73,
+     "abstained": 0,
+     "wrong": 0
+    },
+    "2": {
+     "n": 73,
+     "correct": 70,
+     "abstained": 1,
+     "wrong": 2
+    },
+    "3": {
+     "n": 72,
+     "correct": 71,
+     "abstained": 0,
+     "wrong": 1
+    },
+    "4": {
+     "n": 69,
+     "correct": 68,
+     "abstained": 0,
+     "wrong": 1
+    },
+    "temporal": {
+     "n": 133,
+     "correct": 129,
+     "abstained": 1,
+     "wrong": 3
+    }
+   },
+   "selected": {
+    "0": "ncc r=24 m=40",
+    "1": "ncc r=24 m=80",
+    "2": "ncc r=32 m=40",
+    "3": "ncc r=16 m=40",
+    "4": "ncc r=32 m=40",
+    "temporal": "ncc r=32 m=40"
+   },
+   "own_scale_mm": {
+    "0": 1476.6,
+    "1": 1474.5,
+    "2": 1474.7,
+    "3": 1476.2,
+    "4": 1476.1,
+    "temporal": 1477.9
+   },
+   "differs_from_learned_five_fold": 5,
+   "failed_doors_five_fold": [
+    {
+     "door": "20260901/E30_door_LH_FRT/s_173308",
+     "true": "E30_door_LH_FRT",
+     "pred": "E38_door_LH_FRT",
+     "state": "before"
+    },
+    {
+     "door": "20260930/E30_door_LH_RR/s_170603",
+     "true": "E30_door_LH_RR",
+     "pred": null,
+     "state": "after"
+    },
+    {
+     "door": "20261023/E25_door_RH/s_105348",
+     "true": "E25_door_RH",
+     "pred": "E25_door_LH_RR",
+     "state": "after"
+    },
+    {
+     "door": "20260918/E30_door_LH_RR/s_105355",
+     "true": "E30_door_LH_RR",
+     "pred": "E25_door_LH_RR",
+     "state": "before"
+    },
+    {
+     "door": "20260922/E38_door_LH_RR/s_080559",
+     "true": "E38_door_LH_RR",
+     "pred": "E25_door_LH_FRT",
+     "state": "after"
+    }
+   ],
+   "failed_doors_temporal": [
+    {
+     "door": "20261006/E30_E38_door_RH/s_170710",
+     "true": "E30_E38_door_RH",
+     "pred": null,
+     "state": "after"
+    },
+    {
+     "door": "20261023/E25_door_RH/s_105348",
+     "true": "E25_door_RH",
+     "pred": "E25_door_LH_RR",
+     "state": "after"
+    },
+    {
+     "door": "20261027/E30_door_LH_FRT/s_074619",
+     "true": "E30_door_LH_FRT",
+     "pred": "E30_E38_door_RH",
+     "state": "after"
+    },
+    {
+     "door": "20261027/E30_door_LH_FRT/s_081034",
+     "true": "E30_door_LH_FRT",
+     "pred": "E30_E38_door_RH",
+     "state": "after"
+    }
+   ]
+  },
+  "localisation_test_role_five_fold": {
+   "T1": {
+    "points": 80,
+    "key_wise_within_8px": 46,
+    "order_free_within_8px": 62,
+    "order_free_max_px": 677.8608261000187
+   },
+   "T1b": {
+    "points": 80,
+    "key_wise_within_8px": 51,
+    "order_free_within_8px": 75,
+    "order_free_max_px": 677.8608261000187
+   }
+  },
+  "W0_plane_distance_mm": {
+   "five_fold_test": {
+    "images": 7104,
+    "images_with_plane": 7089,
+    "sessions": 361,
+    "median_images_mm": 1448.502975823033,
+    "median_of_session_medians_mm": 1448.6416490703402,
+    "session_median_range_mm": [
+     1413.6740691533744,
+     1495.4646481946795
+    ]
+   },
+   "by_state": {
+    "before": 1451.2559561032429,
+    "after": 1441.0377593193991
+   },
+   "train_only": {
+    "0": 1447.3446873050243,
+    "1": 1448.7457273804698,
+    "2": 1448.9984713394515,
+    "3": 1449.0874609441585,
+    "4": 1448.2969896644718,
+    "temporal": 1450.0362276999356
+   }
+  },
+  "W1_outer_width_train_constant": {
+   "five_fold": {
+    "n": 361,
+    "correct": 285,
+    "abstained": 14,
+    "wrong": 62
+   },
+   "registered": {
+    "n": 361,
+    "correct": 285,
+    "abstained": 14,
+    "wrong": 62
+   },
+   "doors_decision_differs": 0,
+   "temporal": {
+    "n": 133,
+    "correct": 109,
+    "abstained": 6,
+    "wrong": 18
+   },
+   "temporal_differs": 0
+  }
+ },
+ "claim_rule": {
+  "T1_as_registered": "N5 = 298 <= 300 -> case (b) of extension_v18 (NT = 133).",
+  "T1b": "N5 = 356 >= 343 and NT = 129 >= 126 -> case (a).",
+  "applied": "The cases differ; as the addendum prescribes, the manuscript wording follows case (a), the one in which the baseline identifies more doors: the 41 mm sentence of section 4.2 is restricted to the registered setting without the separation condition and to the outer width, and the abstract and conclusion give 356 instead of the learned-scale 286. Table 3 carries the T1b row; the T1 counts and the reason for fold 4 are in the text of section 4.2. T2 (249/361) identified fewer doors than T1 and is reported in the reply document only."
+ },
+ "observations_not_in_the_claim_rule": [
+  "Fold 4 of T1: the six NCC candidates had key-wise validation PCK8 0.19-0.50 with medians of 329-827 px, the LoG candidate sigma=1.5 m=40 had 0.50 with 15.2 px (scored order-free) and was selected by the tie-break; it identified 11/69 doors with S = 1,624.5 mm. With the order-free score the same NCC candidates have validation PCK8 0.81-1.00 in fold 4.",
+  "Temporal split: T1 selected r=16 m=40 (133/133); T1b selected r=32 m=40 (validation PCK8 1.00 against 0.83) and identified 129/133. The order-free selection is therefore not better in every split.",
+  "The same-hole share of T1 and T1b is 0 by construction; T2 kept 3,204 of 7,104 same-hole test images because the two per-key boxes overlap (the latch-side hole changes side with the class).",
+  "Own S of T1b is 1,474.5-1,476.6 mm in the five folds (learned detector 1,474.2-1,475.3 mm); judging the T1b detections with the learned S changes no door decision.",
+  "The stored single-thread detection times of this run were measured while 20 worker processes ran in parallel and are not reported.",
+  "The value 1,450 mm of the outer-width baseline cannot be reproduced exactly: the recomputed median is 1,448.5 mm (images) / 1,448.6 mm (session medians). The manuscript now gives 1,449 mm in section 4.3 and calls 1,450 mm a rounded fixed value in section 3.2.",
+  "The registered protocol gives the hole-to-hole distance of the annotations as 622-1,164 px; these are class means. The individual annotations range from 620.4 to 1,169.2 px. The 500 px rule is unaffected."
+ ],
+ "scope_limit": "All template-matching results of this folder are post hoc: the separation rule and the order-free validation score were added after TEST results of the registered baseline (and, for T1b, of T1) had been seen. The diagnostics were not run in the unseen-class condition.",
+ "manuscript_use": "v18: abstract, sections 3.2, 3.4, 4.2 (text and Table 3), 4.3 (1,449 mm), 4.5, conclusion."
+}

@@ -1,0 +1,97 @@
+{
+  "created_at": "2026-11-13T14:34:46+09:00",
+  "protocol_sha256": "c475ef4d228cc53d254fe61f543d1b773ba7cef6df1620819839848fa8844e15",
+  "variant": "gapfree",
+  "splits": {
+    "0": {
+      "key_wise": {
+        "points": 16,
+        "pck8": 0.5,
+        "median_px": 329.171345428583,
+        "max_px": 1166.0584995929664
+      },
+      "order_free": {
+        "points": 16,
+        "pck8": 1.0,
+        "median_px": 1.0180389741452616,
+        "max_px": 2.7057498036588252
+      }
+    },
+    "1": {
+      "key_wise": {
+        "points": 16,
+        "pck8": 0.625,
+        "median_px": 1.9953678605094642,
+        "max_px": 1162.5650431025354
+      },
+      "order_free": {
+        "points": 16,
+        "pck8": 1.0,
+        "median_px": 0.9902325949865294,
+        "max_px": 3.065569115188891
+      }
+    },
+    "2": {
+      "key_wise": {
+        "points": 16,
+        "pck8": 0.8125,
+        "median_px": 0.906944781988329,
+        "max_px": 1185.6514047396056
+      },
+      "order_free": {
+        "points": 16,
+        "pck8": 0.8125,
+        "median_px": 0.906944781988329,
+        "max_px": 677.8608261000187
+      }
+    },
+    "3": {
+      "key_wise": {
+        "points": 16,
+        "pck8": 0.5,
+        "median_px": 32.07215859914145,
+        "max_px": 999.1430542484895
+      },
+      "order_free": {
+        "points": 16,
+        "pck8": 0.875,
+        "median_px": 1.2415407091591022,
+        "max_px": 67.63195741659406
+      }
+    },
+    "4": {
+      "key_wise": {
+        "points": 16,
+        "pck8": 0.75,
+        "median_px": 0.9529649749043563,
+        "max_px": 997.2756638171815
+      },
+      "order_free": {
+        "points": 16,
+        "pck8": 1.0,
+        "median_px": 0.8837990951143248,
+        "max_px": 1.5433823246363394
+      }
+    },
+    "temporal": {
+      "key_wise": {
+        "points": 26,
+        "pck8": 0.6923076923076923,
+        "median_px": 1.450806396821949,
+        "max_px": 999.0463144919759
+      },
+      "order_free": {
+        "points": 26,
+        "pck8": 1.0,
+        "median_px": 1.2803509079172908,
+        "max_px": 2.544944793114385
+      }
+    }
+  },
+  "five_fold": {
+    "points": 80,
+    "key_wise_within_8px": 51,
+    "order_free_within_8px": 75,
+    "order_free_max_px": 677.8608261000187
+  }
+}

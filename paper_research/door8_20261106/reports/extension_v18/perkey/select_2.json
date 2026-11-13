@@ -1,0 +1,231 @@
+{
+  "created_at": "2026-11-13T14:21:27+09:00",
+  "protocol_sha256": "dea8e309c85a7806ce28def5c4c1494d97b6415a4600d4cff1ed01040beb6bb5",
+  "variant": "perkey",
+  "split": "2",
+  "base_run": "holes_field8_f2_s42_v3",
+  "train_images": 8,
+  "val_images": 8,
+  "candidates": [
+    {
+      "candidate": "ncc r=16 m=40",
+      "region": [
+        387,
+        938,
+        1632,
+        1068
+      ],
+      "regions_per_key": {
+        "corner_latch": [
+          511,
+          938,
+          1632,
+          1068
+        ],
+        "corner_hinge": [
+          387,
+          943,
+          1522,
+          1068
+        ]
+      },
+      "points": 16,
+      "pck8": 0.6875,
+      "median_px": 1.2786349890628204,
+      "max_px": 933.8010375149515
+    },
+    {
+      "candidate": "ncc r=16 m=80",
+      "region": [
+        347,
+        898,
+        1672,
+        1108
+      ],
+      "regions_per_key": {
+        "corner_latch": [
+          471,
+          898,
+          1672,
+          1108
+        ],
+        "corner_hinge": [
+          347,
+          903,
+          1562,
+          1108
+        ]
+      },
+      "points": 16,
+      "pck8": 0.625,
+      "median_px": 1.359488815997623,
+      "max_px": 933.8010375149515
+    },
+    {
+      "candidate": "ncc r=24 m=40",
+      "region": [
+        387,
+        938,
+        1632,
+        1068
+      ],
+      "regions_per_key": {
+        "corner_latch": [
+          511,
+          938,
+          1632,
+          1068
+        ],
+        "corner_hinge": [
+          387,
+          943,
+          1522,
+          1068
+        ]
+      },
+      "points": 16,
+      "pck8": 0.6875,
+      "median_px": 1.3725906769825165,
+      "max_px": 934.182737626852
+    },
+    {
+      "candidate": "ncc r=24 m=80",
+      "region": [
+        347,
+        898,
+        1672,
+        1108
+      ],
+      "regions_per_key": {
+        "corner_latch": [
+          471,
+          898,
+          1672,
+          1108
+        ],
+        "corner_hinge": [
+          347,
+          903,
+          1562,
+          1108
+        ]
+      },
+      "points": 16,
+      "pck8": 0.6875,
+      "median_px": 1.3725906769825165,
+      "max_px": 934.182737626852
+    },
+    {
+      "candidate": "ncc r=32 m=40",
+      "region": [
+        387,
+        938,
+        1632,
+        1068
+      ],
+      "regions_per_key": {
+        "corner_latch": [
+          511,
+          938,
+          1632,
+          1068
+        ],
+        "corner_hinge": [
+          387,
+          943,
+          1522,
+          1068
+        ]
+      },
+      "points": 16,
+      "pck8": 0.75,
+      "median_px": 1.2786349890628204,
+      "max_px": 934.182737626852
+    },
+    {
+      "candidate": "ncc r=32 m=80",
+      "region": [
+        347,
+        898,
+        1672,
+        1108
+      ],
+      "regions_per_key": {
+        "corner_latch": [
+          471,
+          898,
+          1672,
+          1108
+        ],
+        "corner_hinge": [
+          347,
+          903,
+          1562,
+          1108
+        ]
+      },
+      "points": 16,
+      "pck8": 0.75,
+      "median_px": 1.2786349890628204,
+      "max_px": 934.182737626852
+    },
+    {
+      "candidate": "log sigma=1.5 m=40",
+      "region": [
+        387,
+        938,
+        1632,
+        1068
+      ],
+      "regions_per_key": null,
+      "points": 16,
+      "pck8": 0.1875,
+      "median_px": 119.66411796194126,
+      "max_px": 463.2070733322193
+    },
+    {
+      "candidate": "log sigma=1.5 m=80",
+      "region": [
+        347,
+        898,
+        1672,
+        1108
+      ],
+      "regions_per_key": null,
+      "points": 16,
+      "pck8": 0.0,
+      "median_px": 184.46699855353603,
+      "max_px": 457.64885751523514
+    },
+    {
+      "candidate": "log sigma=2.5 m=40",
+      "region": [
+        387,
+        938,
+        1632,
+        1068
+      ],
+      "regions_per_key": null,
+      "points": 16,
+      "pck8": 0.1875,
+      "median_px": 119.41660988632862,
+      "max_px": 537.874431117524
+    },
+    {
+      "candidate": "log sigma=2.5 m=80",
+      "region": [
+        347,
+        898,
+        1672,
+        1108
+      ],
+      "regions_per_key": null,
+      "points": 16,
+      "pck8": 0.0625,
+      "median_px": 170.9134858387863,
+      "max_px": 325.5099764753763
+    }
+  ],
+  "selected": "ncc r=32 m=40",
+  "selected_index": 4
+}

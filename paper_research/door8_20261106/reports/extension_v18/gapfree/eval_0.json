@@ -1,0 +1,97 @@
+{
+  "created_at": "2026-11-13T14:29:18+09:00",
+  "protocol_sha256": "c475ef4d228cc53d254fe61f543d1b773ba7cef6df1620819839848fa8844e15",
+  "variant": "gapfree",
+  "split": "0",
+  "selected": "ncc r=24 m=40",
+  "scale": {
+    "54910212": 1476.6233681883268
+  },
+  "scale_learned": {
+    "54910212": 1475.3372010525288
+  },
+  "seconds_per_image_single_thread": 0.04099622426548296,
+  "doors": {
+    "n": 74,
+    "correct": 74,
+    "abstained": 0,
+    "wrong": 0
+  },
+  "frames": {
+    "n": 1478,
+    "correct": 1453,
+    "abstained": 22,
+    "wrong": 3
+  },
+  "frame_reasons": {
+    "ok": 1456,
+    "cad_distance_reject": 22
+  },
+  "localisation_test_role": {
+    "points": 16,
+    "pck8": 0.5,
+    "median_px": 329.171345428583,
+    "max_px": 1166.0584995929664
+  },
+  "residual": {
+    "frames_measured": 1478,
+    "percentiles_5_50_95": [
+      -0.004118744557456977,
+      0.0004511664777699931,
+      0.005720035387827727
+    ],
+    "range": [
+      -0.4599728366345036,
+      0.1774778216483548
+    ],
+    "rms": 0.031059305334872934,
+    "mean_abs": 0.006074461224274654,
+    "max_abs_mm": 499.9904734217055,
+    "frames_out_of_band": 25,
+    "max_utilisation": 6.275970677459054,
+    "within_door_sd_median": 0.0009626398439366432,
+    "between_door_sd": 0.020113564078800866
+  },
+  "failed_doors": [],
+  "by_state": {
+    "before": {
+      "n": 30,
+      "correct": 30,
+      "abstained": 0,
+      "wrong": 0
+    },
+    "after": {
+      "n": 44,
+      "correct": 44,
+      "abstained": 0,
+      "wrong": 0
+    }
+  },
+  "differs_from_learned": 0,
+  "learned_doors": {
+    "n": 74,
+    "correct": 74,
+    "abstained": 0,
+    "wrong": 0
+  },
+  "same_hole": {
+    "train": 0,
+    "train_images": 4171,
+    "test": 0,
+    "test_images": 1478
+  },
+  "learned_scale": {
+    "doors": {
+      "n": 74,
+      "correct": 74,
+      "abstained": 0,
+      "wrong": 0
+    },
+    "frames": {
+      "n": 1478,
+      "correct": 1453,
+      "abstained": 22,
+      "wrong": 3
+    }
+  }
+}

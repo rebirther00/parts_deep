@@ -1,0 +1,175 @@
+{
+  "created_at": "2026-11-11T17:03:22+09:00",
+  "protocol_sha256": "5982292eb068cb2129d577feeeea9448a282cf68d15efbf6eb781559b58b51ca",
+  "scale": {
+    "54910212": 1475.3372010525288
+  },
+  "sessions": {
+    "20260903/E30_door_LH_RR/s_151736": {
+      "operator_input": "E30_door_LH_RR",
+      "corrected": "E25_door_LH_RR",
+      "images": 3,
+      "hole": {
+        "decision": "E25_door_LH_RR",
+        "measured_D_median": 1031.1096178027285,
+        "images_measured": 3,
+        "image_decisions": {
+          "E25_door_LH_RR": 3
+        }
+      },
+      "rgb_f0_s42": {
+        "decision": "E25_door_LH_RR",
+        "image_decisions": {
+          "E25_door_LH_RR": 3
+        },
+        "confidence_median": 1.0
+      },
+      "rgbe_f0_s42": {
+        "decision": "E25_door_LH_RR",
+        "image_decisions": {
+          "E25_door_LH_RR": 3
+        },
+        "confidence_median": 0.9999985694885254
+      },
+      "agrees": {
+        "hole": "corrected",
+        "rgb_f0_s42": "corrected",
+        "rgbe_f0_s42": "corrected"
+      }
+    },
+    "20260903/E30_door_LH_RR/s_183159": {
+      "operator_input": "E30_door_LH_RR",
+      "corrected": "E30_E38_door_RH",
+      "images": 7,
+      "hole": {
+        "decision": "E30_E38_door_RH",
+        "measured_D_median": 1089.2245046780297,
+        "images_measured": 7,
+        "image_decisions": {
+          "E30_E38_door_RH": 7
+        }
+      },
+      "rgb_f0_s42": {
+        "decision": "E30_E38_door_RH",
+        "image_decisions": {
+          "E30_E38_door_RH": 7
+        },
+        "confidence_median": 1.0
+      },
+      "rgbe_f0_s42": {
+        "decision": "E30_E38_door_RH",
+        "image_decisions": {
+          "E30_E38_door_RH": 7
+        },
+        "confidence_median": 0.999994158744812
+      },
+      "agrees": {
+        "hole": "corrected",
+        "rgb_f0_s42": "corrected",
+        "rgbe_f0_s42": "corrected"
+      }
+    },
+    "20260905/E30_door_LH_RR/s_123451": {
+      "operator_input": "E30_door_LH_RR",
+      "corrected": "E30_E38_door_RH",
+      "images": 1,
+      "hole": {
+        "decision": "E30_E38_door_RH",
+        "measured_D_median": 1081.95821959266,
+        "images_measured": 1,
+        "image_decisions": {
+          "E30_E38_door_RH": 1
+        }
+      },
+      "rgb_f0_s42": {
+        "decision": "E30_E38_door_RH",
+        "image_decisions": {
+          "E30_E38_door_RH": 1
+        },
+        "confidence_median": 1.0
+      },
+      "rgbe_f0_s42": {
+        "decision": "E30_E38_door_RH",
+        "image_decisions": {
+          "E30_E38_door_RH": 1
+        },
+        "confidence_median": 0.9999939203262329
+      },
+      "agrees": {
+        "hole": "corrected",
+        "rgb_f0_s42": "corrected",
+        "rgbe_f0_s42": "corrected"
+      }
+    },
+    "20260914/E30_door_LH_RR/s_170035": {
+      "operator_input": "E30_door_LH_RR",
+      "corrected": "E30_E38_door_RH",
+      "images": 20,
+      "hole": {
+        "decision": "E30_E38_door_RH",
+        "measured_D_median": 1089.2466201345765,
+        "images_measured": 20,
+        "image_decisions": {
+          "E30_E38_door_RH": 20
+        }
+      },
+      "rgb_f0_s42": {
+        "decision": "E30_E38_door_RH",
+        "image_decisions": {
+          "E30_E38_door_RH": 20
+        },
+        "confidence_median": 1.0
+      },
+      "rgbe_f0_s42": {
+        "decision": "E30_E38_door_RH",
+        "image_decisions": {
+          "E30_E38_door_RH": 20
+        },
+        "confidence_median": 0.9999963641166687
+      },
+      "agrees": {
+        "hole": "corrected",
+        "rgb_f0_s42": "corrected",
+        "rgbe_f0_s42": "corrected"
+      }
+    },
+    "20261029/E30_door_LH_FRT/s_075858": {
+      "operator_input": "E30_door_LH_FRT",
+      "corrected": "E38_door_LH_FRT",
+      "images": 20,
+      "hole": {
+        "decision": "E38_door_LH_FRT",
+        "measured_D_median": 813.1303119091353,
+        "images_measured": 20,
+        "image_decisions": {
+          "E38_door_LH_FRT": 20
+        }
+      },
+      "rgb_f0_s42": {
+        "decision": "E38_door_LH_FRT",
+        "image_decisions": {
+          "E38_door_LH_FRT": 20
+        },
+        "confidence_median": 0.9999991655349731
+      },
+      "rgbe_f0_s42": {
+        "decision": "E38_door_LH_FRT",
+        "image_decisions": {
+          "E38_door_LH_FRT": 20
+        },
+        "confidence_median": 0.9999949336051941
+      },
+      "agrees": {
+        "hole": "corrected",
+        "rgb_f0_s42": "corrected",
+        "rgbe_f0_s42": "corrected"
+      }
+    }
+  },
+  "hole_disagrees_with_operator_input": 5,
+  "door_accuracy_if_operator_inputs_were_right": [
+    361,
+    366,
+    0.9863387978142076
+  ]
+}

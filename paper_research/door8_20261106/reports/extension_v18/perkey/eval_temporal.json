@@ -1,0 +1,195 @@
+{
+  "created_at": "2026-11-13T14:28:09+09:00",
+  "protocol_sha256": "dea8e309c85a7806ce28def5c4c1494d97b6415a4600d4cff1ed01040beb6bb5",
+  "variant": "perkey",
+  "split": "temporal",
+  "selected": "ncc r=32 m=40",
+  "scale": {
+    "54910212": 1482.963566571225
+  },
+  "scale_learned": {
+    "54910212": 1476.8410632258065
+  },
+  "seconds_per_image_single_thread": 0.34610344566459084,
+  "doors": {
+    "n": 133,
+    "correct": 117,
+    "abstained": 16,
+    "wrong": 0
+  },
+  "frames": {
+    "n": 2617,
+    "correct": 1414,
+    "abstained": 1199,
+    "wrong": 4
+  },
+  "frame_reasons": {
+    "distance_range": 1175,
+    "ok": 1418,
+    "cad_distance_reject": 24
+  },
+  "localisation_test_role": {
+    "points": 26,
+    "pck8": 0.5384615384615384,
+    "median_px": 1.58460877058348,
+    "max_px": 998.2190645609811
+  },
+  "residual": {
+    "frames_measured": 1442,
+    "percentiles_5_50_95": [
+      0.001919232434869611,
+      0.005913345707081907,
+      0.009954859339800226
+    ],
+    "range": [
+      -0.5849143294850354,
+      0.26870716355633695
+    ],
+    "rms": 0.046464880404480435,
+    "mean_abs": 0.011593065247910369,
+    "max_abs_mm": 677.330793543671,
+    "frames_out_of_band": 28,
+    "max_utilisation": 15.670590215642402,
+    "within_door_sd_median": 0.0005207931430768011,
+    "between_door_sd": 0.05173667593910227
+  },
+  "failed_doors": [
+    {
+      "door": "20261006/E30_E38_door_RH/s_170710",
+      "true": "E30_E38_door_RH",
+      "pred": null,
+      "state": "after"
+    },
+    {
+      "door": "20261012/E30_door_LH_RR/s_164001",
+      "true": "E30_door_LH_RR",
+      "pred": null,
+      "state": "after"
+    },
+    {
+      "door": "20261013/E25_door_RH/s_071934",
+      "true": "E25_door_RH",
+      "pred": null,
+      "state": "after"
+    },
+    {
+      "door": "20261013/E30_door_LH_FRT/s_084330",
+      "true": "E30_door_LH_FRT",
+      "pred": null,
+      "state": "after"
+    },
+    {
+      "door": "20261013/E30_door_LH_FRT/s_092635",
+      "true": "E30_door_LH_FRT",
+      "pred": null,
+      "state": "after"
+    },
+    {
+      "door": "20261021/E25_door_LH_RR/s_153921",
+      "true": "E25_door_LH_RR",
+      "pred": null,
+      "state": "after"
+    },
+    {
+      "door": "20261022/E25_door_LH_RR/s_150502",
+      "true": "E25_door_LH_RR",
+      "pred": null,
+      "state": "after"
+    },
+    {
+      "door": "20261022/E25_door_LH_RR/s_153652",
+      "true": "E25_door_LH_RR",
+      "pred": null,
+      "state": "after"
+    },
+    {
+      "door": "20261023/E25_door_RH/s_083521",
+      "true": "E25_door_RH",
+      "pred": null,
+      "state": "after"
+    },
+    {
+      "door": "20261026/E25_door_LH_FRT/s_100727",
+      "true": "E25_door_LH_FRT",
+      "pred": null,
+      "state": "after"
+    },
+    {
+      "door": "20261026/E25_door_LH_RR/s_082837",
+      "true": "E25_door_LH_RR",
+      "pred": null,
+      "state": "after"
+    },
+    {
+      "door": "20261027/E30_door_LH_FRT/s_074619",
+      "true": "E30_door_LH_FRT",
+      "pred": null,
+      "state": "after"
+    },
+    {
+      "door": "20261027/E30_door_LH_FRT/s_081034",
+      "true": "E30_door_LH_FRT",
+      "pred": null,
+      "state": "after"
+    },
+    {
+      "door": "20261029/E25_door_LH_FRT/s_123610",
+      "true": "E25_door_LH_FRT",
+      "pred": null,
+      "state": "after"
+    },
+    {
+      "door": "20261029/E30_door_LH_FRT/s_105319",
+      "true": "E30_door_LH_FRT",
+      "pred": null,
+      "state": "after"
+    },
+    {
+      "door": "20261029/E38_door_LH_FRT/s_095115",
+      "true": "E38_door_LH_FRT",
+      "pred": null,
+      "state": "after"
+    }
+  ],
+  "by_state": {
+    "before": {
+      "n": 0,
+      "correct": 0,
+      "abstained": 0,
+      "wrong": 0
+    },
+    "after": {
+      "n": 133,
+      "correct": 117,
+      "abstained": 16,
+      "wrong": 0
+    }
+  },
+  "differs_from_learned": 16,
+  "learned_doors": {
+    "n": 133,
+    "correct": 133,
+    "abstained": 0,
+    "wrong": 0
+  },
+  "same_hole": {
+    "train": 1822,
+    "train_images": 3802,
+    "test": 1162,
+    "test_images": 2617
+  },
+  "learned_scale": {
+    "doors": {
+      "n": 133,
+      "correct": 116,
+      "abstained": 16,
+      "wrong": 1
+    },
+    "frames": {
+      "n": 2617,
+      "correct": 1414,
+      "abstained": 1191,
+      "wrong": 12
+    }
+  }
+}

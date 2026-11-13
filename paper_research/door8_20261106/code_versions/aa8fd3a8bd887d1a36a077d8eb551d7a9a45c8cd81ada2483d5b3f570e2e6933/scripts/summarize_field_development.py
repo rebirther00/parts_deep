@@ -1,0 +1,113 @@
+"""Summarize completed development runs, without changing the v1 manuscript."""
+from pathlib import Path
+import json
+import sys
+sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
+from door8.core import ROOT,dump,now,read_json,read_jsonl,require_fresh_dir,setup_runtime,sha256,snapshot,partition
+setup_runtime()
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+from matplotlib import font_manager
+from docx import Document
+from docx.shared import Inches,Pt
+from docx.oxml.ns import qn
+from door8.metrics import summarize
+
+
+def build():
+    reports=[]
+    for budget in [0,8,16,24]:
+        name='holes_lab_f0_validation_v2_control' if budget==0 else f'holes_field{budget}_f0_s42_v2_validation'
+        folder=ROOT/'reports'/name;r=read_json(folder/'development.json')
+        if not r['development_only'] or r['test_frames_evaluated'] or r['subset']!='validation':
+            raise ValueError('Only completed validation development reports can enter this summary')
+        reports.append((budget,folder,r))
+    sp,_,frames,splits=snapshot();cfg=read_json(sp/'protocol.json')
+    val=partition(frames,splits,'0')['val'];expected={r['frame_id'] for r in val}
+    table=[];controls=[]
+    for budget,folder,r in reports:
+        for mode in ['pixel','depth']:
+            pred=read_jsonl(folder/(mode+'_predictions.jsonl'))
+            if len(pred)!=len(expected) or {p['frame_id'] for p in pred}!=expected:
+                raise ValueError('Methods must use the same validation frames')
+            m=r['modes'][mode]
+            table.append(dict(budget=budget,mode=mode,frame_accuracy=m['frame']['accuracy_all'],
+                              frame_coverage=m['frame']['coverage'],session_accuracy=m['session']['accuracy_all'],
+                              session_coverage=m['session']['coverage'],session_correct=m['session']['correct'],
+                              frame_correct=m['frame']['correct'],frame_n=m['frame']['n'],session_n=m['session']['n'],
+                              session_macro_f1=m['session']['macro_f1']))
+    for run in ['rgb_f0_s42','rgbe_f0_s42']:
+        pred=read_jsonl(ROOT/'runs'/run/'val_predictions.jsonl')
+        if len(pred)!=len(expected) or {p['frame_id'] for p in pred}!=expected:raise ValueError('CNN validation mismatch')
+        controls.append(dict(run=run,metrics=summarize(pred,cfg['classes']),
+                             predictions_sha256=sha256(ROOT/'runs'/run/'val_predictions.jsonl')))
+    dst=require_fresh_dir('reports/field_v2_development_comparison')
+    manual=read_json(ROOT/'reports/field40_manual_f0_v1/diagnostic.json')
+    sampling=read_json(ROOT/'reports/field_sampling_confirmation_20261109.json')
+    combined=dict(created_at=now(),scope='Fold0 seed42 checkpoint-selection validation; not independent TEST.',
+                  classes=cfg['classes'],validation_frames=len(val),validation_sessions=len({r['group_id'] for r in val}),
+                  field_sampling_confirmation=sampling,
+                  test_frames_evaluated=0,table=table,cnn_controls=controls,
+                  localization_by_budget={str(b):r['localization'] for b,_,r in reports},
+                  manual_coordinate_diagnostic=manual,
+                  report_hashes={str(folder.relative_to(ROOT)):sha256(folder/'development.json') for _,folder,_ in reports})
+    dump(dst/'comparison.json',combined)
+    available={f.name for f in font_manager.fontManager.ttflist}
+    for font in ['NanumGothic','Noto Sans CJK KR','Noto Sans CJK JP']:
+        if font in available:plt.rcParams['font.family']=font;break
+    plt.rcParams['axes.unicode_minus']=False
+    fig,axes=plt.subplots(1,2,figsize=(10,4.4),layout='constrained')
+    for mode,color in [('pixel','#167b81'),('depth','#d4762a')]:
+        values=[r for r in table if r['mode']==mode]
+        for ax,key in zip(axes,['frame_accuracy','frame_coverage']):
+            ax.plot([r['budget'] for r in values],[100*r[key] for r in values],'-o',label=mode,color=color)
+    for ax,title in zip(axes,['Frame accuracy (abstentions included)','Frame coverage']):
+        ax.set(title=title,xlabel='Manually labeled FIELD training images',ylabel='Percent',ylim=(-3,103),xticks=[0,8,16,24])
+        ax.grid(alpha=.2);ax.legend()
+    fig.suptitle('Development validation only: 73 sessions / 1,455 frames',fontsize=12)
+    for suffix in ['png','pdf','svg']:fig.savefig(dst/('field_budget_comparison.'+suffix),dpi=180)
+    plt.close(fig)
+    lines=['현장 수동 좌표 추가 학습 — 개발 검증 결과', '',
+           'Fold 0 / seed 42. 모델 선택에 사용한 검증 자료의 결과이며, 독립 시험이나 교차검증 전체 성능이 아니다.', '',
+           '40장·240점의 수동 좌표를 검증하고 별도 스냅샷으로 고정했다. 학습 후보 24장, 검증 8장, 시험 8장 중 시험 좌표와 시험 영상은 이번 신규 실험에서 평가하지 않았다.', '',
+           '2026-11-09 현장 수집 담당자는 포함된 361세션이 실제 작업에서 각각 다른 실물 도어 361개를 촬영한 것임을 확인했다. 따라서 세션 단위 분리는 실물 단위 분리에도 해당한다. 한 세션 안의 여러 프레임을 서로 다른 실물로 세지 않는다. 기존 개발에서 관찰한 기간이라는 점과 단일 현장·카메라의 범위는 그대로 남는다.', '',
+           '수동 좌표 진단: 학습 24장으로만 보정했을 때 검증 8장에서 픽셀 방식 8장 정답, 깊이 방식 7장 정답·1장 보류였다. 픽셀 CAD 절대 잔차 중앙값 1.84 mm, 최대 4.52 mm였다. 자동 검출기의 성능이 아니며 CAD 잔차는 실물 실측 오차가 아니다.', '',
+           '| 현장 학습 좌표 | 방식 | 프레임 정답률 | 프레임 판정 비율 | 세션 정답 | 세션 판정 비율 |',
+           '|---:|---|---:|---:|---:|---:|']
+    for row in table:
+        lines.append(f'| {row["budget"]}장 | {row["mode"]} | {100*row["frame_accuracy"]:.2f}% | {100*row["frame_coverage"]:.2f}% | {row["session_correct"]}/{row["session_n"]} | {100*row["session_coverage"]:.2f}% |')
+    lines += ['', '모든 자동 방법은 같은 검증 73세션·1,455프레임으로 비교했다. 세션 최빈값은 여러 프레임의 오프라인 집계이며 실시간 단일 판정 성능과 구분한다.', '',
+              '8장 모델도 픽셀 방식에서 73/73세션을 맞혔고, 16장·24장으로 늘려도 세션 성능은 같았다. 24장은 프레임 정답이 한 장 더 많았을 뿐이므로 학습량 증가의 일관된 이점이나 최적 주석 수를 입증한 결과가 아니다. 8장이 다른 폴드·조건에도 충분한지는 후속 검증이 필요하다.', '',
+              '| 현장 학습 좌표 | 볼트 PCK8 | 힌지 PCK8 | 래치 PCK8 | 전체 PCK8 |',
+              '|---:|---:|---:|---:|---:|']
+    for budget,_,r in reports:
+        loc=r['localization'];ch=loc['per_channel']
+        lines.append(f'| {budget}장 | {100*ch["bolt"]["pck8"]:.2f}% | {100*ch["hinge"]["pck8"]:.2f}% | {100*ch["latch"]["pck8"]:.2f}% | {100*loc["all"]["pck8"]:.2f}% |')
+    lines += ['', 'PCK8은 사람이 표시한 현장 검증 8장의 점 48개 중 예측 오차가 원본 영상 8픽셀 이내인 비율이다. 미검출도 실패로 계산했다. 볼트 네 점은 순서 없이 대응했다. 현장 적응 모델은 이 검증 자료의 히트맵 손실로 체크포인트를 선택했으므로 독립적인 국소화 시험이 아니다.', '',
+              '같은 검증 자료의 기존 RGB 및 RGBE 분류기는 모두 1,455/1,455프레임, 73/73세션 정답이었다. 홀 방법의 회복이 확인되더라도 이 결과만으로 RGB보다 우수하다고 결론내릴 수 없다.', '',
+              '현장 8/16/24장 외에 실험실 학습 94장과 현장 검증 8장을 사용했다. 실험실 검증 24장은 모니터링에만 사용했다. 모든 모델은 ImageNet 초기화에서 새로 학습했고, 기존 운영 모델·VLM·의사 좌표는 사용하지 않았다. 0장 모델은 기존 실험실 전용 모델로 현장 좌표를 학습이나 모델 선택에 사용하지 않았다. 따라서 0장 대비 변화에는 현장 학습과 현장 검증에 의한 모델 선택이 함께 포함된다. 거리 보정에는 각 모델이 예측한 학습 세션의 특징과 기존 품종 라벨을 사용했다.', '',
+              '이번 단계에서는 검출 임계값 0.15와 기존 기하·CAD 보류 규칙을 바꾸지 않았다. 각 학습량은 클래스별 1/2/3장의 중첩 표본이며 고정된 선택 규칙을 사용했다. 80 epoch라는 조건은 같지만 학습량에 따라 최적화 스텝 수가 달라진다. 학습 시간은 다른 GPU 작업과 자원을 공유한 값이므로 논문의 처리 시간 비교에 사용하지 않는다.', '',
+              '수동 주석의 실제 작업 시간은 별도로 측정하지 않았다. 좌표 영상 수만으로 CNN보다 라벨 비용이 낮다고 결론내릴 수 없다. 라벨 효율성을 주 기여로 삼으려면 동일한 현장 학습 영상 예산을 준 RGB 비교와 주석 비용 기록을 추가해야 한다.', '',
+              '다음 판단은 분리된 시험 및 새 실물·새 촬영 조건에서도 회복이 유지되는가이다. 학습량을 선택하거나 설정을 수정한 이 개발 결과를 새 블라인드 시험처럼 기술하지 않는다. 전체 5폴드×3시드와 전향적 현장 평가는 아직 미완료다.', '']
+    (dst/'결과.md').write_text('\n'.join(lines),encoding='utf8')
+    doc=Document();normal=doc.styles['Normal'];normal.font.name='Malgun Gothic';normal.font.size=Pt(10)
+    normal.element.rPr.rFonts.set(qn('w:eastAsia'),'맑은 고딕')
+    doc.add_heading(lines[0],0);table_pending=None
+    for line in lines[1:]:
+        if line.startswith('|'):
+            cells=[x.strip() for x in line.strip('|').split('|')]
+            if all(set(c)<=set('-: ') for c in cells):continue
+            if table_pending is None:table_pending=doc.add_table(rows=0,cols=len(cells));table_pending.style='Table Grid'
+            for cell,value in zip(table_pending.add_row().cells,cells):cell.text=value
+        else:
+            table_pending=None
+            if line:doc.add_paragraph(line)
+    doc.add_picture(str(dst/'field_budget_comparison.png'),width=Inches(6.3))
+    doc.save(dst/'결과.docx')
+    print(json.dumps({'report':str(dst),'table':table},ensure_ascii=False),flush=True)
+    return combined
+
+
+if __name__=='__main__':
+    build()

@@ -1,0 +1,25 @@
+{
+ "created_at": "2026-11-12T14:22:12+09:00",
+ "protocol_sha256": "b1b9f846242740e485fec1747cb2940342e6af576488fe73af183a61d128fb3a",
+ "attempts": [
+  {
+   "step": "code test",
+   "note": "Before the measurement the width function and the decision helpers were run on a synthetic image (a bright rectangle on a dark noisy background) and on toy numbers only; no field image was processed."
+  },
+  {
+   "step": "measure",
+   "attempt": 1,
+   "outcome": "7,104 frames, all four settings gave a measurement on every frame; 193 s wall with six processes"
+  },
+  {
+   "step": "evaluate",
+   "attempt": 1,
+   "outcome": "OK; nothing re-run"
+  }
+ ],
+ "observations": [
+  "The measurement time (28 ms per image and setting, single thread) was taken while the GPU training queue of extension_v16 used most CPU cores.",
+  "Variant B is the registered primary variant (Table 3 row). Variant A and its unseen-class test are reported as registered; no further variant was computed.",
+  "Within-class spread of the session medians (fold 0: SD 16 to 129 mm at the nominal scale) is of the size of, or larger than, the smallest gap between class references (39 to 44 mm over the folds)."
+ ]
+}

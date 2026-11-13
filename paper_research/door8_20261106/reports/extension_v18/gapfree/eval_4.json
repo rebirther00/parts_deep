@@ -1,0 +1,104 @@
+{
+  "created_at": "2026-11-13T14:31:47+09:00",
+  "protocol_sha256": "c475ef4d228cc53d254fe61f543d1b773ba7cef6df1620819839848fa8844e15",
+  "variant": "gapfree",
+  "split": "4",
+  "selected": "ncc r=32 m=40",
+  "scale": {
+    "54910212": 1476.0884613716369
+  },
+  "scale_learned": {
+    "54910212": 1474.1836219861748
+  },
+  "seconds_per_image_single_thread": 0.041414454188101836,
+  "doors": {
+    "n": 69,
+    "correct": 68,
+    "abstained": 0,
+    "wrong": 1
+  },
+  "frames": {
+    "n": 1355,
+    "correct": 1326,
+    "abstained": 19,
+    "wrong": 10
+  },
+  "frame_reasons": {
+    "ok": 1336,
+    "cad_distance_reject": 19
+  },
+  "localisation_test_role": {
+    "points": 16,
+    "pck8": 0.75,
+    "median_px": 0.9529649749043563,
+    "max_px": 997.2756638171815
+  },
+  "residual": {
+    "frames_measured": 1355,
+    "percentiles_5_50_95": [
+      -0.003410211279990638,
+      6.415836586670665e-06,
+      0.0044665165394193185
+    ],
+    "range": [
+      -0.46806353934933964,
+      0.40699133255166786
+    ],
+    "rms": 0.03165657759864441,
+    "mean_abs": 0.005545093321635074,
+    "max_abs_mm": 632.8219052003071,
+    "frames_out_of_band": 29,
+    "max_utilisation": 21.094063506676907,
+    "within_door_sd_median": 0.0005595937545463994,
+    "between_door_sd": 0.05631586198193825
+  },
+  "failed_doors": [
+    {
+      "door": "20260922/E38_door_LH_RR/s_080559",
+      "true": "E38_door_LH_RR",
+      "pred": "E25_door_LH_FRT",
+      "state": "after"
+    }
+  ],
+  "by_state": {
+    "before": {
+      "n": 32,
+      "correct": 32,
+      "abstained": 0,
+      "wrong": 0
+    },
+    "after": {
+      "n": 37,
+      "correct": 36,
+      "abstained": 0,
+      "wrong": 1
+    }
+  },
+  "differs_from_learned": 1,
+  "learned_doors": {
+    "n": 69,
+    "correct": 69,
+    "abstained": 0,
+    "wrong": 0
+  },
+  "same_hole": {
+    "train": 0,
+    "train_images": 4271,
+    "test": 0,
+    "test_images": 1355
+  },
+  "learned_scale": {
+    "doors": {
+      "n": 69,
+      "correct": 68,
+      "abstained": 0,
+      "wrong": 1
+    },
+    "frames": {
+      "n": 1355,
+      "correct": 1326,
+      "abstained": 19,
+      "wrong": 10
+    }
+  }
+}

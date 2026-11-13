@@ -1,0 +1,147 @@
+{
+  "created_at": "2026-11-12T10:11:05+09:00",
+  "protocol_sha256": "cd4d85790047c52992fda1453943733fb8ae0b11222a8e509c5e47055fadadcd",
+  "note": "POST HOC, not registered: the baseline detections judged with the scale S of the learned detector of the same split, to separate detection errors from the failure of the scale fit. Computed after the registered TEST results had been seen.",
+  "splits": {
+    "0": {
+      "scale_own": {
+        "54910212": 1480.736703355032
+      },
+      "scale_learned": {
+        "54910212": 1475.3372010525288
+      },
+      "valid_train_sessions_own": 213,
+      "doors": {
+        "n": 74,
+        "correct": 67,
+        "abstained": 6,
+        "wrong": 1
+      },
+      "frames": {
+        "n": 1478,
+        "correct": 917,
+        "abstained": 553,
+        "wrong": 8
+      }
+    },
+    "1": {
+      "scale_own": {
+        "54910212": 1478.768758657107
+      },
+      "scale_learned": {
+        "54910212": 1474.7142049471586
+      },
+      "valid_train_sessions_own": 214,
+      "doors": {
+        "n": 73,
+        "correct": 59,
+        "abstained": 14,
+        "wrong": 0
+      },
+      "frames": {
+        "n": 1455,
+        "correct": 776,
+        "abstained": 679,
+        "wrong": 0
+      }
+    },
+    "2": {
+      "scale_own": {
+        "54910212": 1479.3518954039541
+      },
+      "scale_learned": {
+        "54910212": 1475.3139687312205
+      },
+      "valid_train_sessions_own": 215,
+      "doors": {
+        "n": 73,
+        "correct": 58,
+        "abstained": 15,
+        "wrong": 0
+      },
+      "frames": {
+        "n": 1402,
+        "correct": 639,
+        "abstained": 762,
+        "wrong": 1
+      }
+    },
+    "3": {
+      "scale_own": {
+        "54910212": 658391.8185
+      },
+      "scale_learned": {
+        "54910212": 1475.2884131777812
+      },
+      "valid_train_sessions_own": 215,
+      "doors": {
+        "n": 72,
+        "correct": 42,
+        "abstained": 30,
+        "wrong": 0
+      },
+      "frames": {
+        "n": 1414,
+        "correct": 470,
+        "abstained": 944,
+        "wrong": 0
+      }
+    },
+    "4": {
+      "scale_own": {
+        "54910212": 206307.3071828238
+      },
+      "scale_learned": {
+        "54910212": 1474.1836219861748
+      },
+      "valid_train_sessions_own": 217,
+      "doors": {
+        "n": 69,
+        "correct": 60,
+        "abstained": 9,
+        "wrong": 0
+      },
+      "frames": {
+        "n": 1355,
+        "correct": 645,
+        "abstained": 710,
+        "wrong": 0
+      }
+    },
+    "temporal": {
+      "scale_own": {
+        "54910212": 485685.8775
+      },
+      "scale_learned": {
+        "54910212": 1476.8410632258065
+      },
+      "valid_train_sessions_own": 193,
+      "doors": {
+        "n": 133,
+        "correct": 111,
+        "abstained": 22,
+        "wrong": 0
+      },
+      "frames": {
+        "n": 2617,
+        "correct": 1090,
+        "abstained": 1523,
+        "wrong": 4
+      }
+    }
+  },
+  "five_fold": {
+    "doors": {
+      "n": 361,
+      "correct": 286,
+      "abstained": 74,
+      "wrong": 1
+    },
+    "frames": {
+      "n": 7104,
+      "correct": 3447,
+      "abstained": 3648,
+      "wrong": 9
+    }
+  }
+}

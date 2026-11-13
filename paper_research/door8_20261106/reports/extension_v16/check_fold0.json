@@ -1,0 +1,47 @@
+{
+  "created_at": "2026-11-12T09:49:19+09:00",
+  "protocol_sha256": "5fb94f5cb1f00890639a55c1ad1ed497763c037eb17ea3eebe2f5726f0364e15",
+  "ok": true,
+  "per_class": {
+    "E25_door_LH_FRT": {
+      "inputs": true,
+      "predictions": true,
+      "n": 1478
+    },
+    "E25_door_LH_RR": {
+      "inputs": true,
+      "predictions": true,
+      "n": 1478
+    },
+    "E25_door_RH": {
+      "inputs": true,
+      "predictions": true,
+      "n": 1478
+    },
+    "E30_E38_door_RH": {
+      "inputs": true,
+      "predictions": true,
+      "n": 1478
+    },
+    "E30_door_LH_FRT": {
+      "inputs": true,
+      "predictions": true,
+      "n": 1478
+    },
+    "E30_door_LH_RR": {
+      "inputs": true,
+      "predictions": true,
+      "n": 1478
+    },
+    "E38_door_LH_FRT": {
+      "inputs": true,
+      "predictions": true,
+      "n": 1478
+    },
+    "E38_door_LH_RR": {
+      "inputs": true,
+      "predictions": true,
+      "n": 1478
+    }
+  }
+}

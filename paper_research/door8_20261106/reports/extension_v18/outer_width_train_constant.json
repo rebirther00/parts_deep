@@ -1,0 +1,184 @@
+{
+  "created_at": "2026-11-13T14:19:24+09:00",
+  "protocol_sha256": "dea8e309c85a7806ce28def5c4c1494d97b6415a4600d4cff1ed01040beb6bb5",
+  "registered_constant_mm": 1450.0,
+  "splits": {
+    "0": {
+      "constant_mm": 1447.3446873050243,
+      "selected": "k=1.0 c=15",
+      "registered_selected": "k=1.0 c=15",
+      "doors": {
+        "n": 74,
+        "correct": 56,
+        "abstained": 4,
+        "wrong": 14
+      },
+      "frames": {
+        "n": 1478,
+        "correct": 954,
+        "abstained": 203,
+        "wrong": 321
+      },
+      "registered_doors": {
+        "n": 74,
+        "correct": 56,
+        "abstained": 4,
+        "wrong": 14
+      },
+      "doors_decision_differs": 0,
+      "differing_doors": []
+    },
+    "1": {
+      "constant_mm": 1448.7457273804698,
+      "selected": "k=1.0 c=15",
+      "registered_selected": "k=1.0 c=15",
+      "doors": {
+        "n": 73,
+        "correct": 61,
+        "abstained": 2,
+        "wrong": 10
+      },
+      "frames": {
+        "n": 1455,
+        "correct": 1173,
+        "abstained": 51,
+        "wrong": 231
+      },
+      "registered_doors": {
+        "n": 73,
+        "correct": 61,
+        "abstained": 2,
+        "wrong": 10
+      },
+      "doors_decision_differs": 0,
+      "differing_doors": []
+    },
+    "2": {
+      "constant_mm": 1448.9984713394515,
+      "selected": "k=1.0 c=15",
+      "registered_selected": "k=1.0 c=15",
+      "doors": {
+        "n": 73,
+        "correct": 58,
+        "abstained": 3,
+        "wrong": 12
+      },
+      "frames": {
+        "n": 1402,
+        "correct": 1025,
+        "abstained": 93,
+        "wrong": 284
+      },
+      "registered_doors": {
+        "n": 73,
+        "correct": 58,
+        "abstained": 3,
+        "wrong": 12
+      },
+      "doors_decision_differs": 0,
+      "differing_doors": []
+    },
+    "3": {
+      "constant_mm": 1449.0874609441585,
+      "selected": "k=1.0 c=15",
+      "registered_selected": "k=1.0 c=15",
+      "doors": {
+        "n": 72,
+        "correct": 54,
+        "abstained": 2,
+        "wrong": 16
+      },
+      "frames": {
+        "n": 1414,
+        "correct": 939,
+        "abstained": 175,
+        "wrong": 300
+      },
+      "registered_doors": {
+        "n": 72,
+        "correct": 54,
+        "abstained": 2,
+        "wrong": 16
+      },
+      "doors_decision_differs": 0,
+      "differing_doors": []
+    },
+    "4": {
+      "constant_mm": 1448.2969896644718,
+      "selected": "k=1.0 c=15",
+      "registered_selected": "k=1.0 c=15",
+      "doors": {
+        "n": 69,
+        "correct": 56,
+        "abstained": 3,
+        "wrong": 10
+      },
+      "frames": {
+        "n": 1355,
+        "correct": 996,
+        "abstained": 136,
+        "wrong": 223
+      },
+      "registered_doors": {
+        "n": 69,
+        "correct": 56,
+        "abstained": 3,
+        "wrong": 10
+      },
+      "doors_decision_differs": 0,
+      "differing_doors": []
+    },
+    "temporal": {
+      "constant_mm": 1450.0362276999356,
+      "selected": "k=1.0 c=15",
+      "registered_selected": "k=1.0 c=15",
+      "doors": {
+        "n": 133,
+        "correct": 109,
+        "abstained": 6,
+        "wrong": 18
+      },
+      "frames": {
+        "n": 2617,
+        "correct": 1960,
+        "abstained": 273,
+        "wrong": 384
+      },
+      "registered_doors": {
+        "n": 133,
+        "correct": 109,
+        "abstained": 6,
+        "wrong": 18
+      },
+      "doors_decision_differs": 0,
+      "differing_doors": []
+    }
+  },
+  "five_fold": {
+    "doors": {
+      "n": 361,
+      "correct": 285,
+      "abstained": 14,
+      "wrong": 62
+    },
+    "doors_wilson": [
+      0.744481990105765,
+      0.8283695730788775
+    ],
+    "frames": {
+      "n": 7104,
+      "correct": 5087,
+      "abstained": 658,
+      "wrong": 1359
+    },
+    "image_accuracy": 0.7160754504504504,
+    "image_coverage": 0.9073761261261262,
+    "registered_doors": {
+      "n": 361,
+      "correct": 285,
+      "abstained": 14,
+      "wrong": 62
+    },
+    "doors_decision_differs": 0
+  }
+}

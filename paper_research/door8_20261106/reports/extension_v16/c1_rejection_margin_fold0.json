@@ -1,0 +1,438 @@
+{
+  "created_at": "2026-11-12T10:00:41+09:00",
+  "protocol_sha256": "5fb94f5cb1f00890639a55c1ad1ed497763c037eb17ea3eebe2f5726f0364e15",
+  "scopes": {
+    "fold0_s42": {
+      "runs": 8,
+      "registered_max_abs_residual_mm": 13.916784372106349,
+      "unregistered_min_distance_mm": 37.58243147307758,
+      "tau_interval_mm": [
+        13.916784372106349,
+        37.58243147307758
+      ],
+      "tau_30_inside": true,
+      "registered_unmeasured": 0,
+      "unregistered_unmeasured": 0,
+      "per_class": {
+        "E25_door_LH_FRT": {
+          "cad_mm": 724,
+          "gap_to_nearest_cad_mm": 41,
+          "nominal_rejection_margin_mm": 11,
+          "observed_min_distance_mm": 38.66332807135245,
+          "observed_rejection_margin_mm": 8.663328071352453
+        },
+        "E25_door_LH_RR": {
+          "cad_mm": 1037,
+          "gap_to_nearest_cad_mm": 50,
+          "nominal_rejection_margin_mm": 20,
+          "observed_min_distance_mm": 47.93886608825164,
+          "observed_rejection_margin_mm": 17.938866088251643
+        },
+        "E25_door_RH": {
+          "cad_mm": 886,
+          "gap_to_nearest_cad_mm": 74,
+          "nominal_rejection_margin_mm": 44,
+          "observed_min_distance_mm": 65.4230534419371,
+          "observed_rejection_margin_mm": 35.4230534419371
+        },
+        "E30_E38_door_RH": {
+          "cad_mm": 1087,
+          "gap_to_nearest_cad_mm": 50,
+          "nominal_rejection_margin_mm": 20,
+          "observed_min_distance_mm": 37.58243147307758,
+          "observed_rejection_margin_mm": 7.582431473077577
+        },
+        "E30_door_LH_FRT": {
+          "cad_mm": 765,
+          "gap_to_nearest_cad_mm": 41,
+          "nominal_rejection_margin_mm": 11,
+          "observed_min_distance_mm": 38.408389721099866,
+          "observed_rejection_margin_mm": 8.408389721099866
+        },
+        "E30_door_LH_RR": {
+          "cad_mm": 1158,
+          "gap_to_nearest_cad_mm": 71,
+          "nominal_rejection_margin_mm": 41,
+          "observed_min_distance_mm": 67.66682974036144,
+          "observed_rejection_margin_mm": 37.666829740361436
+        },
+        "E38_door_LH_FRT": {
+          "cad_mm": 812,
+          "gap_to_nearest_cad_mm": 47,
+          "nominal_rejection_margin_mm": 17,
+          "observed_min_distance_mm": 41.242795951228686,
+          "observed_rejection_margin_mm": 11.242795951228686
+        },
+        "E38_door_LH_RR": {
+          "cad_mm": 1352,
+          "gap_to_nearest_cad_mm": 194,
+          "nominal_rejection_margin_mm": 164,
+          "observed_min_distance_mm": 192.58072618152232,
+          "observed_rejection_margin_mm": 162.58072618152232
+        }
+      },
+      "per_run": {
+        "0:E25_door_LH_FRT": {
+          "registered_max_abs_residual_mm": 12.39599307245885,
+          "registered_max_nearest_mm": 12.39599307245885,
+          "registered_unmeasured": 0,
+          "registered_images": 1438,
+          "unregistered_min_distance_mm": 38.66332807135245,
+          "unregistered_unmeasured": 0,
+          "unregistered_images": 40
+        },
+        "0:E25_door_LH_RR": {
+          "registered_max_abs_residual_mm": 12.251276693583122,
+          "registered_max_nearest_mm": 12.251276693583122,
+          "registered_unmeasured": 0,
+          "registered_images": 1200,
+          "unregistered_min_distance_mm": 47.93886608825164,
+          "unregistered_unmeasured": 0,
+          "unregistered_images": 278
+        },
+        "0:E25_door_RH": {
+          "registered_max_abs_residual_mm": 13.916784372106349,
+          "registered_max_nearest_mm": 13.916784372106349,
+          "registered_unmeasured": 0,
+          "registered_images": 1198,
+          "unregistered_min_distance_mm": 65.4230534419371,
+          "unregistered_unmeasured": 0,
+          "unregistered_images": 280
+        },
+        "0:E30_E38_door_RH": {
+          "registered_max_abs_residual_mm": 9.064532839507024,
+          "registered_max_nearest_mm": 9.064532839507024,
+          "registered_unmeasured": 0,
+          "registered_images": 1198,
+          "unregistered_min_distance_mm": 37.58243147307758,
+          "unregistered_unmeasured": 0,
+          "unregistered_images": 280
+        },
+        "0:E30_door_LH_FRT": {
+          "registered_max_abs_residual_mm": 12.39599307245885,
+          "registered_max_nearest_mm": 12.39599307245885,
+          "registered_unmeasured": 0,
+          "registered_images": 1298,
+          "unregistered_min_distance_mm": 38.408389721099866,
+          "unregistered_unmeasured": 0,
+          "unregistered_images": 180
+        },
+        "0:E30_door_LH_RR": {
+          "registered_max_abs_residual_mm": 12.308973376184895,
+          "registered_max_nearest_mm": 12.308973376184895,
+          "registered_unmeasured": 0,
+          "registered_images": 1278,
+          "unregistered_min_distance_mm": 67.66682974036144,
+          "unregistered_unmeasured": 0,
+          "unregistered_images": 200
+        },
+        "0:E38_door_LH_FRT": {
+          "registered_max_abs_residual_mm": 12.128959988515817,
+          "registered_max_nearest_mm": 12.128959988515817,
+          "registered_unmeasured": 0,
+          "registered_images": 1378,
+          "unregistered_min_distance_mm": 41.242795951228686,
+          "unregistered_unmeasured": 0,
+          "unregistered_images": 100
+        },
+        "0:E38_door_LH_RR": {
+          "registered_max_abs_residual_mm": 12.429836922597588,
+          "registered_max_nearest_mm": 12.429836922597588,
+          "registered_unmeasured": 0,
+          "registered_images": 1358,
+          "unregistered_min_distance_mm": 192.58072618152232,
+          "unregistered_unmeasured": 0,
+          "unregistered_images": 120
+        }
+      }
+    },
+    "fold0_s123": {
+      "runs": 8,
+      "registered_max_abs_residual_mm": 14.073453740053765,
+      "unregistered_min_distance_mm": 37.56847088489553,
+      "tau_interval_mm": [
+        14.073453740053765,
+        37.56847088489553
+      ],
+      "tau_30_inside": true,
+      "registered_unmeasured": 0,
+      "unregistered_unmeasured": 0,
+      "per_class": {
+        "E25_door_LH_FRT": {
+          "cad_mm": 724,
+          "gap_to_nearest_cad_mm": 41,
+          "nominal_rejection_margin_mm": 11,
+          "observed_min_distance_mm": 38.68516658073952,
+          "observed_rejection_margin_mm": 8.68516658073952
+        },
+        "E25_door_LH_RR": {
+          "cad_mm": 1037,
+          "gap_to_nearest_cad_mm": 50,
+          "nominal_rejection_margin_mm": 20,
+          "observed_min_distance_mm": 48.03221868439118,
+          "observed_rejection_margin_mm": 18.032218684391182
+        },
+        "E25_door_RH": {
+          "cad_mm": 886,
+          "gap_to_nearest_cad_mm": 74,
+          "nominal_rejection_margin_mm": 44,
+          "observed_min_distance_mm": 65.24866268664312,
+          "observed_rejection_margin_mm": 35.248662686643115
+        },
+        "E30_E38_door_RH": {
+          "cad_mm": 1087,
+          "gap_to_nearest_cad_mm": 50,
+          "nominal_rejection_margin_mm": 20,
+          "observed_min_distance_mm": 37.56847088489553,
+          "observed_rejection_margin_mm": 7.568470884895532
+        },
+        "E30_door_LH_FRT": {
+          "cad_mm": 765,
+          "gap_to_nearest_cad_mm": 41,
+          "nominal_rejection_margin_mm": 11,
+          "observed_min_distance_mm": 38.37567407621975,
+          "observed_rejection_margin_mm": 8.375674076219752
+        },
+        "E30_door_LH_RR": {
+          "cad_mm": 1158,
+          "gap_to_nearest_cad_mm": 71,
+          "nominal_rejection_margin_mm": 41,
+          "observed_min_distance_mm": 67.59232030838643,
+          "observed_rejection_margin_mm": 37.592320308386434
+        },
+        "E38_door_LH_FRT": {
+          "cad_mm": 812,
+          "gap_to_nearest_cad_mm": 47,
+          "nominal_rejection_margin_mm": 17,
+          "observed_min_distance_mm": 40.72909432379265,
+          "observed_rejection_margin_mm": 10.729094323792651
+        },
+        "E38_door_LH_RR": {
+          "cad_mm": 1352,
+          "gap_to_nearest_cad_mm": 194,
+          "nominal_rejection_margin_mm": 164,
+          "observed_min_distance_mm": 192.57859933800523,
+          "observed_rejection_margin_mm": 162.57859933800523
+        }
+      },
+      "per_run": {
+        "0:E25_door_LH_FRT": {
+          "registered_max_abs_residual_mm": 12.557751647952273,
+          "registered_max_nearest_mm": 12.557751647952273,
+          "registered_unmeasured": 0,
+          "registered_images": 1438,
+          "unregistered_min_distance_mm": 38.68516658073952,
+          "unregistered_unmeasured": 0,
+          "unregistered_images": 40
+        },
+        "0:E25_door_LH_RR": {
+          "registered_max_abs_residual_mm": 12.347835577602382,
+          "registered_max_nearest_mm": 12.347835577602382,
+          "registered_unmeasured": 0,
+          "registered_images": 1200,
+          "unregistered_min_distance_mm": 48.03221868439118,
+          "unregistered_unmeasured": 0,
+          "unregistered_images": 278
+        },
+        "0:E25_door_RH": {
+          "registered_max_abs_residual_mm": 14.073453740053765,
+          "registered_max_nearest_mm": 14.073453740053765,
+          "registered_unmeasured": 0,
+          "registered_images": 1198,
+          "unregistered_min_distance_mm": 65.24866268664312,
+          "unregistered_unmeasured": 0,
+          "unregistered_images": 280
+        },
+        "0:E30_E38_door_RH": {
+          "registered_max_abs_residual_mm": 9.053865864616796,
+          "registered_max_nearest_mm": 9.053865864616796,
+          "registered_unmeasured": 0,
+          "registered_images": 1198,
+          "unregistered_min_distance_mm": 37.56847088489553,
+          "unregistered_unmeasured": 0,
+          "unregistered_images": 280
+        },
+        "0:E30_door_LH_FRT": {
+          "registered_max_abs_residual_mm": 12.44210531827298,
+          "registered_max_nearest_mm": 12.44210531827298,
+          "registered_unmeasured": 0,
+          "registered_images": 1298,
+          "unregistered_min_distance_mm": 38.37567407621975,
+          "unregistered_unmeasured": 0,
+          "unregistered_images": 180
+        },
+        "0:E30_door_LH_RR": {
+          "registered_max_abs_residual_mm": 12.357068720426696,
+          "registered_max_nearest_mm": 12.357068720426696,
+          "registered_unmeasured": 0,
+          "registered_images": 1278,
+          "unregistered_min_distance_mm": 67.59232030838643,
+          "unregistered_unmeasured": 0,
+          "unregistered_images": 200
+        },
+        "0:E38_door_LH_FRT": {
+          "registered_max_abs_residual_mm": 12.813819444390447,
+          "registered_max_nearest_mm": 12.813819444390447,
+          "registered_unmeasured": 0,
+          "registered_images": 1378,
+          "unregistered_min_distance_mm": 40.72909432379265,
+          "unregistered_unmeasured": 0,
+          "unregistered_images": 100
+        },
+        "0:E38_door_LH_RR": {
+          "registered_max_abs_residual_mm": 12.431529115104468,
+          "registered_max_nearest_mm": 12.431529115104468,
+          "registered_unmeasured": 0,
+          "registered_images": 1358,
+          "unregistered_min_distance_mm": 192.57859933800523,
+          "unregistered_unmeasured": 0,
+          "unregistered_images": 120
+        }
+      }
+    },
+    "fold0_s456": {
+      "runs": 8,
+      "registered_max_abs_residual_mm": 14.463519565166507,
+      "unregistered_min_distance_mm": 36.869951250495205,
+      "tau_interval_mm": [
+        14.463519565166507,
+        36.869951250495205
+      ],
+      "tau_30_inside": true,
+      "registered_unmeasured": 1,
+      "unregistered_unmeasured": 0,
+      "per_class": {
+        "E25_door_LH_FRT": {
+          "cad_mm": 724,
+          "gap_to_nearest_cad_mm": 41,
+          "nominal_rejection_margin_mm": 11,
+          "observed_min_distance_mm": 38.575819007155474,
+          "observed_rejection_margin_mm": 8.575819007155474
+        },
+        "E25_door_LH_RR": {
+          "cad_mm": 1037,
+          "gap_to_nearest_cad_mm": 50,
+          "nominal_rejection_margin_mm": 20,
+          "observed_min_distance_mm": 50.24517025160185,
+          "observed_rejection_margin_mm": 20.24517025160185
+        },
+        "E25_door_RH": {
+          "cad_mm": 886,
+          "gap_to_nearest_cad_mm": 74,
+          "nominal_rejection_margin_mm": 44,
+          "observed_min_distance_mm": 65.26627607582634,
+          "observed_rejection_margin_mm": 35.26627607582634
+        },
+        "E30_E38_door_RH": {
+          "cad_mm": 1087,
+          "gap_to_nearest_cad_mm": 50,
+          "nominal_rejection_margin_mm": 20,
+          "observed_min_distance_mm": 36.869951250495205,
+          "observed_rejection_margin_mm": 6.869951250495205
+        },
+        "E30_door_LH_FRT": {
+          "cad_mm": 765,
+          "gap_to_nearest_cad_mm": 41,
+          "nominal_rejection_margin_mm": 11,
+          "observed_min_distance_mm": 37.5725943277364,
+          "observed_rejection_margin_mm": 7.572594327736397
+        },
+        "E30_door_LH_RR": {
+          "cad_mm": 1158,
+          "gap_to_nearest_cad_mm": 71,
+          "nominal_rejection_margin_mm": 41,
+          "observed_min_distance_mm": 66.2089870322834,
+          "observed_rejection_margin_mm": 36.2089870322834
+        },
+        "E38_door_LH_FRT": {
+          "cad_mm": 812,
+          "gap_to_nearest_cad_mm": 47,
+          "nominal_rejection_margin_mm": 17,
+          "observed_min_distance_mm": 40.09000691498932,
+          "observed_rejection_margin_mm": 10.090006914989317
+        },
+        "E38_door_LH_RR": {
+          "cad_mm": 1352,
+          "gap_to_nearest_cad_mm": 194,
+          "nominal_rejection_margin_mm": 164,
+          "observed_min_distance_mm": 192.21240615291208,
+          "observed_rejection_margin_mm": 162.21240615291208
+        }
+      },
+      "per_run": {
+        "0:E25_door_LH_FRT": {
+          "registered_max_abs_residual_mm": 12.39599307245885,
+          "registered_max_nearest_mm": 12.39599307245885,
+          "registered_unmeasured": 0,
+          "registered_images": 1438,
+          "unregistered_min_distance_mm": 38.575819007155474,
+          "unregistered_unmeasured": 0,
+          "unregistered_images": 40
+        },
+        "0:E25_door_LH_RR": {
+          "registered_max_abs_residual_mm": 14.463519565166507,
+          "registered_max_nearest_mm": 14.463519565166507,
+          "registered_unmeasured": 0,
+          "registered_images": 1200,
+          "unregistered_min_distance_mm": 50.24517025160185,
+          "unregistered_unmeasured": 0,
+          "unregistered_images": 278
+        },
+        "0:E25_door_RH": {
+          "registered_max_abs_residual_mm": 14.051911532435724,
+          "registered_max_nearest_mm": 14.051911532435724,
+          "registered_unmeasured": 1,
+          "registered_images": 1198,
+          "unregistered_min_distance_mm": 65.26627607582634,
+          "unregistered_unmeasured": 0,
+          "unregistered_images": 280
+        },
+        "0:E30_E38_door_RH": {
+          "registered_max_abs_residual_mm": 7.979988362008953,
+          "registered_max_nearest_mm": 7.979988362008953,
+          "registered_unmeasured": 0,
+          "registered_images": 1198,
+          "unregistered_min_distance_mm": 36.869951250495205,
+          "unregistered_unmeasured": 0,
+          "unregistered_images": 280
+        },
+        "0:E30_door_LH_FRT": {
+          "registered_max_abs_residual_mm": 13.574035038928741,
+          "registered_max_nearest_mm": 13.574035038928741,
+          "registered_unmeasured": 0,
+          "registered_images": 1298,
+          "unregistered_min_distance_mm": 37.5725943277364,
+          "unregistered_unmeasured": 0,
+          "unregistered_images": 180
+        },
+        "0:E30_door_LH_RR": {
+          "registered_max_abs_residual_mm": 13.665841380224492,
+          "registered_max_nearest_mm": 13.665841380224492,
+          "registered_unmeasured": 0,
+          "registered_images": 1278,
+          "unregistered_min_distance_mm": 66.2089870322834,
+          "unregistered_unmeasured": 0,
+          "unregistered_images": 200
+        },
+        "0:E38_door_LH_FRT": {
+          "registered_max_abs_residual_mm": 13.665841380224492,
+          "registered_max_nearest_mm": 13.665841380224492,
+          "registered_unmeasured": 0,
+          "registered_images": 1378,
+          "unregistered_min_distance_mm": 40.09000691498932,
+          "unregistered_unmeasured": 0,
+          "unregistered_images": 100
+        },
+        "0:E38_door_LH_RR": {
+          "registered_max_abs_residual_mm": 12.722885465002946,
+          "registered_max_nearest_mm": 12.722885465002946,
+          "registered_unmeasured": 0,
+          "registered_images": 1358,
+          "unregistered_min_distance_mm": 192.21240615291208,
+          "unregistered_unmeasured": 0,
+          "unregistered_images": 120
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,27 @@
+{
+ "created_at": "2026-11-12T10:12:00+09:00",
+ "protocol_sha256": "cd4d85790047c52992fda1453943733fb8ae0b11222a8e509c5e47055fadadcd",
+ "attempts": [
+  {
+   "step": "select",
+   "attempt": 1,
+   "outcome": "all six splits stopped with \"TypeError: Object of type int64 is not JSON serializable\" when the result file was written; nothing was written or printed, so no validation score had been seen"
+  },
+  {
+   "step": "select",
+   "attempt": 2,
+   "change": "run_extension_v16e.region returns Python ints instead of numpy int64 (type conversion only; candidates, search region and selection rule unchanged)",
+   "outcome": "six splits OK"
+  },
+  {
+   "step": "detect / eval / collect",
+   "attempt": 1,
+   "outcome": "six splits OK, collect OK; nothing re-run"
+  }
+ ],
+ "observations": [
+  "In folds 3, 4 and the temporal split the scale S fitted from the baseline detections of the TRAIN sessions is far from the physical value (2e5 to 7e5 mm instead of about 1,475 mm): in most TRAIN sessions the two corner detections were wrong, so the median of the session medians is not a camera distance. Nearly all TEST images of these splits are then outside the valid distance range.",
+  "reports/extension_v16e/posthoc_learned_scale.json is a POST-HOC diagnostic that was not registered: the same baseline detections judged with the scale of the learned detector of the split. It separates detection errors from the failure of the scale fit and is reported as post hoc.",
+  "The mean single-thread detection time (74 ms per image) was measured while the GPU training queue of extension_v16 used most CPU cores; fold 0 alone, measured first, gave 28 ms."
+ ]
+}

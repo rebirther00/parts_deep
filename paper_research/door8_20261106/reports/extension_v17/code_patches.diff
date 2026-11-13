@@ -1,0 +1,48 @@
+--- run_extension_v5.train_cnn_loco
++++ run_extension_v5.train_cnn_loco (v17: no early stop, RULE and LAST checkpoints)
+@@ -1,5 +1,5 @@
+ def train_cnn_loco(kind, exclude, run, seed=42, workers=4):
+-    sp, summary, rows, splits = snapshot(); cfg = read_json(sp / 'protocol.json'); parts = partition(rows, splits, '0')
++    sp, summary, rows, splits = snapshot(); cfg = read_json(sp / 'protocol.json'); parts = partition(rows, splits, _FOLD)
+     if exclude not in cfg['classes']:
+         raise ValueError(exclude)
+     classes = [c for c in cfg['classes'] if c != exclude]; idx = {c: i for i, c in enumerate(classes)}
+@@ -16,14 +16,14 @@
+     scaler = torch.amp.GradScaler('cuda', enabled=dev.type == 'cuda')
+     scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(opt, mode='min', factor=.5, patience=3)
+     meta = dict(model_kind=kind, snapshot='v1', snapshot_sha256=sha256(sp / 'COMPLETE.json'), protocol_sha256=summary['protocol_sha256'],
+-                extension_protocol_sha256=sha256(PROTOCOL), fold='0', seed=seed, classes=classes, excluded_class=exclude,
++                extension_protocol_sha256=sha256(PROTOCOL), fold=_FOLD, seed=seed, classes=classes, excluded_class=exclude,
+                 image_size=hp['image_size'], training_regime='field_class_labels_leave_one_class_out',
+                 initialization='ImageNet1K_V1', initialization_sha256=sha256(pretrained_resnet()),
+                 train_frame_ids=[r['frame_id'] for r in tr], val_frame_ids=[r['frame_id'] for r in va],
+                 train_group_ids=sorted({r['group_id'] for r in tr}), val_group_ids=sorted({r['group_id'] for r in va}),
+                 pilot=False, requested_epochs=hp['epochs'], started_at=now(), status='running', hyperparameters=hp, device=str(dev))
+     meta.update(capture_code()); dump(runpath / 'run.json', meta)
+-    hist = []; best = (-1., float('-inf')); wait = 0; t0 = time.perf_counter()
++    hist = []; best = (-1., float('-inf')); wait = 0; stopped = False; t0 = time.perf_counter()
+     for ep in range(hp['epochs']):
+         net.train(); total = 0.; seen = 0; et = time.perf_counter()
+         for x, y, _ in dl:
+@@ -37,13 +37,16 @@
+         scheduler.step(vloss)
+         rec = dict(epoch=ep + 1, train_loss=total / seen, val_loss=vloss, val_session_balanced_accuracy=score[0], seconds=time.perf_counter() - et)
+         hist.append(rec); dump(runpath / 'history.json', hist)
+-        if score > best:
+-            best = score; wait = 0; torch.save(net.state_dict(), outpath(runpath / 'model.pth')); jsonl(runpath / 'val_predictions.jsonl', pred)
+-            meta.update(best_epoch=ep + 1, best_val_session_balanced_accuracy=score[0]); dump(runpath / 'run.json', meta)
++        if score > best and not stopped:
++            best = score; wait = 0; torch.save(net.state_dict(), outpath(runpath / 'model_rule.pth')); jsonl(runpath / 'val_predictions_rule.jsonl', pred)
++            meta.update(rule_epoch=ep + 1, rule_val_session_balanced_accuracy=score[0]); dump(runpath / 'run.json', meta)
+         else:
+             wait += 1
+         print(json.dumps(dict(run=run, **rec)), flush=True)
+-        if wait >= hp['patience']:
+-            break
++        if wait >= hp['patience'] and not stopped:
++            stopped = True; meta.update(rule_stop_epoch=ep + 1)
++    torch.save(net.state_dict(), outpath(runpath / 'model.pth')); jsonl(runpath / 'val_predictions.jsonl', pred)
++    meta.update(checkpoint='last_epoch', checkpoint_epoch=len(hist), checkpoint_val_session_balanced_accuracy=hist[-1]['val_session_balanced_accuracy'],
++                rule_weights_sha256=sha256(runpath / 'model_rule.pth'))
+     meta.update(status='complete', finished_at=now(), seconds=time.perf_counter() - t0, weights_sha256=sha256(runpath / 'model.pth'))
+     dump(runpath / 'run.json', meta)

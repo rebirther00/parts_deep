@@ -1,0 +1,179 @@
+{
+  "created_at": "2026-11-11T17:03:30+09:00",
+  "protocol_sha256": "5982292eb068cb2129d577feeeea9448a282cf68d15efbf6eb781559b58b51ca",
+  "C1": {
+    "doors": {
+      "before_0921": 160,
+      "0921_to_0923": 22,
+      "after_0923": 179
+    },
+    "failed": {
+      "after_0923": 27,
+      "0921_to_0923": 2
+    },
+    "failed_0921_to_0923": [
+      "20260923/E25_door_LH_FRT/s_082712",
+      "20260923/E30_door_LH_FRT/s_075113"
+    ],
+    "bumped": {
+      "20260921/E38_door_LH_RR/s_155719": {
+        "true": "E38_door_LH_RR",
+        "pred": "E38_door_LH_RR"
+      },
+      "20260922/E38_door_LH_RR/s_080559": {
+        "true": "E38_door_LH_RR",
+        "pred": "E38_door_LH_RR"
+      }
+    }
+  },
+  "C2": {
+    "2026-09-23": {
+      "model_id": 7,
+      "sessions": 175,
+      "sessions_by_state": {
+        "normal": 160,
+        "changed": 15
+      },
+      "majority_wrong": 0,
+      "majority_wrong_by_window": {},
+      "none_judged": 0,
+      "majority_wrong_also_failed_in_manuscript": 0,
+      "manuscript_failed_not_majority_wrong": 29
+    },
+    "2026-11-04": {
+      "model_id": 12,
+      "sessions": 361,
+      "sessions_by_state": {
+        "normal": 160,
+        "changed": 201
+      },
+      "majority_wrong": 27,
+      "majority_wrong_by_window": {
+        "after_0923": 26,
+        "0921_to_0923": 1
+      },
+      "none_judged": 0,
+      "majority_wrong_also_failed_in_manuscript": 22,
+      "manuscript_failed_not_majority_wrong": 7
+    }
+  },
+  "C3": {
+    "rows_model7": 186,
+    "among_361": 175,
+    "input_error_sessions": 10,
+    "other": 1,
+    "among_361_by_state": {
+      "normal": 160,
+      "changed": 15
+    },
+    "last_session": "20260923/E30_E38_door_RH/s_072354"
+  },
+  "C4": {
+    "rgb:s42": {
+      "images_rejected": 1323,
+      "in_fully_rejected_doors": 780,
+      "share": 0.5895691609977324,
+      "doors_fully_rejected": 39,
+      "doors_partly_rejected": 77,
+      "doors": 518
+    },
+    "rgbe:s42": {
+      "images_rejected": 1146,
+      "in_fully_rejected_doors": 720,
+      "share": 0.6282722513089005,
+      "doors_fully_rejected": 36,
+      "doors_partly_rejected": 60,
+      "doors": 518
+    },
+    "rgb:s123": {
+      "images_rejected": 1164,
+      "in_fully_rejected_doors": 760,
+      "share": 0.6529209621993127,
+      "doors_fully_rejected": 38,
+      "doors_partly_rejected": 59,
+      "doors": 518
+    },
+    "rgbe:s123": {
+      "images_rejected": 1157,
+      "in_fully_rejected_doors": 660,
+      "share": 0.5704407951598963,
+      "doors_fully_rejected": 33,
+      "doors_partly_rejected": 67,
+      "doors": 518
+    },
+    "rgb:s456": {
+      "images_rejected": 1368,
+      "in_fully_rejected_doors": 880,
+      "share": 0.6432748538011696,
+      "doors_fully_rejected": 44,
+      "doors_partly_rejected": 64,
+      "doors": 518
+    },
+    "rgbe:s456": {
+      "images_rejected": 1503,
+      "in_fully_rejected_doors": 900,
+      "share": 0.5988023952095808,
+      "doors_fully_rejected": 45,
+      "doors_partly_rejected": 76,
+      "doors": 518
+    }
+  },
+  "C5": {
+    "annotated_40": {
+      "changed": 19,
+      "normal": 21
+    },
+    "folds": {
+      "0": {
+        "train_field_sessions": {
+          "normal": 3,
+          "changed": 5
+        },
+        "selection_field_sessions": {
+          "normal": 5,
+          "changed": 3
+        }
+      },
+      "1": {
+        "train_field_sessions": {
+          "normal": 3,
+          "changed": 5
+        },
+        "selection_field_sessions": {
+          "normal": 5,
+          "changed": 3
+        }
+      },
+      "2": {
+        "train_field_sessions": {
+          "normal": 5,
+          "changed": 3
+        },
+        "selection_field_sessions": {
+          "normal": 4,
+          "changed": 4
+        }
+      },
+      "3": {
+        "train_field_sessions": {
+          "normal": 4,
+          "changed": 4
+        },
+        "selection_field_sessions": {
+          "normal": 3,
+          "changed": 5
+        }
+      },
+      "4": {
+        "train_field_sessions": {
+          "normal": 4,
+          "changed": 4
+        },
+        "selection_field_sessions": {
+          "normal": 4,
+          "changed": 4
+        }
+      }
+    }
+  }
+}

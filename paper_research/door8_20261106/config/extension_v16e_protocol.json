@@ -1,0 +1,35 @@
+{
+  "version": "extension-v16e-20261112",
+  "registered_at": "2026-11-12 09:55:21 KST (written by the script that created this file; no classical detection had been computed)",
+  "requested_by": "Author (user), 2026-11-12: bundle E of the review-round-5 revision plan (a classical image-processing baseline). An earlier author decision (2026-11-11) had left this baseline out; both reviews of v15 asked for it.",
+  "seen_before_registration": "All results of the learned detectors. Of the field annotations: their format and the range of the annotated corner-hole coordinates by camera state (the two corner holes lie in the lower part of the image, x about 430-1670 px and y about 860-1030 px; LH and RH doors are mirrored, so neither hole has a fixed image position). No output of any classical detector on any image.",
+  "principle": "Only the detection stage is replaced. Scale S (door8.geometry.fit_scale on the split's TRAIN sessions, from the baseline's own detections), the CAD list, nearest CAD value, 30 mm reject, valid distance range and the session vote are the functions used for the learned detector. There is no geometry gate because the bolt holes are not detected; an image has a measurement when both corner detections exist.",
+  "supervision": "Per split, the field annotations the learned detector of that split used: its field training images (8 per fold, 24 in the temporal split) give the templates and the search region; its field validation images (8 per fold, 3 temporal) select the configuration. Only the two corner-hole points are used. LAB images are not used. Class labels of the TRAIN sessions are used for S, as for the learned detector.",
+  "search_region": "axis-aligned box around all annotated corner points (both landmarks) of the split's field training images, expanded by a margin m on every side and clipped to the image",
+  "candidates": {
+    "ncc": "normalised cross-correlation template matching (cv2.matchTemplate, TM_CCOEFF_NORMED) on the gray search region. Templates: (2r+1) x (2r+1) gray patches centred on each annotated corner_latch (latch set) and corner_hinge (hinge set) of the training images. Score map of a landmark = pixel-wise maximum over its templates; detection = integer location of the maximum, for each landmark independently. r in {16, 24, 32}.",
+    "log": "dark-blob detection: scale-normalised Laplacian of the Gaussian-smoothed gray region (sigma in {1.5, 2.5}); the strongest local maximum and the strongest one at least 500 px away horizontally are the two corner detections (their order does not matter for D).",
+    "margin": "m in {40, 80} px",
+    "order": [
+      "ncc r=16 m=40",
+      "ncc r=16 m=80",
+      "ncc r=24 m=40",
+      "ncc r=24 m=80",
+      "ncc r=32 m=40",
+      "ncc r=32 m=80",
+      "log sigma=1.5 m=40",
+      "log sigma=1.5 m=80",
+      "log sigma=2.5 m=40",
+      "log sigma=2.5 m=80"
+    ],
+    "not_tried": "Hough circle detection: the corner hole has a radius of about 2.6 px in the 1920 x 1200 image (6 mm x fx / S), below the usable radius range of cv2.HoughCircles; the LoG candidate stands for classical hole detection."
+  },
+  "selection": "per split: the candidate with the highest PCK8 over the corner points of the validation images (a point counts when the detection is within 8 px of the annotation; for the log candidate the better of the two assignments); ties: smaller median error, then the earlier candidate in the listed order. No TEST image or TEST label is used.",
+  "evaluation": {
+    "splits": "five folds (out-of-fold TEST doors, 361) and the temporal split (133 later doors)",
+    "metrics": "as Table 3: image accuracy and coverage, door accuracy with Wilson 95% interval; wrong and rejected doors by class and reason; relative residual range, RMS and largest margin utilisation; localisation of the corner points on the TEST-role annotated images (PCK8, median error); results before / after the camera change; single-thread processing time per image on the learning PC; the selected candidate per split and the validation PCK8 of every candidate",
+    "paired": "doors on which the baseline and the learned field-adapted detector differ"
+  },
+  "claim_rule": "The result is reported whatever its direction. If the baseline identifies the doors as well as the learned detector, the manuscript states so and no longer argues that a learned detector is necessary for this jig. No candidate, margin or rule is added or changed after a TEST result has been seen.",
+  "outputs": "cache/extension_v16e/, reports/extension_v16e/"
+}

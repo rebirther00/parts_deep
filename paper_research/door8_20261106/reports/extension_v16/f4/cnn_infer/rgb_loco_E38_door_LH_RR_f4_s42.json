@@ -1,0 +1,35 @@
+{
+  "run": "rgb_loco_E38_door_LH_RR_f4_s42",
+  "group": "unseen",
+  "kind": "rgb",
+  "fold": "4",
+  "exclude": "E38_door_LH_RR",
+  "classes": [
+    "E25_door_LH_FRT",
+    "E25_door_LH_RR",
+    "E25_door_RH",
+    "E30_E38_door_RH",
+    "E30_door_LH_FRT",
+    "E30_door_LH_RR",
+    "E38_door_LH_FRT"
+  ],
+  "protocol_sha256": "5fb94f5cb1f00890639a55c1ad1ed497763c037eb17ea3eebe2f5726f0364e15",
+  "weights_sha256": "5c5657a37c1f163f0c51c745738e234b566909e13d3834f457c5ca72fc5ad2eb",
+  "train_frames": 3938,
+  "covariance_rank": 512,
+  "consistency": {
+    "test": {
+      "n": 1355,
+      "argmax_mismatch": 0,
+      "stored_confidence_exactly_one": 417
+    },
+    "val": {
+      "n": 1358,
+      "argmax_mismatch": 0,
+      "stored_confidence_exactly_one": 403
+    }
+  },
+  "torch": "2.9.1+cu130",
+  "device": "cuda",
+  "created_at": "2026-11-12T15:04:14+09:00"
+}

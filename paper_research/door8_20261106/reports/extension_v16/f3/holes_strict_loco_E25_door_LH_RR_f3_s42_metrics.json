@@ -1,0 +1,110 @@
+{
+  "unknown_doors": {
+    "n": 14,
+    "rejected": 14,
+    "accepted_as": {}
+  },
+  "unknown_frames": {
+    "n": 279,
+    "rejected": 279
+  },
+  "unknown_closed_set_destination": {
+    "null": 14
+  },
+  "known_doors_threshold": {
+    "n": 58,
+    "correct": 58,
+    "abstained": 0,
+    "wrong": 0
+  },
+  "known_doors_closed": {
+    "n": 58,
+    "correct": 58
+  },
+  "known_frames_judged": 1.0,
+  "auroc_frame": 1.0,
+  "run": "holes_strict_loco_E25_door_LH_RR_f3_s42",
+  "excluded_class": "E25_door_LH_RR",
+  "scale": {
+    "54910212": 1475.2884131777812
+  },
+  "best_epoch": 64,
+  "weights_sha256": "fc96c4a977912a1217806e6db9fe87f06e63cdd252b5622fcc98b15abbaca59f",
+  "test_role_localization": {
+    "all": {
+      "visible_points": 48,
+      "matched": 48,
+      "pck8": 1.0,
+      "pck16": 1.0,
+      "median_error_px_when_matched": 2.304222322595744,
+      "p95_error_px_when_matched": 4.082006008108923
+    },
+    "per_channel": {
+      "bolt": {
+        "visible_points": 32,
+        "matched": 32,
+        "pck8": 1.0,
+        "pck16": 1.0,
+        "median_error_px_when_matched": 2.564138559365419,
+        "p95_error_px_when_matched": 4.066977245865795
+      },
+      "hinge": {
+        "visible_points": 8,
+        "matched": 8,
+        "pck8": 1.0,
+        "pck16": 1.0,
+        "median_error_px_when_matched": 2.1922581632370286,
+        "p95_error_px_when_matched": 4.161663060985052
+      },
+      "latch": {
+        "visible_points": 8,
+        "matched": 8,
+        "pck8": 1.0,
+        "pck16": 1.0,
+        "median_error_px_when_matched": 1.3764532207289921,
+        "p95_error_px_when_matched": 3.004494304718813
+      }
+    },
+    "scope": "Field TEST-role annotated images of the split; missing detections fail PCK; never used for training or selection."
+  },
+  "excluded_class_test_role_points": [
+    {
+      "frame_id": "43:rgb_0078.png",
+      "key": "bolt_tl",
+      "channel": "bolt",
+      "error_px": 1.485250147281529
+    },
+    {
+      "frame_id": "43:rgb_0078.png",
+      "key": "bolt_tr",
+      "channel": "bolt",
+      "error_px": 3.5279824262601593
+    },
+    {
+      "frame_id": "43:rgb_0078.png",
+      "key": "bolt_bl",
+      "channel": "bolt",
+      "error_px": 3.163623397308933
+    },
+    {
+      "frame_id": "43:rgb_0078.png",
+      "key": "bolt_br",
+      "channel": "bolt",
+      "error_px": 3.1815488366517815
+    },
+    {
+      "frame_id": "43:rgb_0078.png",
+      "key": "corner_hinge",
+      "channel": "hinge",
+      "error_px": 1.7104926191012644
+    },
+    {
+      "frame_id": "43:rgb_0078.png",
+      "key": "corner_latch",
+      "channel": "latch",
+      "error_px": 3.050639277266398
+    }
+  ],
+  "unknown_measured_D_median": 1038.3884584648347,
+  "unknown_min_distance_mm": 48.17284712721698
+}

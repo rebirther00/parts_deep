@@ -1,0 +1,117 @@
+{
+  "created_at": "2026-11-12T09:59:53+09:00",
+  "protocol_sha256": "cd4d85790047c52992fda1453943733fb8ae0b11222a8e509c5e47055fadadcd",
+  "split": "0",
+  "selected": "ncc r=32 m=40",
+  "scale": {
+    "54910212": 1480.736703355032
+  },
+  "seconds_per_image_single_thread": 0.028114741666497692,
+  "doors": {
+    "n": 74,
+    "correct": 67,
+    "abstained": 6,
+    "wrong": 1
+  },
+  "frames": {
+    "n": 1478,
+    "correct": 917,
+    "abstained": 553,
+    "wrong": 8
+  },
+  "frame_reasons": {
+    "ok": 925,
+    "distance_range": 551,
+    "cad_distance_reject": 2
+  },
+  "localisation_test_role": {
+    "points": 16,
+    "pck8": 0.6875,
+    "median_px": 1.718574368563458,
+    "max_px": 995.9051530913977
+  },
+  "residual": {
+    "frames_measured": 927,
+    "percentiles_5_50_95": [
+      -0.0014221174450017582,
+      0.00322642797369066,
+      0.009250843715852497
+    ],
+    "range": [
+      -0.31217818870297775,
+      0.010188335229099232
+    ],
+    "rms": 0.02536644744809696,
+    "mean_abs": 0.0063290285219679485,
+    "max_abs_mm": 339.3376911201368,
+    "frames_out_of_band": 10,
+    "max_utilisation": 11.822174693438292,
+    "within_door_sd_median": 3.1561922290385446e-05,
+    "between_door_sd": 0.04220511171117587
+  },
+  "failed_doors": [
+    {
+      "door": "20260918/E30_E38_door_RH/s_095707",
+      "true": "E30_E38_door_RH",
+      "pred": null,
+      "state": "before"
+    },
+    {
+      "door": "20261002/E25_door_RH/s_164340",
+      "true": "E25_door_RH",
+      "pred": null,
+      "state": "after"
+    },
+    {
+      "door": "20261006/E30_E38_door_RH/s_170710",
+      "true": "E30_E38_door_RH",
+      "pred": "E38_door_LH_FRT",
+      "state": "after"
+    },
+    {
+      "door": "20261007/E30_door_LH_RR/s_164351",
+      "true": "E30_door_LH_RR",
+      "pred": null,
+      "state": "after"
+    },
+    {
+      "door": "20261007/E30_door_LH_RR/s_171409",
+      "true": "E30_door_LH_RR",
+      "pred": null,
+      "state": "after"
+    },
+    {
+      "door": "20261013/E25_door_RH/s_071934",
+      "true": "E25_door_RH",
+      "pred": null,
+      "state": "after"
+    },
+    {
+      "door": "20261028/E30_E38_door_RH/s_150546",
+      "true": "E30_E38_door_RH",
+      "pred": null,
+      "state": "after"
+    }
+  ],
+  "by_state": {
+    "before": {
+      "n": 30,
+      "correct": 29,
+      "abstained": 1,
+      "wrong": 0
+    },
+    "after": {
+      "n": 44,
+      "correct": 38,
+      "abstained": 5,
+      "wrong": 1
+    }
+  },
+  "differs_from_learned": 7,
+  "learned_doors": {
+    "n": 74,
+    "correct": 74,
+    "abstained": 0,
+    "wrong": 0
+  }
+}

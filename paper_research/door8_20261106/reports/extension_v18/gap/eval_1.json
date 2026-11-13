@@ -1,0 +1,97 @@
+{
+  "created_at": "2026-11-13T14:21:19+09:00",
+  "protocol_sha256": "dea8e309c85a7806ce28def5c4c1494d97b6415a4600d4cff1ed01040beb6bb5",
+  "variant": "gap",
+  "split": "1",
+  "selected": "ncc r=24 m=40",
+  "scale": {
+    "54910212": 1474.5439487351066
+  },
+  "scale_learned": {
+    "54910212": 1474.7142049471586
+  },
+  "seconds_per_image_single_thread": 0.05246280593468776,
+  "doors": {
+    "n": 73,
+    "correct": 73,
+    "abstained": 0,
+    "wrong": 0
+  },
+  "frames": {
+    "n": 1455,
+    "correct": 1445,
+    "abstained": 3,
+    "wrong": 7
+  },
+  "frame_reasons": {
+    "ok": 1452,
+    "cad_distance_reject": 3
+  },
+  "localisation_test_role": {
+    "points": 16,
+    "pck8": 0.625,
+    "median_px": 1.9953678605094642,
+    "max_px": 1162.5650431025354
+  },
+  "residual": {
+    "frames_measured": 1455,
+    "percentiles_5_50_95": [
+      -0.004397335921301537,
+      -2.4399731445967632e-05,
+      0.003506714582216297
+    ],
+    "range": [
+      -0.21363397340914536,
+      0.3436335005636513
+    ],
+    "rms": 0.014575036834425804,
+    "mean_abs": 0.0029295899179533095,
+    "max_abs_mm": 279.0304024576849,
+    "frames_out_of_band": 10,
+    "max_utilisation": 0.23662129947487393,
+    "within_door_sd_median": 0.0005478663558406707,
+    "between_door_sd": 0.002315543039225162
+  },
+  "failed_doors": [],
+  "by_state": {
+    "before": {
+      "n": 35,
+      "correct": 35,
+      "abstained": 0,
+      "wrong": 0
+    },
+    "after": {
+      "n": 38,
+      "correct": 38,
+      "abstained": 0,
+      "wrong": 0
+    }
+  },
+  "differs_from_learned": 0,
+  "learned_doors": {
+    "n": 73,
+    "correct": 73,
+    "abstained": 0,
+    "wrong": 0
+  },
+  "same_hole": {
+    "train": 0,
+    "train_images": 4247,
+    "test": 0,
+    "test_images": 1455
+  },
+  "learned_scale": {
+    "doors": {
+      "n": 73,
+      "correct": 73,
+      "abstained": 0,
+      "wrong": 0
+    },
+    "frames": {
+      "n": 1455,
+      "correct": 1445,
+      "abstained": 3,
+      "wrong": 7
+    }
+  }
+}

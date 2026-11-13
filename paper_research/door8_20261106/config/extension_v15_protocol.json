@@ -1,0 +1,45 @@
+{
+  "version": "extension-v15-20261111",
+  "registered_at": "2026-11-11 17:02 KST (file time), before A or B below was computed",
+  "requested_by": "Review round 4 of manuscript v14 (manuscript/review_round4_door_shape_identification.md, 2026-11-11), items 1 to 3 and the small notes. No training.",
+  "seen_before_registration": "Everything reported up to manuscript v14, including reports/review3_checks_v14.json: the camera states by session (operational records and images), the pixel-width relative residual medians before / after the change with the scale S fit on all TRAIN sessions (-0.34% / +0.18%), the depth-plane failures by date, the operational records of session decisions (pred_major of the eleven input-error sessions equals their corrected labels). Not seen: any decision or residual with a scale fit on one camera state only (A); any output of the manuscript's own hole detector or CNNs on the five in-list input-error sessions (B).",
+  "camera_states": {
+    "normal": "session date before 2026-09-21 (160 of the 361 sessions; last session 2026-09-18 13:26)",
+    "changed": "session date from 2026-09-21 (201 sessions), consisting of bumped = ['20260921/E38_door_LH_RR/s_155719', '20260922/E38_door_LH_RR/s_080559'] and re-adjusted = the other 199",
+    "basis": "operational records (per-session pixel scale and depth-plane tilt) and the images in reports/camera_readjustment_202609; the author states that date and time of the bump were not recorded"
+  },
+  "A_scale_transfer": {
+    "question": "Does the decision hold when the scale S is fit on one camera state and applied to the other?",
+    "data": "stored features of the five field-adapted detectors (run_extension_v5.hole_pool, integer peaks); five-fold partition of snapshot v1; no detector is run",
+    "forward_primary": "for each fold k: S = door8.geometry.fit_scale(TRAIN sessions of fold k in state normal, features, cad, 'pixel'); TEST frames of fold k in state changed are judged with door8.geometry.classify_measurement (8 CAD values, geometry gate, 30 mm reject) and the session vote run_extension_v5.vote; pooled over the five folds (201 doors)",
+    "reverse_secondary": "the same with S fit on the TRAIN sessions in state changed and applied to the TEST frames in state normal (160 doors)",
+    "depth_secondary": "forward and reverse repeated with mode 'depth' (depth-plane distance with its scale fit on one state only)",
+    "reference": "the stored decisions with S fit on all TRAIN sessions, restricted to the same doors",
+    "metrics": "doors and frames correct / rejected / wrong; relative residual to the CAD value of the true class (median, minimum, maximum, RMS); margin utilisation U as in run_extension_v12.residual_stats with run_extension_v5.bands; S per fold; results for the two bumped sessions listed separately",
+    "limit_to_state": "the detectors were adapted and selected with field images of both camera states; the number of annotated field images per state and role is reported (C5). Only S is restricted to one state."
+  },
+  "B_in_list_input_errors": {
+    "question": "How do the manuscript's own models, and the CNNs that do not use D, classify the five excluded sessions whose operator input was another class of the selection list?",
+    "sessions": [
+      {"session_dir": "20260903/E30_door_LH_RR/s_151736", "operator_input": "E30_door_LH_RR", "corrected": "E25_door_LH_RR"},
+      {"session_dir": "20260903/E30_door_LH_RR/s_183159", "operator_input": "E30_door_LH_RR", "corrected": "E30_E38_door_RH"},
+      {"session_dir": "20260905/E30_door_LH_RR/s_123451", "operator_input": "E30_door_LH_RR", "corrected": "E30_E38_door_RH"},
+      {"session_dir": "20260914/E30_door_LH_RR/s_170035", "operator_input": "E30_door_LH_RR", "corrected": "E30_E38_door_RH"},
+      {"session_dir": "20261029/E30_door_LH_FRT/s_075858", "operator_input": "E30_door_LH_FRT", "corrected": "E38_door_LH_FRT"}
+    ],
+    "images": "every rgb_*.png (with its depth_*.png) in the local collection folder of the session, as for the E23 sessions of extension_v3 (run_extension_v3.e23_rows pattern)",
+    "hole": "fold-0 field-adapted detector holes_field8_f0_s42_v2; features by run_extension_v3.extract; S = fit_scale(fold-0 TRAIN sessions, development feature pool, 'pixel') as in the main fold-0 evaluation; classify_measurement with the 8 CAD values; session = run_extension_v3.session_outcome",
+    "cnn": "rgb_f0_s42 and rgbe_f0_s42 (8 outputs); closed-set argmax per image by door8 cnn_predict, session = mode (run_extension_v3.session_outcome). No rejection threshold is applied. None of the five sessions was in any training, validation or test split.",
+    "report": "per session: number of images, measured D (median), decision of the hole method, decisions of the two CNNs, and whether each equals the operator input or the corrected label. The bound for the manuscript is stated as found: if the hole method disagrees with the operator input in m of the five sessions, the door accuracy under the assumption that those operator inputs were right is 361 / (361 + m)."
+  },
+  "C_retabulations": {
+    "note": "descriptive counts from stored predictions and operational records; no decision rule involved",
+    "C1": "depth-plane failures (five-fold out-of-fold) by date window: before 2026-09-21, 2026-09-21 to 2026-09-23, later; and the result of the two bumped sessions",
+    "C2": "operational depth path (session_hole_metrics, n_wrong against n_judged): sessions with a majority of wrong images in the evaluation of 2026-09-23 (model 7) and of 2026-11-04 (model 12), by camera state, and their overlap with the depth-plane failures of the manuscript",
+    "C3": "composition of the 185 sessions of the operational switch record: how many are among the 361 sessions and how many of those are in state changed",
+    "C4": "Mahalanobis score, unseen condition, three seeds: share of the rejected registered-class TEST images that belong to doors with all images rejected",
+    "C5": "annotated field images (field40 label set) by camera state and by role in each fold"
+  },
+  "rules": "Nothing existing is overwritten; outputs go to reports/extension_v15/. All results are reported whatever the direction. No threshold, rule or metric is changed after seeing the outputs. A technical failure is fixed without changing the analysis, re-run, and noted in reports/extension_v15/run_notes.json.",
+  "outputs": "reports/extension_v15/{scale_transfer.json, scale_transfer_predictions.jsonl, input_errors.json, input_errors_*.jsonl, retabulations.json, collected.json}"
+}

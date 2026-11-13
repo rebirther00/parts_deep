@@ -1,0 +1,45 @@
+{
+ "version": "extension-v16w-20261112",
+ "registered_at": "2026-11-12 14:16:59 KST (written by the script that created this file; no width measurement had been computed on any image)",
+ "requested_by": "Author (user), 2026-11-12: bundle E of the review-round-5 revision plan, the alternative baseline (outer width of the door measured from its edges), to be done if time allowed. Written while the extension_v16 training queue was running.",
+ "seen_before_registration": "All results of the learned detectors and of the registered template-matching baseline (extension_v16e: five-fold doors 190/361, temporal 11/133). Field images as shown in Fig. 1 and in the label and camera check sheets: the doors are bright sheet metal on a darker jig table, with clamps, louvres and tools near the edges. No output of any width measurement on any image.",
+ "principle": "A classical measurement without hole detection and without point annotations: the outer width of the door from a brightness segmentation. Class labels of the TRAIN sessions calibrate it, as they calibrate the scale S of the hole method. Two decision variants are registered; nothing else is tried.",
+ "measurement": {
+  "steps": [
+   "gray image (1920 x 1200), Gaussian blur sigma 2",
+   "threshold T = k x Otsu threshold of the whole image; mask = gray > T",
+   "morphological closing with a square kernel of c x c pixels",
+   "largest 8-connected component of the mask",
+   "for every image row between 25% and 75% of the component's bounding-box height: extent = last minus first component pixel in the row plus 1",
+   "W_px = median of the row extents"
+  ],
+  "no_measurement": "largest component smaller than 5% of the image area, or fewer than 20 rows in the band; the image is then rejected",
+  "candidates": {
+   "k": [
+    1.0,
+    0.8
+   ],
+   "c": [
+    15,
+    41
+   ]
+  },
+  "order": [
+   "k=1.0 c=15",
+   "k=1.0 c=41",
+   "k=0.8 c=15",
+   "k=0.8 c=41"
+  ],
+  "unit": "W_mm = 1450 x W_px / fx. 1,450 mm is the median depth distance of the door plane reported in manuscript v15, section 4.3; it only sets the unit in which the 30 mm rule is applied."
+ },
+ "variant_B_class_reference_widths": "PRIMARY (Table 3 row). Reference of a class = median over its TRAIN sessions of the session median W_mm. Image decision: nearest reference, rejected when farther than 30 mm. Door decision: the session vote of the manuscript (run_extension_v5.vote). A class without a TRAIN session has no reference.",
+ "variant_A_affine_map_to_cad": "Least-squares line D = a x + b over the TRAIN sessions (x = session median of W_px / fx, y = CAD hole distance of the session's class). Image decision: nearest CAD value of the registered list to a x + b, rejected beyond 30 mm; session vote. No valid-distance-range check.",
+ "variant_A_unseen": "Folds 0-4, each of the eight classes c removed: line fitted without the TRAIN sessions of c and candidate selected on the VAL sessions without c. TEST doors judged (i) with the seven-value CAD list (doors of c should be rejected; decisions of the other doors) and (ii) after adding D_c to the list with the same line (doors of c should be identified). Variant B cannot register a class without its images and has no such test.",
+ "selection": "Per split and per variant: the candidate with the highest door accuracy on the VAL sessions (references or line from TRAIN); ties: higher VAL image accuracy, then the earlier candidate in the listed order. No TEST image or TEST label is used.",
+ "evaluation": {
+  "splits": "five folds (out-of-fold TEST doors, 361) and the temporal split (133 later doors); the partitions of the manuscript",
+  "metrics": "as Table 3: image accuracy and coverage, door accuracy with Wilson 95% interval; wrong and rejected doors by class; results before / after the camera change; doors on which the baseline and the learned field-adapted detector differ; class reference widths, their smallest gap and the spread of the session medians within a class; line coefficients and residual RMS of variant A; single-thread measurement time per image; the selected candidate per split and the VAL accuracy of every candidate"
+ },
+ "claim_rule": "The result is reported whatever its direction. If a width baseline identifies the registered doors as well as the hole method, the manuscript states that a classical width measurement suffices for identification among registered classes in this jig and restates the contribution accordingly; if variant A also rejects and registers unseen classes, that is stated as well. No candidate, variant or rule is added or changed after a TEST result has been seen.",
+ "outputs": "cache/extension_v16w/, reports/extension_v16w/"
+}

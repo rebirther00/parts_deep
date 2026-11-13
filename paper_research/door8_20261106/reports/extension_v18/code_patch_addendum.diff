@@ -1,0 +1,81 @@
+13a14,17
+>     gapfree T1b, addendum config/extension_v18b_protocol.json: the detections of 'gap'; the validation score that selects the
+>             candidate uses the better of the two assignments of the detected points to the annotated holes
+> 
+>   loc-free --variant V           test-role localisation of a variant, key-wise and for the better assignment (addendum)
+39a44
+> PROTOCOL_B = ROOT / 'config/extension_v18b_protocol.json'      # addendum: variant gapfree, loc-free
+43c48
+< VARIANTS = ('gap', 'perkey')
+---
+> VARIANTS = ('gap', 'perkey', 'gapfree')
+112c117,131
+<     return detect_gap(g, s['reg'], s['sets'], cand['r']) if variant == 'gap' else detect_perkey(g, s['regs'], s['sets'], cand['r'])
+---
+>     return detect_perkey(g, s['regs'], s['sets'], cand['r']) if variant == 'perkey' else detect_gap(g, s['reg'], s['sets'], cand['r'])
+> 
+> 
+> def proto(variant):
+>     return PROTOCOL_B if variant == 'gapfree' else PROTOCOL
+> 
+> 
+> def errors_free(det, pts):
+>     """Errors (px) of the two corner points for the better of the two assignments (as run_extension_v16e.errors does for LoG)."""
+>     gt = [np.array(pts[k], float) for k in KEYS]
+>     if not det:
+>         return [None, None]
+>     a, b = (np.array(p[:2]) for p in points(det))
+>     e1 = [np.linalg.norm(a - gt[0]), np.linalg.norm(b - gt[1])]; e2 = [np.linalg.norm(b - gt[0]), np.linalg.norm(a - gt[1])]
+>     return [float(x) for x in (e1 if sum(e1) <= sum(e2) else e2)]
+147c166
+<     tr, va, _ = E.supervision(split); shape = E.gray(tr[0]['rgb']).shape; rows = []
+---
+>     tr, va, _ = E.supervision(split); shape = E.gray(tr[0]['rgb']).shape; rows = []; err = errors_free if variant == 'gapfree' else E.errors
+151c170
+<             errs += E.errors(detect(E.gray(row['rgb']), variant, cand, s), row['points'])
+---
+>             errs += err(detect(E.gray(row['rgb']), variant, cand, s), row['points'])
+154c173
+<     out = dict(created_at=now(), protocol_sha256=sha256(PROTOCOL), variant=variant, split=split, base_run=E.base_run(split), train_images=len(tr), val_images=len(va),
+---
+>     out = dict(created_at=now(), protocol_sha256=sha256(proto(variant)), variant=variant, split=split, base_run=E.base_run(split), train_images=len(tr), val_images=len(va),
+186c205
+<     dump(dst / 'features.json', dict(created_at=now(), protocol_sha256=sha256(PROTOCOL), variant=variant, split=split, n=len(feats), rows_sha256=sha256(dst / 'features.jsonl'),
+---
+>     dump(dst / 'features.json', dict(created_at=now(), protocol_sha256=sha256(proto(variant)), variant=variant, split=split, n=len(feats), rows_sha256=sha256(dst / 'features.jsonl'),
+204c223
+<     if fm['protocol_sha256'] != sha256(PROTOCOL) or sha256(src / 'features.jsonl') != fm['rows_sha256']:
+---
+>     if fm['protocol_sha256'] != sha256(proto(variant)) or sha256(src / 'features.jsonl') != fm['rows_sha256']:
+217c236
+<     res = dict(created_at=now(), protocol_sha256=sha256(PROTOCOL), variant=variant, split=split, selected=fm['selected'], scale=cal['camera_scales'], scale_learned=cal_l['camera_scales'],
+---
+>     res = dict(created_at=now(), protocol_sha256=sha256(proto(variant)), variant=variant, split=split, selected=fm['selected'], scale=cal['camera_scales'], scale_learned=cal_l['camera_scales'],
+237c256
+<     out = dict(created_at=now(), protocol_sha256=sha256(PROTOCOL), variant=variant,
+---
+>     out = dict(created_at=now(), protocol_sha256=sha256(proto(variant)), variant=variant,
+259a279,294
+> def loc_free(variant):
+>     """Test-role localisation from the stored detections: key-wise (as registered) and for the better assignment."""
+>     out = dict(created_at=now(), protocol_sha256=sha256(PROTOCOL_B), variant=variant, splits={}); tot = collections.Counter(); mx = 0.
+>     for split in SPLITS:
+>         pool = {r['frame_id']: r for r in read_jsonl(CACHE / variant / split / 'features.jsonl')}; _, _, labs = E.supervision(split); kw = []; fr = []
+>         for lab in labs:
+>             det = pool[lab['frame_id']]['detection']; kw += E.errors(det, lab['points']); fr += errors_free(det, lab['points'])
+>         out['splits'][split] = dict(key_wise=E.pck(kw), order_free=E.pck(fr))
+>         if split != 'temporal':
+>             tot.update(points=len(fr), key_wise_within_8px=sum(x is not None and x <= 8 for x in kw), order_free_within_8px=sum(x is not None and x <= 8 for x in fr))
+>             mx = max([mx] + [x for x in fr if x is not None])
+>         print(variant, split, 'key-wise', out['splits'][split]['key_wise'], 'order-free', out['splits'][split]['order_free'])
+>     out['five_fold'] = dict(tot, order_free_max_px=mx); print(variant, 'five-fold', out['five_fold'])
+>     dump(OUT / variant / 'localisation_order_free.json', out)
+> 
+> 
+324c359
+<     ap.add_argument('cmd', choices=('same-hole', 'select', 'detect', 'eval', 'collect', 'plane', 'width')); ap.add_argument('--variant', choices=VARIANTS)
+---
+>     ap.add_argument('cmd', choices=('same-hole', 'select', 'detect', 'eval', 'collect', 'loc-free', 'plane', 'width')); ap.add_argument('--variant', choices=VARIANTS)
+336a372,373
+>     elif x.cmd == 'loc-free':
+>         loc_free(x.variant)

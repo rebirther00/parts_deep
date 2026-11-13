@@ -1,0 +1,116 @@
+{
+  "created_at": "2026-11-13T14:22:13+09:00",
+  "protocol_sha256": "dea8e309c85a7806ce28def5c4c1494d97b6415a4600d4cff1ed01040beb6bb5",
+  "variant": "gap",
+  "split": "2",
+  "selected": "ncc r=32 m=40",
+  "scale": {
+    "54910212": 1474.708408286463
+  },
+  "scale_learned": {
+    "54910212": 1475.3139687312205
+  },
+  "seconds_per_image_single_thread": 0.04069381257235146,
+  "doors": {
+    "n": 73,
+    "correct": 70,
+    "abstained": 1,
+    "wrong": 2
+  },
+  "frames": {
+    "n": 1402,
+    "correct": 1333,
+    "abstained": 29,
+    "wrong": 40
+  },
+  "frame_reasons": {
+    "ok": 1373,
+    "cad_distance_reject": 29
+  },
+  "localisation_test_role": {
+    "points": 16,
+    "pck8": 0.8125,
+    "median_px": 0.906944781988329,
+    "max_px": 1185.6514047396056
+  },
+  "residual": {
+    "frames_measured": 1402,
+    "percentiles_5_50_95": [
+      -0.004315304919648044,
+      0.00020667727309819917,
+      0.004388873390979819
+    ],
+    "range": [
+      -0.5575293243973274,
+      0.16900880372438998
+    ],
+    "rms": 0.03618539095030956,
+    "mean_abs": 0.00728280024054593,
+    "max_abs_mm": 753.7796465851866,
+    "frames_out_of_band": 69,
+    "max_utilisation": 24.608127977095506,
+    "within_door_sd_median": 0.000570679318222756,
+    "between_door_sd": 0.06711562638006559
+  },
+  "failed_doors": [
+    {
+      "door": "20260901/E30_door_LH_FRT/s_173308",
+      "true": "E30_door_LH_FRT",
+      "pred": "E38_door_LH_FRT",
+      "state": "before"
+    },
+    {
+      "door": "20260930/E30_door_LH_RR/s_170603",
+      "true": "E30_door_LH_RR",
+      "pred": null,
+      "state": "after"
+    },
+    {
+      "door": "20261023/E25_door_RH/s_105348",
+      "true": "E25_door_RH",
+      "pred": "E25_door_LH_RR",
+      "state": "after"
+    }
+  ],
+  "by_state": {
+    "before": {
+      "n": 28,
+      "correct": 27,
+      "abstained": 0,
+      "wrong": 1
+    },
+    "after": {
+      "n": 45,
+      "correct": 43,
+      "abstained": 1,
+      "wrong": 1
+    }
+  },
+  "differs_from_learned": 3,
+  "learned_doors": {
+    "n": 73,
+    "correct": 73,
+    "abstained": 0,
+    "wrong": 0
+  },
+  "same_hole": {
+    "train": 0,
+    "train_images": 4288,
+    "test": 0,
+    "test_images": 1402
+  },
+  "learned_scale": {
+    "doors": {
+      "n": 73,
+      "correct": 70,
+      "abstained": 1,
+      "wrong": 2
+    },
+    "frames": {
+      "n": 1402,
+      "correct": 1333,
+      "abstained": 29,
+      "wrong": 40
+    }
+  }
+}
