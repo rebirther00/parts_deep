@@ -57,7 +57,8 @@ import radar_check as rc                                  # noqa: E402
 from factory_camera import FactoryCamera, require_cuda_ready   # noqa: E402
 import depth_view                                         # noqa: E402
 
-VERSION = '0.2.0'      # 0.2.0 (2026-11-06): 레이더 옵션 규칙 v2 — 피크 시차 보정·허용치 25/10, 규칙 O 는 피크 동반+판 전체 높이 전제, 프레임별 옵션 근거 기록
+VERSION = '0.2.1'      # 0.2.1 (2026-11-16): 세션 마감 직후 빈 지그 한 장을 타임랩스에 추가(TL_BOUNDARY) — 1분 주기가 놓치는 빠른 교체의 세션 경계 확인용
+# 0.2.0 (2026-11-06): 레이더 옵션 규칙 v2 — 피크 시차 보정·허용치 25/10, 규칙 O 는 피크 동반+판 전체 높이 전제, 프레임별 옵션 근거 기록
 UNKNOWN_LABEL = '미등록 도어 (unknown)'
 STATUS_LABEL = {'judged': '판정', 'unknown': '미등록 도어', 'unrecognized': '미인식(기종 외)', 'abstain': '보류'}
 # CNN 폴백을 돌리는 홀 게이트 실패 종류 — 6점은 잡혔는데 기하가 안 맞는 경우만. 홀 자체가 없는(no_corner/no_frame) 맨 밑판·
@@ -100,6 +101,7 @@ CFG = dict(
     Z_PLATE_MM=_env('Z_PLATE_MM', 1468.0),    # 빈 지그 평판 깊이(OCC_ROI 중앙값, 11/3 등록 시 1468). 배경 등록 때 갱신·npz 에 보존
     Z_EMPTY_TOL_MM=_env('Z_EMPTY_TOL_MM', 15.0),  # OCC_ROI 중앙값이 평판 − 이 값 이상(= 평판 높이)이면 배경맵과 무관하게 '비움' (도어 면은 ≈33mm 앞)
     TL_EVERY_S=_env('TL_EVERY_S', 60.0),      # 타임랩스: 1분 1장 (육안 판정 근거·세션 경계 검증), timelapse/<날짜>/HHMMSS.jpg + index.jsonl
+    TL_BOUNDARY=_env('TL_BOUNDARY', True),    # 세션 마감(LEAVE_S 비움 확인) 직후 한 장을 주기와 무관하게 추가 — 도어 교체가 1분 안에 끝나도 빈 지그가 남는다
     TL_BG_EVERY_S=_env('TL_BG_EVERY_S', 600.0),   # 배경 비교 그림(/bg.jpg 와 동일) 10분 1장 → bg_HHMMSS.jpg
     TL_WIDTH=_env('TL_WIDTH', 960),
     TL_RETAIN_DAYS=_env('TL_RETAIN_DAYS', 30),
@@ -1127,14 +1129,21 @@ class Monitor(threading.Thread):
 
     def _timelapse(self, rgb, m, now):
         cfg = self.cfg
-        if now - getattr(self, 'last_tl_t', 0.0) < cfg['TL_EVERY_S']:
+        # 경계 프레임: 방금 마감한 세션(_finish 'leave' = LEAVE_S 동안 비움 확인)의 '종료 후'이자 다음 세션의 '시작 전' 빈 지그.
+        # 1분 주기와 별개로 한 장 더 남기며 주기 타이머는 건드리지 않는다 (2026-11-16: 교체가 1분 안에 끝나 빈 지그가 안 찍힌 세션이 1/3)
+        boundary, self.tl_boundary = getattr(self, 'tl_boundary', None), None
+        due = now - getattr(self, 'last_tl_t', 0.0) >= cfg['TL_EVERY_S']
+        if not due and boundary is None:
             return
-        self.last_tl_t = now
+        if due:
+            self.last_tl_t = now
         try:
             day = datetime.now().strftime('%Y%m%d')
             tdir = OUTPUT_ROOT / 'timelapse' / day
             tdir.mkdir(parents=True, exist_ok=True)
             stamp = datetime.now().strftime('%H%M%S')
+            if not due and (tdir / f'{stamp}.jpg').exists():
+                return                                  # 같은 초에 주기 프레임이 이미 있음 (그 장이 빈 지그를 보여 준다)
             h, w = rgb.shape[:2]
             sc = cfg['TL_WIDTH'] / w
             img = cv2.resize(rgb, (int(cfg['TL_WIDTH']), int(h * sc)), interpolation=cv2.INTER_AREA)
@@ -1150,8 +1159,9 @@ class Monitor(threading.Thread):
                 'radar': (s.result or {}).get('radar') if s else None,
                 'z_occ': m.get('z_occ'), 'diff': m.get('diff'), 'pts': m.get('pts'), 'intr': m.get('intr'),
                 'z_empty': bool(m.get('z_empty')), 'gate': hr['gate'] if hr else None,
+                **({'boundary': 'leave', 'closed': boundary} if boundary else {}),
             })
-            if now - getattr(self, 'last_tlbg_t', 0.0) >= cfg['TL_BG_EVERY_S']:
+            if due and now - getattr(self, 'last_tlbg_t', 0.0) >= cfg['TL_BG_EVERY_S']:
                 self.last_tlbg_t = now
                 g = self.gates
                 if g.bg is not None or g.last_d4 is not None:
@@ -1224,6 +1234,8 @@ class Monitor(threading.Thread):
             log_event('leave', session_dir=s.rel, status=s.status, pred_class=r.get('pred_class'),
                       part_no=r.get('part_no'), saved=len(s.saved), dwell_s=round(s.dwell, 1), reason=reason)
             kick_upload()
+            if reason == 'leave' and self.cfg['TL_BOUNDARY']:
+                self.tl_boundary = s.rel        # 같은 스텝의 _timelapse 가 '마감 직후 빈 지그' 한 장을 남긴다
         self._set_state('EMPTY')
 
     # -- 조회 --

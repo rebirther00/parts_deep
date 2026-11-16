@@ -61,6 +61,10 @@ python db/backup_db.py --restore-test  # 최근 백업을 풀어 integrity_check
 
 경주 박스의 추론 서비스(`../07_factory_infer.py`, `../DOC_factory_infer.md`)가 도어마다 `result.json`+판정 프레임을 NAS `nas:Guest/weld_infer` 에 올린다.
 학습 PC 는 30분 cron 으로 등록하고 webapp **현장 판정(`/inference`)** 에서 판정 이미지 | 작업자 라벨 대표 이미지 | 2순위 후보를 나란히 보고 확정한다.
+세션 상세(`/inference/<id>`)의 **세션 경계** 줄(2026-11-16): 시작 전 2장 · 첫 장 · 마지막 장 · 종료 후 2장 — 도어 한 개가 한 세션인지 확인용.
+빈 지그 여부는 테두리 색(서비스 상태)이 아니라 비움 조건(pts < 2 이고 z_empty 또는 diff ≤ 0.08, 또는 추론 서비스 0.2.1 의 경계 프레임)으로 판정해 글자로 적는다.
+세션 구간은 DB 시작~종료 시각 ∪ 타임랩스 색인의 세션 표시(마감 안 된 그날 마지막 도어는 DB 종료 시각이 실제보다 이르다). 확정 폼은 상세 화면에도 있다.
+확정은 쓰기 가능 인스턴스에서만: 공개 서비스(:5050)는 `--readonly` 이므로 학습 PC 에서 `python db/webapp.py --port 5051 --host 127.0.0.1` 을 따로 띄운다.
 
 ```bash
 python db/migrate_inference.py             # 최초 1회 (ingest_infer 가 자동으로도 호출)

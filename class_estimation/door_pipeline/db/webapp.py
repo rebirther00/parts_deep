@@ -1630,6 +1630,16 @@ def infer_status(con):
     return N(**st)
 
 
+# 확정 폼 — 목록(/inference)과 상세(/inference/<id>) 가 같이 쓴다. 템플릿 변수: r(판정 행), classes
+CONFIRM_FORM = """
+    <form class="inline" method="post" action="{{ url_for('act_infer_confirm', sid=r.session_id) }}" style="flex-direction:column;align-items:flex-start;gap:4px">
+      {% if r.pred_class and r.pred_class != 'unknown' %}<button name="value" value="ok" {{ 'class=ghost' if r.confirmed_class == r.pred_class }}>판정대로 확정</button>{% endif %}
+      <span><select name="cls">{% for k in ['', 'Unknown'] + classes %}<option value="{{ k }}" {{ 'selected' if k == (r.confirmed_class or r.pred_class) }}>{{ k or '클래스…' }}</option>{% endfor %}</select>
+      <select name="radar"><option value="">레이더 —</option><option value="1" {{ 'selected' if (r.confirmed_radar if r.confirmed_radar is not none else r.radar) == 1 }}>레이더 O</option><option value="0" {{ 'selected' if (r.confirmed_radar if r.confirmed_radar is not none else r.radar) == 0 }}>레이더 X</option></select>
+      <button name="value" value="set" class="ghost">이 값으로 확정</button></span>
+      {% if r.confirmed_class %}<button class="danger" name="value" value="clear">확정 취소</button>{% endif %}
+    </form>"""
+
 INFERENCE = """
 <h1>현장 판정 <span class="muted small">{{ rows|length }}개 표시 — 모델 판정은 잠정값, 대표 이미지와 비교해 확정하면 재학습 GT 가 된다</span></h1>
 <p class="small muted">판정 이미지(6점 오버레이) | 판정 클래스의 <b>작업자 라벨 대표 이미지</b> | 2순위 후보 대표 이미지. 경주 박스 실시간 화면은
@@ -1691,14 +1701,7 @@ INFERENCE = """
       <br><span class="muted small" title="{{ r.vlm.desc }}">{{ r.vlm.desc[:140] }}{{ '…' if r.vlm.desc|length > 140 }}</span>
       <br><span class="muted small">{{ r.vlm.n }}프레임 · {{ (r.vlm.at or '')[5:16] }}</span>
     {% else %}<span class="muted">—</span>{% endif %}</td>
-  <td>{% if not readonly %}
-    <form class="inline" method="post" action="{{ url_for('act_infer_confirm', sid=r.session_id) }}" style="flex-direction:column;align-items:flex-start;gap:4px">
-      {% if r.pred_class and r.pred_class != 'unknown' %}<button name="value" value="ok" {{ 'class=ghost' if r.confirmed_class == r.pred_class }}>판정대로 확정</button>{% endif %}
-      <span><select name="cls">{% for k in ['', 'Unknown'] + classes %}<option value="{{ k }}" {{ 'selected' if k == (r.confirmed_class or r.pred_class) }}>{{ k or '클래스…' }}</option>{% endfor %}</select>
-      <select name="radar"><option value="">레이더 —</option><option value="1" {{ 'selected' if (r.confirmed_radar if r.confirmed_radar is not none else r.radar) == 1 }}>레이더 O</option><option value="0" {{ 'selected' if (r.confirmed_radar if r.confirmed_radar is not none else r.radar) == 0 }}>레이더 X</option></select>
-      <button name="value" value="set" class="ghost">이 값으로 확정</button></span>
-      {% if r.confirmed_class %}<button class="danger" name="value" value="clear">확정 취소</button>{% endif %}
-    </form>{% endif %}</td>
+  <td>{% if not readonly %}""" + CONFIRM_FORM + """{% endif %}</td>
 </tr>
 {% endfor %}
 </table></div>
@@ -1731,11 +1734,23 @@ INFER_DETAIL = """
 <h2>후보 (CAD D 거리순)</h2>
 <div class="tbl"><table><tr><th>클래스</th><th class="n">CAD D</th><th class="n">편차 mm</th></tr>
 {% for c in cands %}<tr><td>{{ c['class'] }}</td><td class="n">{{ c['cad_D_mm'] }}</td><td class="n">{{ c['diff_mm'] }}</td></tr>{% endfor %}</table></div>
-<h2>세션 구간 타임랩스 <span class="muted small">1분 1장 · {{ tl|length }}장 ({{ (r.started_at or '')[11:16] }}~{{ (r.ended_at or '')[11:16] }}) — 육안 판정 근거. 테두리: 회색 빈 지그 · 주황 판정 중 · 초록 판정 완료</span></h2>
+{% set tlcol = {'EMPTY':'#8a93a3','JUDGING':'#d08a2a','JUDGED':'#2F7D4F','UNRESOLVED':'#B45D0E'} %}
+{% if tlb.row %}
+<h2>세션 경계 <span class="muted small">시작 전 {{ tlb.n_before }}장 · 첫 장 · 마지막 장 · 종료 후 {{ tlb.n_after }}장 — 도어 한 개가 한 세션인지 확인. 점선 = 세션 밖, 테두리 색 = 서비스 상태(실제 장면과 다를 수 있어 빈 지그 여부는 글자로 표시)</span></h2>
+<p class="small" style="margin:0 0 6px"><span class="{{ tlb.before[0] }}">{{ tlb.before[1] }}</span> &nbsp;·&nbsp; <span class="{{ tlb.after[0] }}">{{ tlb.after[1] }}</span></p>
+<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-start;padding:4px 0">
+{% for f in tlb.row %}{% if f.gap %}<div class="muted small" style="align-self:center;padding:0 6px">… {{ f.gap }}장 …</div>{% else %}
+<a href="{{ url_for('inference_tl', day=f.day, name=f.file) }}" target="_blank" style="flex:0 0 auto;text-align:center" title="{{ f.ts }} {{ f.state }} {{ f.session_dir or '' }} {{ f.pred_class or '' }} z_occ {{ f.z_occ }} diff {{ f.diff }} pts {{ f.pts }}">
+  <img src="{{ url_for('inference_tl', day=f.day, name=f.file) }}" loading="lazy" style="width:250px;height:156px;object-fit:cover;border-radius:4px;border:2px {{ 'dashed' if f.ctx else 'solid' }} {{ tlcol.get(f.state, '#ccc') }}">
+  <div class="small"><b>{{ {'before':'시작 전', 'after':'종료 후', 'first':'첫 장', 'last':'마지막 장'}.get(f.ctx or f.pos, '') }}</b> {{ f.ts[11:16] }} <span class="{{ 'ok' if f.vacant else 'muted' }}">{{ f.cap }}</span></div></a>{% endif %}{% endfor %}
+</div>
+{% endif %}
+{% if not readonly %}<div class="box" style="margin-top:8px;display:inline-block">""" + CONFIRM_FORM + """</div>{% endif %}
+<h2>세션 구간 타임랩스 <span class="muted small">1분 1장 · {{ tl|length }}장 ({{ tlb.t0[:5] }}~{{ tlb.t1[:5] }}) — 육안 판정 근거. 테두리: 회색 빈 지그 · 주황 판정 중 · 초록 판정 완료</span></h2>
 {% if tl %}<div style="display:flex;gap:6px;overflow-x:auto;padding:4px 0">
 {% for f in tl %}<a href="{{ url_for('inference_tl', day=f.day, name=f.file) }}" target="_blank" style="flex:0 0 auto;text-align:center" title="{{ f.ts }} {{ f.state }} {{ f.pred_class or '' }} z_occ {{ f.z_occ }} diff {{ f.diff }} pts {{ f.pts }}">
-  <img src="{{ url_for('inference_tl', day=f.day, name=f.file) }}" loading="lazy" style="width:180px;height:112px;object-fit:cover;border-radius:4px;border:2px solid {{ {'EMPTY':'#8a93a3','JUDGING':'#d08a2a','JUDGED':'#2F7D4F','UNRESOLVED':'#B45D0E'}.get(f.state, '#ccc') }}">
-  <div class="muted small">{{ f.ts[11:16] }} {{ (f.pred_class or f.state or '')|replace('_door','') }}</div></a>{% endfor %}
+  <img src="{{ url_for('inference_tl', day=f.day, name=f.file) }}" loading="lazy" style="width:180px;height:112px;object-fit:cover;border-radius:4px;border:2px solid {{ tlcol.get(f.state, '#ccc') }}">
+  <div class="muted small">{{ f.ts[11:16] }} {{ f.cap }}</div></a>{% endfor %}
 </div>{% else %}<p class="muted small">미러된 타임랩스 없음 — 박스 그림자 모드이거나 ingest_infer 가 아직 안 받음 (datasets_factory_infer/timelapse/&lt;날짜&gt;/)</p>{% endif %}
 <h2>result.json</h2>
 <pre class="notes">{{ raw }}</pre>
@@ -1830,30 +1845,111 @@ def inference_detail(sid):
         raw = json.dumps(json.loads(m.get("result_json") or "{}"), ensure_ascii=False, indent=1)
     except ValueError:
         cands, raw = [], m.get("result_json") or ""
+    tl, tlb = timelapse_frames(m)
     return page(f"판정 {m['session_dir']}", "inference", INFER_DETAIL, r=m, sid=sid, labels=INFER_STATUS_LABEL,
                 ref=ref_image_name(m["pred_class"], m["radar"]), ref2=ref_image_name(second, m["radar"]), second=second,
-                cands=cands, raw=raw, vlm=vlm_map(con).get(m["session_dir"]), tl=timelapse_frames(m))
+                cands=cands, raw=raw, vlm=vlm_map(con).get(m["session_dir"]), tl=tl, tlb=tlb,
+                classes=list(INFER_CLASSES), readonly=app.config["READONLY"])
+
+
+TL_CTX_N = 2          # 세션 구간 앞뒤로 붙이는 프레임 수 (세션 경계 확인용)
+TL_CTX_MAX_S = 300    # 경계에서 이 시간 안의 프레임만 — 타임랩스 공백(서비스 재시작) 너머의 엉뚱한 장면을 붙이지 않는다
+TL_OCC_OFF = 0.08     # 07_factory_infer.py OCC_OFF 와 같은 값
+
+
+def _tl_vacant(f):
+    """물리적으로 빈 지그인가 — 07_factory_infer 의 비움 조건(홀 점 < 2 이고 평판 높이 비움 또는 배경 차이 작음).
+    state 는 서비스 상태라 실제 장면과 다르다: 이탈 디바운스(LEAVE_S 20초) 동안은 JUDGED 인데 지그가 비어 있고,
+    서비스 시작 직후는 EMPTY 인데 전날 도어가 올라가 있다. 그래서 빈 지그 여부는 state 가 아니라 이 값으로 본다."""
+    if f.get("boundary") == "leave":      # 07_factory_infer 0.2.1: 세션 마감(20초 비움 확인) 직후에 남긴 경계 프레임
+        return True
+    diff = f.get("diff")
+    return (f.get("pts") or 0) < 2 and bool(f.get("z_empty") or (diff is not None and diff <= TL_OCC_OFF))
+
+
+def _tl_sec(hms):
+    return int(hms[:2]) * 3600 + int(hms[3:5]) * 60 + int(hms[6:8])
 
 
 def timelapse_frames(m):
-    """세션 시작~종료 사이의 타임랩스 프레임 (미러 datasets_factory_infer/timelapse/<day>/index.jsonl)."""
-    day = (m.get("session_dir") or "").split("/")[0]
-    p = INFER_MIRROR / "timelapse" / day / "index.jsonl"
-    if not day or not p.exists():
-        return []
+    """세션 구간의 타임랩스 프레임과 세션 경계 요약 (미러 datasets_factory_infer/timelapse/<day>/index.jsonl).
+
+    구간 = DB 시작~종료 시각 안의 프레임 ∪ 색인이 이 세션으로 기록한 프레임. 그날 마지막 도어처럼 마감되지 않은
+    세션은 DB 종료 시각(result.json 마지막 갱신)이 실제보다 일러, 시각만 쓰면 뒤쪽 프레임이 빠진다.
+    반환: (구간 프레임 목록, 경계 요약 dict — row(시작 전·첫 장·마지막 장·종료 후), before/after(css class, 문구))."""
+    sdir = m.get("session_dir") or ""
+    day = sdir.split("/")[0]
     t0 = (m.get("started_at") or "")[11:19]
     t1 = (m.get("ended_at") or "")[11:19] or "23:59:59"
-    out = []
+    tlb = dict(row=[], before=("muted", ""), after=("muted", ""), n_before=0, n_after=0,
+               t0=t0, t1=(m.get("ended_at") or "")[11:19])
+    p = INFER_MIRROR / "timelapse" / day / "index.jsonl"
+    if not day or not p.exists():
+        return [], tlb
+    frames = []
     for line in p.read_text(encoding="utf-8", errors="ignore").splitlines():
         try:
             f = json.loads(line)
-        except ValueError:
+            hms = f["ts"][11:19]
+            _tl_sec(hms)
+        except (ValueError, KeyError, TypeError, IndexError):
             continue
-        hms = f.get("ts", "")[11:19]
-        if t0 <= hms <= t1 and (p.parent / f.get("file", "")).exists():
-            f["day"] = day
-            out.append(f)
-    return out
+        if not (p.parent / f.get("file", "")).exists():
+            continue
+        f.update(day=day, hms=hms, vacant=_tl_vacant(f), ctx=None)
+        other = f.get("session_dir") and f["session_dir"] != sdir
+        label = (f.get("pred_class") or f.get("state") or "").replace("_door", "")
+        f["cap"] = ("빈 지그" if f["vacant"] else
+                    f"{f['session_dir'].split('/')[-1]} {label}" if other else label)
+        frames.append(f)
+    frames.sort(key=lambda f: f["hms"])
+    # 경계 프레임(세션 마감 직후 빈 지그)은 어느 세션에도 속하지 않는다 — 구간에서 빼고 '종료 후/시작 전' 으로만 쓴다
+    win = [f for f in frames if not f.get("boundary")
+           and ((t0 and t0 <= f["hms"] <= t1) or f.get("session_dir") == sdir)]
+    if win:
+        tlb["t0"], tlb["t1"] = min(t0 or win[0]["hms"], win[0]["hms"]), max(win[-1]["hms"], t1 if m.get("ended_at") else "")
+    lo, hi = (win[0]["hms"], win[-1]["hms"]) if win else (t0, t1)
+    if not lo:
+        return win, tlb
+    before = [dict(f, ctx="before") for f in frames
+              if f["hms"] < lo and _tl_sec(lo) - _tl_sec(f["hms"]) <= TL_CTX_MAX_S][-TL_CTX_N:]
+    after = [dict(f, ctx="after") for f in frames
+             if (f["hms"] > hi or (f.get("closed") == sdir and f["hms"] >= hi))
+             and _tl_sec(f["hms"]) - _tl_sec(hi) <= TL_CTX_MAX_S][:TL_CTX_N]
+    for f in before + after:        # 세션 밖인데 지그가 차 있고 다른 세션도 아닌 프레임 (서비스 시작 직후 등)
+        if not f["vacant"] and not f.get("session_dir"):
+            f["cap"] = "지그 점유(세션 밖)"
+    row = list(before)
+    if win:
+        row.append(dict(win[0], pos="first"))
+        if len(win) > 2:
+            row.append(dict(gap=len(win) - 2))
+        if len(win) > 1:
+            row.append(dict(win[-1], pos="last"))
+    row += after
+    tlb.update(row=row, n_before=len(before), n_after=len(after))
+
+    def neighbor(f, side):
+        if f.get("session_dir"):
+            return (f"{side} 세션 {f['session_dir'].split('/')[-1]}({(f.get('pred_class') or '판정 전').replace('_door', '')})"
+                    " · 1분 안에 교체했거나 같은 도어가 두 세션으로 갈린 경우이니 사진으로 구분")
+        return "세션 밖인데 지그가 차 있음 (서비스 시작 직후 등)"
+
+    vac = [f for f in before if f["vacant"]]
+    if vac:
+        tlb["before"] = ("ok", f"시작 전 빈 지그 확인 ({vac[-1]['hms'][:5]})")
+    elif before:
+        tlb["before"] = ("warn", f"시작 전 빈 지그 프레임 없음 — 직전 장은 {neighbor(before[-1], '앞')}")
+    else:
+        tlb["before"] = ("muted", "시작 전 프레임 없음 (그날 첫 프레임이거나 타임랩스 공백)")
+    vac = ([win[-1]] if win and win[-1]["vacant"] else []) or [f for f in after if f["vacant"]]
+    if vac:
+        tlb["after"] = ("ok", f"종료 후 빈 지그 확인 ({vac[0]['hms'][:5]})")
+    elif after:
+        tlb["after"] = ("warn", f"종료 후 빈 지그 프레임 없음 — 다음 장은 {neighbor(after[0], '뒤')}")
+    else:
+        tlb["after"] = ("muted", "종료 후 프레임 없음 (그날 마지막 도어가 지그에 남았거나 아직 미러 전)")
+    return win, tlb
 
 
 @app.route("/inference/tl/<day>/<name>")
