@@ -64,7 +64,16 @@ python db/backup_db.py --restore-test  # 최근 백업을 풀어 integrity_check
 세션 상세(`/inference/<id>`)의 **세션 경계** 줄(2026-11-16): 시작 전 2장 · 첫 장 · 마지막 장 · 종료 후 2장 — 도어 한 개가 한 세션인지 확인용.
 빈 지그 여부는 테두리 색(서비스 상태)이 아니라 비움 조건(pts < 2 이고 z_empty 또는 diff ≤ 0.08, 또는 추론 서비스 0.2.1 의 경계 프레임)으로 판정해 글자로 적는다.
 세션 구간은 DB 시작~종료 시각 ∪ 타임랩스 색인의 세션 표시(마감 안 된 그날 마지막 도어는 DB 종료 시각이 실제보다 이르다). 확정 폼은 상세 화면에도 있다.
-확정은 쓰기 가능 인스턴스에서만: 공개 서비스(:5050)는 `--readonly` 이므로 학습 PC 에서 `python db/webapp.py --port 5051 --host 127.0.0.1` 을 따로 띄운다.
+확정 권한(2026-11-16): 공개 서비스(:5050)는 `--readonly` + 열람 계정 그대로이고, **관리자 계정**(`--admin id:pw` 또는 env `WEBAPP_ADMIN`,
+`~/.config/door_web.env`)으로 `/admin` 에서 로그인한 브라우저만 쓰기 동작 전부(확정·라벨 정정·split·무효화·메모·빌드·옵션)가 열린다.
+로그인은 서명 쿠키(12시간, SameSite=Lax, HTTPS 에서는 Secure)이고 서명 키는 서비스 시작 때마다 새로 만들어 재시작하면 다시 로그인한다.
+POST 는 같은 출처에서 온 것만 받고(Origin/Referer 검사), 로그인 실패 8회면 10분 잠긴다. 확정자는 `inference_results.confirmed_by`(관리자 계정 이름, 로컬 쓰기 인스턴스는 `user`).
+관리자 계정 없이 쓰려면 예전처럼 학습 PC 에서 `python db/webapp.py --port 5051 --host 127.0.0.1` 을 따로 띄운다.
+**세션 제외(2026-11-16)**: 추론 오류·불안정으로 잘못 등록된 세션(같은 도어가 갈린 조각, 도어 아님 등)은 지우지 않고 제외 표시한다 —
+목록·상세의 [세션 제외…](사유 선택 + 설명, 관리자만) → `inference_results.excluded/excluded_reason/excluded_by/excluded_at`(`migrate_inference.py`, user_version 4)
++ 그 세션 이미지 `is_valid=0` + notes 이력. 제외 세션은 목록에서 기본 숨김(필터 "제외 세션 포함/만"), 목록·대시보드 집계와 일치율에서 빠지고 [제외 취소]로 되돌린다.
+행을 지우지 않는 이유: NAS 가 정본이라 지워도 `ingest_infer.py` 가 다시 등록하고, 사유가 남아야 인식율 분모에서 뺀 근거가 된다
+(실제 도어인데 판정을 못 한 보류는 제외 대상이 아니다 — 성능지표상 보류는 분모 포함). `ingest_infer --refresh` 는 이 열을 건드리지 않는다.
 
 ```bash
 python db/migrate_inference.py             # 최초 1회 (ingest_infer 가 자동으로도 호출)

@@ -1,4 +1,5 @@
 """추론 서비스(07_factory_infer.py) 결과 테이블 inference_results 생성 — 멱등 (2026-11-02, user_version=3).
+2026-11-16 (user_version=4): 제외 표시 열 excluded/excluded_reason/excluded_by/excluded_at 추가 — 기존 DB 에는 ALTER TABLE 로 붙인다.
 
     python db/migrate_inference.py [--db db/door_pipeline.db]
 
@@ -50,6 +51,10 @@ CREATE TABLE IF NOT EXISTS inference_results (
     confirmed_by    VARCHAR(30),
     confirmed_at    TIMESTAMP,
     note            TEXT,
+    excluded        INTEGER NOT NULL DEFAULT 0,   -- 1 = 잘못 등록된 세션(추론 오류·조각·도어 아님) — 목록·집계·학습에서 제외 (webapp /inference, 2026-11-16)
+    excluded_reason TEXT,
+    excluded_by     VARCHAR(30),
+    excluded_at     TIMESTAMP,
     created_at      TIMESTAMP NOT NULL DEFAULT (datetime('now','localtime')),
     updated_at      TIMESTAMP NOT NULL DEFAULT (datetime('now','localtime'))
 );
@@ -58,11 +63,22 @@ CREATE INDEX IF NOT EXISTS idx_infer_started ON inference_results(started_at);
 """
 
 
+# 제외 표시 (2026-11-16): 삭제 대신 표시만 한다 — NAS 가 정본이라 행을 지워도 ingest_infer 가 다시 등록하고,
+# 왜 뺐는지(사유·주체·시각)가 남아야 인식율 분모에서 뺀 근거가 된다. ingest_infer 의 갱신은 열을 명시하므로 이 열을 건드리지 않는다.
+EXCLUDE_COLS = [("excluded", "INTEGER NOT NULL DEFAULT 0"), ("excluded_reason", "TEXT"),
+                ("excluded_by", "VARCHAR(30)"), ("excluded_at", "TIMESTAMP")]
+VERSION = 4
+
+
 def migrate(con):
     con.executescript(DDL)
+    have = {r[1] for r in con.execute("PRAGMA table_info(inference_results)")}
+    for name, typ in EXCLUDE_COLS:
+        if name not in have:
+            con.execute(f"ALTER TABLE inference_results ADD COLUMN {name} {typ}")
     v = con.execute("PRAGMA user_version").fetchone()[0]
-    if v < 3:
-        con.execute("PRAGMA user_version = 3")
+    if v < VERSION:
+        con.execute(f"PRAGMA user_version = {VERSION}")
     con.commit()
     return v
 
@@ -74,7 +90,8 @@ def main():
     con = sqlite3.connect(a.db)
     v = migrate(con)
     n = con.execute("SELECT COUNT(*) FROM inference_results").fetchone()[0]
-    print(f"inference_results 준비됨 (user_version {v} → {max(v, 3)}), 행 {n}")
+    ex = con.execute("SELECT COUNT(*) FROM inference_results WHERE excluded").fetchone()[0]
+    print(f"inference_results 준비됨 (user_version {v} → {max(v, VERSION)}), 행 {n}, 제외 {ex}")
 
 
 if __name__ == "__main__":

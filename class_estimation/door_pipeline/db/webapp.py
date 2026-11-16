@@ -21,14 +21,17 @@ import hmac
 import json
 import os
 import re
+import secrets
 import sqlite3
 import statistics
 import time
 from collections import Counter
 from pathlib import Path
+from urllib.parse import urlsplit
 
 from flask import (Flask, Response, abort, flash, g, redirect, render_template_string,
-                   request, send_file, url_for)
+                   request, send_file, session, url_for)
+from flask.sessions import SecureCookieSessionInterface
 from PIL import Image, ImageDraw
 
 import build_dataset as bd
@@ -43,6 +46,19 @@ app = Flask(__name__)
 app.secret_key = "door-db-webapp-local"
 app.config["DB_PATH"] = str(DEFAULT_DB)
 app.config["READONLY"] = False
+app.config["ADMIN_AUTH"] = None                 # (id, pw) — 이 계정으로 로그인하면 --readonly 서비스에서도 쓰기 가능 (main 에서 설정)
+app.config["SESSION_COOKIE_SAMESITE"] = "Lax"   # 다른 사이트가 보낸 POST 에는 로그인 쿠키가 실리지 않는다
+app.config["PERMANENT_SESSION_LIFETIME"] = dt.timedelta(hours=12)
+
+
+class _SessionInterface(SecureCookieSessionInterface):
+    """HTTPS(funnel) 로 들어온 요청에는 Secure 쿠키, 로컬 http 에는 일반 쿠키."""
+
+    def get_cookie_secure(self, app):
+        return request.is_secure
+
+
+app.session_interface = _SessionInterface()
 
 
 # ── DB ──────────────────────────────────────────────────
@@ -70,9 +86,42 @@ def image_abs_path(base_path, rel_path):
     return root / rel_path
 
 
+# ── 권한 (2026-11-16) ────────────────────────────────────
+# 공개 서비스는 --readonly + 열람 계정(--auth) 그대로 두고, 관리자 계정(--admin / env WEBAPP_ADMIN) 으로 /admin 에서
+# 로그인한 브라우저만 쓰기를 허용한다. 로그인 상태는 서명 쿠키(세션)이며 비밀키는 시작할 때마다 새로 만든다
+# (저장소에 있는 기본 secret_key 로는 위조 가능하므로 main 에서 교체 — 재시작하면 다시 로그인).
+
+def admin_name():
+    """관리자로 로그인한 요청이면 계정 이름, 아니면 None."""
+    cred = app.config["ADMIN_AUTH"]
+    who = session.get("admin") if cred else None
+    return who if who and hmac.compare_digest(str(who), cred[0]) else None
+
+
+def is_readonly():
+    return bool(app.config["READONLY"]) and admin_name() is None
+
+
+def actor():
+    """쓰기 기록에 남길 주체 — 관리자 로그인이면 그 계정, 로컬 쓰기 인스턴스면 'user'."""
+    return admin_name() or "user"
+
+
 def guard_write():
-    if app.config["READONLY"]:
-        abort(403, "열람 전용 모드로 실행 중입니다 (--readonly 없이 재시작하면 수정 가능).")
+    if is_readonly():
+        abort(403, "열람 전용입니다 — 관리자 로그인(/admin) 후 수정할 수 있습니다." if app.config["ADMIN_AUTH"]
+              else "열람 전용 모드로 실행 중입니다 (--readonly 없이 재시작하면 수정 가능).")
+
+
+@app.before_request
+def _same_origin_post():
+    """쓰기 요청(POST)은 이 사이트의 화면에서 보낸 것만 받는다 (다른 사이트가 관리자 브라우저를 빌려 보내는 요청 차단)."""
+    if request.method != "POST":
+        return
+    src = request.headers.get("Origin") or request.referrer
+    host = urlsplit(src).netloc if src else ""
+    if host and host not in {request.host, request.headers.get("X-Forwarded-Host", request.host)}:
+        abort(403, "다른 사이트에서 온 쓰기 요청은 받지 않습니다.")
 
 
 # ── 공통 레이아웃 ────────────────────────────────────────
@@ -143,7 +192,8 @@ svg text { fill:var(--muted); font-size:10px; }
   {% for ep, label in [('dashboard','대시보드'), ('inference','현장 판정'), ('sessions','세션'), ('images','이미지'), ('labels','라벨'), ('training','학습·평가'), ('drift','드리프트'), ('options','옵션·품번')] %}
     <a class="tab {{ 'on' if active == ep }}" href="{{ url_for(ep) }}">{{ label }}</a>
   {% endfor %}
-  {% if readonly %}<span class="ro">열람 전용 모드</span>{% endif %}
+  {% if admin %}<form class="ro" method="post" action="{{ url_for('admin_logout') }}" style="display:inline-flex;gap:8px;align-items:center">관리자 {{ admin }} 로그인 중 <button class="ghost" style="padding:2px 8px;font-size:12px">로그아웃</button></form>
+  {% elif readonly %}<span class="ro">열람 전용 모드{% if admin_enabled %} · <a href="{{ url_for('admin_page', next=request.full_path) }}">관리자 로그인</a>{% endif %}</span>{% endif %}
 </nav>
 <main>
 {% with msgs = get_flashed_messages(with_categories=true) %}
@@ -155,8 +205,70 @@ svg text { fill:var(--muted); font-size:10px; }
 
 def page(title, active, body_tpl, **ctx):
     body = render_template_string(body_tpl, **ctx)
-    return render_template_string(LAYOUT, title=title, active=active, body=body,
-                                  readonly=app.config["READONLY"])
+    return render_template_string(LAYOUT, title=title, active=active, body=body, readonly=is_readonly(),
+                                  admin=admin_name(), admin_enabled=bool(app.config["ADMIN_AUTH"]))
+
+
+# ── 관리자 로그인 ────────────────────────────────────────
+
+ADMIN_PAGE = """
+<h1>관리자 로그인</h1>
+<div class="box" style="max-width:420px">
+{% if not enabled %}<p class="muted">이 서비스에는 관리자 계정이 설정되지 않았습니다 (--admin id:pw 또는 env WEBAPP_ADMIN).</p>
+{% elif admin %}<p><b>{{ admin }}</b> 로 로그인되어 있습니다. 확정·정정 버튼이 보입니다.</p>
+<form method="post" action="{{ url_for('admin_logout') }}"><button class="ghost">로그아웃</button></form>
+{% else %}<form method="post" action="{{ url_for('admin_login') }}" style="display:flex;flex-direction:column;gap:8px">
+  <input type="hidden" name="next" value="{{ next }}">
+  <input type="text" name="user" placeholder="관리자 계정" autocomplete="username" autofocus>
+  <input type="password" name="pw" placeholder="비밀번호" autocomplete="current-password"
+         style="padding:5px 8px;border:1px solid var(--line);border-radius:4px;background:var(--card);color:var(--ink);font-size:13px">
+  <button>로그인</button>
+</form>
+<p class="muted small" style="margin-bottom:0">로그인은 이 브라우저에서 12시간 유지되고, 서비스가 재시작되면 다시 로그인합니다.</p>{% endif %}
+</div>
+"""
+ADMIN_FAILS = []                 # 로그인 실패 시각 (프로세스 전체) — 무차별 대입 방지
+ADMIN_MAX_FAILS, ADMIN_LOCK_S = 8, 600
+
+
+def _safe_next(u):
+    u = (u or "").strip()
+    return u if u.startswith("/") and not u.startswith("//") and "\\" not in u and not u.startswith("/admin") else url_for("inference")
+
+
+@app.route("/admin")
+def admin_page():
+    return page("관리자 로그인", "", ADMIN_PAGE, enabled=bool(app.config["ADMIN_AUTH"]), admin=admin_name(),
+                next=_safe_next(request.args.get("next")))
+
+
+@app.post("/admin/login")
+def admin_login():
+    cred = app.config["ADMIN_AUTH"]
+    if not cred:
+        abort(404)
+    now = time.time()
+    ADMIN_FAILS[:] = [t for t in ADMIN_FAILS if now - t < ADMIN_LOCK_S]
+    if len(ADMIN_FAILS) >= ADMIN_MAX_FAILS:
+        abort(429, f"로그인 실패가 많아 잠겼습니다. {int((ADMIN_LOCK_S - (now - ADMIN_FAILS[0])) // 60) + 1}분 뒤 다시 시도하세요.")
+    ok = hmac.compare_digest(request.form.get("user", "").encode(), cred[0].encode()) \
+        & hmac.compare_digest(request.form.get("pw", "").encode(), cred[1].encode())
+    if not ok:
+        ADMIN_FAILS.append(now)
+        flash("관리자 계정 또는 비밀번호가 맞지 않습니다.", "error")
+        return redirect(url_for("admin_page", next=_safe_next(request.form.get("next"))))
+    session.clear()
+    session["admin"] = cred[0]
+    session.permanent = True
+    flash(f"관리자 {cred[0]} 로 로그인했습니다.")
+    return redirect(_safe_next(request.form.get("next")))
+
+
+@app.post("/admin/logout")
+def admin_logout():
+    session.pop("admin", None)
+    flash("로그아웃했습니다.")
+    return redirect(url_for("inference"))
 
 
 # ── 대시보드 ────────────────────────────────────────────
@@ -185,7 +297,7 @@ DASH = """
   <a class="card" href="{{ url_for('inference', confirm='todo') }}"><div class="num {{ 'flag' if inf.todo }}">{{ inf.todo }}</div>
     <div class="lbl">확정 대기 (판정 완료, 육안 확인 전)</div></a>
   <a class="card" href="{{ url_for('inference', status='issue') }}"><div class="num {{ 'flag' if inf.issue }}">{{ inf.issue }}</div>
-    <div class="lbl">미등록·미인식·보류 (확정 전)</div></a>
+    <div class="lbl">미등록·미인식·보류 (확정 전){% if inf.excluded %} · <span class="muted">제외 {{ inf.excluded }}건은 이 줄 집계에서 뺌</span>{% endif %}</div></a>
   <div class="card"><div class="num {{ 'ok' if inf.agree_pct is not none and inf.agree_pct >= 99 }}">{{ ('%.1f%%' % inf.agree_pct) if inf.agree_pct is not none else '—' }}</div>
     <div class="lbl">판정 = 확정 일치율 (확정 {{ inf.confirmed }}건)</div></div>
   <a class="card" href="{{ url_for('inference', vlm='diff') }}"><div class="num {{ 'flag' if inf.vlm_diff }}">{{ inf.vlm_diff }}</div>
@@ -554,7 +666,7 @@ def sessions():
         n_hidden = 0
     return page("세션", "sessions", SESSIONS, rows=rows, n_hidden=n_hidden, order=order,
                 show_invalid=show_invalid, todo=todo if todo_label else "", todo_label=todo_label,
-                readonly=app.config["READONLY"])
+                readonly=is_readonly())
 
 
 DETAIL = """
@@ -657,7 +769,7 @@ def session_detail(sid):
     return page(s["session_dir"], "sessions", DETAIL, s=s, cls=info["cls"], n=info["n"],
                 n_local=info["n_local"], valid=info["valid"], split=info["split"], imgs=imgs,
                 manageable=(ds_name == bd.DATASET_NAME), class_choices=choices,
-                readonly=app.config["READONLY"])
+                readonly=is_readonly())
 
 
 # ── 관리 동작 (build_dataset.py 재사용) ──────────────────
@@ -1478,7 +1590,7 @@ def options():
         rows = [m for m in rows if not m["checked_at"]]
     if cur["q"]:
         rows = [m for m in rows if cur["q"] in m["session_dir"]]
-    return page("옵션·품번", "options", OPTIONS, rows=rows, clss=clss, cur=cur, c=c, readonly=app.config["READONLY"])
+    return page("옵션·품번", "options", OPTIONS, rows=rows, clss=clss, cur=cur, c=c, readonly=is_readonly())
 
 
 @app.route("/options/crop/<int:sid>")
@@ -1577,13 +1689,17 @@ def vlm_map(con):
     return out
 
 
+def _infer_has_exclude(con):
+    return any(r[1] == "excluded" for r in con.execute("PRAGMA table_info(inference_results)"))
+
+
 def infer_status(con):
     """대시보드 카드: 하트비트·오늘/7일 도어 수·확정 대기·미확정·판정-확정 일치율."""
     N = lambda **kw: type("I", (), kw)
     today = dt.date.today()
     st = dict(hb_at="—", hb_msg="미러 없음 (ingest_infer 미실행)", hb_warn=True, today=today.strftime("%Y%m%d"),
               today_n=0, today_judged=0, today_issue=0, week_n=0, last_at="—", todo=0, issue=0, confirmed=0, agree_pct=None,
-              vlm_n=0, vlm_diff=0, vlm_at="—")
+              vlm_n=0, vlm_diff=0, vlm_at="—", excluded=0)
     try:
         vm = vlm_map(con)
         st.update(vlm_n=len(vm), vlm_diff=sum(1 for v in vm.values() if v["agree"] is False),
@@ -1600,7 +1716,9 @@ def infer_status(con):
     except (OSError, ValueError, KeyError):
         pass
     try:
-        rows = con.execute("SELECT status, started_at, judged_at, pred_class, confirmed_class FROM inference_results").fetchall()
+        live = "COALESCE(excluded, 0) = 0" if _infer_has_exclude(con) else "1"
+        st["excluded"] = con.execute(f"SELECT COUNT(*) FROM inference_results WHERE NOT ({live})").fetchone()[0]
+        rows = con.execute(f"SELECT status, started_at, judged_at, pred_class, confirmed_class FROM inference_results WHERE {live}").fetchall()
     except sqlite3.OperationalError:
         return N(**st)
     t0 = today.strftime("%Y-%m-%d")
@@ -1620,15 +1738,33 @@ def infer_status(con):
                 st["issue"] += 1
         else:
             st["confirmed"] += 1
-    last = con.execute("SELECT MAX(judged_at) FROM inference_results WHERE status='judged'").fetchone()[0]
+    last = con.execute(f"SELECT MAX(judged_at) FROM inference_results WHERE status='judged' AND {live}").fetchone()[0]
     if last:
         st["last_at"] = last[5:16]
     agree = con.execute("SELECT SUM(confirmed_class = pred_class), COUNT(*) FROM inference_results "
-                        "WHERE confirmed_class IS NOT NULL AND status='judged'").fetchone()
+                        f"WHERE confirmed_class IS NOT NULL AND status='judged' AND {live}").fetchone()
     if agree and agree[1]:
         st["agree_pct"] = 100.0 * (agree[0] or 0) / agree[1]
     return N(**st)
 
+
+# 세션 제외 (2026-11-16): 추론 오류·불안정으로 잘못 등록된 세션을 지우는 대신 표시한다 (inference_results.excluded, migrate_inference.py).
+# NAS 가 정본이라 행을 지워도 ingest_infer 가 다시 등록하고, 사유가 남아야 인식율 분모에서 뺀 근거가 된다.
+# 제외하면 목록에서 기본 숨김·집계 제외·이미지 is_valid=0(학습 제외). 되돌릴 수 있다.
+INFER_EXCLUDE_REASONS = ("추론 오류·불안정으로 잘못 등록된 세션", "같은 도어가 여러 세션으로 갈린 조각",
+                         "도어 아님 (공구·부품·빈 지그 오검출)", "서비스 시험·재시작 중 생성", "기타")
+app.jinja_env.globals["exclude_reasons"] = INFER_EXCLUDE_REASONS
+
+# 제외 폼 — 목록·상세 공용. 템플릿 변수: r(판정 행)
+EXCLUDE_FORM = """
+    <form class="inline" method="post" action="{{ url_for('act_infer_exclude', sid=r.session_id) }}" style="flex-direction:column;align-items:flex-start;gap:4px">
+      {% if r.excluded %}<button class="ghost" name="action" value="restore">제외 취소</button>
+      {% else %}<details><summary class="small muted" style="cursor:pointer">세션 제외…</summary>
+        <div style="display:flex;flex-direction:column;gap:4px;align-items:flex-start;margin-top:4px">
+        <select name="reason">{% for k in exclude_reasons %}<option>{{ k }}</option>{% endfor %}</select>
+        <input type="text" name="detail" placeholder="덧붙일 설명 (기타는 필수)" style="width:240px">
+        <button class="danger" name="action" value="exclude">이 세션 제외</button></div></details>{% endif %}
+    </form>"""
 
 # 확정 폼 — 목록(/inference)과 상세(/inference/<id>) 가 같이 쓴다. 템플릿 변수: r(판정 행), classes
 CONFIRM_FORM = """
@@ -1652,6 +1788,7 @@ INFERENCE = """
   <div class="card"><div class="num {{ 'flag' if c.todo }}">{{ c.todo }}</div><div class="lbl">확정 대기</div></div>
   <div class="card"><div class="num">{{ c.confirmed }}</div><div class="lbl">확정됨{% if c.agree is not none %} · 일치 {{ '%.1f%%' % c.agree }}{% endif %}</div></div>
   <div class="card"><div class="num {{ 'flag' if c.vlm_diff }}">{{ c.vlm_diff }}</div><div class="lbl">VLM 2차 의견 ≠ 판정 (감사 {{ c.vlm_n }})</div></div>
+  <a class="card" href="{{ url_for('inference', excl='only') }}"><div class="num">{{ c.excluded }}</div><div class="lbl">제외한 세션 (위 숫자에 안 들어감)</div></a>
 </div>
 <form class="filters" method="get">
   <input type="text" name="date" value="{{ cur.date }}" placeholder="날짜 YYYYMMDD (앞부분만도 됨)" style="width:200px">
@@ -1666,16 +1803,21 @@ INFERENCE = """
   <select name="vlm" onchange="this.form.submit()">
     {% for v, lab in [('', 'VLM 전체'), ('diff', 'VLM ≠ 판정'), ('anom', 'VLM 이상 태그'), ('none', 'VLM 미감사')] %}
       <option value="{{ v }}" {{ 'selected' if v == cur.vlm }}>{{ lab }}</option>{% endfor %}</select>
+  <select name="excl" onchange="this.form.submit()">
+    {% for v, lab in [('', '제외 세션 숨김'), ('all', '제외 세션 포함'), ('only', '제외 세션만')] %}
+      <option value="{{ v }}" {{ 'selected' if v == cur.excl }}>{{ lab }}</option>{% endfor %}</select>
   <button class="ghost">필터</button> <a class="small" href="{{ url_for('inference') }}">초기화</a>
   <span class="muted small" style="margin-left:auto">최근 {{ limit }}개까지 표시</span>
 </form>
 <div class="tbl tall wrap"><table>
 <tr><th>시각 · 세션</th><th>상태</th><th>판정</th><th>판정 이미지 | 라벨 대표 | 2순위</th><th>확정</th><th>VLM 2차 의견 <span class="muted small">(Claude, 판정 결과 모름)</span></th><th>{{ '' if readonly else '확정 버튼' }}</th></tr>
 {% for r in rows %}
-<tr>
+<tr {{ 'style=opacity:.6' if r.excluded }}>
   <td><b>{{ (r.started_at or '')[5:16] }}</b><br><a href="{{ url_for('inference_detail', sid=r.session_id) }}" class="small">{{ r.session_dir }}</a>
       <br><span class="muted small">체류 {{ '%.0f' % ((r.dwell_s or 0) / 60) }}분 · {{ r.source or '—' }}{% if r.conflict %} · <span class="warn">CNN 불일치</span>{% endif %}</span></td>
   <td><span class="pill {{ 'test' if r.status != 'judged' }}">{{ labels[r.status] }}</span>
+      {% if r.excluded %}<br><span class="pill none">제외</span><br><span class="small">{{ r.excluded_reason }}</span>
+        <br><span class="muted small">{{ r.excluded_by }} {{ (r.excluded_at or '')[:16] }}</span>{% endif %}
       {% if r.gate_counts and r.status != 'judged' %}<br><span class="muted small">{{ r.gate_counts }}</span>{% endif %}</td>
   <td>{% if r.pred_class %}<b>{{ r.pred_class }}</b>{% else %}<span class="muted">—</span>{% endif %}
       <br><span class="small">{{ r.part_no or '—' }} {{ r.part_name or '' }}</span>
@@ -1701,7 +1843,7 @@ INFERENCE = """
       <br><span class="muted small" title="{{ r.vlm.desc }}">{{ r.vlm.desc[:140] }}{{ '…' if r.vlm.desc|length > 140 }}</span>
       <br><span class="muted small">{{ r.vlm.n }}프레임 · {{ (r.vlm.at or '')[5:16] }}</span>
     {% else %}<span class="muted">—</span>{% endif %}</td>
-  <td>{% if not readonly %}""" + CONFIRM_FORM + """{% endif %}</td>
+  <td>{% if not readonly %}{% if not r.excluded %}""" + CONFIRM_FORM + """{% endif %}""" + EXCLUDE_FORM + """{% endif %}</td>
 </tr>
 {% endfor %}
 </table></div>
@@ -1716,6 +1858,8 @@ INFER_DETAIL = """
   <div class="card"><div class="num">{{ '%.0f' % r.d_mm if r.d_mm else '—' }} mm</div><div class="lbl">D · 마진 {{ '%.0f' % r.margin_mm if r.margin_mm is not none else '—' }} · 편차 {{ '%.0f' % r.nearest_mm if r.nearest_mm is not none else '—' }}</div></div>
   <div class="card"><div class="num" style="font-size:16px">{{ r.confirmed_class or '미확정' }}</div><div class="lbl">확정 {{ (r.confirmed_at or '')[:16] }}</div></div>
 </div>
+{% if r.excluded %}<div class="flash err">제외한 세션입니다 — {{ r.excluded_reason }} <span class="muted small">({{ r.excluded_by }} {{ (r.excluded_at or '')[:16] }})</span>.
+  목록·집계에 들어가지 않고 이미지는 학습에서 빠집니다.</div>{% endif %}
 <div style="display:flex;gap:10px;flex-wrap:wrap;margin:10px 0">
   {% if r.thumb_path %}<figure style="margin:0"><img src="{{ url_for('inference_thumb', sid=r.session_id) }}" style="width:480px;border-radius:6px"><figcaption class="muted small">판정 대표 프레임</figcaption></figure>{% endif %}
   {% if ref %}<figure style="margin:0"><img src="{{ url_for('ref_image', name=ref) }}" style="width:480px;border-radius:6px"><figcaption class="muted small">작업자 라벨 대표: {{ r.pred_class }}</figcaption></figure>{% endif %}
@@ -1745,7 +1889,7 @@ INFER_DETAIL = """
   <div class="small"><b>{{ {'before':'시작 전', 'after':'종료 후', 'first':'첫 장', 'last':'마지막 장'}.get(f.ctx or f.pos, '') }}</b> {{ f.ts[11:16] }} <span class="{{ 'ok' if f.vacant else 'muted' }}">{{ f.cap }}</span></div></a>{% endif %}{% endfor %}
 </div>
 {% endif %}
-{% if not readonly %}<div class="box" style="margin-top:8px;display:inline-block">""" + CONFIRM_FORM + """</div>{% endif %}
+{% if not readonly %}<div class="box" style="margin-top:8px;display:inline-flex;gap:24px;align-items:flex-start">{% if not r.excluded %}<div>""" + CONFIRM_FORM + """</div>{% endif %}<div>""" + EXCLUDE_FORM + """</div></div>{% endif %}
 <h2>세션 구간 타임랩스 <span class="muted small">1분 1장 · {{ tl|length }}장 ({{ tlb.t0[:5] }}~{{ tlb.t1[:5] }}) — 육안 판정 근거. 테두리: 회색 빈 지그 · 주황 판정 중 · 초록 판정 완료</span></h2>
 {% if tl %}<div style="display:flex;gap:6px;overflow-x:auto;padding:4px 0">
 {% for f in tl %}<a href="{{ url_for('inference_tl', day=f.day, name=f.file) }}" target="_blank" style="flex:0 0 auto;text-align:center" title="{{ f.ts }} {{ f.state }} {{ f.pred_class or '' }} z_occ {{ f.z_occ }} diff {{ f.diff }} pts {{ f.pts }}">
@@ -1786,7 +1930,8 @@ def inference():
     except sqlite3.OperationalError:
         raw = []
     cur = dict(date=request.args.get("date", "").strip(), status=request.args.get("status", ""),
-               confirm=request.args.get("confirm", ""), cls=request.args.get("cls", ""), vlm=request.args.get("vlm", ""))
+               confirm=request.args.get("confirm", ""), cls=request.args.get("cls", ""), vlm=request.args.get("vlm", ""),
+               excl=request.args.get("excl", ""))
     limit = int(request.args.get("limit", 300))
     vm = vlm_map(con)
     rows = []
@@ -1798,6 +1943,8 @@ def inference():
         m["vlm"] = vm.get(m["session_dir"])
         rows.append(m)
     clss = sorted({m["pred_class"] for m in rows if m["pred_class"]})
+    every, rows = rows, [m for m in rows if not m.get("excluded")]      # 집계는 제외하지 않은 세션만
+    n_excluded = len(every) - len(rows)
     c = dict(total=len(rows), judged=sum(m["status"] == "judged" for m in rows),
              issue=sum(m["status"] != "judged" for m in rows),
              todo=sum(m["confirmed_class"] is None and m["status"] == "judged" for m in rows),
@@ -1806,6 +1953,11 @@ def inference():
     conf = [m for m in rows if m["confirmed_class"] is not None and m["status"] == "judged"]
     if conf:
         c["agree"] = 100.0 * sum(m["confirmed_class"] == m["pred_class"] for m in conf) / len(conf)
+    c["excluded"] = n_excluded
+    if cur["excl"] == "all":
+        rows = every
+    elif cur["excl"] == "only":
+        rows = [m for m in every if m.get("excluded")]
     if cur["date"]:
         rows = [m for m in rows if (m["session_dir"] or "").startswith(cur["date"])]
     if cur["status"] == "issue":
@@ -1828,7 +1980,7 @@ def inference():
         rows = [m for m in rows if not m["vlm"]]
     rows = rows[:limit]
     return page("현장 판정", "inference", INFERENCE, rows=rows, cur=cur, c=c, clss=clss, labels=INFER_STATUS_LABEL,
-                classes=list(INFER_CLASSES), limit=limit, readonly=app.config["READONLY"])
+                classes=list(INFER_CLASSES), limit=limit, readonly=is_readonly())
 
 
 @app.route("/inference/<int:sid>")
@@ -1849,7 +2001,7 @@ def inference_detail(sid):
     return page(f"판정 {m['session_dir']}", "inference", INFER_DETAIL, r=m, sid=sid, labels=INFER_STATUS_LABEL,
                 ref=ref_image_name(m["pred_class"], m["radar"]), ref2=ref_image_name(second, m["radar"]), second=second,
                 cands=cands, raw=raw, vlm=vlm_map(con).get(m["session_dir"]), tl=tl, tlb=tlb,
-                classes=list(INFER_CLASSES), readonly=app.config["READONLY"])
+                classes=list(INFER_CLASSES), readonly=is_readonly())
 
 
 TL_CTX_N = 2          # 세션 구간 앞뒤로 붙이는 프레임 수 (세션 경계 확인용)
@@ -2012,9 +2164,9 @@ def act_infer_confirm(sid):
             return redirect(request.referrer or url_for("inference"))
         if "FRT" in cls:
             radar = None
-        con.execute("UPDATE inference_results SET confirmed_class=?, confirmed_radar=?, confirmed_by='user', "
+        con.execute("UPDATE inference_results SET confirmed_class=?, confirmed_radar=?, confirmed_by=?, "
                     "confirmed_at=datetime('now','localtime'), updated_at=datetime('now','localtime') WHERE session_id=?",
-                    (cls, radar, sid))
+                    (cls, radar, actor(), sid))
         # 이미지 라벨(재학습 GT) = 확정 클래스 — door_factory_infer 데이터셋 안에서 재배정
         model, part = (cls.split("_door_", 1)[0], "door_" + cls.split("_door_", 1)[1]) if "_door_" in cls else (None, None)
         con.execute("INSERT OR IGNORE INTO classes (dataset_id, name, display_name, model_name, part_type) VALUES (?, ?, ?, ?, ?)",
@@ -2032,6 +2184,45 @@ def act_infer_confirm(sid):
     con.commit()
     flash(f"{r['session_dir']}: {note}")
     return redirect(request.referrer or url_for("inference"))
+
+
+@app.post("/inference/<int:sid>/exclude")
+def act_infer_exclude(sid):
+    """잘못 등록된 세션을 제외/복귀. 행은 지우지 않는다 (INFER_EXCLUDE_REASONS 위 설명 참조)."""
+    guard_write()
+    con = db()
+    back = redirect(request.referrer or url_for("inference"))
+    if not _infer_has_exclude(con):
+        flash("DB 에 제외 표시 열이 없습니다 — python db/migrate_inference.py 를 먼저 실행하세요.", "error")
+        return back
+    r = con.execute("SELECT r.excluded, s.session_dir FROM inference_results r JOIN capture_sessions s ON s.id=r.session_id "
+                    "WHERE r.session_id=?", (sid,)).fetchone()
+    if not r:
+        abort(404)
+    action = request.form.get("action")
+    now = time.strftime("%Y-%m-%d %H:%M")
+    if action == "restore":
+        con.execute("UPDATE inference_results SET excluded=0, excluded_reason=NULL, excluded_by=NULL, excluded_at=NULL, "
+                    "updated_at=datetime('now','localtime') WHERE session_id=?", (sid,))
+        n = con.execute("UPDATE images SET is_valid=1 WHERE session_id=?", (sid,)).rowcount
+        note = f"[{now}] 현장 판정 제외 취소 ({n}장 유효 복귀, {actor()})"
+    elif action == "exclude":
+        reason = (request.form.get("reason") or "").strip()
+        detail = " ".join((request.form.get("detail") or "").split())[:200]
+        if reason not in INFER_EXCLUDE_REASONS or (reason == "기타" and not detail):
+            flash("제외 사유를 고르세요 (기타는 설명 필수).", "error")
+            return back
+        reason = f"{reason} — {detail}" if detail else reason
+        con.execute("UPDATE inference_results SET excluded=1, excluded_reason=?, excluded_by=?, excluded_at=datetime('now','localtime'), "
+                    "updated_at=datetime('now','localtime') WHERE session_id=?", (reason, actor(), sid))
+        n = con.execute("UPDATE images SET is_valid=0 WHERE session_id=?", (sid,)).rowcount     # 학습·평가 뷰에서 제외
+        note = f"[{now}] 현장 판정 제외: {reason} ({n}장 무효, {actor()})"
+    else:
+        abort(400)
+    con.execute("UPDATE capture_sessions SET notes = COALESCE(notes || '\n', '') || ? WHERE id = ?", (note, sid))
+    con.commit()
+    flash(f"{r['session_dir']}: {note}")
+    return back
 
 
 # ── 이미지 서빙 ──────────────────────────────────────────
@@ -2077,11 +2268,19 @@ def main():
     ap.add_argument("--port", type=int, default=5050)
     ap.add_argument("--host", default="0.0.0.0")
     ap.add_argument("--readonly", action="store_true", help="열람 전용 (수정 버튼 비활성)")
+    ap.add_argument("--admin", default=os.environ.get("WEBAPP_ADMIN", ""),
+                    help="관리자 계정 'id:pw' — /admin 에서 로그인하면 --readonly 에서도 쓰기 가능. env WEBAPP_ADMIN 로도 지정")
     ap.add_argument("--auth", default=os.environ.get("WEBAPP_AUTH", ""),
                     help="기본 인증 'id:pw' (외부 공개 시 필수, 미지정=인증 없음). env WEBAPP_AUTH 로도 지정 가능")
     a = ap.parse_args()
     app.config["DB_PATH"] = a.db
     app.config["READONLY"] = a.readonly
+    app.secret_key = secrets.token_hex(32)      # 로그인 쿠키 서명 키 — 시작할 때마다 새로 (저장소의 기본값은 공개돼 있다)
+    if a.admin:
+        admin_user, _, admin_pw = a.admin.partition(":")
+        if not admin_user or len(admin_pw) < 6:      # 2026-11-16 사용자 결정: 12 → 6자 (추측 방어는 로그인 실패 잠금에 기댄다)
+            ap.error("--admin 형식은 'id:pw', 비밀번호는 6자 이상")
+        app.config["ADMIN_AUTH"] = (admin_user, admin_pw)
     if a.auth:
         auth_user, _, auth_pw = a.auth.partition(":")
         if not auth_pw:
@@ -2096,7 +2295,7 @@ def main():
                 return Response("인증이 필요합니다", 401,
                                 {"WWW-Authenticate": 'Basic realm="door_pipeline"'})
     print(f"door_pipeline DB 웹 도구: http://localhost:{a.port}  (DB: {a.db}"
-          f"{', 열람 전용' if a.readonly else ''}{', 기본 인증' if a.auth else ''})")
+          f"{', 열람 전용' if a.readonly else ''}{', 기본 인증' if a.auth else ''}{', 관리자 계정' if a.admin else ''})")
     # funnel(HTTPS 프록시) 뒤에서 리다이렉트가 http 로 생성되지 않게 X-Forwarded-Proto 신뢰
     # (개발 서버 폴백용 — waitress 경로에서는 trusted_proxy 설정이 같은 역할)
     from werkzeug.middleware.proxy_fix import ProxyFix

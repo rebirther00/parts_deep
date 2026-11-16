@@ -291,6 +291,10 @@ CREATE TABLE IF NOT EXISTS inference_results (
     confirmed_by    VARCHAR(30),
     confirmed_at    TIMESTAMP,
     note            TEXT,
+    excluded        INTEGER NOT NULL DEFAULT 0,   -- 1 = 잘못 등록된 세션(추론 오류·조각·도어 아님) — 목록·집계·학습에서 제외 (webapp /inference, 2026-11-16)
+    excluded_reason TEXT,
+    excluded_by     VARCHAR(30),
+    excluded_at     TIMESTAMP,
     created_at      TIMESTAMP NOT NULL DEFAULT (datetime('now','localtime')),
     updated_at      TIMESTAMP NOT NULL DEFAULT (datetime('now','localtime'))
 );
