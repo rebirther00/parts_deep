@@ -1758,7 +1758,8 @@ app.jinja_env.globals["exclude_reasons"] = INFER_EXCLUDE_REASONS
 # 제외 폼 — 목록·상세 공용. 템플릿 변수: r(판정 행)
 EXCLUDE_FORM = """
     <form class="inline" method="post" action="{{ url_for('act_infer_exclude', sid=r.session_id) }}" style="flex-direction:column;align-items:flex-start;gap:4px">
-      {% if r.excluded %}<button class="ghost" name="action" value="restore">제외 취소</button>
+      {% if r.excluded and r.n_children %}<span class="muted small">분할된 세션 — 되돌리려면<br>split_infer_sessions.py undo</span>
+      {% elif r.excluded %}<button class="ghost" name="action" value="restore">제외 취소</button>
       {% else %}<details><summary class="small muted" style="cursor:pointer">세션 제외…</summary>
         <div style="display:flex;flex-direction:column;gap:4px;align-items:flex-start;margin-top:4px">
         <select name="reason">{% for k in exclude_reasons %}<option>{{ k }}</option>{% endfor %}</select>
@@ -1814,6 +1815,8 @@ INFERENCE = """
 {% for r in rows %}
 <tr {{ 'style=opacity:.6' if r.excluded }}>
   <td><b>{{ (r.started_at or '')[5:16] }}</b><br><a href="{{ url_for('inference_detail', sid=r.session_id) }}" class="small">{{ r.session_dir }}</a>
+      {% if r.split_parent %}<br><span class="pill">복원</span> <span class="muted small">합쳐진 <a href="{{ url_for('inference_detail', sid=r.split_parent) }}">{{ (r.parent_dir or '').split('/')[-1] }}</a> 의 {{ r.split_part }}번째 도어</span>{% endif %}
+      {% if r.n_children %}<br><span class="muted small">→ 복원 세션 {{ r.n_children }}개</span>{% endif %}
       <br><span class="muted small">체류 {{ '%.0f' % ((r.dwell_s or 0) / 60) }}분 · {{ r.source or '—' }}{% if r.conflict %} · <span class="warn">CNN 불일치</span>{% endif %}</span></td>
   <td><span class="pill {{ 'test' if r.status != 'judged' }}">{{ labels[r.status] }}</span>
       {% if r.excluded %}<br><span class="pill none">제외</span><br><span class="small">{{ r.excluded_reason }}</span>
@@ -1860,6 +1863,13 @@ INFER_DETAIL = """
 </div>
 {% if r.excluded %}<div class="flash err">제외한 세션입니다 — {{ r.excluded_reason }} <span class="muted small">({{ r.excluded_by }} {{ (r.excluded_at or '')[:16] }})</span>.
   목록·집계에 들어가지 않고 이미지는 학습에서 빠집니다.</div>{% endif %}
+{% if children %}<div class="box" style="margin:8px 0"><b>도어 {{ children|length }}대로 분할된 세션</b> <span class="muted small">— 빈 지그를 못 알아봐 합쳐졌던 것을 초 단위 기록으로 나눔. 판정·확정은 아래 복원 세션에서 한다.</span>
+  <div class="small" style="margin-top:4px">{% for k in children %}<a href="{{ url_for('inference_detail', sid=k.session_id) }}">{{ k.split_part }}. {{ (k.started_at or '')[11:16] }}~{{ (k.ended_at or '')[11:16] }} {{ (k.pred_class or '—').replace('_door', '') }}</a>{{ ' · ' if not loop.last }}{% endfor %}</div></div>{% endif %}
+{% if r.split_parent %}<div class="box" style="margin:8px 0"><b>복원 세션</b> — 합쳐져 있던 <a href="{{ url_for('inference_detail', sid=r.split_parent) }}">{{ parent_dir }}</a> 의 {{ r.split_part }}번째 도어{% if split.parts %} ({{ split.parts }}대 중){% endif %}.
+  <span class="small">구간은 추론 PC 의 초 단위 기록에서 빈 지그가 20초 이상 이어진 곳으로 나눴다. 이 구간에서 기하 게이트를 통과한 {{ split.n_ok }}프레임 중 {{ split.n_vote }}프레임이 {{ r.pred_class }}, D 중앙값 {{ split.d_med }} mm.
+  {% if split.own_frames %}원본 프레임 {{ split.own_frames|length }}장이 이 구간에서 찍혔다.{% else %}원본 프레임은 없고 타임랩스만 있다(위 사진도 타임랩스).{% endif %}
+  레이더는 초 단위 기록에 없어 합쳐진 세션이 당시 표시하던 값이다 — 확정할 때 사진으로 확인할 것.
+  타임랩스 글자는 합쳐진 세션의 그 시각 판정이라 구간 앞쪽은 이전 도어의 클래스로 찍혀 있을 수 있다. 같은 도어를 내렸다 다시 올린 것이면 한쪽을 제외한다.</span></div>{% endif %}
 <div style="display:flex;gap:10px;flex-wrap:wrap;margin:10px 0">
   {% if r.thumb_path %}<figure style="margin:0"><img src="{{ url_for('inference_thumb', sid=r.session_id) }}" style="width:480px;border-radius:6px"><figcaption class="muted small">판정 대표 프레임</figcaption></figure>{% endif %}
   {% if ref %}<figure style="margin:0"><img src="{{ url_for('ref_image', name=ref) }}" style="width:480px;border-radius:6px"><figcaption class="muted small">작업자 라벨 대표: {{ r.pred_class }}</figcaption></figure>{% endif %}
@@ -1943,6 +1953,13 @@ def inference():
         m["vlm"] = vm.get(m["session_dir"])
         rows.append(m)
     clss = sorted({m["pred_class"] for m in rows if m["pred_class"]})
+    by_id = {m["session_id"]: m for m in rows}
+    for m in rows:                                      # 분할(split_infer_sessions.py): 복원 세션 ↔ 합쳐져 있던 원 세션
+        par = by_id.get(m.get("split_parent"))
+        m["parent_dir"] = par["session_dir"] if par else None
+        m.setdefault("n_children", 0)
+        if par:
+            par["n_children"] = par.get("n_children", 0) + 1
     every, rows = rows, [m for m in rows if not m.get("excluded")]      # 집계는 제외하지 않은 세션만
     n_excluded = len(every) - len(rows)
     c = dict(total=len(rows), judged=sum(m["status"] == "judged" for m in rows),
@@ -1997,16 +2014,33 @@ def inference_detail(sid):
         raw = json.dumps(json.loads(m.get("result_json") or "{}"), ensure_ascii=False, indent=1)
     except ValueError:
         cands, raw = [], m.get("result_json") or ""
+    try:
+        split = json.loads(m.get("split_info") or "{}") or {}
+    except ValueError:
+        split = {}
+    parent_dir, children = None, []
+    if m.get("split_parent"):
+        pr = con.execute("SELECT session_dir FROM capture_sessions WHERE id=?", (m["split_parent"],)).fetchone()
+        parent_dir = pr["session_dir"] if pr else None
+    try:
+        children = [dict(k) for k in con.execute(
+            "SELECT session_id, split_part, pred_class, started_at, ended_at FROM inference_results WHERE split_parent=? ORDER BY split_part", (sid,))]
+    except sqlite3.OperationalError:                    # 분할 열이 없는 옛 DB
+        pass
+    m.update(split=split, split_parent_dir=parent_dir, n_children=len(children))
     tl, tlb = timelapse_frames(m)
     return page(f"판정 {m['session_dir']}", "inference", INFER_DETAIL, r=m, sid=sid, labels=INFER_STATUS_LABEL,
                 ref=ref_image_name(m["pred_class"], m["radar"]), ref2=ref_image_name(second, m["radar"]), second=second,
                 cands=cands, raw=raw, vlm=vlm_map(con).get(m["session_dir"]), tl=tl, tlb=tlb,
+                split=split, parent_dir=parent_dir, children=children,
                 classes=list(INFER_CLASSES), readonly=is_readonly())
 
 
 TL_CTX_N = 2          # 세션 구간 앞뒤로 붙이는 프레임 수 (세션 경계 확인용)
 TL_CTX_MAX_S = 300    # 경계에서 이 시간 안의 프레임만 — 타임랩스 공백(서비스 재시작) 너머의 엉뚱한 장면을 붙이지 않는다
 TL_OCC_OFF = 0.08     # 07_factory_infer.py OCC_OFF 와 같은 값
+TL_Z_EMPTY_MIN = 1481        # 07_factory_infer.py Z_EMPTY_MIN_MM (0.2.2) — 세로 바를 벌린 설정의 빈 지그는 지그 중앙 깊이가 이 이상
+TL_NARROW_ZO = (1464, 1476)  # 세로 바를 가운데로 모은 설정(E23 작업)의 빈 지그 — 지그 중앙이 세로 바 높이로 읽힌다 (split_infer_sessions.py)
 
 
 def _tl_vacant(f):
@@ -2015,8 +2049,13 @@ def _tl_vacant(f):
     서비스 시작 직후는 EMPTY 인데 전날 도어가 올라가 있다. 그래서 빈 지그 여부는 state 가 아니라 이 값으로 본다."""
     if f.get("boundary") == "leave":      # 07_factory_infer 0.2.1: 세션 마감(20초 비움 확인) 직후에 남긴 경계 프레임
         return True
-    diff = f.get("diff")
-    return (f.get("pts") or 0) < 2 and bool(f.get("z_empty") or (diff is not None and diff <= TL_OCC_OFF))
+    pts, diff, zo = f.get("pts") or 0, f.get("diff"), f.get("z_occ") or 0
+    if pts >= 2:
+        return False
+    # 색인의 z_empty·diff 는 그때 서비스가 내린 판정이라 0.2.1 까지는 빈 지그를 놓친 프레임이 있다(11/19 사고) → 깊이로도 본다
+    if f.get("z_empty") or (diff is not None and diff <= TL_OCC_OFF) or zo >= TL_Z_EMPTY_MIN:
+        return True
+    return pts == 0 and TL_NARROW_ZO[0] <= zo <= TL_NARROW_ZO[1]
 
 
 def _tl_sec(hms):
@@ -2049,7 +2088,7 @@ def timelapse_frames(m):
         if not (p.parent / f.get("file", "")).exists():
             continue
         f.update(day=day, hms=hms, vacant=_tl_vacant(f), ctx=None)
-        other = f.get("session_dir") and f["session_dir"] != sdir
+        other = f.get("session_dir") and f["session_dir"] not in (sdir, m.get("split_parent_dir"))
         label = (f.get("pred_class") or f.get("state") or "").replace("_door", "")
         f["cap"] = ("빈 지그" if f["vacant"] else
                     f"{f['session_dir'].split('/')[-1]} {label}" if other else label)
@@ -2101,6 +2140,14 @@ def timelapse_frames(m):
         tlb["after"] = ("warn", f"종료 후 빈 지그 프레임 없음 — 다음 장은 {neighbor(after[0], '뒤')}")
     else:
         tlb["after"] = ("muted", "종료 후 프레임 없음 (그날 마지막 도어가 지그에 남았거나 아직 미러 전)")
+    si = m.get("split") or {}
+    if si.get("restored"):              # 복원 세션: 앞뒤 프레임이 같은 원 세션이라 위 문구가 맞지 않는다 → 초 단위 기록의 빈 지그 시간으로
+        kind = {"narrow": "세로 바 모은 설정", "wide": "세로 바 벌린 설정"}.get(si.get("gap_kind"), "")
+        gb, ga = si.get("gap_before_s"), si.get("gap_after_s")
+        tlb["before"] = (("ok", f"시작 전 빈 지그 {gb:.0f}초 (초 단위 기록{', ' + kind if kind else ''})") if gb is not None
+                         else ("muted", "원 세션의 첫 구간 — 시작은 원 세션 시작과 같음"))
+        tlb["after"] = (("ok", f"종료 후 빈 지그 {ga:.0f}초 (초 단위 기록)") if ga is not None
+                        else ("muted", "원 세션의 마지막 구간 — 종료는 원 세션 마감(이탈·서비스 정지)과 같음"))
     return win, tlb
 
 
@@ -2202,6 +2249,13 @@ def act_infer_exclude(sid):
     action = request.form.get("action")
     now = time.strftime("%Y-%m-%d %H:%M")
     if action == "restore":
+        try:
+            kids = con.execute("SELECT COUNT(*) FROM inference_results WHERE split_parent=?", (sid,)).fetchone()[0]
+        except sqlite3.OperationalError:
+            kids = 0
+        if kids:                        # 복원 세션이 살아 있는데 원 세션을 되살리면 같은 도어를 두 번 센다
+            flash(f"{r['session_dir']}: 도어 {kids}대로 분할된 세션은 제외 취소할 수 없습니다 — python db/split_infer_sessions.py undo {r['session_dir']}", "error")
+            return back
         con.execute("UPDATE inference_results SET excluded=0, excluded_reason=NULL, excluded_by=NULL, excluded_at=NULL, "
                     "updated_at=datetime('now','localtime') WHERE session_id=?", (sid,))
         n = con.execute("UPDATE images SET is_valid=1 WHERE session_id=?", (sid,)).rowcount

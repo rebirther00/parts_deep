@@ -295,6 +295,9 @@ CREATE TABLE IF NOT EXISTS inference_results (
     excluded_reason TEXT,
     excluded_by     VARCHAR(30),
     excluded_at     TIMESTAMP,
+    split_parent    INTEGER,                      -- 복원 세션: 합쳐져 있던 원 세션의 session_id (db/split_infer_sessions.py, 2026-11-19)
+    split_part      INTEGER,
+    split_info      TEXT,
     created_at      TIMESTAMP NOT NULL DEFAULT (datetime('now','localtime')),
     updated_at      TIMESTAMP NOT NULL DEFAULT (datetime('now','localtime'))
 );

@@ -1,5 +1,6 @@
 """추론 서비스(07_factory_infer.py) 결과 테이블 inference_results 생성 — 멱등 (2026-11-02, user_version=3).
 2026-11-16 (user_version=4): 제외 표시 열 excluded/excluded_reason/excluded_by/excluded_at 추가 — 기존 DB 에는 ALTER TABLE 로 붙인다.
+2026-11-19 (user_version=5): 합쳐진 세션 분할 열 split_parent/split_part/split_info 추가 (db/split_infer_sessions.py).
 
     python db/migrate_inference.py [--db db/door_pipeline.db]
 
@@ -55,6 +56,9 @@ CREATE TABLE IF NOT EXISTS inference_results (
     excluded_reason TEXT,
     excluded_by     VARCHAR(30),
     excluded_at     TIMESTAMP,
+    split_parent    INTEGER,                      -- 복원 세션: 합쳐져 있던 원 세션의 session_id (split_infer_sessions.py, 2026-11-19). NAS 에는 없는 DB 전용 레코드
+    split_part      INTEGER,                      -- 복원 세션: 원 세션 안에서 몇 번째 도어인가 (1부터)
+    split_info      TEXT,                         -- json. 복원 세션 = 구간 판정 근거(통과 프레임·득표·D·앞뒤 빈 지그 초), 원 세션 = 복원 세션 목록
     created_at      TIMESTAMP NOT NULL DEFAULT (datetime('now','localtime')),
     updated_at      TIMESTAMP NOT NULL DEFAULT (datetime('now','localtime'))
 );
@@ -67,13 +71,16 @@ CREATE INDEX IF NOT EXISTS idx_infer_started ON inference_results(started_at);
 # 왜 뺐는지(사유·주체·시각)가 남아야 인식율 분모에서 뺀 근거가 된다. ingest_infer 의 갱신은 열을 명시하므로 이 열을 건드리지 않는다.
 EXCLUDE_COLS = [("excluded", "INTEGER NOT NULL DEFAULT 0"), ("excluded_reason", "TEXT"),
                 ("excluded_by", "VARCHAR(30)"), ("excluded_at", "TIMESTAMP")]
-VERSION = 4
+# 분할 (2026-11-19): 빈 지그를 못 알아봐 도어 여러 대가 합쳐진 세션을 초 단위 지표 로그로 도어별 세션으로 복원한다.
+# 원 세션은 excluded=1·excluded_by='split' 로 남기고, 복원 세션은 split_parent 로 원 세션을 가리킨다.
+SPLIT_COLS = [("split_parent", "INTEGER"), ("split_part", "INTEGER"), ("split_info", "TEXT")]
+VERSION = 5
 
 
 def migrate(con):
     con.executescript(DDL)
     have = {r[1] for r in con.execute("PRAGMA table_info(inference_results)")}
-    for name, typ in EXCLUDE_COLS:
+    for name, typ in EXCLUDE_COLS + SPLIT_COLS:
         if name not in have:
             con.execute(f"ALTER TABLE inference_results ADD COLUMN {name} {typ}")
     v = con.execute("PRAGMA user_version").fetchone()[0]

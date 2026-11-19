@@ -41,4 +41,10 @@ if [ -d "$ROOT/timelapse" ]; then
     "$RCLONE" copy "$ROOT/timelapse" "$DEST/timelapse" --max-age 2d --transfers 4 --timeout 60s --retries 2 >>"$LOG" 2>&1 \
         || echo "$(date '+%F %T') FAIL timelapse (다음 주기에 재시도)" >>"$LOG"
 fi
+# 초 단위 지표 로그(metrics_YYYYMMDD.jsonl, 하루 ≈8MB) — 서비스가 14일 뒤 지우므로 NAS 에 보존한다 (2026-11-19).
+# 합쳐진 세션을 도어별로 다시 나누는 근거(db/split_infer_sessions.py). 3시간 넘게 안 바뀐 파일 = 끝난 날 것만, 한 번씩 올라간다.
+if [ -d "$ROOT/metrics" ]; then
+    "$RCLONE" copy "$ROOT/metrics" "$DEST/metrics" --include 'metrics_*.jsonl' --min-age 3h --transfers 2 --timeout 120s --retries 2 >>"$LOG" 2>&1 \
+        || echo "$(date '+%F %T') FAIL metrics (다음 주기에 재시도)" >>"$LOG"
+fi
 exit 0

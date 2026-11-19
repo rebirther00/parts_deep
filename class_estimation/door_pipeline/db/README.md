@@ -19,6 +19,7 @@
 | `migrate_options.py` | 세션 옵션(RADAR) 컬럼 `capture_sessions.option_radar/option_source/option_note/option_at` + `session_radar_check` 표 + `session_hole_metrics.pred_major` (멱등, 2026-09-23). 품번 = 클래스 × option_radar (`../partno/part_numbers.json`), webapp `/options` 에서 확정 |
 | `migrate_inference.py` | **현장 판정 결과 표** `inference_results` 생성(멱등, user_version=3, 2026-11-02). 세션은 capture_sessions(dataset `door_factory_infer`)에 두고 판정값·사용자 확정값은 이 표에 |
 | `ingest_infer.py` | NAS `nas:Guest/weld_infer`(07_factory_infer.py 업로드) 스캔 → capture_sessions/images/inference_results 등록 + `result.json`·`thumb.jpg`·`heartbeat.json` 로컬 미러(`datasets_factory_infer/`). 사용자 확정(confirmed_*, option_source='user')은 덮어쓰지 않음 |
+| `split_infer_sessions.py` | **합쳐진 추론 세션 분할 복원**(2026-11-19) — 빈 지그를 못 알아봐 도어 여러 대가 한 세션이 된 것을 추론 PC 의 초 단위 지표 로그(`datasets_factory_infer/metrics/`, NAS `weld_infer/metrics/`)로 도어별 세션 `<원 세션>_pN` 으로 다시 나눈다. `pull`(NAS→로컬) · `scan`(계획 `infer_splits.json`) · `apply`(DB 반영, 멱등) · `undo` |
 | `backup_db.py` | **야간 백업**(2026-10-30) — 온라인 백업 → quick_check → gzip → `db/backups/`(최근 14개) + NAS `nas:Guest/weld_db_backup`(30일, 매월 1일분 계속 보관), `decisions.csv` 내보내기, 결과 `db/backups/last_backup.json`(대시보드 표시). `--restore-test` 로 최근 백업 복원 시험 |
 | `decisions.csv` | 세션별 **사람 판단**(현장 입력·DB 클래스·split·유효·레이더 옵션·출처·품번·notes) — git 추적. DB 유실 시 복원 근거, diff 로 판단 변경 확인 |
 | `door_pipeline.db` | SQLite DB 본체 (git 미추적) |
@@ -74,6 +75,18 @@ POST 는 같은 출처에서 온 것만 받고(Origin/Referer 검사), 로그인
 + 그 세션 이미지 `is_valid=0` + notes 이력. 제외 세션은 목록에서 기본 숨김(필터 "제외 세션 포함/만"), 목록·대시보드 집계와 일치율에서 빠지고 [제외 취소]로 되돌린다.
 행을 지우지 않는 이유: NAS 가 정본이라 지워도 `ingest_infer.py` 가 다시 등록하고, 사유가 남아야 인식율 분모에서 뺀 근거가 된다
 (실제 도어인데 판정을 못 한 보류는 제외 대상이 아니다 — 성능지표상 보류는 분모 포함). `ingest_infer --refresh` 는 이 열을 건드리지 않는다.
+
+**합쳐진 세션 분할(2026-11-19)**: 추론 서비스가 빈 지그를 못 알아보면 세션이 안 끝나 도어 여러 대가 한 세션에 합쳐진다(11/19 `s_070136` = 8대,
+원인·수정은 `../DOC_factory_infer.md` 비움 판정 절). 이런 세션은 제외하지 않고 **도어별로 나눈다** — `python db/split_infer_sessions.py scan` → `apply`.
+- 근거: 추론 PC 의 초 단위 지표 로그 `metrics_YYYYMMDD.jsonl`(매초 지그 중앙 깊이·홀 점 수·그 프레임의 판정 클래스·D). 빈 지그가 20초 이어진 곳이 도어 경계,
+  구간 판정은 기하 게이트를 통과한 프레임의 다수결(거의 만장일치), D 는 중앙값. 로그는 추론 PC 에서 14일 뒤 지워지므로 `nas_sync_infer.sh` 가 NAS 로 올린다.
+- DB: 도어마다 `<원 세션>_pN` 세션(`inference_results.split_parent/split_part/split_info`, user_version 5). **NAS 에는 없는 DB 전용 레코드**이며
+  계획 파일 `db/infer_splits.json` 이 재현 근거다(DB 를 NAS 에서 다시 만들면 `ingest_infer` → `split_infer_sessions.py apply`).
+  원 세션은 `excluded=1, excluded_by='split'` 로 남기고 [제외 취소]는 막는다(되돌리기는 `undo`).
+- 원본 프레임: 합쳐진 세션 폴더에는 마지막으로 판정이 바뀐 순간의 3~5장만 있다 → 촬영 시각이 속한 복원 세션으로 옮긴다. 나머지 복원 세션은 타임랩스만 있다.
+- 한계: 레이더 옵션은 초 단위 로그에 없어 합쳐진 세션이 당시 표시하던 값을 참고로 넣는다(확정 때 사진으로 확인). 같은 도어를 내렸다 다시 올리면 2대로 나뉜다.
+  판정 프레임이 없는 구간(홀 가공 전 등)은 세션으로 만들지 않는다. 2026-11-19 첫 적용: 11/5~11/19 로그로 10세션 → 38대, 원본 프레임 49장 이동.
+- webapp: 복원 세션은 목록에 [복원] 표시, 상세에 근거(통과 프레임·득표·D·앞뒤 빈 지그 초)와 원 세션 링크. 확정·제외는 다른 세션과 같다.
 
 ```bash
 python db/migrate_inference.py             # 최초 1회 (ingest_infer 가 자동으로도 호출)
@@ -137,6 +150,7 @@ python db/ingest_infer.py                  # NAS → DB (+ 썸네일 미러). --
 |---|---|---|
 | 1 | `migrate_kst.py` (2026-08-28) | UTC→KST 시각 보정 |
 | 2 | `migrate_eval_types.py` (2026-08-31) | `eval_type`에 `pose_pipeline` 추가 — pos_pipeline/03의 자세 평가 기록이 CHECK 위반으로 조용히 유실되던 문제 수정. 기존 현장 평가 1건은 JSON에서 소급 기록 |
+| 3~5 | `migrate_inference.py` | 3(2026-11-02) 현장 판정 결과 표 `inference_results` · 4(2026-11-16) 제외 표시 열 `excluded*` · 5(2026-11-19) 분할 열 `split_parent/split_part/split_info` (합쳐진 세션 → 도어별 복원 세션, `split_infer_sessions.py`) |
 
 ## 현장 데이터 활용 흐름 (2026-08-28)
 

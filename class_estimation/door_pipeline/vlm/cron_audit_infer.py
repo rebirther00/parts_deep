@@ -49,8 +49,11 @@ def new_sessions(con, force):
         done = {r[0] for r in con.execute("SELECT DISTINCT session_dir FROM vlm_audits WHERE source='infer'")}
     except sqlite3.OperationalError:
         done = set()
-    rows = con.execute("""SELECT s.session_dir FROM inference_results r JOIN capture_sessions s ON s.id = r.session_id
-                          ORDER BY r.started_at""").fetchall()
+    # 복원 세션(split_infer_sessions.py, NAS 에 프레임이 없는 DB 전용 레코드)과 제외·분할된 세션은 감사하지 않는다 (2026-11-19)
+    cols = {r[1] for r in con.execute("PRAGMA table_info(inference_results)")}
+    where = [w for c, w in (('split_parent', 'r.split_parent IS NULL'), ('excluded', 'COALESCE(r.excluded, 0) = 0')) if c in cols]
+    rows = con.execute(f"""SELECT s.session_dir FROM inference_results r JOIN capture_sessions s ON s.id = r.session_id
+                           {('WHERE ' + ' AND '.join(where)) if where else ''} ORDER BY r.started_at""").fetchall()
     return {r[0] for r in rows if r[0] not in done}
 
 

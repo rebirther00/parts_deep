@@ -163,7 +163,9 @@ def main():
                         (dataset_id, cls, cls.replace("_", " "), model_name, part_type))
             class_id = cur.execute("SELECT id FROM classes WHERE dataset_id = ? AND name = ?", (dataset_id, cls)).fetchone()[0]
         depth_files = {f for f in info["files"] if f.startswith("depth_")}
-        for rgb in sorted(f for f in info["files"] if f.startswith("rgb_") and f.endswith(".png")):
+        # 분할된 원 세션(split_infer_sessions.py)의 프레임은 복원 세션으로 옮겨 두었다 — 다시 만들면 같은 사진이 두 세션에 생긴다
+        split_done = cur.execute("SELECT 1 FROM inference_results WHERE session_id = ? AND excluded_by = 'split'", (session_id,)).fetchone()
+        for rgb in ([] if split_done else sorted(f for f in info["files"] if f.startswith("rgb_") and f.endswith(".png"))):
             depth = rgb.replace("rgb_", "depth_")
             has_depth = depth in depth_files
             cur.execute(
