@@ -6,7 +6,7 @@
 |---|---|
 | `vlm_common.py` | 클라이언트·960px JPEG 인코딩·대표 이미지 15장 프리픽스(캐시 브레이크포인트)·도메인 설명·판정 JSON 스키마·비용 집계 |
 | `audit_sessions.py` | ①② 독립 2차 감사: `--source collect`(확정 세션 vs GT) / `--source infer`(07 판정 vs VLM + 미확정 원인 설명). 결과 `artifacts/audit_*.jsonl`, 요약 `../report/vlm_audit/*.md`, DB `vlm_audits` |
-| `cron_audit_infer.py` | **cron(30분, ingest_infer 2분 뒤)**: 새 추론 세션만 2프레임 감사 → DB. **무료 크레딧까지만** — 2026-11-17 부터 자동 중지(`VLM_AUDIT_UNTIL`), 누적 $100 상한(`VLM_AUDIT_CAP_USD`), 잠금 파일, 로그 `logs/vlm_audit.log`, 상태 `artifacts/cron_state.json`. webapp /inference 'VLM 2차 의견' 열·`?vlm=diff` 필터·상세 표·대시보드 카드가 이 결과를 보여 준다 |
+| `cron_audit_infer.py` | **cron(30분, ingest_infer 2분 뒤)**: 새 추론 세션만 2프레임 감사 → DB. **무료 크레딧까지만** — 2026-11-17 부터 자동 중지(`VLM_AUDIT_UNTIL`), 누적 $100 상한(`VLM_AUDIT_CAP_USD`), 잠금 파일, 로그 `logs/vlm_audit.log`, 상태 `artifacts/cron_state.json`. webapp /inference 'VLM 2차 의견' 열·`?vlm=diff` 필터·상세 표·대시보드 카드가 이 결과를 보여 준다. **복원 세션**(`db/split_infer_sessions.py`, NAS 에 폴더가 없음)은 원본 프레임이 없어 그 구간의 타임랩스 사진 3장으로 감사한다(2026-11-20, `audit_sessions.targets_restored`) — 구간을 3칸으로 나눠 칸마다 도어가 가장 온전히 보이는 사진을 고르고, 사진에 찍힌 홀 검출 점은 무시하라고 일러 준다. webapp 에는 '장(타임랩스 사진)' 으로 표시 |
 | `build_instruction_set.py` | ③ 인스트럭션 셋: 세션 사실표+프레임 → 질문/응답 4쌍. `--pilot N`(동기) → `--submit`(Batch) → `--collect`. 산출 `artifacts/instruction_set_v0.jsonl`, `../DOC_instruction_set.md` |
 
 ```bash

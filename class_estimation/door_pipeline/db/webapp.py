@@ -1685,7 +1685,8 @@ def vlm_map(con):
         confs = [r["vlm_class_conf"] for r in ok]
         out[sd] = dict(group=g, cls=c, radar=rd, conf=(Counter(confs).most_common(1)[0][0] if confs else None),
                        anom=[VLM_ANOM_LABEL.get(a, a) for a in anom], desc=(ok[0]["vlm_description"] if ok else (rs[0]["error"] or "")),
-                       n=len(rs), agree=agree, at=rs[-1]["created_at"], frames=rs, cost=sum(r["cost_usd"] or 0 for r in rs))
+                       n=len(rs), agree=agree, at=rs[-1]["created_at"], frames=rs, cost=sum(r["cost_usd"] or 0 for r in rs),
+                       tl=any("/timelapse/" in (r["frame"] or "") for r in rs))    # 복원 세션: 원본 프레임 대신 타임랩스 사진으로 본 의견
     return out
 
 
@@ -1844,7 +1845,7 @@ INFERENCE = """
       <span class="small">· 레이더 {{ r.vlm.radar }} · {{ r.vlm.conf or '—' }}{% if r.vlm.agree is false %} · <span class="warn">≠ 판정</span>{% endif %}</span>
       {% if r.vlm.anom %}<br>{% for a in r.vlm.anom %}<span class="pill test">{{ a }}</span> {% endfor %}{% endif %}
       <br><span class="muted small" title="{{ r.vlm.desc }}">{{ r.vlm.desc[:140] }}{{ '…' if r.vlm.desc|length > 140 }}</span>
-      <br><span class="muted small">{{ r.vlm.n }}프레임 · {{ (r.vlm.at or '')[5:16] }}</span>
+      <br><span class="muted small">{{ r.vlm.n }}{{ '장(타임랩스 사진)' if r.vlm.tl else '프레임' }} · {{ (r.vlm.at or '')[5:16] }}</span>
     {% else %}<span class="muted">—</span>{% endif %}</td>
   <td>{% if not readonly %}{% if not r.excluded %}""" + CONFIRM_FORM + """{% endif %}""" + EXCLUDE_FORM + """{% endif %}</td>
 </tr>
@@ -1876,7 +1877,7 @@ INFER_DETAIL = """
   {% if ref2 %}<figure style="margin:0"><img src="{{ url_for('ref_image', name=ref2) }}" style="width:480px;border-radius:6px;opacity:.8"><figcaption class="muted small">2순위 후보: {{ second }}</figcaption></figure>{% endif %}
 </div>
 {% if vlm %}
-<h2>VLM 독립 2차 의견 <span class="muted small">Claude Opus 5.5 · 대표 이미지 15장 + 원본 RGB 만 보고 판정(판정 결과·홀 점 미제공) · 세션 다수결
+<h2>VLM 독립 2차 의견 <span class="muted small">Claude Opus 5.5 · {% if vlm.tl %}대표 이미지 15장 + 이 구간의 타임랩스 사진만 보고 판정(판정 결과 미제공 · 사진에 찍힌 홀 점은 무시하도록 지시 — 복원 세션은 원본 프레임이 없음){% else %}대표 이미지 15장 + 원본 RGB 만 보고 판정(판정 결과·홀 점 미제공){% endif %} · 세션 다수결
   <b class="{{ 'ok' if vlm.agree else ('warn' if vlm.agree is false else '') }}">{{ vlm.group }} / {{ vlm.cls }} / 레이더 {{ vlm.radar }}</b>{% if vlm.agree is false %} <span class="warn">≠ 판정</span>{% endif %}
   · ${{ '%.3f' % vlm.cost }}</span></h2>
 <div class="tbl wrap"><table><tr><th>프레임</th><th>형상군 / 클래스 (확신)</th><th>레이더</th><th>이상</th><th>설명</th><th>근거</th></tr>

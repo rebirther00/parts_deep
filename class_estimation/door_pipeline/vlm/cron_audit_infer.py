@@ -2,6 +2,7 @@
 
 학습 PC crontab 의 ingest_infer 줄 뒤에 붙는다(30분). 제드 박스는 건드리지 않는다.
   - 새 세션 = inference_results 에 있고 vlm_audits(source=infer) 에 없는 세션. NAS 에서 rgb 2장 pull → Claude → DB.
+    복원 세션(split_infer_sessions.py, NAS 에 폴더 없음)은 그 구간의 타임랩스 사진 3장으로 감사한다 (2026-11-20).
   - **무료 크레딧까지만**: UNTIL(기본 2026-11-17, 크레딧 만료일) 당일부터 API 를 부르지 않고 종료.
     지출 상한 CAP_USD(기본 100, 사용자 지정) 를 vlm_audits 누적 + 배치분(OTHER_SPEND) 이 넘어도 종료.
   - 잠금 파일로 중복 실행 방지. 로그 한 줄: 세션 수·불일치·비용·누적.
@@ -27,6 +28,7 @@ UNTIL = os.environ.get('VLM_AUDIT_UNTIL', '2026-11-17')          # 이 날짜부
 CAP_USD = float(os.environ.get('VLM_AUDIT_CAP_USD', '100'))       # 누적 지출 상한 (사용자 조정 11/3: 180→100)
 OTHER_SPEND = 6.0                                                  # DB 에 없는 지출: 인스트럭션 배치 $5.86 + 파일럿 $0.11 (11/3)
 FRAMES, WORKERS = 2, 2
+TL_FRAMES = 3                                                      # 복원 세션: 타임랩스 사진 수(다수결이 갈리지 않게 홀수)
 LOCK = os.path.join(C.ART, '.cron_audit.lock')
 STATE = os.path.join(C.ART, 'cron_state.json')
 
@@ -49,9 +51,9 @@ def new_sessions(con, force):
         done = {r[0] for r in con.execute("SELECT DISTINCT session_dir FROM vlm_audits WHERE source='infer'")}
     except sqlite3.OperationalError:
         done = set()
-    # 복원 세션(split_infer_sessions.py, NAS 에 프레임이 없는 DB 전용 레코드)과 제외·분할된 세션은 감사하지 않는다 (2026-11-19)
+    # 제외된 세션(분할돼 대체된 원 세션 포함)은 감사하지 않는다. 복원 세션은 감사한다 — 프레임은 타임랩스에서(targets_restored) (2026-11-20)
     cols = {r[1] for r in con.execute("PRAGMA table_info(inference_results)")}
-    where = [w for c, w in (('split_parent', 'r.split_parent IS NULL'), ('excluded', 'COALESCE(r.excluded, 0) = 0')) if c in cols]
+    where = [w for c, w in (('excluded', 'COALESCE(r.excluded, 0) = 0'),) if c in cols]
     rows = con.execute(f"""SELECT s.session_dir FROM inference_results r JOIN capture_sessions s ON s.id = r.session_id
                            {('WHERE ' + ' AND '.join(where)) if where else ''} ORDER BY r.started_at""").fetchall()
     return {r[0] for r in rows if r[0] not in done}
@@ -79,7 +81,7 @@ def main():
     con.close()
     if not only:
         log('새 세션 없음'); return
-    ts = A.targets_infer(FRAMES, 0, only)
+    ts = A.targets_infer(FRAMES, 0, only) + A.targets_restored(TL_FRAMES, only)
     log(f'대상 세션 {len(only)} · 프레임 {len(ts)} · 누적 지출 ${used:.2f}/{CAP_USD:.0f}')
     if a.dry_run or not ts:
         for t in ts:

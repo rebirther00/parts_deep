@@ -3,6 +3,7 @@
   --source collect : decisions.csv 의 유효·확정 세션(로컬 미러 datasets_factory_collect) — GT 와 일치율
   --source infer   : datasets_factory_infer/<날짜>/s_*/result.json (07_factory_infer 판정) — 판정 일치 + 미확정 세션 원인 설명(2번)
                      원본 프레임은 NAS weld_infer 에서 rgb_0000/0005 만 내려받아 artifacts/frames/ 에 둔다(thumb.jpg 는 점 오버레이가 있어 안 씀)
+                     복원 세션(split_infer_sessions.py)은 원본 프레임이 없어 타임랩스 사진으로 본다 — targets_restored (cron 전용)
 
 출력: artifacts/audit_<source>_<run>.jsonl (프레임 단위) · ../report/vlm_audit/audit_<source>_<run>.md (요약) · DB vlm_audits (--no-db 로 끔)
 예:  python vlm/audit_sessions.py --source collect --dry-run
@@ -30,6 +31,7 @@ DB = os.path.join(C.DOOR, 'db', 'door_pipeline.db')
 MIRROR = os.path.join(C.DOOR, 'datasets_factory_collect')
 INFER = os.path.join(C.DOOR, 'datasets_factory_infer')
 FRAMES = os.path.join(C.ART, 'frames')
+TIMELAPSE = os.path.join(INFER, 'timelapse')           # ingest_infer 가 미러하는 1분 1장 사진 + index.jsonl
 REPORT = os.path.join(C.DOOR, 'report', 'vlm_audit')
 RCLONE = os.path.expanduser('~/.local/bin/rclone')
 
@@ -119,12 +121,76 @@ def targets_infer(frames_n, limit, only):
     return out
 
 
+# 복원 세션(db/split_infer_sessions.py): NAS 에 폴더가 없는 DB 전용 레코드라 원본 프레임이 없다 → 그 구간의 타임랩스 사진으로 감사한다 (2026-11-20).
+# 타임랩스 사진에는 홀 검출 점이 그려져 있어(판정 결과 글자는 없음) 점을 무시하라고 따로 일러 준다.
+TL_NOTE = ('이 사진은 1분 간격 기록 사진이라 다른 장치가 찍어 둔 작은 색 점·선(파랑·분홍·주황·빨강)이 겹쳐 있다. '
+           '점과 선은 없는 것으로 보고 판정 근거로 쓰지 마라(틀린 자리에 찍혀 있을 수 있다).')
+TL_EMPTY_Z = 1481                                           # 07_factory_infer Z_EMPTY_MIN_MM — 이 이상이면 빈 지그 사진
+
+
+def pick_timelapse(day, t0, t1, n):
+    """타임랩스 중 [t0, t1] 구간에서 n 장 — 구간을 n 칸으로 나눠 칸마다 도어가 가장 온전히 보이는 사진(게이트 통과·가림 적음)."""
+    import datetime as dt
+    fmt = '%Y-%m-%d %H:%M:%S'
+    a, b = dt.datetime.strptime(t0[:19], fmt), dt.datetime.strptime(t1[:19], fmt)
+    m = dt.timedelta(seconds=45 if (b - a).total_seconds() > 240 else 0)      # 올리고 내리는 순간은 피한다
+    lo, hi = (a + m).strftime(fmt), (b - m).strftime(fmt)
+    cands = []
+    try:
+        lines = open(os.path.join(TIMELAPSE, day, 'index.jsonl'), encoding='utf-8', errors='replace').read().splitlines()
+    except OSError:
+        return []
+    for l in lines:
+        try:
+            r = json.loads(l)
+        except ValueError:
+            continue                                        # 쓰다 만 줄
+        ts, f = str(r.get('ts', '')), os.path.join(TIMELAPSE, day, str(r.get('file', '')))
+        if not (lo <= ts <= hi) or r.get('boundary') or not os.path.isfile(f):
+            continue
+        pts, zo = r.get('pts') or 0, r.get('z_occ') or 0
+        if pts < 2 and zo >= TL_EMPTY_Z:
+            continue                                        # 빈 지그
+        cands.append(((r.get('gate') != 'ok', pts < 4, r.get('intr') if r.get('intr') is not None else 1.0), f))
+    k = min(n, len(cands))
+    out = []
+    for i in range(k):
+        chunk = cands[i * len(cands) // k:(i + 1) * len(cands) // k]
+        mid = len(chunk) // 2
+        out.append(min(enumerate(chunk), key=lambda e: (e[1][0], abs(e[0] - mid)))[1][1])
+    return out
+
+
+def targets_restored(frames_n, only):
+    """복원 세션(inference_results.split_parent 가 있는 행, 제외된 것은 빼고) → 타임랩스 사진 frames_n 장씩."""
+    con = sqlite3.connect(DB); con.row_factory = sqlite3.Row
+    try:
+        rows = con.execute("""SELECT s.session_dir, r.started_at, r.ended_at, r.status, r.pred_class, r.radar, r.part_no, r.gate_counts
+                              FROM inference_results r JOIN capture_sessions s ON s.id = r.session_id
+                              WHERE r.split_parent IS NOT NULL AND COALESCE(r.excluded, 0) = 0 ORDER BY r.started_at""").fetchall()
+    except sqlite3.OperationalError:                        # 분할 열이 없는 DB
+        rows = []
+    con.close()
+    out = []
+    for r in rows:
+        if only is not None and r['session_dir'] not in only:
+            continue
+        files = pick_timelapse(r['session_dir'][:8], r['started_at'], r['ended_at'], frames_n)
+        if not files:
+            print(f"[warn] 타임랩스 사진 없음: {r['session_dir']}", file=sys.stderr); continue
+        for f in files:
+            out.append({'session_dir': r['session_dir'], 'frame': f, 'ref_class': r['pred_class'],
+                        'ref_radar': (int(r['radar']) if r['radar'] in (0, 1) else None), 'ref_status': r['status'],
+                        'ref_part_no': r['part_no'], 'gate_counts': json.loads(r['gate_counts'] or 'null'), 'note': TL_NOTE})
+    return out
+
+
 # ---------- 호출 ----------
 def ask(client, prefix, t):
     content = prefix + [
         {'type': 'text', 'text': '검사 대상 이미지:'},
         C.image_block(t['frame']),
-        {'type': 'text', 'text': '이 이미지를 판정하라. 참조 이미지와 폭·그릴·브래킷을 비교하고 JSON 으로만 답하라.'},
+        {'type': 'text', 'text': (t['note'] + '\n' if t.get('note') else '') + '이 이미지를 판정하라. 참조 이미지와 폭·그릴·브래킷을 비교하고 JSON 으로만 답하라.'},
     ]
     resp = client.messages.create(
         model=C.MODEL, max_tokens=4000,
