@@ -6,13 +6,14 @@
 상태기계:
     EMPTY ─점유(ENTER_S)─▶ JUDGING ─잠금─▶ JUDGED ─이탈(LEAVE_S)─▶ EMPTY (세션 마감)
                               └─JUDGE_TIMEOUT_S 내 미확정─▶ UNRESOLVED ─이탈─▶ EMPTY
-점유 신호 (빈 지그 = 카메라 정면 평판 ~1475mm, 도어는 그 위 ~30mm — 절대 z 로는 구분 불가):
+점유 신호 (배경맵 비교 diff 가 주 신호, 지그 중앙 깊이 z_occ 가 독립 보조 신호 — 빈 지그 1,488~1,538mm / 도어 ≤1,478mm, CFG Z_EMPTY_MIN_MM 참조):
     diff  = 빈 지그 배경 기준맵(depth 1/4, 시드 reference_images/empty_jig_depth_small.png → EMPTY 에서 EMA 갱신,
             OUTPUT_ROOT/background.npz 로 보존) 대비 BG_MM 넘게 다른 픽셀 비율. **OCC_ROI(지그 중앙 빈 부분)** 안에서만 잰다 —
             양쪽 세로 바가 도어 기종마다 레일을 따라 가로로 움직여 도어 ROI 전체로 재면 빈 지그도 변화로 잡힘(2026-11-03).
             E23(최소 도어)도 중앙은 덮으므로 빈 지그 ≈0, 도어 ≈1. 도어 ROI 전체 값은 diff_door 로 진단만.
     pts   = 홀 검출기 점수 ≥ PTS_SCORE 인 점 수 (볼트 4 + 코너 2)
-    점유 = pts ≥ OCC_PTS 또는 diff ≥ OCC_ON / 비움 = pts < 2 이고 diff ≤ OCC_OFF (ENTER_S·LEAVE_S 디바운스)
+    점유 = pts ≥ OCC_PTS 또는 (diff ≥ OCC_ON 이고 z_occ < Z_EMPTY_MIN_MM)
+    비움 = pts < 2 이고 (diff ≤ OCC_OFF 또는 z_occ ≥ Z_EMPTY_MIN_MM) (ENTER_S·LEAVE_S 디바운스)
 게이트 (모두 통과한 프레임만 판정 윈도·저장):
     정지(motion < MOTION_THR, STATIC_FRAMES 연속) · 침입(intr < INTR_FRAC: 중앙값보다 INTR_MM 이상 가까운 픽셀) · 점유
     + hole_classifier 기하 게이트 · pose_warn. CNN 폴백은 "도어는 보이는데(pts≥OCC_PTS) 기하 실패"인 프레임만.
@@ -57,7 +58,9 @@ import radar_check as rc                                  # noqa: E402
 from factory_camera import FactoryCamera, require_cuda_ready   # noqa: E402
 import depth_view                                         # noqa: E402
 
-VERSION = '0.2.1'      # 0.2.1 (2026-11-16): 세션 마감 직후 빈 지그 한 장을 타임랩스에 추가(TL_BOUNDARY) — 1분 주기가 놓치는 빠른 교체의 세션 경계 확인용
+VERSION = '0.2.2'      # 0.2.1 (2026-11-16): 세션 마감 직후 빈 지그 한 장을 타임랩스에 추가(TL_BOUNDARY) — 1분 주기가 놓치는 빠른 교체의 세션 경계 확인용
+#                        0.2.2 (2026-11-19): 평판 높이 비움 기준을 고정값(Z_EMPTY_MIN_MM)으로 — 등록 순간 깊이를 기준으로 삼던 방식이
+#                        11/18 자동 재등록 때 1,538mm(평소 1,488~1,525)를 잡아 11/19 세션이 5시간 안 끝남. 타임랩스에 depth 1/4 원본 저장(TL_DEPTH)
 # 0.2.0 (2026-11-06): 레이더 옵션 규칙 v2 — 피크 시차 보정·허용치 25/10, 규칙 O 는 피크 동반+판 전체 높이 전제, 프레임별 옵션 근거 기록
 UNKNOWN_LABEL = '미등록 도어 (unknown)'
 STATUS_LABEL = {'judged': '판정', 'unknown': '미등록 도어', 'unrecognized': '미인식(기종 외)', 'abstain': '보류'}
@@ -98,11 +101,16 @@ CFG = dict(
     BG_TAU_EMPTY_S=_env('BG_TAU_EMPTY_S', 300.0),     # EMPTY 에서 배경 갱신 시정수 (카메라 드리프트 추종)
     BG_UPDATE_MM=_env('BG_UPDATE_MM', 10.0),  # 배경 갱신은 기존 배경과 이 안쪽으로 같은 픽셀만(보수적). 밑판(≈20~33mm 앞)이 흡수되던 사고(11/3→11/4) 방지
     BG_SAVE_S=_env('BG_SAVE_S', 600.0),
-    Z_PLATE_MM=_env('Z_PLATE_MM', 1468.0),    # 빈 지그 평판 깊이(OCC_ROI 중앙값, 11/3 등록 시 1468). 배경 등록 때 갱신·npz 에 보존
-    Z_EMPTY_TOL_MM=_env('Z_EMPTY_TOL_MM', 15.0),  # OCC_ROI 중앙값이 평판 − 이 값 이상(= 평판 높이)이면 배경맵과 무관하게 '비움' (도어 면은 ≈33mm 앞)
+    Z_PLATE_MM=_env('Z_PLATE_MM', 1513.0),    # 빈 지그 평판 깊이 **표시용** 초깃값(OCC_ROI 중앙값). 배경 등록 때 그 순간 값으로 갱신·npz 에 보존하지만 판정에는 안 쓴다(0.2.2)
+    # OCC_ROI 중앙값이 이 값 이상이면 배경맵과 무관하게 '비움'. **고정값(학습하지 않음)** — 카메라 높이·기울기를 바꾸면 다시 잡을 것.
+    # 근거(11/5~11/19 타임랩스 5,546장): 빈 지그(세로 바 벌린 설정) 1,488~1,526(자동 재등록 순간 1,538) / 도어 ≤1,478(홀 6점인 1,485 한 장 제외)·
+    # 세로 바 모은 설정(E23) 빈 지그 1,466~1,473. 홀 2점 미만 1,050장 중 1,474~1,487 사이는 0장 → 그 한가운데. 같은 빈 지그도 깊이가 ±25mm 흔들려(전역 스케일 드리프트)
+    # 0.2.1 까지의 '등록 순간 중앙값 − 15mm' 는 기준이 1,492~1,523 을 떠돌았고 11/18 14:50 자동 재등록이 1,538 을 잡아 빈 지그를 못 알아봄.
+    Z_EMPTY_MIN_MM=_env('Z_EMPTY_MIN_MM', 1481.0),
     TL_EVERY_S=_env('TL_EVERY_S', 60.0),      # 타임랩스: 1분 1장 (육안 판정 근거·세션 경계 검증), timelapse/<날짜>/HHMMSS.jpg + index.jsonl
     TL_BOUNDARY=_env('TL_BOUNDARY', True),    # 세션 마감(LEAVE_S 비움 확인) 직후 한 장을 주기와 무관하게 추가 — 도어 교체가 1분 안에 끝나도 빈 지그가 남는다
     TL_BG_EVERY_S=_env('TL_BG_EVERY_S', 600.0),   # 배경 비교 그림(/bg.jpg 와 동일) 10분 1장 → bg_HHMMSS.jpg
+    TL_DEPTH=_env('TL_DEPTH', True),          # 경계 프레임·10분 그림 때 depth 1/4 원본도 d4_HHMMSS.png(16bit mm) 로 — 빈 지그 깊이 자료(비움 기준 개선용, 하루 ≈10MB)
     TL_WIDTH=_env('TL_WIDTH', 960),
     TL_RETAIN_DAYS=_env('TL_RETAIN_DAYS', 30),
     PROTR_MM=_env('PROTR_MM', 40.0),         # 진단 지표용 (판정에 안 씀 — 지그 레일·클램프가 평판보다 40mm+ 돌출해 구분 안 됨)
@@ -400,7 +408,7 @@ class SceneGates:
 
     def set_background(self, d4, src):
         """현재 depth(1/4) 를 빈 지그 배경으로 즉시 채택 (웹 [빈 지그 배경 등록]). depth 가 비는 픽셀은 기존 값을 남긴다.
-        평판 깊이 z_plate(OCC_ROI 중앙값)도 함께 갱신 — 배경맵과 독립된 '비움' 기준."""
+        평판 깊이 z_plate(OCC_ROI 중앙값)도 함께 기록한다 — 표시·진단용이며 '비움' 판정 기준은 고정값 Z_EMPTY_MIN_MM (0.2.2)."""
         if d4 is None:
             return False
         bg = d4.astype(np.float32).copy()
@@ -1021,9 +1029,10 @@ class Monitor(threading.Thread):
         pts = self.last_pts if now - self.last_hr_t < 2.0 else 0
 
         diff = m.get('diff')
-        # 평판 높이 기준 비움: OCC_ROI 중앙값이 평판(z_plate) − 허용치 이상이면 배경맵이 틀려도(도어 흡수 등) 비움으로 본다
+        # 평판 높이 기준 비움: OCC_ROI 중앙값이 고정 기준(Z_EMPTY_MIN_MM) 이상이면 배경맵이 틀려도(도어 흡수·깊이 드리프트) 비움으로 본다.
+        # 기준은 학습하지 않는다 — 등록 순간 값(z_plate)을 기준으로 삼으면 그 한 번의 깊이 오차가 기준을 옮겨 빈 지그를 못 알아본다(11/18→11/19).
         zp, zo = self.gates.z_plate, m.get('z_occ')
-        z_empty = bool(zp and zo and zo >= zp - cfg['Z_EMPTY_TOL_MM'])
+        z_empty = bool(zo and zo >= cfg['Z_EMPTY_MIN_MM'])
         occupied_raw = pts >= cfg['OCC_PTS'] or (diff is not None and diff >= cfg['OCC_ON'] and not z_empty)
         empty_raw = pts < 2 and (diff is None or diff <= cfg['OCC_OFF'] or z_empty)
         m['z_empty'] = z_empty
@@ -1105,9 +1114,9 @@ class Monitor(threading.Thread):
                 self.gates.save_background()
             except Exception as e:                      # noqa: BLE001
                 log.warning('배경 기준맵 저장 실패: %s', e)
-            log.info('빈 지그 배경 자동 재등록: 평판 높이 비움(z_occ %s ≥ z_plate %s−%s)인데 diff %.2f — 배경맵이 틀려 있었음',
-                     zo, round(zp), cfg['Z_EMPTY_TOL_MM'], diff)
-            log_event('bg_auto', z_occ=zo, z_plate=round(zp), diff_before=diff)
+            log.info('빈 지그 배경 자동 재등록: 평판 높이 비움(z_occ %s ≥ %s)인데 diff %.2f — 배경맵이 틀려 있었음(직전 등록 z_plate %s)',
+                     zo, round(cfg['Z_EMPTY_MIN_MM']), diff, zp and round(zp))
+            log_event('bg_auto', z_occ=zo, z_plate=zp and round(zp), z_empty_min=cfg['Z_EMPTY_MIN_MM'], diff_before=diff)
         self._timelapse(rgb, dict(m, pts=pts), now)
 
         self.last_metrics = dict(m, pts=pts, occ=occupied_raw, static=is_static, intr_flag=intruded, clean=clean,
@@ -1144,6 +1153,12 @@ class Monitor(threading.Thread):
             stamp = datetime.now().strftime('%H%M%S')
             if not due and (tdir / f'{stamp}.jpg').exists():
                 return                                  # 같은 초에 주기 프레임이 이미 있음 (그 장이 빈 지그를 보여 준다)
+            bg_due = due and now - getattr(self, 'last_tlbg_t', 0.0) >= cfg['TL_BG_EVERY_S']
+            # depth 1/4 원본: 경계 프레임(빈 지그 확정 순간)과 10분 그림 때 — 깊이가 날·시간에 따라 얼마나 흔들리는지, 지그 설정별 빈 지그 모양 자료
+            d4_name = None
+            if cfg['TL_DEPTH'] and (boundary or bg_due) and self.gates.last_d4 is not None:
+                d4_name = f'd4_{stamp}.png'
+                cv2.imwrite(str(tdir / d4_name), np.clip(self.gates.last_d4, 0, 65535).astype(np.uint16))
             h, w = rgb.shape[:2]
             sc = cfg['TL_WIDTH'] / w
             img = cv2.resize(rgb, (int(cfg['TL_WIDTH']), int(h * sc)), interpolation=cv2.INTER_AREA)
@@ -1160,8 +1175,9 @@ class Monitor(threading.Thread):
                 'z_occ': m.get('z_occ'), 'diff': m.get('diff'), 'pts': m.get('pts'), 'intr': m.get('intr'),
                 'z_empty': bool(m.get('z_empty')), 'gate': hr['gate'] if hr else None,
                 **({'boundary': 'leave', 'closed': boundary} if boundary else {}),
+                **({'d4': d4_name} if d4_name else {}),
             })
-            if due and now - getattr(self, 'last_tlbg_t', 0.0) >= cfg['TL_BG_EVERY_S']:
+            if bg_due:
                 self.last_tlbg_t = now
                 g = self.gates
                 if g.bg is not None or g.last_d4 is not None:
@@ -1447,8 +1463,7 @@ def _preview_jpeg(width=800):
     col = {'EMPTY': (160, 160, 160), 'JUDGING': (0, 200, 255), 'JUDGED': (0, 220, 0), 'UNRESOLVED': (0, 120, 255)}.get(st, (200, 200, 200))
     cv2.putText(band, f'{st}', (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.8, col, 2)
     dtxt = '-' if m.get('diff') is None else f"{m['diff']:.3f}"
-    zp = monitor.gates.z_plate if monitor else None
-    txt = (f"z {m.get('z_med') or '-'} zo {m.get('z_occ') or '-'}/{round(zp) if zp else '-'}{' Z-EMPTY' if m.get('z_empty') else ''} "
+    txt = (f"z {m.get('z_med') or '-'} zo {m.get('z_occ') or '-'}/{round(CFG['Z_EMPTY_MIN_MM'])}{' Z-EMPTY' if m.get('z_empty') else ''} "
            f"diff {dtxt} intr {m.get('intr', 0):.3f} "
            f"motion {m.get('motion', 0):.1f} pts {m.get('pts', 0)} "
            f"{'OCC' if m.get('occ') else 'empty'} {'static' if m.get('static') else 'moving'}"
@@ -1493,7 +1508,8 @@ def api_status():
         'disk_free_gb': round(disk.free / 1e9, 1), 'disk_warn': disk.free / 1e9 < CFG['DISK_WARN_GB'],
         'today': today_counts(), 'upload': {'enabled': CFG['UPLOAD'], **last_upload_info()},
         'background': {'src': monitor.gates.bg_src, 'loaded': monitor.gates.bg is not None,
-                       'z_plate': round(monitor.gates.z_plate) if monitor.gates.z_plate else None},
+                       'z_plate': round(monitor.gates.z_plate) if monitor.gates.z_plate else None,
+                       'z_empty_min': CFG['Z_EMPTY_MIN_MM']},
         'service': {'version': VERSION, 'started': now_str(monitor.started), 'models': monitor.models,
                     'shadow': not CFG['UPLOAD']},
         'now': datetime.now().strftime('%m/%d %H:%M:%S'),

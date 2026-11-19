@@ -31,7 +31,8 @@ for res in "$ROOT"/*/s_*/result.json; do
     fi
 done
 
-for f in events.jsonl heartbeat.json; do
+# background.npz(빈 지그 배경맵, ≈0.3MB)도 함께 — 무엇이 등록돼 있는지 학습 PC 에서 볼 수 있게 (2026-11-19, 바뀐 때만 전송됨)
+for f in events.jsonl heartbeat.json background.npz; do
     [ -e "$ROOT/$f" ] && "$RCLONE" copyto "$ROOT/$f" "$DEST/$f" >>"$LOG" 2>&1
 done
 
